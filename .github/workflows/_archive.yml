@@ -108,6 +108,35 @@ jobs:
             -authenticationKeyID "$APPLE_API_KEY_ID" \
             -authenticationKeyIssuerID "$APPLE_API_ISSUER_ID"
 
+      - name: Check entitlements in IPA
+        # Archive に埋め込んだ Entitlements のキーが、Export した IPA の各バンドルに残っていることを確かめる
+        # （プロファイルに App Group が無いと、Export は通っても Entitlements から落とされることがある）
+        run: |
+          mkdir -p "$RUNNER_TEMP/ipa"
+          unzip -q "$RUNNER_TEMP"/export/*.ipa -d "$RUNNER_TEMP/ipa"
+          applications="$RUNNER_TEMP/build.xcarchive/Products/Applications"
+          # 署名が無い・Entitlements が無いバンドルは {} として扱う
+          entitlements() {
+            local xml
+            xml=$(codesign -d --entitlements - --xml "$1" 2>/dev/null)
+            if [[ -z "$xml" ]]; then echo '{}'; else plutil -convert json -o - - <<<"$xml"; fi
+          }
+          status=0
+          while IFS= read -r -d '' archived; do
+            exported="$RUNNER_TEMP/ipa/Payload/${archived#"$applications"/}"
+            missing=$(jq -n -r \
+              --argjson archived "$(entitlements "$archived")" \
+              --argjson exported "$(entitlements "$exported")" \
+              '$archived | to_entries | map(select($exported[.key] != .value) | .key) | join(" ")')
+            if [[ -n "$missing" ]]; then
+              echo "::error::${exported##*/} の Entitlements に無い・値が違うもの: ${missing}"
+              status=1
+            else
+              echo "${exported##*/}: Entitlements を引き継いでいる"
+            fi
+          done < <(find "$applications" \( -name '*.app' -o -name '*.appex' \) -print0)
+          exit "$status"
+
       - name: Upload IPA to GitHub
         uses: actions/upload-artifact@v7
         with:
