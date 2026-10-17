@@ -105,6 +105,8 @@ API Key は App Store Connect の「ユーザとアクセス → 統合 → App 
 ### 5. App Store Connect にアプリを作成する
 
 Bundle ID・証明書・プロビジョニングプロファイルは、Export のときに API Key で自動的に作成されます（`-allowProvisioningUpdates`）。
+アプリと Widget Extension の 2 つの Bundle ID が登録されます。Archive は署名せずに作るため、Export の前に各ターゲットの Entitlements（App Group）をアドホック署名で埋め込み（[.github/scripts/embed-entitlements.rb](.github/scripts/embed-entitlements.rb)）、Export した IPA に残っていることを確かめてからアップロードします。
+「Check entitlements in IPA」で App Group が無いと止まったときは、Export の自動署名が App Group を登録・割り当てできていません。Apple Developer の Identifiers で App Group（`group.<アプリの Bundle ID>`）を作り、アプリと Widget Extension の両方の App ID に割り当ててから、ワークフローを再実行してください。
 App Store Connect でのアプリ作成だけは API で行えないため、Web 画面で行います。
 
 アプリを作らずに `develop` へ push しても問題ありません。Upload ワークフローがアップロードの前にアプリの有無を確認し（[.github/scripts/check-app-store-app.rb](.github/scripts/check-app-store-app.rb)）、アプリが無ければ「新規アプリ」画面に入力する値（名前・バンドル ID・SKU など）を Job Summary に表示して止まります。表示された値でアプリを作成してから、ワークフローを再実行してください。
@@ -168,7 +170,7 @@ body=$(gh pr view <番号> --json body -q .body) &&
 └── .github/
     ├── ISSUE_TEMPLATE/      # Issue テンプレート
     ├── pull_request_template.md
-    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）
+    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）・embed-entitlements.rb（Archive に Entitlements を埋め込む）
     └── workflows/
         ├── _build.yml       # 共通処理: ビルド + テスト + SwiftLint（workflow_call）
         ├── _archive.yml     # 共通処理: Archive → Export（→ Upload）（workflow_call）
