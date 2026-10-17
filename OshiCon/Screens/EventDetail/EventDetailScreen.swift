@@ -14,12 +14,15 @@ struct EventDetailScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Query private var storedEvents: [StoredEvent]
     @State private var isEditing = false
     @State private var isConfirmingDelete = false
     @State private var failureMessage: String?
 
     private static let photoHeight: CGFloat = 300
+    /// 横向きの iPhone（縦が狭い）では、写真で画面が埋まらないよう低くする。
+    private static let compactPhotoHeight: CGFloat = 140
     private static let cardOverlap: CGFloat = 28
 
     init(eventID: OshiEvent.ID) {
@@ -45,7 +48,7 @@ struct EventDetailScreen: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .modifier(DetailNavigationBarBackground())
         // 予定が消えた・読めないときは前の画面に戻る。作り直しや遷移の途中でも戻れるよう、ホームの積み重ねから外す
         .onChange(of: current == nil, initial: true) { _, isMissing in
             if isMissing {
@@ -65,13 +68,15 @@ struct EventDetailScreen: View {
             ZStack(alignment: .top) {
                 // 写真は画面の幅いっぱいに敷き、カードだけ読みやすい幅に収める
                 EventDetailHeader(oshi: oshi, color: oshi?.color ?? .black)
-                    .frame(height: Self.photoHeight)
+                    .frame(height: photoHeight)
                     .clipped()
+                    // 横向きでは左右の安全領域の外まで敷く
+                    .ignoresSafeArea(edges: .horizontal)
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     EventDetailCard(detail: EventDetailContent(event: event, oshi: oshi, now: context.date, calendar: zonedCalendar))
                 }
                 .frame(maxWidth: 720)
-                .padding(.top, Self.photoHeight - Self.cardOverlap)
+                .padding(.top, photoHeight - Self.cardOverlap)
             }
         }
         .ignoresSafeArea(edges: .top)
@@ -89,6 +94,10 @@ struct EventDetailScreen: View {
         } message: {
             Text(EventDetailContent(event: event, oshi: oshi, now: .now, calendar: zonedCalendar).deleteMessage)
         }
+    }
+
+    private var photoHeight: CGFloat {
+        verticalSizeClass == .compact ? Self.compactPhotoHeight : Self.photoHeight
     }
 
     /// 端末のタイムゾーンを変えたときも、次の秒からその日付で数える。
@@ -138,6 +147,20 @@ struct EventDetailScreen: View {
             // 予定が消えると onChange で前の画面に戻る（leave）
         } catch {
             failureMessage = "削除できませんでした"
+        }
+    }
+}
+
+/// 詳細のナビゲーションバー。iOS 26 ではボタンがガラス風の丸になるので地を出さず写真を見せる。
+/// それより前の版ではボタンに地が付かず、明るい写真の上で見えにくいので、すりガラスの地を出す。
+private struct DetailNavigationBarBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.toolbarBackground(.hidden, for: .navigationBar)
+        } else {
+            content
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         }
     }
 }

@@ -61,6 +61,8 @@ struct OshiFilterBar: View {
 struct FeaturedEventCard: View {
     let item: HomeContent.Item
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -83,7 +85,8 @@ struct FeaturedEventCard: View {
                 scheduled: item.scheduled,
                 color: item.color.onFill,
                 mutedColor: item.color.onFill,
-                numberFont: AppFont.countdownLarge,
+                // 横向きの iPhone（縦が狭い）では、カードで画面が埋まらないよう数字を小さくする
+                numberFont: verticalSizeClass == .compact ? AppFont.countdownClock : AppFont.countdownLarge,
                 unitFont: AppFont.text(.title3, weight: .bold),
                 showsPrefix: true
             )
