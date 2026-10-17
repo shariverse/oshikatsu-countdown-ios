@@ -37,8 +37,13 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 
 ## 構成
 
-- Xcode 16 以降のフォルダ同期グループ。`OshiCon/`・`OshiConTests/`・`OshiConUITests/` にファイルを足しても pbxproj は変わらない（xcodegen は使っていない）。
-  pbxproj を手で編集するのはターゲットの追加（Widget Extension）のときだけ
+- Xcode 16 以降のフォルダ同期グループ。フォルダの中にファイルを足しても pbxproj は変わらない（xcodegen は使っていない）。
+  pbxproj を手で編集するのはターゲットの追加のときだけ
+  - `OshiCon/`: アプリだけのコード（画面・写真の取り込み）
+  - `Shared/`: アプリと Widget Extension の両方に入るコード（規則・ストア・配色・書体）。ウィジェットからも使う型は `nonisolated` にする
+  - `OshiConWidget/`: Widget Extension（`OshiConWidgetExtension`、Bundle ID は `$(APP_BUNDLE_IDENTIFIER).Widget`）。Info.plist に `AppGroupIdentifier` と `UIAppFonts` を持つ
+  - `OshiConTests/`・`OshiConUITests/`: テスト。`Shared/` の型も `@testable import OshiCon` で使える
+  - 新しいターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION` などをプロジェクトの階層から受け継ぐ。ターゲット側で上書きしていないか確かめる
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今は UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告している。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら `1C8F.1` が要り、Widget Extension にも別にマニフェストが要る。データの収集・トラッキングはしない
