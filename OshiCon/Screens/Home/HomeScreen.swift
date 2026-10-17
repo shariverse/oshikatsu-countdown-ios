@@ -14,7 +14,7 @@ struct HomeScreen: View {
     private var storedOshis: [StoredOshi]
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @State private var selectedOshiID: Oshi.ID?
-    @State private var isAddingEvent = false
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         TimelineView(.everyMinute) { context in
@@ -25,11 +25,11 @@ struct HomeScreen: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("予定を追加", systemImage: "plus") {
-                    isAddingEvent = true
+                    router.isAddingEvent = true
                 }
             }
         }
-        .sheet(isPresented: $isAddingEvent) {
+        .sheet(isPresented: Bindable(router).isAddingEvent) {
             // 推しで絞り込んでいるときは、その推しを選んでおく
             EventEditorScreen(event: nil, preselectedOshiID: selectedOshiID)
         }
@@ -55,7 +55,7 @@ struct HomeScreen: View {
                 Text("ライブ・誕生日・発売日を登録すると、その日まであと何日かを数えます。")
             } actions: {
                 Button("予定を追加") {
-                    isAddingEvent = true
+                    router.isAddingEvent = true
                 }
                 .buttonStyle(.borderedProminent)
                 .font(AppFont.text(.headline, weight: .bold))
@@ -148,5 +148,6 @@ private struct HomeSection<Content: View>: View {
     NavigationStack {
         HomeScreen()
     }
+    .environment(AppRouter())
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }

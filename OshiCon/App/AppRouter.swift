@@ -50,6 +50,8 @@ enum HomeRoute: Hashable {
 final class AppRouter {
     var selectedTab: AppTab = .home
     var homePath: [HomeRoute] = []
+    /// ホームで予定の追加のシートを開いている。推しカウントウィジェットの ＋ からも開く。
+    var isAddingEvent = false
 
     /// ホームのタブに切り替え、最初の画面まで戻してから `route` を積む。
     func openInHome(_ route: HomeRoute) {
@@ -64,9 +66,14 @@ final class AppRouter {
         }
         switch link {
         case let .eventDetail(id):
+            isAddingEvent = false
             openInHome(.eventDetail(id))
-        case .home, .addEvent:
-            // 予定の追加のシートは推しカウントウィジェット（タスク 17）で開く
+        case .addEvent:
+            // ホームの最初の画面に戻してから、予定の追加のシートを開く
+            selectedTab = .home
+            homePath = []
+            isAddingEvent = true
+        case .home:
             selectedTab = .home
         }
     }

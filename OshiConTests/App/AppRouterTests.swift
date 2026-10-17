@@ -40,14 +40,35 @@ struct AppRouterTests {
         #expect(router.homePath == [.eventDetail(id)])
     }
 
+    @Test("予定の追加のリンクで、ホームの最初の画面に戻して予定の追加のシートを開く")
+    func openAddEventLink() {
+        let router = AppRouter()
+        router.selectedTab = .oshi
+        router.homePath = [.eventDetail(UUID())]
+        router.open(.addEvent, hasCompletedOnboarding: true)
+        #expect(router.selectedTab == .home)
+        #expect(router.homePath.isEmpty)
+        #expect(router.isAddingEvent)
+
+        // 予定の詳細を開くときは、予定の追加のシートを閉じる
+        let id = UUID()
+        router.open(.eventDetail(id), hasCompletedOnboarding: true)
+        #expect(!router.isAddingEvent)
+        #expect(router.homePath == [.eventDetail(id)])
+    }
+
     @Test("初回の導線の途中は、ウィジェットのリンクで何も開かない")
     func widgetLinkDuringOnboarding() {
         let router = AppRouter()
         router.selectedTab = .settings
-        router.open(.eventDetail(UUID()), hasCompletedOnboarding: false)
-        router.open(.home, hasCompletedOnboarding: false)
+        let shown = HomeRoute.eventDetail(UUID())
+        router.homePath = [shown]
+        for link in [WidgetLink.eventDetail(UUID()), .addEvent, .home] {
+            router.open(link, hasCompletedOnboarding: false)
+        }
         #expect(router.selectedTab == .settings)
-        #expect(router.homePath.isEmpty)
+        #expect(router.homePath == [shown])
+        #expect(!router.isAddingEvent)
     }
 
     @Test("ホーム画面の表示名")
