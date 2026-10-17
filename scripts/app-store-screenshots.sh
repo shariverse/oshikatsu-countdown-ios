@@ -78,7 +78,10 @@ while IFS= read -r device; do
   xcrun xcresulttool export attachments --path "$result" --output-path "$device_dir"
 
   # テストが飛ばされた（環境変数が渡らなかった）ときも xcodebuild は成功で終わるので、撮れた枚数を確かめる
-  count=$(jq '[.[].attachments | length] | add // 0' "$device_dir/manifest.json")
+  count=0
+  if [[ -f "$device_dir/manifest.json" ]]; then
+    count=$(jq '[.[].attachments | length] | add // 0' "$device_dir/manifest.json")
+  fi
   if [[ "$count" -ne "$EXPECTED_SCREENSHOTS" ]]; then
     echo "${device} のスクリーンショットが ${count} 枚でした（${EXPECTED_SCREENSHOTS} 枚のはず）。テストが飛ばされていないか確かめてください" >&2
     exit 1
