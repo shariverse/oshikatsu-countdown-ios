@@ -50,8 +50,11 @@ enum HomeRoute: Hashable {
 final class AppRouter {
     var selectedTab: AppTab = .home
     var homePath: [HomeRoute] = []
-    /// ホームで予定の追加のシートを開いている。推しカウントウィジェットの ＋ からも開く。
-    var isAddingEvent = false
+    /// ウィジェットのリンクで画面を切り替えるときに、各画面へ自分のシートを閉じさせる合図。値が変わったら閉じる。
+    /// ほかのシートが開いたままだと、ホームで予定の追加のシートを出せない（2 枚目のシートは出せない）ため。
+    private(set) var sheetDismissal = 0
+    /// 予定の追加のシートを開く要求。ホームが受け取ったら false に戻し、ほかのシートが閉じてから開く。
+    var pendingAddEvent = false
 
     /// ホームのタブに切り替え、最初の画面まで戻してから `route` を積む。
     func openInHome(_ route: HomeRoute) {
@@ -66,13 +69,16 @@ final class AppRouter {
         }
         switch link {
         case let .eventDetail(id):
-            isAddingEvent = false
+            // 開いているシート（予定の追加の入力中を含む）は閉じる。ウィジェットから別の予定を開くのは利用者の操作なので、確かめない
+            pendingAddEvent = false
+            sheetDismissal += 1
             openInHome(.eventDetail(id))
         case .addEvent:
-            // ホームの最初の画面に戻してから、予定の追加のシートを開く
+            // ホームの最初の画面に戻し、ほかのシートを閉じてから予定の追加のシートを開く
             selectedTab = .home
             homePath = []
-            isAddingEvent = true
+            pendingAddEvent = true
+            sheetDismissal += 1
         case .home:
             selectedTab = .home
         }

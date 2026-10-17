@@ -48,13 +48,19 @@ struct AppRouterTests {
         router.open(.addEvent, hasCompletedOnboarding: true)
         #expect(router.selectedTab == .home)
         #expect(router.homePath.isEmpty)
-        #expect(router.isAddingEvent)
+        #expect(router.pendingAddEvent)
+        #expect(router.sheetDismissal == 1)
 
-        // 予定の詳細を開くときは、予定の追加のシートを閉じる
+        // 予定の詳細を開くときは、予定の追加の要求を取り消し、開いているシートを閉じさせる
         let id = UUID()
         router.open(.eventDetail(id), hasCompletedOnboarding: true)
-        #expect(!router.isAddingEvent)
+        #expect(!router.pendingAddEvent)
+        #expect(router.sheetDismissal == 2)
         #expect(router.homePath == [.eventDetail(id)])
+
+        // アプリを開くだけのリンクでは、開いているシートは閉じない
+        router.open(.home, hasCompletedOnboarding: true)
+        #expect(router.sheetDismissal == 2)
     }
 
     @Test("初回の導線の途中は、ウィジェットのリンクで何も開かない")
@@ -68,7 +74,8 @@ struct AppRouterTests {
         }
         #expect(router.selectedTab == .settings)
         #expect(router.homePath == [shown])
-        #expect(!router.isAddingEvent)
+        #expect(!router.pendingAddEvent)
+        #expect(router.sheetDismissal == 0)
     }
 
     @Test("ホーム画面の表示名")

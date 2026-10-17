@@ -12,6 +12,7 @@ struct OshiListScreen: View {
     private var storedOshis: [StoredOshi]
     @Query private var storedEvents: [StoredEvent]
     @State private var editorTarget: EditorTarget?
+    @Environment(AppRouter.self) private var router
 
     /// 開いているシート。
     private enum EditorTarget: Identifiable {
@@ -53,6 +54,10 @@ struct OshiListScreen: View {
                     editorTarget = .register
                 }
             }
+        }
+        // ウィジェットのリンクで画面を切り替えるときは、登録・編集のシートを閉じる
+        .onChange(of: router.sheetDismissal) {
+            editorTarget = nil
         }
         .sheet(item: $editorTarget) { target in
             OshiEditorScreen(oshi: target.oshi)
@@ -122,5 +127,6 @@ private struct OshiRow: View {
     NavigationStack {
         OshiListScreen()
     }
+    .environment(AppRouter())
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }

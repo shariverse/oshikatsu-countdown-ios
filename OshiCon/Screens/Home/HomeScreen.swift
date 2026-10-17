@@ -9,12 +9,16 @@ import SwiftUI
 /// ホーム。推しで絞り込み、先頭の予定のカードと、これからの予定・終わった予定を出す。
 /// 1 分ごと（分の変わり目）に今日を確かめ、日付が変わったら数え直す。
 struct HomeScreen: View {
+    /// ウィジェットの ＋ から予定の追加のシートを開くまで待つ時間。ほかのシートが閉じる動きが終わるのを待つ。
+    private static let sheetPresentationDelay = Duration.milliseconds(450)
+
     @Query private var storedEvents: [StoredEvent]
     @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
     private var storedOshis: [StoredOshi]
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @State private var selectedOshiID: Oshi.ID?
     @Environment(AppRouter.self) private var router
+    @State private var isAddingEvent = false
 
     var body: some View {
         TimelineView(.everyMinute) { context in
@@ -25,11 +29,32 @@ struct HomeScreen: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("予定を追加", systemImage: "plus") {
-                    router.isAddingEvent = true
+                    isAddingEvent = true
                 }
             }
         }
-        .sheet(isPresented: Bindable(router).isAddingEvent) {
+        // ウィジェットのリンクで画面を切り替えるときは、予定の追加のシートを閉じる（予定の追加の要求のときは開いたまま）
+        .onChange(of: router.sheetDismissal) {
+            if !router.pendingAddEvent {
+                isAddingEvent = false
+            }
+        }
+        // ウィジェットの ＋ の要求を受け取る。ホームを新しく作ったとき（iPad でほかの項目から移ったとき）も受け取る
+        .onChange(of: router.pendingAddEvent, initial: true) {
+            guard router.pendingAddEvent else {
+                return
+            }
+            router.pendingAddEvent = false
+            guard !isAddingEvent else {
+                return
+            }
+            Task {
+                // ほかの画面のシートが閉じきるのを待ってから開く（閉じている途中に出すと出せない）
+                try? await Task.sleep(for: Self.sheetPresentationDelay)
+                isAddingEvent = true
+            }
+        }
+        .sheet(isPresented: $isAddingEvent) {
             // 推しで絞り込んでいるときは、その推しを選んでおく
             EventEditorScreen(event: nil, preselectedOshiID: selectedOshiID)
         }
@@ -55,7 +80,7 @@ struct HomeScreen: View {
                 Text("ライブ・誕生日・発売日を登録すると、その日まであと何日かを数えます。")
             } actions: {
                 Button("予定を追加") {
-                    router.isAddingEvent = true
+                    isAddingEvent = true
                 }
                 .buttonStyle(.borderedProminent)
                 .font(AppFont.text(.headline, weight: .bold))
