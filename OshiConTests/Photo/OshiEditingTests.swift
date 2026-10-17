@@ -65,6 +65,20 @@ struct OshiEditingTests {
         #expect(PhotoFixtures.properties(of: data)?.width == 1_440)
     }
 
+    @Test("新しく登録するときに同じ id を渡してやり直すと、重ねて登録せずに更新する")
+    func retryRegistrationWithSameID() async throws {
+        let id = UUID()
+        let first = try #require(
+            try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: .keep, now: now, newOshiID: id)
+        )
+        let second = try #require(
+            try await editing.save(current: nil, name: "ミナトくん", color: .navy, photoChange: .keep, now: now, newOshiID: id)
+        )
+        #expect(first.id == id)
+        #expect(second.id == id)
+        #expect(try store.oshis() == [second])
+    }
+
     @Test("写真を差し替えると、前の写真を消す")
     func replacePhoto() async throws {
         let first = try #require(try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now))
