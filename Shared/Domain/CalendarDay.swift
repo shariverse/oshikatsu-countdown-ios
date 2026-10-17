@@ -56,6 +56,16 @@ nonisolated struct CalendarDay: Hashable, Comparable, Codable, Sendable {
         Self(year: year, month: month, day: day)
     }
 
+    /// `days` 日後（負なら前）の日付。
+    func adding(days: Int) -> Self {
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = .gmt
+        guard let date = gregorian.date(byAdding: .day, value: days, to: date(at: nil, calendar: gregorian)) else {
+            preconditionFailure("日付を足せなかった: \(self) + \(days)")
+        }
+        return Self(date, calendar: gregorian)
+    }
+
     /// `other` までの暦の日数。`other` が前の日なら負。
     func days(until other: Self) -> Int {
         other.dayNumber - dayNumber
