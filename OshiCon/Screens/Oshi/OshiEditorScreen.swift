@@ -109,17 +109,33 @@ struct OshiEditorScreen: View {
         } header: {
             Text("推しの名前")
         } footer: {
-            HStack {
-                if form.isNameTooLong {
-                    Text("\(form.nameMaxLength) 文字までです")
+            // 大きな文字サイズで 1 行に収まらなければ縦に並べる
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    nameLimitMessage
+                    Spacer()
+                    nameCount
                 }
-                Spacer()
-                Text("\(form.nameLength) / \(form.nameMaxLength)")
-                    .monospacedDigit()
-                    .accessibilityLabel("\(form.nameMaxLength) 文字中 \(form.nameLength) 文字")
+                VStack(alignment: .trailing, spacing: 2) {
+                    nameLimitMessage
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    nameCount
+                }
             }
             .foregroundStyle(form.isNameTooLong ? AppPalette.destructive.color : AppPalette.onSurfaceVariant.color)
         }
+    }
+
+    @ViewBuilder private var nameLimitMessage: some View {
+        if form.isNameTooLong {
+            Text("\(form.nameMaxLength) 文字までです")
+        }
+    }
+
+    private var nameCount: some View {
+        Text("\(form.nameLength) / \(form.nameMaxLength)")
+            .monospacedDigit()
+            .accessibilityLabel("\(form.nameMaxLength) 文字中 \(form.nameLength) 文字")
     }
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
