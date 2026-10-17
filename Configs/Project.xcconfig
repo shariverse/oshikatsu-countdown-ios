@@ -14,6 +14,10 @@ DEVELOPMENT_TEAM = XU74X3434S
 // テストターゲットは $(APP_BUNDLE_IDENTIFIER).Tests / .UITests として派生させる
 APP_BUNDLE_IDENTIFIER = jp.shilokuma.OshiCon
 
+// アプリとウィジェットでデータ（SwiftData のストアと推しの写真）を共有する App Group。
+// Entitlements と Info.plist（AppGroupIdentifier）はこの値を参照する
+APP_GROUP_IDENTIFIER = group.$(APP_BUNDLE_IDENTIFIER)
+
 // バージョン（CFBundleShortVersionString / CFBundleVersion）
 MARKETING_VERSION = 1.0.0
 CURRENT_PROJECT_VERSION = 1
