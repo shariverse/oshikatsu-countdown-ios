@@ -88,4 +88,24 @@ final class OshiConUITests: XCTestCase {
         alert.buttons["削除"].tap()
         XCTAssertTrue(app.staticTexts["推しを登録しよう"].waitForExistence(timeout: 2))
     }
+
+    @MainActor
+    func testSettingsShowsPastEventsToggleAndLicenses() throws {
+        let app = launch(hasCompletedOnboarding: true)
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+        tabBar.buttons["設定"].tap()
+        XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
+
+        let showsPast = app.switches.matching(NSPredicate(format: "label CONTAINS %@", "終わった予定も表示する")).firstMatch
+        XCTAssertTrue(showsPast.exists)
+        XCTAssertEqual(showsPast.value as? String, "0")
+        XCTAssertTrue(app.staticTexts["バージョン"].exists)
+
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "オープンソースライセンス")).firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["オープンソースライセンス"].waitForExistence(timeout: 2))
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Outfit")).firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Outfit"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "SIL OPEN FONT LICENSE")).firstMatch.exists)
+    }
 }
