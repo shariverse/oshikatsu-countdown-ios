@@ -29,21 +29,24 @@ struct OshiConStoreFileTests {
         #expect(try reopened.events() == [event])
     }
 
-    @Test("保存に失敗したら変更を取り消して投げ、読み直しても元のまま")
+    /// 読み取り専用（`allowsSave: false`）で開いたストアは保存で投げるので、それで保存の失敗を起こす。
+    @Test("保存に失敗したら変更を取り消して投げ、開き直しても元のまま")
     func saveFailureRollsBack() throws {
         let kept = Oshi(name: "残す")
         do {
             let store = OshiConStore(context: ModelContext(try OshiConStore.makeContainer(.file(url))))
             try store.save(kept, now: .now)
         }
-        let readOnly = OshiConStore(context: ModelContext(try OshiConStore.makeContainer(.file(url), allowsSave: false)))
-        #expect(throws: (any Error).self) {
-            try readOnly.save(Oshi(name: "保存できない"), now: .now)
+        do {
+            let readOnly = OshiConStore(context: ModelContext(try OshiConStore.makeContainer(.file(url), allowsSave: false)))
+            #expect(throws: (any Error).self) {
+                try readOnly.save(Oshi(name: "保存できない"), now: .now)
+            }
+            // 取り消したので、保存していない変更は残らない
+            #expect(!readOnly.context.hasChanges)
+            #expect(try !readOnly.oshis().contains { $0.name == "保存できない" })
         }
-        #expect(try readOnly.oshis() == [kept])
-        #expect(throws: (any Error).self) {
-            try readOnly.deleteOshi(id: kept.id)
-        }
-        #expect(try readOnly.oshis() == [kept])
+        let reopened = OshiConStore(context: ModelContext(try OshiConStore.makeContainer(.file(url))))
+        #expect(try reopened.oshis() == [kept])
     }
 }
