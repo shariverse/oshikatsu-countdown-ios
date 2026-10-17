@@ -138,12 +138,17 @@ struct UpcomingWidgetView: View {
             }
             Spacer()
             Link(destination: WidgetLink.addEvent.url) {
+                // 見た目は 32pt の丸、押せる範囲は 44pt にする
                 Image(systemName: "plus")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(AppPalette.onBrand.color)
-                    .frame(width: 28, height: 28)
+                    .frame(width: 32, height: 32)
                     .background(AppPalette.brand.color, in: Circle())
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .padding(.trailing, -6)
+            .padding(.vertical, -6)
             .accessibilityLabel("予定を追加")
         }
     }
