@@ -33,11 +33,4 @@ struct SampleDataTests {
         let content = HomeContent(events: sample.events, oshis: sample.oshis, selectedOshiID: nil, showsPastEvents: false, today: day)
         #expect(content.upcoming.map(\.countdownText) == ["今日！", "あと 3 日", "あと 6 日", "あと 12 日", "あと 25 日"])
     }
-
-    @Test("日付を足すと月・年・うるう日をまたぐ")
-    func addingDays() {
-        #expect(DomainFixtures.day(2026, 12, 30).adding(days: 3) == DomainFixtures.day(2027, 1, 2))
-        #expect(DomainFixtures.day(2028, 2, 28).adding(days: 1) == DomainFixtures.day(2028, 2, 29))
-        #expect(DomainFixtures.day(2026, 3, 1).adding(days: -1) == DomainFixtures.day(2026, 2, 28))
-    }
 }

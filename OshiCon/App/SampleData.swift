@@ -35,7 +35,7 @@ nonisolated enum SampleData {
                 oshiID: minato.id,
                 kind: .birthday,
                 title: "ミナトの誕生日",
-                // うるう年を基準にして、2/29 でも日付がずれないようにする
+                // 誕生日らしく過去の年にする。平年だと 2/29 が 2/28 に丸められるので、うるう年の 2000 年にする
                 day: today.adding(days: 3).withYear(2000),
                 repeatsYearly: true,
                 createdAt: registeredAt
