@@ -66,6 +66,33 @@ struct EventScheduleTests {
         #expect(schedule.upcoming.map(\.event.title) == ["今日", "終日", "0:00", "9:00 先に登録", "9:00 後に登録", "18:00", "あさって"])
     }
 
+    @Test("毎年くり返す予定は、最初の回の日付ではなく次の回の日付で並べる")
+    func upcomingOrderWithRepeating() {
+        let soon = DomainFixtures.event(title: "10/25", day: DomainFixtures.day(2026, 10, 25))
+        let birthday = DomainFixtures.event(title: "誕生日 11/5", day: DomainFixtures.day(2000, 11, 5), repeatsYearly: true)
+        let later = DomainFixtures.event(title: "12/1", day: DomainFixtures.day(2026, 12, 1))
+        let pastBirthday = DomainFixtures.event(title: "誕生日 10/1", day: DomainFixtures.day(2000, 10, 1), repeatsYearly: true)
+
+        let schedule = EventSchedule(events: [pastBirthday, later, birthday, soon], today: today)
+        #expect(schedule.upcoming.map(\.event.title) == ["10/25", "誕生日 11/5", "12/1", "誕生日 10/1"])
+        #expect(schedule.upcoming.map(\.occurrenceDay).last == DomainFixtures.day(2027, 10, 1))
+        #expect(schedule.featured?.event == soon)
+    }
+
+    @Test("ピン留めした毎年くり返す予定は、次の回が遠くても先頭の予定")
+    func featuredIsPinnedRepeating() {
+        let nearest = DomainFixtures.event(title: "近い", day: DomainFixtures.day(2026, 10, 19))
+        let pinnedBirthday = DomainFixtures.event(
+            title: "誕生日",
+            day: DomainFixtures.day(2000, 5, 1),
+            repeatsYearly: true,
+            isPinned: true
+        )
+        let schedule = EventSchedule(events: [nearest, pinnedBirthday], today: today)
+        #expect(schedule.featured?.event == pinnedBirthday)
+        #expect(schedule.featured?.occurrenceDay == DomainFixtures.day(2027, 5, 1))
+    }
+
     @Test("終わった予定は新しい順で、これからの予定に入らない")
     func pastOrder() {
         let older = DomainFixtures.event(title: "10/1", day: DomainFixtures.day(2026, 10, 1))
