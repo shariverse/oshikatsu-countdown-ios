@@ -7,11 +7,12 @@ import SwiftData
 import SwiftUI
 
 /// 予定の詳細。推しの写真（無ければ推し色の斜めの縞）の上に中身のカードを重ね、秒単位のカウントダウンと進み具合を出す。
-/// 上のボタンでピン留めの切り替え・編集・削除（確認を出す）をする。予定が消えたら（削除・ウィジェットなどから）前の画面に戻る。
+/// 上のボタンでピン留めの切り替え・編集・削除（確認を出す）をする。予定が消えたら（削除・推しの削除など）前の画面に戻る。
 struct EventDetailScreen: View {
     let eventID: OshiEvent.ID
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
     @Environment(\.calendar) private var calendar
     @Environment(\.timeZone) private var timeZone
@@ -47,9 +48,10 @@ struct EventDetailScreen: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .onChange(of: storedEvents.isEmpty, initial: true) { _, isEmpty in
-            if isEmpty {
-                dismiss()
+        // 予定が消えた・読めないときは前の画面に戻る。作り直しや遷移の途中でも戻れるよう、ホームの積み重ねから外す
+        .onChange(of: current == nil, initial: true) { _, isMissing in
+            if isMissing {
+                leave()
             }
         }
         .alert(
@@ -63,16 +65,16 @@ struct EventDetailScreen: View {
     private func content(event: OshiEvent, oshi: Oshi?) -> some View {
         ScrollView {
             ZStack(alignment: .top) {
+                // 写真は画面の幅いっぱいに敷き、カードだけ読みやすい幅に収める
                 EventDetailHeader(oshi: oshi, color: oshi?.color ?? .black)
                     .frame(height: Self.photoHeight)
                     .clipped()
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     EventDetailCard(detail: EventDetailContent(event: event, oshi: oshi, now: context.date, calendar: zonedCalendar))
                 }
+                .frame(maxWidth: 720)
                 .padding(.top, Self.photoHeight - Self.cardOverlap)
             }
-            .frame(maxWidth: 720)
-            .frame(maxWidth: .infinity)
         }
         .ignoresSafeArea(edges: .top)
         .background(AppPalette.surface.color.ignoresSafeArea())
@@ -117,6 +119,15 @@ struct EventDetailScreen: View {
         }
     }
 
+    private func leave() {
+        let route = HomeRoute.eventDetail(eventID)
+        if router.homePath.contains(route) {
+            router.homePath.removeAll { $0 == route }
+        } else {
+            dismiss()
+        }
+    }
+
     private func setPinned(_ isPinned: Bool, event: OshiEvent) {
         do {
             try OshiConStore(context: modelContext).setPinned(isPinned, eventID: event.id)
@@ -128,7 +139,7 @@ struct EventDetailScreen: View {
     private func delete(_ event: OshiEvent) {
         do {
             try OshiConStore(context: modelContext).deleteEvent(id: event.id)
-            // 予定が消えると onChange で前の画面に戻る
+            // 予定が消えると onChange で前の画面に戻る（leave）
         } catch {
             failureMessage = "削除できませんでした"
         }
@@ -174,5 +185,6 @@ private struct EventDetailHeader: View {
     NavigationStack {
         EventDetailScreen(eventID: UUID())
     }
+    .environment(AppRouter())
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }
