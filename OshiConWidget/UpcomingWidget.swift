@@ -103,6 +103,8 @@ nonisolated struct UpcomingProvider: TimelineProvider {
 struct UpcomingWidgetView: View {
     let entry: UpcomingEntry
 
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             header
@@ -110,11 +112,10 @@ struct UpcomingWidgetView: View {
             case let .rows(rows) where rows.isEmpty:
                 message("これからの予定はありません")
             case let .rows(rows):
-                VStack(spacing: 2) {
-                    ForEach(rows) { row in
-                        Link(destination: WidgetLink.eventDetail(row.id).url) {
-                            UpcomingRowView(row: row)
-                        }
+                // 端末や文字の大きさで高さが違うので、収まる件数まで減らす（4 → 3 → 2 → 1 件）
+                ViewThatFits(in: .vertical) {
+                    ForEach((1...rows.count).reversed(), id: \.self) { count in
+                        rowList(Array(rows.prefix(count)))
                     }
                 }
                 Spacer(minLength: 0)
@@ -139,17 +140,38 @@ struct UpcomingWidgetView: View {
             Spacer()
             Link(destination: WidgetLink.addEvent.url) {
                 // 見た目は 32pt の丸、押せる範囲は 44pt にする
-                Image(systemName: "plus")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(AppPalette.onBrand.color)
-                    .frame(width: 32, height: 32)
-                    .background(AppPalette.brand.color, in: Circle())
+                addButtonLabel
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
             .padding(.trailing, -6)
             .padding(.vertical, -6)
             .accessibilityLabel("予定を追加")
+        }
+    }
+
+    private func rowList(_ rows: [UpcomingWidgetContent.Row]) -> some View {
+        VStack(spacing: 2) {
+            ForEach(rows) { row in
+                Link(destination: WidgetLink.eventDetail(row.id).url) {
+                    UpcomingRowView(row: row)
+                }
+            }
+        }
+    }
+
+    /// ＋ の丸。色付き・透明のウィジェット（色が 1 色になる描き方）では、塗りと記号が同じ色で見えなくなるので輪郭の丸にする。
+    @ViewBuilder private var addButtonLabel: some View {
+        let plus = Image(systemName: "plus")
+            .font(.system(size: 15, weight: .bold))
+            .frame(width: 32, height: 32)
+        if renderingMode == .fullColor {
+            plus
+                .foregroundStyle(AppPalette.onBrand.color)
+                .background(AppPalette.brand.color, in: Circle())
+        } else {
+            plus
+                .overlay(Circle().strokeBorder(lineWidth: 2))
         }
     }
 
