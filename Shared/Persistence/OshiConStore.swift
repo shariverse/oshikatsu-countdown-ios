@@ -10,8 +10,19 @@ import SwiftData
 /// 推しと予定の保存・削除。
 ///
 /// 保存・削除に失敗したら投げ、途中の変更は取り消す（呼び出し側は「保存できませんでした」を出し、入力を残してもう一度押せるようにする）。
+/// 取り消しは渡した `ModelContext` の保存していない変更をすべて捨てるので、その context への書き込みはすべてこのストアを通す。
 final class OshiConStore {
     private static let logger = Logger(subsystem: "jp.shilokuma.OshiCon", category: "OshiConStore")
+
+    /// ストアの置き場所。
+    enum Location {
+        /// アプリとウィジェットで共有する App Group のコンテナ。
+        case appGroup
+        /// メモリ上（テスト・Preview・UI テスト）。
+        case inMemory
+        /// 指定したファイル（テスト）。
+        case file(URL)
+    }
 
     let context: ModelContext
 
@@ -19,15 +30,24 @@ final class OshiConStore {
         self.context = context
     }
 
-    /// アプリとウィジェットで共有するストア。`inMemory` はテストと Preview 用。
-    static func makeContainer(inMemory: Bool = false) throws -> ModelContainer {
+    /// ストアを開く。iCloud には同期しない（端末の外に送らない）。`allowsSave` はテストで保存を失敗させるために使う。
+    static func makeContainer(_ location: Location = .appGroup, allowsSave: Bool = true) throws -> ModelContainer {
         let schema = Schema(versionedSchema: OshiConSchemaV1.self)
         let configuration: ModelConfiguration
-        if inMemory {
-            configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-        } else {
+        switch location {
+        case .inMemory:
+            configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, allowsSave: allowsSave, cloudKitDatabase: .none)
+        case .appGroup:
             try FileManager.default.createDirectory(at: AppGroupContainer.dataDirectory, withIntermediateDirectories: true)
-            configuration = ModelConfiguration(schema: schema, url: AppGroupContainer.storeURL)
+            configuration = ModelConfiguration(
+                schema: schema,
+                url: AppGroupContainer.storeURL,
+                allowsSave: allowsSave,
+                cloudKitDatabase: .none
+            )
+        case let .file(url):
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            configuration = ModelConfiguration(schema: schema, url: url, allowsSave: allowsSave, cloudKitDatabase: .none)
         }
         return try ModelContainer(for: schema, migrationPlan: OshiConMigrationPlan.self, configurations: configuration)
     }

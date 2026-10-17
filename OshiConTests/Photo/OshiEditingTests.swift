@@ -29,7 +29,7 @@ struct OshiEditingTests {
     private let now = DomainFixtures.date(2026, 10, 18)
 
     init() throws {
-        container = try OshiConStore.makeContainer(inMemory: true)
+        container = try OshiConStore.makeContainer(.inMemory)
         store = OshiConStore(context: ModelContext(container))
         photos = OshiPhotoLibrary(directory: PhotoFixtures.temporaryDirectory())
         editing = OshiEditing(store: store, photos: photos)
