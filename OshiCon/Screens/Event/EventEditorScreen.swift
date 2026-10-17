@@ -92,13 +92,6 @@ private struct EventFormFields: View {
 
     @Environment(\.calendar) private var calendar
 
-    /// 開始時刻は端末の設定にかかわらず 24 時間表記で出す（SPEC の 2.5）。
-    private static let timeLocale: Locale = {
-        var components = Locale.Components(locale: Locale(identifier: "ja_JP"))
-        components.hourCycle = .zeroToTwentyThree
-        return Locale(components: components)
-    }()
-
     var body: some View {
         Form {
             Section {
@@ -161,7 +154,7 @@ private struct EventFormFields: View {
         if form.startTime != nil {
             HStack {
                 DatePicker("開始時刻（任意）", selection: startTime, displayedComponents: .hourAndMinute)
-                    .environment(\.locale, Self.timeLocale)
+                    .environment(\.locale, .app24Hour)
                 Button {
                     form.startTime = nil
                 } label: {

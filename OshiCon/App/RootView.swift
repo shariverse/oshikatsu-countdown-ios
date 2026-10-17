@@ -21,6 +21,7 @@ struct RootView: View {
         }
         .font(AppFont.text(.body))
         .tint(AppPalette.brand.color)
+        .environment(\.locale, .app)
     }
 }
 
