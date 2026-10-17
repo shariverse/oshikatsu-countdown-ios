@@ -4,6 +4,13 @@
 <dict>
 	<key>AppGroupIdentifier</key>
 	<string>$(APP_GROUP_IDENTIFIER)</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Outfit-Variable.ttf</string>
+		<string>ZenKakuGothicNew-Regular.ttf</string>
+		<string>ZenKakuGothicNew-Medium.ttf</string>
+		<string>ZenKakuGothicNew-Bold.ttf</string>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>
