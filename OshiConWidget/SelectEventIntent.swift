@@ -35,6 +35,13 @@ nonisolated struct EventEntity: AppEntity {
         DisplayRepresentation(title: "\(title)", subtitle: "\(detail)")
     }
 
+    /// 選んだあとに削除された（またはストアを読めず見つからない）予定。id を残して「予定が見つかりません」を出すために使う。
+    init(missingID: OshiEvent.ID) {
+        id = missingID
+        title = "見つからない予定"
+        detail = ""
+    }
+
     init(event: OshiEvent, oshis: [Oshi], today: CalendarDay) {
         id = event.id
         title = event.title
@@ -49,14 +56,20 @@ nonisolated struct EventEntityQuery: EntityQuery {
     func entities(for identifiers: [EventEntity.ID]) async throws -> [EventEntity] {
         let data = await WidgetStore.load()
         let today = CalendarDay(.now, calendar: .autoupdatingCurrent)
-        // 選んだあとに終わった予定も読み直せるよう、終わった予定も含めて探す
-        return data.events
-            .filter { identifiers.contains($0.id) }
-            .map { EventEntity(event: $0, oshis: data.oshis, today: today) }
+        // 選んだあとに終わった予定も読み直せるよう、終わった予定も含めて探す。
+        // 見つからない予定も id を残して返す（落とすと選んでいない扱いになり、「予定が見つかりません」を出せない）
+        return identifiers.map { id in
+            guard let event = data?.events.first(where: { $0.id == id }) else {
+                return EventEntity(missingID: id)
+            }
+            return EventEntity(event: event, oshis: data?.oshis ?? [], today: today)
+        }
     }
 
     func suggestedEntities() async throws -> [EventEntity] {
-        let data = await WidgetStore.load()
+        guard let data = await WidgetStore.load() else {
+            return []
+        }
         let today = CalendarDay(.now, calendar: .autoupdatingCurrent)
         return CountdownWidgetContent.selectableEvents(data.events, today: today)
             .map { EventEntity(event: $0, oshis: data.oshis, today: today) }
