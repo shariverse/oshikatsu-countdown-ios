@@ -147,7 +147,9 @@ final class OshiConUITests: XCTestCase {
         let row = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "5th LIVE、")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
-        XCTAssertTrue(app.staticTexts["今日は当日！"].waitForExistence(timeout: 2))
+        // 当日の表示は「今日は当日！」と「楽しんできてね」をまとめて読み上げる 1 つの要素
+        let today = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "今日は当日！")).firstMatch
+        XCTAssertTrue(today.waitForExistence(timeout: 2))
 
         // ピン留めを切り替える
         app.buttons["ピン留めする"].tap()
