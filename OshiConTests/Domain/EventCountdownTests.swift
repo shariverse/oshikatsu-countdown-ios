@@ -49,6 +49,31 @@ struct EventCountdownTests {
         #expect(countdown.progress == 1)
     }
 
+    @Test("毎年くり返す予定は、当日の開始の時刻を過ぎても来年に飛ばず当日")
+    func repeatingAfterStartOnTheDay() {
+        let birthday = DomainFixtures.event(
+            day: DomainFixtures.day(2000, 10, 18),
+            startTime: TimeOfDay(hour: 19, minute: 0),
+            repeatsYearly: true
+        )
+        let countdown = EventCountdown(event: birthday, now: DomainFixtures.date(2026, 10, 18, 20, 0), calendar: calendar)
+        #expect(countdown.occurrenceDay == DomainFixtures.day(2026, 10, 18))
+        #expect(countdown.status == .today)
+        #expect(countdown.remaining == 0)
+    }
+
+    @Test("夏時間をまたぐ残りは、実際の経過時間を 24 時間単位で日に分ける")
+    func remainingAcrossDaylightSavingTime() {
+        let newYork = DomainFixtures.calendar(timeZone: "America/New_York")
+        // 2026-03-08 は夏時間が始まり、1 日が 23 時間になる
+        let event = DomainFixtures.event(day: DomainFixtures.day(2026, 3, 9))
+        let countdown = EventCountdown(event: event, now: DomainFixtures.date(2026, 3, 7, 12, 0, calendar: newYork), calendar: newYork)
+        #expect(countdown.daysUntil == 2)
+        #expect(countdown.remaining == 35 * 3_600)
+        #expect(countdown.remainingParts.days == 1)
+        #expect(countdown.remainingParts.hours == 11)
+    }
+
     @Test("終わった予定は残り 0、日数は負")
     func ended() {
         let event = DomainFixtures.event(day: DomainFixtures.day(2026, 10, 15))

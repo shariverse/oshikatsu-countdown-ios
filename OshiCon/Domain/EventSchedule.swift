@@ -44,7 +44,7 @@ nonisolated struct EventSchedule: Hashable, Sendable {
     let featured: ScheduledEvent?
     /// 当日とこれからの予定。近い順。同じ日は時刻の無い予定（終日）、時刻の早い順、登録した順。
     let upcoming: [ScheduledEvent]
-    /// 終わった予定。新しい順。
+    /// 終わった予定。新しい順（これからの予定の並びをそのまま逆にするので、同じ日は時刻の遅い順で、終日は最後）。
     let past: [ScheduledEvent]
 
     init(events: [OshiEvent], today: CalendarDay) {
