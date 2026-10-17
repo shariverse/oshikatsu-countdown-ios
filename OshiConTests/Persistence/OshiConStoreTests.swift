@@ -157,6 +157,34 @@ struct OshiConStoreTests {
         #expect(Set(try other.events().map(\.title)) == ["ルミナ", "推しなし"])
     }
 
+    @Test("推しの予定の件数は、予定の削除・別の推しへの付け替え・推しなしへの変更のあとも保存した中身どおり")
+    func eventCountFollowsChanges() throws {
+        let minato = Oshi(name: "ミナト")
+        let lumina = Oshi(name: "ルミナ")
+        try store.save(minato, now: DomainFixtures.date(2026, 10, 1))
+        try store.save(lumina, now: DomainFixtures.date(2026, 10, 2))
+        var first = makeEvent(title: "1", oshiID: minato.id)
+        var second = makeEvent(title: "2", oshiID: minato.id)
+        let third = makeEvent(title: "3", oshiID: minato.id)
+        for event in [first, second, third] {
+            try store.save(event)
+        }
+        #expect(try store.eventCount(oshiID: minato.id) == 3)
+
+        try store.deleteEvent(id: third.id)
+        #expect(try store.eventCount(oshiID: minato.id) == 2)
+
+        first.oshiID = lumina.id
+        try store.save(first)
+        #expect(try store.eventCount(oshiID: minato.id) == 1)
+        #expect(try store.eventCount(oshiID: lumina.id) == 1)
+
+        second.oshiID = nil
+        try store.save(second)
+        #expect(try store.eventCount(oshiID: minato.id) == 0)
+        #expect(try store.eventCount(oshiID: UUID()) == 0)
+    }
+
     @Test("見つからない推し・予定を消しても何もしない")
     func deleteMissing() throws {
         try store.save(makeEvent())
