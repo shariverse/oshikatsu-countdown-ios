@@ -14,8 +14,6 @@ struct EventDetailScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.calendar) private var calendar
-    @Environment(\.timeZone) private var timeZone
     @Query private var storedEvents: [StoredEvent]
     @State private var isEditing = false
     @State private var isConfirmingDelete = false
@@ -93,11 +91,9 @@ struct EventDetailScreen: View {
         }
     }
 
-    /// 端末のタイムゾーンを変えたときも、その日付で数える。
+    /// 端末のタイムゾーンを変えたときも、次の秒からその日付で数える。
     private var zonedCalendar: Calendar {
-        var calendar = calendar
-        calendar.timeZone = timeZone
-        return calendar
+        .autoupdatingCurrent
     }
 
     @ToolbarContentBuilder private func toolbar(event: OshiEvent) -> some ToolbarContent {
