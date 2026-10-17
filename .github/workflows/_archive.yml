@@ -110,7 +110,8 @@ jobs:
 
       - name: Check entitlements in IPA
         # Archive に埋め込んだ Entitlements のキーが、Export した IPA の各バンドルに残っていることを確かめる
-        # （プロファイルに App Group が無いと、Export は通っても Entitlements から落とされることがある）
+        # （プロファイルに App Group が無いと、Export は通っても Entitlements から落とされることがある）。
+        # アップロードは同じ Archive をもう一度 Export して署名し直したものだが、プロファイルと Entitlements は同じになる
         run: |
           mkdir -p "$RUNNER_TEMP/ipa"
           unzip -q "$RUNNER_TEMP"/export/*.ipa -d "$RUNNER_TEMP/ipa"
@@ -122,7 +123,9 @@ jobs:
             if [[ -z "$xml" ]]; then echo '{}'; else plutil -convert json -o - - <<<"$xml"; fi
           }
           status=0
+          count=0
           while IFS= read -r -d '' archived; do
+            count=$((count + 1))
             exported="$RUNNER_TEMP/ipa/Payload/${archived#"$applications"/}"
             missing=$(jq -n -r \
               --argjson archived "$(entitlements "$archived")" \
@@ -135,6 +138,10 @@ jobs:
               echo "${exported##*/}: Entitlements を引き継いでいる"
             fi
           done < <(find "$applications" \( -name '*.app' -o -name '*.appex' \) -print0)
+          if [[ "$count" -eq 0 ]]; then
+            echo "::error::Archive にアプリが見つかりません"
+            status=1
+          fi
           exit "$status"
 
       - name: Upload IPA to GitHub
