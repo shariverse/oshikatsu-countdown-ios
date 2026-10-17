@@ -26,9 +26,13 @@ xcodebuild test -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfor
 xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M5)'
 ```
 
-- SwiftLint は Build Tool Plugin と CI の `swiftlint lint --strict`（0.65.1）で効く。`.swiftlint.yml` のルールを緩めて通さない
-- CI（`.github/workflows/_build.yml`）は作業ブランチの push で Unit テストだけ、PR の作成時に UI テストまで流す。
-  `develop` / `release/**` への push で Upload（TestFlight）、`main` への push で Archive が動く
+- SwiftLint は Build Tool Plugin と CI の `swiftlint lint --strict`（0.65.1）で効く。CI は SPM が解決したバイナリを使うので、手元の `swiftlint` も同じ版にそろえる。`.swiftlint.yml` のルールを緩めて通さない
+- Build（`.github/workflows/build.yml` が `_build.yml` を呼ぶ）の動き:
+  - 作業ブランチへの push では Unit テストだけ流す
+  - PR の作成時（opened / reopened / ready_for_review）は UI テストまで流す。ただし **`epic/**` 宛ての PR（ralph-loop の子 PR）では PR のイベントで動かず、push の Unit テストだけ**になる。
+    子 PR の UI テストは、ローカルで流すか、epic → `develop` の最終 PR（更新でも UI テストまで流す）で確かめる
+  - `**/*.md`・`docs/**` だけの変更では Build を動かさない
+- `develop` / `release/**` への push で Upload（`upload.yml`。TestFlight）、`main` への push で Archive（`archive.yml`）が動く
 - Simulator 名は OS 更新で改名されることがある。解決できない場合は `xcrun simctl list devices available` で確かめる
 
 ## 構成
@@ -36,7 +40,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - Xcode 16 以降のフォルダ同期グループ。`OshiCon/`・`OshiConTests/`・`OshiConUITests/` にファイルを足しても pbxproj は変わらない（xcodegen は使っていない）。
   pbxproj を手で編集するのはターゲットの追加（Widget Extension）のときだけ
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
-- `OshiCon/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。申告が要る API（UserDefaults・ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。データの収集・トラッキングはしない
+- `OshiCon/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今は UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告している。
+  申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら `1C8F.1` が要り、Widget Extension にも別にマニフェストが要る。データの収集・トラッキングはしない
 
 ## アプリ固有の前提
 
@@ -44,7 +49,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   ただし Material 3・`FilterChip`・Snackbar・48dp など Android 固有の部分は移さず、SwiftUI の標準とデザインに従う
 - 画面デザインの正はデザインキャンバス「推し活カウントダウン 画面デザイン」。デザインの無い画面は主要画面の雰囲気に合わせる
 - **作らないもの**: 通知・広告・シェア・検索・カレンダー・英語の文言・丸いウィジェット・ロック画面ウィジェット・iCloud 同期。入力欄に通知の項目や広告の枠を置かない。**通信しない**（データは端末の中だけ）
-- 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents（`AppIntentConfiguration`）/ Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
+- 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents / Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
+- ホーム画面ウィジェットは 2 種: カウントダウン（予定 1 件。`AppIntentConfiguration` で予定を選ぶ）と推しカウント（これからの予定の一覧）
 - データ（SwiftData のストアと推しの写真）は**最初から App Group のコンテナに置く**（ウィジェットと共有するため。後から移すとデータの移し替えが要る）
 - SwiftData のスキーマを最初の TestFlight 配信の後に変えると移行が要る。モデルの形を変えるときは移行を用意する
 - 文言は日本語だけ。String Catalog を使う場合も日本語だけでよい
@@ -58,19 +64,25 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - 通常のフィーチャーブランチは `develop` 起点で切る。ralph-loop の作業ブランチは `epic/**` 起点で切り、PR もその epic 宛てに出す
 - コミット: `[type] 日本語の説明`（type は `feat` / `fix` / `refactor` / `chore` / `update`、補助的に `docs` / `test` / `ci`）。1 コミット = 1 つの論理的変更
 - PR タイトル: `【TYPE】日本語の説明`。本文は `.github/pull_request_template.md` に従い、Assignee に自分を設定する
+- コミットメッセージ・PR 本文・コメントに `Co-Authored-By` や「Generated with Claude Code」などの AI の帰属行を入れない
 - UI の見た目が変わる PR は、Simulator のスクリーンショットを `gh pr create --attach` で添付する（README の「PR 本文のスクリーンショット」）
 
 ## コードレビュー観点
 
 第三者としてのセルフレビュー（ralph-loop のサブエージェント）と CodeRabbit の PR レビューは、どちらもこの観点に従う。
+CodeRabbit が自動でレビューするのは `main`・`release/**` 宛てと epic → `develop` の最終 PR で、`epic/**` 宛ての子 PR は対象外（`.coderabbit.yaml`）。
 
 1. **仕様との食い違い**: Android 版の SPEC（規則・文言・配色）やゴールの決定事項と違う挙動になっていないか。作らないもの（通知・広告・シェア・検索・通信など）が紛れ込んでいないか
-2. **正しさ**: 日付の境界（日付の変わり目・タイムゾーン・2/29・年をまたぐくり返し・当日・終わった予定）、文字数（書記素で数える）、Optional の強制アンラップ、既存挙動のリグレッション
+2. **正しさ**: 日付の境界（日付の変わり目・タイムゾーン・2/29・年をまたぐくり返し・当日・終わった予定）、文字数（書記素で数える）、Optional の強制アンラップ、既存挙動のリグレッション。
+   ウィジェットは、保存・削除のあとの描き直し（`WidgetCenter`）、0:00 とタイムゾーンを変えたときの数え直し、選んだ予定が削除されたときの表示、押したときの画面遷移（初回の導線の途中なら開かない）
 3. **データ**: SwiftData のストアと写真が App Group のコンテナにあるか。削除で関連する予定や写真が残らないか・消えすぎないか。保存・削除の失敗を扱っているか。スキーマの変更に移行が要らないか
 4. **テスト**: 規則が画面から切り離され、`Calendar` と現在時刻を注入した Swift Testing で境界まで確かめているか。壊れても気づけない変更が無いか
-5. **Concurrency**: Swift 6 の Strict Concurrency で警告・エラーが出ないか。UI を更新する型は `@MainActor`、View に連動する非同期処理は `.task { }` を優先する
+5. **Concurrency**: Swift 6 の Strict Concurrency で警告・エラーが出ないか。アプリのターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`（既定でメインアクター）なので、
+   重い処理（写真の縮小など）は `nonisolated` / `@concurrent` でメインから外し、ウィジェットと共有する規則の型は `nonisolated` にする。
+   `ModelContext` や SwiftData のモデルを actor の境界を越えて渡さない。Widget Extension にも同じ Swift 6 と分離の設定を入れる。View に連動する非同期処理は `.task { }` を優先する
 6. **SwiftUI の作法**: 状態は `@Observable` / `@State` / `@Environment`、画面遷移は `NavigationStack` / `NavigationSplitView`、Preview は `#Preview`。iPad・横向き・ダイナミックタイプ・ダークの外観で崩れないか。VoiceOver のラベル
-7. **プライバシー**: 申告の要る API を使ったら `PrivacyInfo.xcprivacy` を更新しているか。通信していないか
+7. **プライバシー**: 申告の要る API を使ったら `PrivacyInfo.xcprivacy`（Widget Extension の分も）を更新しているか。通信していないか。
+   `PhotosPicker` は写真ライブラリの権限が要らないので、`NSPhotoLibraryUsageDescription` を足していないか
 8. **スタイル**: 既存コードとの一貫性、SwiftLint 違反、署名・Bundle ID を pbxproj に直接書いていないか
 
 ## ralph-loop による自律開発
