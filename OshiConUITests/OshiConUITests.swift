@@ -64,18 +64,18 @@ final class OshiConUITests: XCTestCase {
         name.typeText("ミナト")
         XCTAssertTrue(save.isEnabled)
         save.tap()
-        XCTAssertTrue(app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "ミナト")).firstMatch.waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "ミナト")).firstMatch.waitForExistence(timeout: 2))
         // 行は名前と予定の件数をまとめて読み上げる
-        XCTAssertTrue(app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "予定 0 件")).firstMatch.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "予定 0 件")).firstMatch.exists)
 
         // 編集して名前を変える
-        app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "ミナト")).firstMatch.tap()
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "ミナト")).firstMatch.tap()
         XCTAssertTrue(app.navigationBars["推しを編集"].waitForExistence(timeout: 2))
         let editingName = app.textFields["推しの名前"]
         editingName.tap()
         editingName.typeText("くん")
         app.navigationBars["推しを編集"].buttons["保存"].tap()
-        let renamed = app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "ミナトくん")).firstMatch
+        let renamed = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "ミナトくん")).firstMatch
         XCTAssertTrue(renamed.waitForExistence(timeout: 2))
 
         // 削除する
