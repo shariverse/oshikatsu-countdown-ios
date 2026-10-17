@@ -15,12 +15,20 @@ nonisolated enum PhotoChange: Sendable {
     case replace(Data)
 }
 
+/// 推しを保存・削除する口。`OshiConStore` が満たす（テストでは失敗させる偽物に差し替える）。
+protocol OshiStoring {
+    func save(_ oshi: Oshi, now: Date) throws
+    func deleteOshi(id: Oshi.ID) throws -> Oshi?
+}
+
+extension OshiConStore: OshiStoring {}
+
 /// 推しの保存・削除と、写真の取り込み・削除をまとめて行う。
 final class OshiEditing {
-    let store: OshiConStore
+    let store: any OshiStoring
     let photos: OshiPhotoLibrary
 
-    init(store: OshiConStore, photos: OshiPhotoLibrary = OshiPhotoLibrary()) {
+    init(store: any OshiStoring, photos: OshiPhotoLibrary = .shared) {
         self.store = store
         self.photos = photos
     }

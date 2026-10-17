@@ -8,6 +8,19 @@ import Foundation
 import SwiftData
 import Testing
 
+/// 保存・削除に失敗するストア。
+private struct FailingStore: OshiStoring {
+    struct Failure: Error {}
+
+    func save(_ oshi: Oshi, now: Date) throws {
+        throw Failure()
+    }
+
+    func deleteOshi(id: Oshi.ID) throws -> Oshi? {
+        throw Failure()
+    }
+}
+
 struct OshiEditingTests {
     private let container: ModelContainer
     private let store: OshiConStore
@@ -93,6 +106,38 @@ struct OshiEditingTests {
         #expect(try photoFiles().count == 1)
     }
 
+    @Test("新しく登録するときに読めない写真を選んだら、写真なしで保存する")
+    func registerWithBrokenPhoto() async throws {
+        let broken = PhotoChange.replace(Data("broken".utf8))
+        let oshi = try #require(try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: broken, now: now))
+        #expect(oshi.photoFileName == nil)
+        #expect(try photoFiles().isEmpty)
+    }
+
+    @Test("保存に失敗したら、取り込んだ写真を消し、前の写真は残す")
+    func saveFailureDeletesImportedPhoto() async throws {
+        let first = try #require(try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now))
+        let failing = OshiEditing(store: FailingStore(), photos: photos)
+        await #expect(throws: FailingStore.Failure.self) {
+            _ = try await failing.save(current: first, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now)
+        }
+        #expect(try photoFiles() == [try #require(first.photoFileName)])
+        await #expect(throws: FailingStore.Failure.self) {
+            _ = try await failing.save(current: first, name: "ミナト", color: .pink, photoChange: .remove, now: now)
+        }
+        #expect(exists(first.photoFileName))
+    }
+
+    @Test("削除に失敗したら、写真は消さない")
+    func deleteFailureKeepsPhoto() async throws {
+        let oshi = try #require(try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now))
+        let failing = OshiEditing(store: FailingStore(), photos: photos)
+        #expect(throws: FailingStore.Failure.self) {
+            try failing.delete(oshiID: oshi.id)
+        }
+        #expect(exists(oshi.photoFileName))
+    }
+
     @Test("名前が空白だけなら保存しない。写真も取り込まない")
     func emptyNameIsNotSaved() async throws {
         let saved = try await editing.save(current: nil, name: " 　", color: .pink, photoChange: .replace(photo), now: now)
@@ -105,9 +150,11 @@ struct OshiEditingTests {
     func deleteOshi() async throws {
         let oshi = try #require(try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now))
         try store.save(OshiEvent(oshiID: oshi.id, kind: .live, title: "ライブ", day: DomainFixtures.day(2026, 11, 1), createdAt: now))
+        let other = try #require(try await editing.save(current: nil, name: "ルミナ", color: .mint, photoChange: .replace(photo), now: now))
         try editing.delete(oshiID: oshi.id)
-        #expect(try store.oshis().isEmpty)
+        #expect(try store.oshis() == [other])
         #expect(try store.events().isEmpty)
         #expect(!exists(oshi.photoFileName))
+        #expect(exists(other.photoFileName))
     }
 }

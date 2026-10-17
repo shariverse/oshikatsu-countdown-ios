@@ -37,6 +37,8 @@ struct OshiPhotoLibraryTests {
 
     @Test("無い写真を消しても何もしない")
     func deleteMissing() {
-        photos.delete(fileName: "\(UUID().uuidString).jpg")
+        let fileName = "\(UUID().uuidString).jpg"
+        photos.delete(fileName: fileName)
+        #expect(!FileManager.default.fileExists(atPath: photos.url(for: fileName).path(percentEncoded: false)))
     }
 }
