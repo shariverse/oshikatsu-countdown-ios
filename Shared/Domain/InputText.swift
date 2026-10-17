@@ -62,6 +62,16 @@ nonisolated enum InputField: CaseIterable, Sendable {
         return InputText.collapsingWhitespace(truncated)
     }
 
+    /// 文字数（空白を潰した後の、見た目の 1 文字の数）。入力欄の下に「n / 上限」で出す。
+    func length(of text: String) -> Int {
+        InputText.collapsingWhitespace(text).count
+    }
+
+    /// 上限を超えているか。入力中は切らずに知らせ、保存できないようにする（日本語の変換中に切らないため）。
+    func exceedsLimit(_ text: String) -> Bool {
+        length(of: text) > maxLength
+    }
+
     /// 保存できる値か。必須の欄は、空白だけなら空とみなして保存できない。
     func isValid(_ text: String) -> Bool {
         !isRequired || !normalized(text).isEmpty
