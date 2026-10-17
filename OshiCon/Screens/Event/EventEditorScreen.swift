@@ -8,11 +8,13 @@ import SwiftUI
 
 /// 予定の追加・編集のシート。推し・種類・タイトル・日付・開始時刻・会場・毎年くり返すを入れて保存する。
 /// 保存に失敗したら知らせて入力を残す（もう一度押せる）。予定の削除は詳細の画面で行う。
+/// `onboarding` を渡すと、初回の導線の 2 歩目として出す（シートとして閉じず、保存したら `onSaved` を呼ぶ）。
 struct EventEditorScreen: View {
     /// 編集する予定。新しく追加するときは nil。
     let event: OshiEvent?
     /// 追加で選んでおく推し（初回の導線で、登録したばかりの推し）。nil なら先頭の推し。
     var preselectedOshiID: Oshi.ID?
+    var onboarding: OnboardingStep?
     /// 保存したあと、シートを閉じる前に呼ぶ。
     var onSaved: (OshiEvent) -> Void = { _ in }
 
@@ -31,21 +33,15 @@ struct EventEditorScreen: View {
         NavigationStack {
             Group {
                 if let form = Binding($form) {
-                    EventFormFields(form: form, oshis: storedOshis.map(OshiConStore.oshi(from:)))
+                    EventFormFields(form: form, oshis: storedOshis.map(OshiConStore.oshi(from:)), onboarding: onboarding)
                 }
             }
-            .navigationTitle(event == nil ? "予定を追加" : "予定を編集")
+            .navigationTitle(onboarding?.title ?? (event == nil ? "予定を追加" : "予定を編集"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("保存", action: save)
-                        .fontWeight(.bold)
-                        .disabled(!(form?.canSave ?? false))
+            .toolbar { toolbar }
+            .safeAreaInset(edge: .bottom) {
+                if let onboarding {
+                    OnboardingPrimaryButton(title: onboarding.primaryActionTitle, isEnabled: form?.canSave ?? false, action: save)
                 }
             }
         }
@@ -70,6 +66,25 @@ struct EventEditorScreen: View {
         }
     }
 
+    @ToolbarContentBuilder private var toolbar: some ToolbarContent {
+        if let onboarding {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("あとで", action: onboarding.onSkip)
+            }
+        } else {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("キャンセル") {
+                    dismiss()
+                }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("保存", action: save)
+                    .fontWeight(.bold)
+                    .disabled(!(form?.canSave ?? false))
+            }
+        }
+    }
+
     /// 保存は同期で終わるので、保存の途中にシートを閉じられることはない。
     private func save() {
         guard let saved = form?.makeEvent(existing: event, newEventID: newEventID, now: .now) else {
@@ -78,7 +93,9 @@ struct EventEditorScreen: View {
         do {
             try OshiConStore(context: modelContext).save(saved)
             onSaved(saved)
-            dismiss()
+            if onboarding == nil {
+                dismiss()
+            }
         } catch {
             failureMessage = "保存できませんでした"
         }
@@ -89,11 +106,15 @@ struct EventEditorScreen: View {
 private struct EventFormFields: View {
     @Binding var form: EventForm
     let oshis: [Oshi]
+    let onboarding: OnboardingStep?
 
     @Environment(\.calendar) private var calendar
 
     var body: some View {
         Form {
+            if let onboarding {
+                OnboardingHeading(step: onboarding)
+            }
             Section {
                 Picker("推し", selection: $form.oshiID) {
                     Text("推しなし")
