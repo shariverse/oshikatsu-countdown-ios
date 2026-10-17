@@ -56,4 +56,18 @@ final class AppRouter {
         selectedTab = .home
         homePath = [route]
     }
+
+    /// ウィジェットから開いたリンク。予定の詳細はホームのタブに積む。初回の導線の途中なら開かない（何もしない）。
+    func open(_ link: WidgetLink, hasCompletedOnboarding: Bool) {
+        guard hasCompletedOnboarding else {
+            return
+        }
+        switch link {
+        case let .eventDetail(id):
+            openInHome(.eventDetail(id))
+        case .home, .addEvent:
+            // 予定の追加のシートは推しカウントウィジェット（タスク 17）で開く
+            selectedTab = .home
+        }
+    }
 }

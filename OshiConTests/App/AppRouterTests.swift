@@ -25,6 +25,31 @@ struct AppRouterTests {
         #expect(router.homePath == [.eventDetail(id)])
     }
 
+    @Test("ウィジェットのリンクで予定の詳細をホームのタブに積み、アプリを開くだけのリンクはホームのタブにする")
+    func openWidgetLink() {
+        let router = AppRouter()
+        router.selectedTab = .oshi
+        let id = UUID()
+        router.open(.eventDetail(id), hasCompletedOnboarding: true)
+        #expect(router.selectedTab == .home)
+        #expect(router.homePath == [.eventDetail(id)])
+
+        router.selectedTab = .settings
+        router.open(.home, hasCompletedOnboarding: true)
+        #expect(router.selectedTab == .home)
+        #expect(router.homePath == [.eventDetail(id)])
+    }
+
+    @Test("初回の導線の途中は、ウィジェットのリンクで何も開かない")
+    func widgetLinkDuringOnboarding() {
+        let router = AppRouter()
+        router.selectedTab = .settings
+        router.open(.eventDetail(UUID()), hasCompletedOnboarding: false)
+        router.open(.home, hasCompletedOnboarding: false)
+        #expect(router.selectedTab == .settings)
+        #expect(router.homePath.isEmpty)
+    }
+
     @Test("ホーム画面の表示名")
     func displayName() {
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String == "推し活カウント")
