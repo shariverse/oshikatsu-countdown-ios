@@ -23,7 +23,8 @@ struct SettingsScreen: View {
             }
             Section("データ") {
                 VStack(alignment: .leading, spacing: 4) {
-                    Label("この端末の中だけに保存", systemImage: "iphone")
+                    // iPad では iPad の絵にする
+                    Label("この端末の中だけに保存", systemImage: UIDevice.current.userInterfaceIdiom == .pad ? "ipad" : "iphone")
                     Text(
                         "推し・写真・予定は端末の外に送りません。アプリを削除すると消えます。"
                             + "端末のバックアップ（iCloud・パソコン）には含まれます。"
