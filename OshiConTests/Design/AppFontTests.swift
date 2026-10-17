@@ -15,13 +15,19 @@ struct AppFontTests {
         #expect(UIFont(name: face.rawValue, size: 17) != nil)
     }
 
-    @Test("同梱した数字の書体（可変フォント）が登録され、太字を選べる")
-    func numeralFamilyIsRegistered() throws {
+    @Test(
+        "同梱した数字の書体（可変フォント）は、太さを付けるとその太さの字形になる（既定の Thin にならない）",
+        arguments: [(UIFont.Weight.regular, 400), (.medium, 500), (.bold, 700)]
+    )
+    func numeralWeightSelectsVariation(weight: UIFont.Weight, expectedWeightAxis: Int) {
         #expect(UIFont.fontNames(forFamilyName: AppFont.numeralFamily).isEmpty == false)
         let descriptor = UIFontDescriptor(fontAttributes: [.family: AppFont.numeralFamily])
-            .addingAttributes([.traits: [UIFontDescriptor.TraitKey.weight: UIFont.Weight.bold]])
+            .addingAttributes([.traits: [UIFontDescriptor.TraitKey.weight: weight]])
         let font = UIFont(descriptor: descriptor, size: 20)
         #expect(font.familyName == AppFont.numeralFamily)
+        // 可変フォントの wght 軸（'wght' = 0x77676874）の値
+        let variation = CTFontCopyVariation(font as CTFont) as? [NSNumber: NSNumber]
+        #expect(variation?[NSNumber(value: 0x7767_6874)]?.intValue == expectedWeightAxis)
     }
 
     @Test("太さは regular・medium・bold に丸める")

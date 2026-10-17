@@ -7,7 +7,7 @@ import SwiftUI
 
 /// アプリの書体。数字は Outfit、本文は Zen Kaku Gothic New（どちらも同梱。SIL OFL 1.1）。
 /// どちらもダイナミックタイプの文字の大きさに合わせて大きさが変わる。
-enum AppFont {
+nonisolated enum AppFont {
     /// Outfit の family 名。可変フォントで、既定のインスタンスは Thin なので、必ず太さを付けて使う。
     static let numeralFamily = "Outfit"
 
