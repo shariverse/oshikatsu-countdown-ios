@@ -12,7 +12,8 @@ nonisolated enum AppPalette {
     static let background = AdaptiveColor(light: 0xFCF8FA, dark: 0x141218)
     /// カード・シート。
     static let surface = AdaptiveColor(light: 0xFFFFFF, dark: 0x211F26)
-    /// 入力欄・推しカウントの地（デザインの薄い灰色 `#F3EDF1`）。
+    /// 入力欄の地（デザインの薄い灰色 `#F3EDF1`）。
+    /// ライトでは推し色の文字が 4.5:1 を保てない色があるので、推し色の文字（`OshiColor.text`）はこの上に置かない。
     static let surfaceContainer = AdaptiveColor(light: 0xF3EDF1, dark: 0x1D1B20)
     /// 進み具合のバーの溝・区切り。
     static let surfaceContainerHigh = AdaptiveColor(light: 0xE2DCE3, dark: 0x36343B)

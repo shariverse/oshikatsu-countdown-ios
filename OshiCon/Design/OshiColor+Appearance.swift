@@ -70,6 +70,7 @@ extension OshiColor {
     }
 
     /// 推し色を地（画面の地・カード）の上の文字や細い線に使うときの色。ダークでは暗い推し色が沈まないよう白に寄せる。
+    /// 4.5:1 を保てるのは画面の地（background）とカードの地（surface）の上だけで、ライトの surfaceContainer の上には置かない。
     nonisolated var text: AdaptiveColor {
         AdaptiveColor(light: rgb, dark: rgb.mixed(with: .white, fraction: Self.darkTextLightenFraction))
     }

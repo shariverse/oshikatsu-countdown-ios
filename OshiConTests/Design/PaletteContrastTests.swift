@@ -38,12 +38,18 @@ struct PaletteContrastTests {
         #expect(onContainer.contrastRatio(with: AppPalette.brandContainer.resolved(isDark: isDark)) >= 4.5)
     }
 
-    @Test("推し色の文字は、推し色を薄く敷いた地に乗せた本文が読める")
+    @Test("推し色を薄く敷いた地に乗せた本文は 4.5:1 以上")
     func textOnOshiContainer() {
         for color in OshiColor.allCases {
             #expect(AppPalette.onSurface.light.contrastRatio(with: color.container.light) >= 4.5)
             #expect(AppPalette.onSurface.dark.contrastRatio(with: color.container.dark) >= 4.5)
         }
+    }
+
+    @Test("ライトの入力欄の地は、推し色の文字が 4.5:1 を保てない色がある（推し色の文字を置かない）")
+    func oshiTextIsNotForLightSurfaceContainer() {
+        let ratios = OshiColor.allCases.map { $0.text.light.contrastRatio(with: AppPalette.surfaceContainer.light) }
+        #expect(ratios.contains { $0 < 4.5 })
     }
 
     @Test("コントラスト比の計算は WCAG の値と合う")
