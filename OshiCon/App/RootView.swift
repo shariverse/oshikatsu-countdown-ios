@@ -26,20 +26,12 @@ struct RootView: View {
         .onOpenURL(perform: open)
     }
 
-    /// ウィジェットから開いたリンク。予定の詳細はホームのタブに積む。初回の導線の途中なら開かない。
+    /// ウィジェットから開いたリンク。知らないリンクは無視する。
     private func open(_ url: URL) {
-        guard hasCompletedOnboarding, let link = WidgetLink(url: url) else {
+        guard let link = WidgetLink(url: url) else {
             return
         }
-        switch link {
-        case let .eventDetail(id):
-            router.openInHome(.eventDetail(id))
-        case .home:
-            router.selectedTab = .home
-        case .addEvent:
-            // 予定の追加は推しカウントウィジェット（タスク 17）で開く
-            router.selectedTab = .home
-        }
+        router.open(link, hasCompletedOnboarding: hasCompletedOnboarding)
     }
 }
 
