@@ -62,7 +62,7 @@ struct TabRootView: View {
                     .navigationDestination(for: HomeRoute.self) { route in
                         switch route {
                         case let .eventDetail(id):
-                            EventDetailPlaceholder(eventID: id)
+                            EventDetailScreen(eventID: id)
                                 .hidesTabBar()
                         }
                     }
