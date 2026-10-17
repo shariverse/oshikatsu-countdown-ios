@@ -13,7 +13,7 @@ struct OshiConStoreTests {
     private let store: OshiConStore
 
     init() throws {
-        container = try OshiConStore.makeContainer(inMemory: true)
+        container = try OshiConStore.makeContainer(.inMemory)
         store = OshiConStore(context: ModelContext(container))
     }
 
