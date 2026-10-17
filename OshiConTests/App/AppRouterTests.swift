@@ -33,6 +33,7 @@ struct AppRouterTests {
     /// 文言は日本語だけ。端末の言語が英語などでも、日付の選択やシステムのボタンを日本語で出す。
     @Test("アプリの言語は日本語だけ")
     func japaneseOnly() {
+        #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleDevelopmentRegion") as? String == "ja")
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleLocalizations") as? [String] == ["ja"])
         #expect(Bundle.main.preferredLocalizations.first == "ja")
         #expect(Locale.app.identifier == "ja_JP")
