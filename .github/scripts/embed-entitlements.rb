@@ -28,9 +28,10 @@ def env!(name)
   value
 end
 
+# 標準出力だけを返す。xcodebuild は標準エラーにログを出すので、混ぜると JSON として読めない
 def run!(*command)
-  output, status = Open3.capture2e(*command)
-  abort "失敗しました: #{command.join(' ')}\n#{output}" unless status.success?
+  output, error, status = Open3.capture3(*command)
+  abort "失敗しました: #{command.join(' ')}\n#{output}#{error}" unless status.success?
   output
 end
 
@@ -57,8 +58,13 @@ targets = JSON.parse(
        '-configuration', configuration, '-sdk', 'iphoneos', '-json')
 )
 
-bundles = Dir.glob(File.join(archive_path, 'Products', 'Applications', '**', '*.{app,appex}'))
+# 署名するのはアプリと App Extension だけ。埋め込みのフレームワーク・dylib があると、署名していない中身を抱えたまま
+# 外側を署名することになるので止める（足すときは、ここで内側から署名するように直す）
+applications = File.join(archive_path, 'Products', 'Applications')
+bundles = Dir.glob(File.join(applications, '**', '*.{app,appex}'))
 abort "#{archive_path} にアプリが見つかりません" if bundles.empty?
+nested_code = Dir.glob(File.join(applications, '**', '*.{framework,dylib}'))
+abort "署名しない中身があります: #{nested_code.join(', ')}" unless nested_code.empty?
 
 project_dir = File.dirname(File.expand_path(project_path))
 signed = 0
@@ -79,7 +85,11 @@ Dir.mktmpdir do |dir|
 
     source = JSON.parse(run!('plutil', '-convert', 'json', '-o', '-', File.expand_path(entitlements_path, project_dir)))
     expanded = File.join(dir, "#{target['target']}.entitlements")
-    File.write("#{expanded}.json", JSON.generate(expand(source, settings)))
+    entitlements = expand(source, settings)
+    # $(VAR:修飾子) や $VAR は展開していないので、残っていたら止める（展開していない値で署名しないため）
+    unexpanded = JSON.generate(entitlements)[/\$[({]?\w[^"]*/]
+    abort "#{entitlements_path} に展開できない変数が残っています: #{unexpanded}" if unexpanded
+    File.write("#{expanded}.json", JSON.generate(entitlements))
     run!('plutil', '-convert', 'xml1', '-o', expanded, "#{expanded}.json")
 
     run!('codesign', '--force', '--sign', '-', '--timestamp=none', '--generate-entitlement-der',
