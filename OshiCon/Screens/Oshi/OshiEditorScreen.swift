@@ -134,6 +134,8 @@ struct OshiEditorScreen: View {
                 ProgressView()
             } else {
                 Button("保存") {
+                    // Task が走り出す前に立て、続けて押しても 1 回だけ保存する
+                    isBusy = true
                     Task {
                         await save()
                     }
@@ -145,7 +147,6 @@ struct OshiEditorScreen: View {
     }
 
     private func save() async {
-        isBusy = true
         defer {
             isBusy = false
         }
