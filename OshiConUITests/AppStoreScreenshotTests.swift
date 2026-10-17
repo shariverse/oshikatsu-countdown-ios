@@ -39,22 +39,25 @@ final class AppStoreScreenshotTests: XCTestCase {
         let title = app.textFields["タイトル"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         title.tap()
-        title.typeText("3rd アルバム発売記念イベント")
+        // 日本語の入力では確定前の文字が残って写るので、英数字だけのタイトルにする
+        title.typeText("3rd ALBUM Release Party")
         capture("03-予定の追加")
 
         // 4. 推しの一覧
         app = launch()
         XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: 5))
         openSection("推し", in: app)
-        XCTAssertTrue(app.staticTexts["LUMINA"].firstMatch.waitForExistence(timeout: 3))
+        // 推しの行は名前と「予定 N 件」をまとめて読み上げるボタン（ホームの絞り込みのボタンは名前だけ）
+        XCTAssertTrue(app.navigationBars["推し"].waitForExistence(timeout: 3))
+        let oshiRow = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS %@", "LUMINA", "予定")).firstMatch
+        XCTAssertTrue(oshiRow.waitForExistence(timeout: 3))
         capture("04-推し")
     }
 
-    /// 見本のデータで起動し直す。キーボードやシステムの文言が日本語になるよう、言語と地域も日本にする。
+    /// 見本のデータで起動し直す（動いていれば終わらせてから起動する）。システムの文言が日本語になるよう、言語と地域も日本にする。
     @MainActor
     private func launch() -> XCUIApplication {
         let app = XCUIApplication()
-        app.terminate()
         app.launchArguments = [
             "-useInMemoryStore",
             "-seedSampleData",
