@@ -101,6 +101,12 @@ struct HomeContentTests {
         #expect(items.map(\.supportingText) == ["10月18日(日) · 毎年", "10月25日(日) · ミナト", "11月1日(日) · 推しなし"])
         #expect(items.map(\.countdownText) == ["今日！", "あと 7 日", "あと 14 日"])
         #expect(items.map(\.color) == [.navy, .navy, .black])
+        #expect(items.map(\.accessibilityLabel) == [
+            "誕生日、10月18日 日曜日、毎年、今日！",
+            "ライブ、10月25日 日曜日、ミナト、あと 7 日",
+            "推しなし、11月1日 日曜日、推しなし、あと 14 日"
+        ])
+        #expect(items[1].featuredAccessibilityLabel == "いちばん近い予定、ミナト、ライブ、あと 7 日、10月25日 日曜日")
     }
 
     @Test("推しが見つからない予定は推しなしとして出す")

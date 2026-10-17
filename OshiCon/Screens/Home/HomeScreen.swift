@@ -90,6 +90,8 @@ struct HomeScreen: View {
                 FeaturedEventCard(item: featured)
             }
             .buttonStyle(.plain)
+            // 読み上げはリンク（ボタン）そのものに付け、中の文字を別々に読ませない
+            .accessibilityLabel(featured.featuredAccessibilityLabel)
         }
         HomeSection(title: "これからの予定") {
             if content.upcoming.isEmpty {
@@ -118,6 +120,7 @@ struct HomeScreen: View {
                 HomeEventRow(item: item)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(item.accessibilityLabel)
         }
     }
 }

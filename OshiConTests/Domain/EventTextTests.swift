@@ -23,6 +23,12 @@ struct EventTextTests {
         #expect(EventText.dateBadge(day) == badge)
     }
 
+    @Test("読み上げの日付は曜日まで言葉で")
+    func spokenDate() {
+        #expect(EventText.spokenMonthDayWeekday(DomainFixtures.day(2026, 10, 18)) == "10月18日 日曜日")
+        #expect(EventText.spokenMonthDayWeekday(DomainFixtures.day(2027, 1, 1)) == "1月1日 金曜日")
+    }
+
     @Test("時刻は 24 時間表記で、時は 0 を付けず分は 2 桁")
     func time() {
         #expect(EventText.time(TimeOfDay(hour: 17, minute: 0)) == "17:00")

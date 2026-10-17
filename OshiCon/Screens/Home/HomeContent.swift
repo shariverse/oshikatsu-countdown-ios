@@ -35,6 +35,25 @@ nonisolated struct HomeContent: Equatable, Sendable {
         var countdownText: String {
             EventText.countdown(daysUntil: scheduled.daysUntil, status: scheduled.status)
         }
+
+        /// 行の読み上げ（`5th LIVE、10月25日 日曜日、ミナト、あと 7 日`）。
+        var accessibilityLabel: String {
+            let detail = event.repeatsYearly ? "毎年" : (oshi?.name ?? "推しなし")
+            return [event.title, EventText.spokenMonthDayWeekday(scheduled.occurrenceDay), detail, countdownText].joined(separator: "、")
+        }
+
+        /// 先頭のカードの読み上げ（`ピン留め、ミナト、5th LIVE、あと 7 日、10月25日 日曜日、開演 17:00`）。
+        var featuredAccessibilityLabel: String {
+            var parts = [event.isPinned ? "ピン留め" : "いちばん近い予定"]
+            if let oshi {
+                parts.append(oshi.name)
+            }
+            parts += [event.title, countdownText, EventText.spokenMonthDayWeekday(scheduled.occurrenceDay)]
+            if let startTime = event.startTime {
+                parts.append(EventText.startTime(startTime, kind: event.kind))
+            }
+            return parts.joined(separator: "、")
+        }
     }
 
     /// 何も出す予定が無いときの案内。
