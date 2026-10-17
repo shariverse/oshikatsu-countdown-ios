@@ -108,6 +108,8 @@ private struct EventFormFields: View {
     let oshis: [Oshi]
     let onboarding: OnboardingStep?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     @Environment(\.calendar) private var calendar
 
     var body: some View {
@@ -126,14 +128,15 @@ private struct EventFormFields: View {
                 }
             }
             Section("種類") {
-                Picker("種類", selection: kind) {
-                    ForEach(EventKind.allCases, id: \.self) { kind in
-                        Text(kind.label)
-                            .tag(kind)
-                    }
+                if dynamicTypeSize.isAccessibilitySize {
+                    // 大きな文字では 5 つのセグメントに収まらないので、メニューで選ぶ
+                    kindPicker
+                        .pickerStyle(.menu)
+                } else {
+                    kindPicker
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
             }
             Section {
                 TextField("例：5th LIVE 東京公演", text: $form.title)
@@ -192,6 +195,15 @@ private struct EventFormFields: View {
                 }
                 .buttonStyle(.borderless)
                 .accessibilityHint("押すと開始時刻を決められます")
+            }
+        }
+    }
+
+    private var kindPicker: some View {
+        Picker("種類", selection: kind) {
+            ForEach(EventKind.allCases, id: \.self) { kind in
+                Text(kind.label)
+                    .tag(kind)
             }
         }
     }

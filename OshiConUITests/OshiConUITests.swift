@@ -13,11 +13,15 @@ final class OshiConUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// 端末に残ったデータに左右されないよう、メモリ上のストアで起動する。
+    /// 端末に残ったデータに左右されないよう、メモリ上のストアで起動し、設定（UserDefaults）も起動引数で決める。
     @MainActor
     private func launch(hasCompletedOnboarding: Bool) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-useInMemoryStore", "-hasCompletedOnboarding", hasCompletedOnboarding ? "YES" : "NO"]
+        app.launchArguments = [
+            "-useInMemoryStore",
+            "-hasCompletedOnboarding", hasCompletedOnboarding ? "YES" : "NO",
+            "-showsPastEvents", "NO"
+        ]
         app.launch()
         return app
     }

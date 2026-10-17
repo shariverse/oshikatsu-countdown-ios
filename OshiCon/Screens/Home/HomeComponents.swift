@@ -61,6 +61,8 @@ struct OshiFilterBar: View {
 struct FeaturedEventCard: View {
     let item: HomeContent.Item
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -83,7 +85,8 @@ struct FeaturedEventCard: View {
                 scheduled: item.scheduled,
                 color: item.color.onFill,
                 mutedColor: item.color.onFill,
-                numberFont: AppFont.countdownLarge,
+                // 横向きの iPhone（縦が狭い）では、カードで画面が埋まらないよう数字を小さくする
+                numberFont: verticalSizeClass == .compact ? AppFont.countdownClock : AppFont.countdownLarge,
                 unitFont: AppFont.text(.title3, weight: .bold),
                 showsPrefix: true
             )
@@ -101,23 +104,6 @@ struct FeaturedEventCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(item.color.fill, in: RoundedRectangle(cornerRadius: 28))
         .contentShape(RoundedRectangle(cornerRadius: 28))
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel)
-        .accessibilityAddTraits(.isButton)
-    }
-
-    private var accessibilityLabel: String {
-        var parts = [item.event.isPinned ? "ピン留め" : "いちばん近い予定"]
-        if let oshi = item.oshi {
-            parts.append(oshi.name)
-        }
-        parts.append(item.event.title)
-        parts.append(item.countdownText)
-        parts.append(EventText.monthDayWeekday(item.scheduled.occurrenceDay))
-        if let startTime = item.event.startTime {
-            parts.append(EventText.startTime(startTime, kind: item.event.kind))
-        }
-        return parts.joined(separator: "、")
     }
 }
 
@@ -155,9 +141,6 @@ struct HomeEventRow: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(item.event.title)、\(item.supportingText)、\(item.countdownText)")
-        .accessibilityAddTraits(.isButton)
     }
 }
 

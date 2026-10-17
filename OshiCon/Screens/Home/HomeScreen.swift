@@ -13,8 +13,6 @@ struct HomeScreen: View {
     @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
     private var storedOshis: [StoredOshi]
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
-    @Environment(\.calendar) private var calendar
-    @Environment(\.timeZone) private var timeZone
     @State private var selectedOshiID: Oshi.ID?
     @State private var isAddingEvent = false
 
@@ -38,9 +36,8 @@ struct HomeScreen: View {
     }
 
     private func makeContent(now: Date) -> HomeContent {
-        // 端末のタイムゾーンを変えたときも、その日付で数える
-        var calendar = calendar
-        calendar.timeZone = timeZone
+        // 端末のタイムゾーンを変えたときも、次の分の変わり目からその日付で数える
+        let calendar = Calendar.autoupdatingCurrent
         return HomeContent(
             events: storedEvents.compactMap(OshiConStore.event(from:)),
             oshis: storedOshis.map(OshiConStore.oshi(from:)),
@@ -93,6 +90,8 @@ struct HomeScreen: View {
                 FeaturedEventCard(item: featured)
             }
             .buttonStyle(.plain)
+            // 読み上げはリンク（ボタン）そのものに付け、中の文字を別々に読ませない
+            .accessibilityLabel(featured.featuredAccessibilityLabel)
         }
         HomeSection(title: "これからの予定") {
             if content.upcoming.isEmpty {
@@ -121,6 +120,7 @@ struct HomeScreen: View {
                 HomeEventRow(item: item)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(item.accessibilityLabel)
         }
     }
 }

@@ -12,6 +12,11 @@ nonisolated enum EventText {
         "\(day.month)月\(day.day)日(\(japaneseWeekdays[weekdayIndex(of: day)]))"
     }
 
+    /// 読み上げの日付（`10月18日 日曜日`）。「(日)」や「·」をそのまま読ませない。
+    static func spokenMonthDayWeekday(_ day: CalendarDay) -> String {
+        "\(day.month)月\(day.day)日 \(japaneseWeekdays[weekdayIndex(of: day)])曜日"
+    }
+
     /// 年まで出す日付（`2026年10月18日(日)`）。
     static func fullDate(_ day: CalendarDay) -> String {
         "\(day.year)年\(monthDayWeekday(day))"
