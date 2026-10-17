@@ -36,9 +36,19 @@ final class OshiEditing {
     /// 推しを保存する。写真を差し替えるときは新しい写真を取り込んでから保存し、使わなくなった写真を消す。
     /// 取り込みに失敗したときは今の写真のまま保存する。保存に失敗したときは取り込んだ写真を消して投げる。
     ///
-    /// - Parameter current: 編集中の推し。新しく登録するときは nil。
+    /// - Parameters:
+    ///   - current: 編集中の推し。新しく登録するときは nil。
+    ///   - newOshiID: 新しく登録するときの id。画面で一度だけ作って渡す（保存に失敗してやり直したときに、
+    ///     別の推しとして重ねて登録しないため）。
     /// - Returns: 保存した推し。名前が空のときは保存せず nil。
-    func save(current: Oshi?, name: String, color: OshiColor, photoChange: PhotoChange, now: Date) async throws -> Oshi? {
+    func save(
+        current: Oshi?,
+        name: String,
+        color: OshiColor,
+        photoChange: PhotoChange,
+        now: Date,
+        newOshiID: Oshi.ID = UUID()
+    ) async throws -> Oshi? {
         let normalizedName = InputField.oshiName.normalized(name)
         guard !normalizedName.isEmpty else {
             return nil
@@ -57,7 +67,7 @@ final class OshiEditing {
             importedPhoto ?? currentPhoto
         }
 
-        var oshi = current ?? Oshi(name: normalizedName, color: color)
+        var oshi = current ?? Oshi(id: newOshiID, name: normalizedName, color: color)
         oshi.name = normalizedName
         oshi.color = color
         oshi.photoFileName = photoFileName

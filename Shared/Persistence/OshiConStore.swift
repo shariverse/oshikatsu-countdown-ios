@@ -69,9 +69,10 @@ final class OshiConStore {
         try storedEvent(id: id).flatMap(Self.event(from:))
     }
 
-    /// 推しに結び付いた予定の件数（推しの削除の確認に出す）。
+    /// 推しに結び付いた予定の件数（推しの削除の確認に出す）。関係の配列ではなく、ストアに数えさせる
+    /// （予定の削除・付け替えの直後でも、保存した中身どおりに数える）。
     func eventCount(oshiID: Oshi.ID) throws -> Int {
-        try storedOshi(id: oshiID)?.events.count ?? 0
+        try context.fetchCount(FetchDescriptor<StoredEvent>(predicate: #Predicate { $0.oshi?.id == oshiID }))
     }
 
     // MARK: - 推しの保存・削除

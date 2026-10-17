@@ -9,16 +9,17 @@ import SwiftUI
 /// 推しの登録・編集で写真を選ぶ部品。今の写真を丸く出し、「写真を選ぶ / 写真を変える」と「写真を外す」を置く。
 /// `PhotosPicker` は写真ライブラリへのアクセスの許可が要らない（選んだ写真だけを受け取る）。
 /// 写真が無いときの見た目（推し色の丸と頭文字）は `placeholder` で渡す（推しの登録・編集の画面でアバターを渡す）。
+/// 選んだ写真を読んでいる間は `isLoading` を true にする（読み終わる前に保存させないため）。
 struct OshiPhotoPicker<Placeholder: View>: View {
     /// 保存してある写真のファイル名。
     let currentPhotoFileName: String?
     @Binding var photoChange: PhotoChange
+    @Binding var isLoading: Bool
     var photos = OshiPhotoLibrary.shared
     @ViewBuilder var placeholder: () -> Placeholder
 
     @State private var selectedItem: PhotosPickerItem?
     @State private var preview: Image?
-    @State private var isLoading = false
     @State private var loadFailed = false
 
     private let avatarSize: CGFloat = 96
@@ -55,12 +56,12 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                     }
                 }
             }
-            .font(.subheadline.bold())
+            .font(AppFont.text(.subheadline, weight: .bold))
             .disabled(isLoading)
             if loadFailed {
                 Text("写真を読み込めませんでした")
-                    .font(.footnote)
-                    .foregroundStyle(.red)
+                    .font(AppFont.text(.footnote))
+                    .foregroundStyle(AppPalette.destructive.color)
             }
         }
         .task(id: currentPhotoFileName) {
@@ -117,8 +118,9 @@ struct OshiPhotoPicker<Placeholder: View>: View {
 
 #Preview {
     @Previewable @State var change = PhotoChange.keep
-    OshiPhotoPicker(currentPhotoFileName: nil, photoChange: $change) {
-        Circle().fill(.pink)
+    @Previewable @State var isLoading = false
+    OshiPhotoPicker(currentPhotoFileName: nil, photoChange: $change, isLoading: $isLoading) {
+        OshiAvatar(name: "ミナト", color: .pink, size: 96)
     }
     .padding()
 }
