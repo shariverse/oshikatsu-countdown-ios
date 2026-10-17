@@ -8,9 +8,11 @@ import SwiftUI
 
 /// 推しの登録・編集のシート。写真・名前・推し色を入れて保存する。編集のときだけ削除を置く。
 /// 保存・削除の途中は閉じられないようにし、失敗したら知らせて入力を残す（もう一度押せる）。
+/// `onboarding` を渡すと、初回の導線の 1 歩目として出す（シートとして閉じず、保存したら `onSaved` を呼ぶ）。
 struct OshiEditorScreen: View {
     /// 編集する推し。新しく登録するときは nil。
     let oshi: Oshi?
+    var onboarding: OnboardingStep?
     /// 保存したあと、シートを閉じる前に呼ぶ。
     var onSaved: (Oshi) -> Void = { _ in }
 
@@ -31,8 +33,9 @@ struct OshiEditorScreen: View {
         let eventCount: Int
     }
 
-    init(oshi: Oshi?, onSaved: @escaping (Oshi) -> Void = { _ in }) {
+    init(oshi: Oshi?, onboarding: OnboardingStep? = nil, onSaved: @escaping (Oshi) -> Void = { _ in }) {
         self.oshi = oshi
+        self.onboarding = onboarding
         self.onSaved = onSaved
         _form = State(initialValue: OshiForm(oshi: oshi))
     }
@@ -40,6 +43,9 @@ struct OshiEditorScreen: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let onboarding {
+                    OnboardingHeading(step: onboarding)
+                }
                 photoSection
                 nameSection
                 Section {
@@ -60,9 +66,18 @@ struct OshiEditorScreen: View {
             .scrollContentBackground(.hidden)
             .background(AppPalette.background.color)
             .disabled(isBusy)
-            .navigationTitle(oshi == nil ? "推しを登録" : "推しを編集")
+            .navigationTitle(onboarding?.title ?? (oshi == nil ? "推しを登録" : "推しを編集"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
+            .safeAreaInset(edge: .bottom) {
+                if let onboarding {
+                    OnboardingPrimaryButton(
+                        title: onboarding.primaryActionTitle,
+                        isEnabled: form.canSave && !isLoadingPhoto && !isBusy,
+                        action: startSaving
+                    )
+                }
+            }
         }
         .font(AppFont.text(.body))
         .tint(AppPalette.brand.color)
@@ -114,26 +129,35 @@ struct OshiEditorScreen: View {
     }
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .cancellationAction) {
-            Button("キャンセル") {
-                dismiss()
+        if let onboarding {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("あとで", action: onboarding.onSkip)
+                    .disabled(isBusy)
             }
-            .disabled(isBusy)
-        }
-        ToolbarItem(placement: .confirmationAction) {
-            if isBusy {
-                ProgressView()
-            } else {
-                Button("保存") {
-                    // Task が走り出す前に立て、続けて押しても 1 回だけ保存する
-                    isBusy = true
-                    Task {
-                        await save()
-                    }
+        } else {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("キャンセル") {
+                    dismiss()
                 }
-                .fontWeight(.bold)
-                .disabled(!form.canSave || isLoadingPhoto)
+                .disabled(isBusy)
             }
+            ToolbarItem(placement: .confirmationAction) {
+                if isBusy {
+                    ProgressView()
+                } else {
+                    Button("保存", action: startSaving)
+                        .fontWeight(.bold)
+                        .disabled(!form.canSave || isLoadingPhoto)
+                }
+            }
+        }
+    }
+
+    private func startSaving() {
+        // Task が走り出す前に立て、続けて押しても 1 回だけ保存する
+        isBusy = true
+        Task {
+            await save()
         }
     }
 
@@ -154,7 +178,9 @@ struct OshiEditorScreen: View {
                 return
             }
             onSaved(saved)
-            dismiss()
+            if onboarding == nil {
+                dismiss()
+            }
         } catch {
             failureMessage = "保存できませんでした"
         }
@@ -189,6 +215,11 @@ struct OshiEditorScreen: View {
 
 #Preview("登録") {
     OshiEditorScreen(oshi: nil)
+        .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
+}
+
+#Preview("初回の導線") {
+    OshiEditorScreen(oshi: nil, onboarding: .oshi {})
         .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }
 

@@ -25,8 +25,42 @@ final class OshiConUITests: XCTestCase {
     @MainActor
     func testFirstLaunchShowsOnboarding() throws {
         let app = launch(hasCompletedOnboarding: false)
-        XCTAssertTrue(app.buttons["はじめる"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["ステップ 1 / 2"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.tabBars.firstMatch.exists)
+    }
+
+    @MainActor
+    func testOnboardingRegistersOshiAndFirstEvent() throws {
+        let app = launch(hasCompletedOnboarding: false)
+        XCTAssertTrue(app.navigationBars["ステップ 1 / 2"].waitForExistence(timeout: 5))
+        let next = app.buttons["次へ：最初の予定を登録"]
+        XCTAssertFalse(next.isEnabled)
+        let name = app.textFields["推しの名前"]
+        name.tap()
+        name.typeText("ミナト")
+        next.tap()
+
+        // 2 歩目では、登録したばかりの推しを選んでおく
+        XCTAssertTrue(app.navigationBars["ステップ 2 / 2"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "ミナト")).firstMatch.exists)
+        let start = app.buttons["保存してはじめる"]
+        XCTAssertFalse(start.isEnabled)
+        let title = app.textFields["タイトル"]
+        title.tap()
+        title.typeText("5th LIVE")
+        start.tap()
+
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 2))
+    }
+
+    @MainActor
+    func testOnboardingCanBeSkipped() throws {
+        let app = launch(hasCompletedOnboarding: false)
+        XCTAssertTrue(app.navigationBars["ステップ 1 / 2"].waitForExistence(timeout: 5))
+        app.navigationBars["ステップ 1 / 2"].buttons["あとで"].tap()
+        XCTAssertTrue(app.navigationBars["ステップ 2 / 2"].waitForExistence(timeout: 2))
+        app.navigationBars["ステップ 2 / 2"].buttons["あとで"].tap()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 2))
     }
 
     @MainActor
