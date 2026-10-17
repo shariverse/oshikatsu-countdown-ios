@@ -75,6 +75,16 @@ extension OshiColor {
         AdaptiveColor(light: rgb, dark: rgb.mixed(with: .white, fraction: Self.darkTextLightenFraction))
     }
 
+    /// ライトの surfaceContainer（推しカウントウィジェットの地 `#F3EDF1`）の上で推し色を文字に使うとき、黒に寄せる割合。
+    /// どの推し色も 4.5:1 以上になる値（最小は 0.06。余裕を見て 0.1）。
+    nonisolated static let surfaceContainerTextDarkenFraction = 0.1
+
+    /// 推し色を surfaceContainer（推しカウントウィジェットの地）の上の文字に使うときの色。
+    /// ライトでは少し黒に寄せて 4.5:1 を保つ。ダークは `text` と同じ。
+    nonisolated var textOnSurfaceContainer: AdaptiveColor {
+        AdaptiveColor(light: rgb.mixed(with: .black, fraction: Self.surfaceContainerTextDarkenFraction), dark: text.dark)
+    }
+
     /// 推し色を薄く敷いた地（選択中の印など）。文字は `AppPalette.onSurface`。
     nonisolated var container: AdaptiveColor {
         AdaptiveColor(

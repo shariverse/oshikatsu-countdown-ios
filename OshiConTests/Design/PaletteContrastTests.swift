@@ -27,6 +27,12 @@ struct PaletteContrastTests {
         }
     }
 
+    @Test("推しカウントの地（surfaceContainer）の上の推し色の文字は、ライトもダークも 4.5:1 以上", arguments: OshiColor.allCases)
+    func oshiTextOnSurfaceContainer(color: OshiColor) {
+        #expect(color.textOnSurfaceContainer.light.contrastRatio(with: AppPalette.surfaceContainer.light) >= 4.5)
+        #expect(color.textOnSurfaceContainer.dark.contrastRatio(with: AppPalette.surfaceContainer.dark) >= 4.5)
+    }
+
     @Test("本文と補助テキストは地に 4.5:1 以上。アクセントの塗りに乗る文字も", arguments: [false, true])
     func textOnGrounds(isDark: Bool) {
         for ground in [AppPalette.background, AppPalette.surface, AppPalette.surfaceContainer] {
