@@ -73,6 +73,15 @@ jobs:
             -archivePath "$RUNNER_TEMP/build.xcarchive" \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Embed entitlements
+        # 署名しない Archive には Entitlements（App Group）が入らず、Export の署名でも抜け落ちる。
+        # アプリと App Extension（ウィジェット）にアドホック署名で Entitlements を載せ、Export に引き継がせる
+        run: |
+          ARCHIVE_PATH="$RUNNER_TEMP/build.xcarchive" \
+          PROJECT_PATH="$PROJECT_NAME.xcodeproj" \
+          CONFIGURATION=Release \
+            ruby .github/scripts/embed-entitlements.rb
+
       - name: Create ExportOptions.plist and API private key
         # Secrets はシェル展開ではなく env 経由で渡す
         env:
