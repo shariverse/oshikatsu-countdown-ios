@@ -33,6 +33,20 @@ nonisolated struct CalendarDay: Hashable, Comparable, Codable, Sendable {
         )
     }
 
+    /// 保存した値を読むときも、月・日を確かめて末日にそろえる（壊れた値で落ちないよう、範囲外は読み込みの失敗にする）。
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let year = try container.decode(Int.self, forKey: .year)
+        let month = try container.decode(Int.self, forKey: .month)
+        let day = try container.decode(Int.self, forKey: .day)
+        guard (1...12).contains(month), day >= 1 else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "日付が範囲外: \(year)-\(month)-\(day)")
+            )
+        }
+        self.init(year: year, month: month, day: day)
+    }
+
     static func < (lhs: Self, rhs: Self) -> Bool {
         (lhs.year, lhs.month, lhs.day) < (rhs.year, rhs.month, rhs.day)
     }
@@ -106,6 +120,19 @@ nonisolated struct TimeOfDay: Hashable, Comparable, Codable, Sendable {
         precondition((0...59).contains(minute), "minute は 0〜59 で指定する: \(minute)")
         self.hour = hour
         self.minute = minute
+    }
+
+    /// 保存した値を読むときも範囲を確かめる（壊れた値で落ちないよう、範囲外は読み込みの失敗にする）。
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let hour = try container.decode(Int.self, forKey: .hour)
+        let minute = try container.decode(Int.self, forKey: .minute)
+        guard (0...23).contains(hour), (0...59).contains(minute) else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "時刻が範囲外: \(hour):\(minute)")
+            )
+        }
+        self.init(hour: hour, minute: minute)
     }
 
     /// 0:00 からの分。

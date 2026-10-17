@@ -62,11 +62,13 @@ nonisolated struct OshiEvent: Identifiable, Hashable, Sendable {
     }
 
     /// `occurrence` の 1 回前の開催日。くり返さない予定と、最初の回（登録した日付）は nil。
+    /// 1 回前が最初の回より前になるとき（`occurrence(from:)` の値でない日付を渡したとき）も nil。
     func previousOccurrence(before occurrence: CalendarDay) -> CalendarDay? {
         guard repeatsYearly, day < occurrence else {
             return nil
         }
-        return day.withYear(occurrence.year - 1)
+        let previous = day.withYear(occurrence.year - 1)
+        return previous >= day ? previous : nil
     }
 }
 

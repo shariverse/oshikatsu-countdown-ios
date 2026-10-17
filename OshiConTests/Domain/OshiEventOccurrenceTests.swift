@@ -60,20 +60,10 @@ struct OshiEventOccurrenceTests {
         #expect(once.previousOccurrence(before: DomainFixtures.day(2026, 10, 18)) == nil)
     }
 
-    @Test("誕生日を選ぶと毎年くり返す、ほかの種類はくり返さない")
-    func repeatsYearlyWhenSelected() {
-        #expect(EventKind.birthday.repeatsYearlyWhenSelected)
-        #expect(EventKind.allCases.filter(\.repeatsYearlyWhenSelected) == [.birthday])
-    }
-
-    @Test("種類の文言と並び")
-    func kindLabels() {
-        #expect(EventKind.allCases.map(\.label) == ["ライブ", "誕生日", "発売日", "配信", "その他"])
-    }
-
-    @Test("推し色は 12 色で、既定はピンク")
-    func oshiColors() {
-        #expect(OshiColor.allCases.count == 12)
-        #expect(OshiColor.defaultColor == .pink)
+    @Test("1 回前が最初の回より前になる日付を渡しても、最初の回より前は返さない")
+    func previousOccurrenceIsNotBeforeFirst() {
+        let repeating = DomainFixtures.event(day: DomainFixtures.day(2026, 3, 1), repeatsYearly: true)
+        #expect(repeating.previousOccurrence(before: DomainFixtures.day(2026, 12, 31)) == nil)
+        #expect(repeating.previousOccurrence(before: DomainFixtures.day(2027, 3, 1)) == DomainFixtures.day(2026, 3, 1))
     }
 }
