@@ -69,6 +69,17 @@ struct InputTextTests {
         #expect(InputField.oshiName.limited(String(repeating: Self.family, count: 21)) == String(repeating: Self.family, count: 20))
     }
 
+    @Test("文字数は空白を潰した後の見た目の文字数で数え、上限を超えたかを判定する", arguments: InputField.allCases)
+    func lengthAndLimit(field: InputField) {
+        let atLimit = String(repeating: Self.family, count: field.maxLength)
+        #expect(field.length(of: "") == 0)
+        #expect(field.length(of: "  ミ   ナト  ") == 4)
+        #expect(field.length(of: atLimit) == field.maxLength)
+        #expect(!field.exceedsLimit(atLimit))
+        #expect(!field.exceedsLimit(atLimit + "  "))
+        #expect(field.exceedsLimit(atLimit + "あ"))
+    }
+
     @Test("必須はタイトルと推しの名前。空白だけは空とみなす")
     func required() {
         #expect(InputField.eventTitle.isRequired)
