@@ -8,6 +8,9 @@ import Foundation
 
 /// 取り込んだ推しの写真の置き場所（App Group のコンテナの Photos）。端末の外には出さない。
 nonisolated struct OshiPhotoLibrary: Sendable {
+    /// アプリの写真の置き場所（App Group のコンテナの Photos）。
+    static let shared = Self()
+
     /// 写真のファイルを置くディレクトリ。
     let directory: URL
 

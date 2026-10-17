@@ -13,7 +13,7 @@ struct OshiPhotoPicker<Placeholder: View>: View {
     /// 保存してある写真のファイル名。
     let currentPhotoFileName: String?
     @Binding var photoChange: PhotoChange
-    var photos = OshiPhotoLibrary()
+    var photos = OshiPhotoLibrary.shared
     @ViewBuilder var placeholder: () -> Placeholder
 
     @State private var selectedItem: PhotosPickerItem?
@@ -66,13 +66,13 @@ struct OshiPhotoPicker<Placeholder: View>: View {
         .task(id: currentPhotoFileName) {
             await loadCurrentPhoto()
         }
-        .onChange(of: selectedItem) { _, item in
-            guard let item else {
+        .task(id: selectedItem) {
+            guard let selectedItem else {
                 return
             }
-            Task {
-                await load(item)
-            }
+            await load(selectedItem)
+            // 選んだ写真を戻し、読み込めなかった同じ写真をもう一度選んでも読み直せるようにする
+            self.selectedItem = nil
         }
     }
 
@@ -91,9 +91,12 @@ struct OshiPhotoPicker<Placeholder: View>: View {
             return
         }
         let pixels = Int(avatarSize * 3)
-        if let image = await photos.loadImage(fileName: currentPhotoFileName, maxPixelLength: pixels) {
-            preview = Image(decorative: image, scale: 1)
+        let image = await photos.loadImage(fileName: currentPhotoFileName, maxPixelLength: pixels)
+        // 読んでいる間に写真を選び直していたら、選んだ写真のプレビューを残す
+        guard case .keep = photoChange, let image else {
+            return
         }
+        preview = Image(decorative: image, scale: 1)
     }
 
     private func load(_ item: PhotosPickerItem) async {
