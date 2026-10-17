@@ -16,7 +16,7 @@ struct CountdownWidget: Widget {
             CountdownWidgetView(entry: entry)
         }
         .configurationDisplayName("カウントダウン")
-        .description("選んだ予定まであと何日かを数えます。")
+        .description("選んだ予定まであと何日かを推し色で表示します")
         .supportedFamilies([.systemSmall])
     }
 }
@@ -43,6 +43,8 @@ nonisolated struct CountdownEntry: TimelineEntry {
 nonisolated struct CountdownProvider: AppIntentTimelineProvider {
     /// 先に作っておく 0:00 のエントリの数。使い切ったら作り直す。
     private static let midnightCount = 7
+    /// ストアを読めなかったとき、読み直すまでの間隔。
+    private static let retryInterval: TimeInterval = 15 * 60
 
     func placeholder(in context: Context) -> CountdownEntry {
         .sample
@@ -53,13 +55,21 @@ nonisolated struct CountdownProvider: AppIntentTimelineProvider {
         if context.isPreview, configuration.event == nil {
             return .sample
         }
-        let data = await WidgetStore.load()
+        guard let data = await WidgetStore.load() else {
+            return CountdownEntry(date: .now, content: .unavailable)
+        }
         return entry(at: .now, configuration: configuration, data: data, calendar: .autoupdatingCurrent)
     }
 
     func timeline(for configuration: SelectEventIntent, in context: Context) async -> Timeline<CountdownEntry> {
-        let data = await WidgetStore.load()
         let now = Date.now
+        guard let data = await WidgetStore.load() else {
+            // 読めないことを「予定が見つかりません」と出し続けないよう、しばらくしてから読み直す
+            return Timeline(
+                entries: [CountdownEntry(date: now, content: .unavailable)],
+                policy: .after(now.addingTimeInterval(Self.retryInterval))
+            )
+        }
         let calendar = Calendar.autoupdatingCurrent
         let dates = [now] + WidgetTimeline.nextMidnights(after: now, count: Self.midnightCount, calendar: calendar)
         let entries = dates.map { entry(at: $0, configuration: configuration, data: data, calendar: calendar) }
@@ -93,6 +103,8 @@ struct CountdownWidgetView: View {
                 message(title: "予定を選んでください", detail: "長押しして「ウィジェットを編集」から選びます")
             case .missing:
                 message(title: "予定が見つかりません", detail: "長押しして「ウィジェットを編集」から選び直します")
+            case .unavailable:
+                message(title: "データを読み込めませんでした", detail: "しばらくしてからもう一度表示します")
             }
         }
         .environment(\.locale, .app)
@@ -169,4 +181,5 @@ private struct EventCountdownView: View {
     CountdownEntry.sample
     CountdownEntry(date: .now, content: .notSelected)
     CountdownEntry(date: .now, content: .missing)
+    CountdownEntry(date: .now, content: .unavailable)
 }

@@ -13,6 +13,8 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
     case notSelected
     /// 選んだ予定が削除された。
     case missing
+    /// ストアを読めなかった（再起動後の最初のロック解除前など）。しばらくしてから読み直す。
+    case unavailable
 
     /// 選んだ予定の中身。
     struct Event: Equatable, Sendable {
