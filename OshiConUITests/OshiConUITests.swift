@@ -108,4 +108,27 @@ final class OshiConUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Outfit"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "SIL OPEN FONT LICENSE")).firstMatch.exists)
     }
+
+    @MainActor
+    func testAddEventFromHome() throws {
+        let app = launch(hasCompletedOnboarding: true)
+        XCTAssertTrue(app.staticTexts["まだ予定がありません"].waitForExistence(timeout: 5))
+
+        app.navigationBars["推し活カウントダウン"].buttons["予定を追加"].tap()
+        XCTAssertTrue(app.navigationBars["予定を追加"].waitForExistence(timeout: 2))
+        let save = app.navigationBars["予定を追加"].buttons["保存"]
+        XCTAssertFalse(save.isEnabled)
+        let title = app.textFields["タイトル"]
+        title.tap()
+        title.typeText("5th LIVE")
+        XCTAssertTrue(save.isEnabled)
+        save.tap()
+
+        // 今日の予定なので、先頭のカードと、これからの予定の行に「今日！」で出る
+        let featured = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "いちばん近い予定")).firstMatch
+        XCTAssertTrue(featured.waitForExistence(timeout: 2))
+        XCTAssertTrue(featured.label.contains("5th LIVE"))
+        XCTAssertTrue(featured.label.contains("今日！"))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "5th LIVE、")).firstMatch.exists)
+    }
 }
