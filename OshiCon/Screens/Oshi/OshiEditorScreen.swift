@@ -17,6 +17,8 @@ struct OshiEditorScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var form: OshiForm
+    /// 新しく登録するときの id。保存に失敗してやり直しても同じ推しとして保存する。
+    @State private var newOshiID = UUID()
     @State private var photoChange = PhotoChange.keep
     @State private var isLoadingPhoto = false
     @State private var isBusy = false
@@ -154,7 +156,8 @@ struct OshiEditorScreen: View {
                 name: form.name,
                 color: form.color,
                 photoChange: photoChange,
-                now: .now
+                now: .now,
+                newOshiID: newOshiID
             ) else {
                 return
             }
