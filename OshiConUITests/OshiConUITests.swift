@@ -165,4 +165,37 @@ final class OshiConUITests: XCTestCase {
         XCTAssertTrue(featured.label.contains("今日！"))
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "5th LIVE、")).firstMatch.exists)
     }
+
+    @MainActor
+    func testEventDetailPinsAndDeletes() throws {
+        let app = launch(hasCompletedOnboarding: true)
+        XCTAssertTrue(app.staticTexts["まだ予定がありません"].waitForExistence(timeout: 5))
+        app.navigationBars["推し活カウントダウン"].buttons["予定を追加"].tap()
+        let title = app.textFields["タイトル"]
+        XCTAssertTrue(title.waitForExistence(timeout: 2))
+        title.tap()
+        title.typeText("5th LIVE")
+        app.navigationBars["予定を追加"].buttons["保存"].tap()
+
+        // 行から詳細を開く。今日の時刻の無い予定なので当日
+        let row = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "5th LIVE、")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        row.tap()
+        // 当日の表示は「今日は当日！」と「楽しんできてね」をまとめて読み上げる 1 つの要素
+        let today = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "今日は当日！")).firstMatch
+        XCTAssertTrue(today.waitForExistence(timeout: 2))
+
+        // ピン留めを切り替える
+        app.buttons["ピン留めする"].tap()
+        XCTAssertTrue(app.buttons["ピン留めを外す"].waitForExistence(timeout: 2))
+
+        // 削除するとホームに戻る
+        app.buttons["その他の操作"].tap()
+        app.buttons["予定を削除"].tap()
+        let alert = app.alerts["この予定を削除しますか？"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        XCTAssertTrue(alert.staticTexts["「5th LIVE」を削除します。元に戻せません。"].exists)
+        alert.buttons["削除"].tap()
+        XCTAssertTrue(app.staticTexts["まだ予定がありません"].waitForExistence(timeout: 3))
+    }
 }

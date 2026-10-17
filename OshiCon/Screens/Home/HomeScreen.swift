@@ -144,18 +144,6 @@ private struct HomeSection<Content: View>: View {
     }
 }
 
-/// 予定の詳細の仮の画面。タスク 11 で置き換える。
-struct EventDetailPlaceholder: View {
-    let eventID: OshiEvent.ID
-
-    var body: some View {
-        AppPalette.background.color
-            .ignoresSafeArea()
-            .navigationTitle("予定")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
 #Preview {
     NavigationStack {
         HomeScreen()
