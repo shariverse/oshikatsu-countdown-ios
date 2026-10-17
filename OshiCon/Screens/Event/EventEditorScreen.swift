@@ -1,0 +1,214 @@
+//
+//  EventEditorScreen.swift
+//  OshiCon
+//
+
+import SwiftData
+import SwiftUI
+
+/// 予定の追加・編集のシート。推し・種類・タイトル・日付・開始時刻・会場・毎年くり返すを入れて保存する。
+/// 保存に失敗したら知らせて入力を残す（もう一度押せる）。予定の削除は詳細の画面で行う。
+struct EventEditorScreen: View {
+    /// 編集する予定。新しく追加するときは nil。
+    let event: OshiEvent?
+    /// 追加で選んでおく推し（初回の導線で、登録したばかりの推し）。nil なら先頭の推し。
+    var preselectedOshiID: Oshi.ID?
+    /// 保存したあと、シートを閉じる前に呼ぶ。
+    var onSaved: (OshiEvent) -> Void = { _ in }
+
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.calendar) private var calendar
+    @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
+    private var storedOshis: [StoredOshi]
+    /// 入力。開いたときの推しの一覧と今日から作る。
+    @State private var form: EventForm?
+    /// 新しく追加するときの id。保存に失敗してやり直しても同じ予定として保存する。
+    @State private var newEventID = UUID()
+    @State private var failureMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let form = Binding($form) {
+                    EventFormFields(form: form, oshis: storedOshis.map(OshiConStore.oshi(from:)))
+                }
+            }
+            .navigationTitle(event == nil ? "予定を追加" : "予定を編集")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("キャンセル") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存", action: save)
+                        .fontWeight(.bold)
+                        .disabled(!(form?.canSave ?? false))
+                }
+            }
+        }
+        .font(AppFont.text(.body))
+        .tint(AppPalette.brand.color)
+        .task {
+            guard form == nil else {
+                return
+            }
+            form = EventForm(
+                event: event,
+                oshis: storedOshis.map(OshiConStore.oshi(from:)),
+                today: CalendarDay(.now, calendar: calendar),
+                preselectedOshiID: preselectedOshiID
+            )
+        }
+        .alert(
+            failureMessage ?? "",
+            isPresented: Binding { failureMessage != nil } set: { if !$0 { failureMessage = nil } }
+        ) {
+            Button("閉じる", role: .cancel) {}
+        }
+    }
+
+    /// 保存は同期で終わるので、保存の途中にシートを閉じられることはない。
+    private func save() {
+        guard let saved = form?.makeEvent(existing: event, newEventID: newEventID, now: .now) else {
+            return
+        }
+        do {
+            try OshiConStore(context: modelContext).save(saved)
+            onSaved(saved)
+            dismiss()
+        } catch {
+            failureMessage = "保存できませんでした"
+        }
+    }
+}
+
+/// 予定の入力欄。
+private struct EventFormFields: View {
+    @Binding var form: EventForm
+    let oshis: [Oshi]
+
+    @Environment(\.calendar) private var calendar
+
+    /// 開始時刻は端末の設定にかかわらず 24 時間表記で出す（SPEC の 2.5）。
+    private static let timeLocale: Locale = {
+        var components = Locale.Components(locale: Locale(identifier: "ja_JP"))
+        components.hourCycle = .zeroToTwentyThree
+        return Locale(components: components)
+    }()
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("推し", selection: $form.oshiID) {
+                    Text("推しなし")
+                        .tag(Oshi.ID?.none)
+                    ForEach(oshis) { oshi in
+                        Text(oshi.name)
+                            .tag(Oshi.ID?.some(oshi.id))
+                    }
+                }
+            }
+            Section("種類") {
+                Picker("種類", selection: kind) {
+                    ForEach(EventKind.allCases, id: \.self) { kind in
+                        Text(kind.label)
+                            .tag(kind)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+            }
+            Section {
+                TextField("例：5th LIVE 東京公演", text: $form.title)
+                    .accessibilityLabel("タイトル")
+            } header: {
+                Text("タイトル")
+            } footer: {
+                InputLengthFooter(field: .eventTitle, text: form.title)
+            }
+            Section {
+                DatePicker("日付", selection: day, displayedComponents: .date)
+                startTimeRow
+            }
+            Section {
+                TextField("会場・場所（任意）", text: $form.venue)
+                    .accessibilityLabel("会場・場所（任意）")
+            } header: {
+                Text("会場・場所（任意）")
+            } footer: {
+                InputLengthFooter(field: .eventVenue, text: form.venue)
+            }
+            Section {
+                Toggle(isOn: $form.repeatsYearly) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("毎年くり返す")
+                        Text("誕生日や記念日は、過ぎたら翌年の同じ日を数えます")
+                            .font(AppFont.text(.footnote))
+                            .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    }
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppPalette.background.color)
+    }
+
+    /// 開始時刻。決まっていなければ「未定」で、押すと 18:00 から選べるようにする。消すボタンで時刻なしに戻す。
+    @ViewBuilder private var startTimeRow: some View {
+        if form.startTime != nil {
+            HStack {
+                DatePicker("開始時刻（任意）", selection: startTime, displayedComponents: .hourAndMinute)
+                    .environment(\.locale, Self.timeLocale)
+                Button {
+                    form.startTime = nil
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("開始時刻を消す")
+            }
+        } else {
+            LabeledContent("開始時刻（任意）") {
+                Button("未定") {
+                    form.startTime = EventForm.defaultStartTime
+                }
+                .buttonStyle(.borderless)
+                .accessibilityHint("押すと開始時刻を決められます")
+            }
+        }
+    }
+
+    private var kind: Binding<EventKind> {
+        Binding {
+            form.kind
+        } set: { kind in
+            form.selectKind(kind)
+        }
+    }
+
+    private var day: Binding<Date> {
+        Binding {
+            form.day.date(at: nil, calendar: calendar)
+        } set: { date in
+            form.day = CalendarDay(date, calendar: calendar)
+        }
+    }
+
+    private var startTime: Binding<Date> {
+        Binding {
+            form.day.date(at: form.startTime ?? EventForm.defaultStartTime, calendar: calendar)
+        } set: { date in
+            let gregorian = CalendarDay.gregorian(matching: calendar)
+            form.startTime = TimeOfDay(hour: gregorian.component(.hour, from: date), minute: gregorian.component(.minute, from: date))
+        }
+    }
+}
+
+#Preview("追加") {
+    EventEditorScreen(event: nil)
+        .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
+}
