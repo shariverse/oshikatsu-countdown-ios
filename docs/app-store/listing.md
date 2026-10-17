@@ -77,4 +77,4 @@ iPad の大きな画面や横向きでも使えます。ダークモードにも
 
 ## スクリーンショット
 
-UI テストで撮る（epic/mvp のタスク 21。6.9 インチの iPhone と 13 インチの iPad）。
+`scripts/app-store-screenshots.sh` で撮る（見本のデータで UI テストを流す。6.9 インチの iPhone と 13 インチの iPad）。README の「App Store 用スクリーンショット」を参照。

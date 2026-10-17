@@ -155,6 +155,18 @@ body=$(gh pr view <番号> --json body -q .body) &&
   | gh pr edit <番号> --body-file -
 ```
 
+### 8. App Store 用スクリーンショット
+
+見本の推しと予定で、App Store に載せるスクリーンショットを撮ります。6.9 インチの iPhone（iPhone 17 Pro Max）と 13 インチの iPad（iPad Pro 13-inch (M5)）で UI テスト（`AppStoreScreenshotTests`）を流し、画像を `build/app-store-screenshots/<端末>/` に書き出します。
+
+```bash
+scripts/app-store-screenshots.sh
+```
+
+- 見本のデータは起動引数 `-useInMemoryStore -seedSampleData` でメモリ上のストアにだけ入ります（端末のデータは書き換えません）。日付は今日から数えるので、いつ撮っても同じ残り日数になります
+- 撮る画面はホーム・予定の詳細・予定の追加・推しの一覧です。画面の名前は書き出した `manifest.json` にあります
+- ステータスバーは 9:41・電池満タンにそろえます。ふだんのテスト（CI を含む）では、このテストは飛ばされます
+
 ## 構成
 
 ```
@@ -165,7 +177,7 @@ body=$(gh pr view <番号> --json body -q .body) &&
 ├── OshiConUITests/   # UI テスト（XCTest）
 ├── OshiCon.xcodeproj # 共有スキーム OshiCon を含む
 ├── docs/                    # ExportOptions.plist のサンプル
-├── scripts/                 # rename.sh
+├── scripts/                 # rename.sh・app-store-screenshots.sh（App Store 用スクリーンショット）
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/
     ├── ISSUE_TEMPLATE/      # Issue テンプレート
