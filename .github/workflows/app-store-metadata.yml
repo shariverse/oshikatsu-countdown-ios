@@ -6,6 +6,8 @@ name: App Store Metadata
 # 表示サイズと機種は docs/app-store/screenshots.json、言語は docs/app-store/languages.json で決める。
 # スクリーンショットは表示サイズごとに別のジョブで並行して、scripts/app-store-screenshots.sh で撮る（リポジトリに大きな画像を置かない）。
 # iPhone Duo は xcode-27 のランナーで撮る（Xcode 27 と iOS 27.1 のランタイムが要る）。
+# クリエイティブアセット（プロダクトページのヘッダー / 検索結果）は、6.9 インチのスクリーンショットから scripts/render-creative-assets.sh で書き出し、
+# App Asset Library に上げて言語ごとのローカリゼーションに配置する。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリなどは入れないので、App Store Connect の画面で入れる。
 # 審査への提出は行わないので、提出は App Store Connect の画面から行う。
 on:
@@ -25,6 +27,10 @@ on:
         default: ''
       screenshots:
         description: スクリーンショットを撮って差し替える
+        type: boolean
+        default: true
+      creative_assets:
+        description: ヘッダー / 検索結果のクリエイティブアセットを書き出して配置する（6.9 インチのスクリーンショットを撮るときだけ）
         type: boolean
         default: true
       upload:
@@ -118,8 +124,41 @@ jobs:
           # 途中で失敗しても撮れたぶんは残す
           if-no-files-found: warn
 
-  upload:
+  creative:
     needs: [plan, screenshots]
+    # 6.9 インチのスクリーンショットを撮ったときだけ（撮影が一部失敗しても、撮れていれば書き出す）
+    if: ${{ always() && inputs.creative_assets && contains(needs.plan.outputs.matrix, 'APP_IPHONE_67') }}
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Select Xcode
+        # アイコンを書き出す Icon Composer（ictool）が入っている Xcode を使う
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.6'
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download 6.9 inch screenshots
+        uses: actions/download-artifact@v8
+        with:
+          name: screenshots-APP_IPHONE_67
+          path: ${{ runner.temp }}/app-store-screenshots
+
+      - name: Render creative assets
+        run: scripts/render-creative-assets.sh "$RUNNER_TEMP/app-store-screenshots/APP_IPHONE_67" "$RUNNER_TEMP/creative-assets"
+
+      - name: Upload creative assets to GitHub
+        uses: actions/upload-artifact@v7
+        with:
+          name: creative-assets
+          path: ${{ runner.temp }}/creative-assets
+          if-no-files-found: error
+
+  upload:
+    needs: [plan, screenshots, creative]
     # スクリーンショットを撮らないとき（screenshots ジョブが飛ばされたとき）や、一部のサイズが失敗したときも、撮れたぶんと掲載文は登録する
     if: ${{ always() && inputs.upload && needs.plan.result == 'success' }}
     # 透過のある PNG を JPEG にするのに sips を使うので macOS で動かす
@@ -175,3 +214,30 @@ jobs:
           APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
           LANGUAGES: ${{ inputs.languages }}
         run: ruby .github/scripts/app-store-metadata/upload-app-store-metadata.rb
+
+      - name: Download creative assets
+        id: creative
+        if: ${{ needs.creative.result == 'success' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: creative-assets
+          path: ${{ runner.temp }}/creative-assets
+
+      - name: Place creative assets
+        # 掲載文の登録でローカリゼーションができてから配置する
+        if: ${{ steps.creative.outcome == 'success' }}
+        env:
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          ASSET_DIR: ${{ runner.temp }}/creative-assets
+          OUTPUT_DIR: ${{ runner.temp }}/creative-assets-output
+          PLACEMENT: dedicated
+        run: ruby .github/scripts/creative-assets/upload-creative-assets.rb
+
+      - name: Upload API responses to GitHub
+        if: ${{ always() && steps.creative.outcome == 'success' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: creative-assets-api-responses
+          path: ${{ runner.temp }}/creative-assets-output
+          if-no-files-found: ignore
