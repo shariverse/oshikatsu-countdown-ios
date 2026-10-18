@@ -83,9 +83,18 @@ final class AppStoreScreenshotTests: XCTestCase {
         case home
         case oshi
         case settings
+
+        /// タブのアイコン（AppTab.systemImage）。iOS 27 の iPhone Duo の縦のタブは、このアイコン名を ID に持つボタンになる
+        var systemImage: String {
+            switch self {
+            case .home: "house"
+            case .oshi: "heart"
+            case .settings: "gearshape"
+            }
+        }
     }
 
-    /// iPhone はタブバー、iPad・iPhone Duo はサイドバーで切り替える。サイドバーが隠れていたら出してから押す。
+    /// iPhone はタブバー、iPad はサイドバー、iPhone Duo（iOS 27）は縦のタブで切り替える。サイドバーが隠れていたら出してから押す。
     @MainActor
     private func openSection(_ section: Section, in app: XCUIApplication) {
         let tabBar = app.tabBars.firstMatch
@@ -113,10 +122,11 @@ final class AppStoreScreenshotTests: XCTestCase {
         XCTFail("サイドバーの項目 \(section) が見つかりません")
     }
 
-    /// サイドバーの項目。ID、並びの位置（collection view・table・outline のセル）の順に探し、押せるものを返す。
+    /// サイドバー・縦のタブの項目。縦のタブのアイコン名、ID、並びの位置（collection view・table・outline のセル）の順に探し、押せるものを返す。
     @MainActor
     private func sidebarItem(_ section: Section, in app: XCUIApplication) -> XCUIElement? {
         let candidates = [
+            app.buttons[section.systemImage].firstMatch,
             app.descendants(matching: .any)["sidebar.\(section)"].firstMatch,
             app.collectionViews.firstMatch.cells.element(boundBy: section.rawValue),
             app.tables.firstMatch.cells.element(boundBy: section.rawValue),
