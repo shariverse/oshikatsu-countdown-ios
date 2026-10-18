@@ -5,7 +5,7 @@ name: App Store Metadata
 #
 # 表示サイズと機種は docs/app-store/screenshots.json、言語は docs/app-store/languages.json で決める。
 # スクリーンショットは表示サイズごとに別のジョブで並行して、scripts/app-store-screenshots.sh で撮る（リポジトリに大きな画像を置かない）。
-# iPhone Duo は xcode-27 のランナーで撮る（Xcode 27 と iOS 27.1 のランタイムが要る）。
+# iPhone Duo は GitHub の標準イメージ xcode-27 で撮る（Xcode 27 と iOS 27.1 のランタイムが要る。ランタイムは scripts/app-store-screenshots.sh が入れる）。
 # クリエイティブアセット（プロダクトページのヘッダー / 検索結果）は、6.9 インチのスクリーンショットから scripts/render-creative-assets.sh で書き出し、
 # App Asset Library に上げて言語ごとのローカリゼーションに配置する。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリなどは入れないので、App Store Connect の画面で入れる。

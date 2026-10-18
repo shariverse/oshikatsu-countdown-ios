@@ -83,10 +83,18 @@ final class AppStoreScreenshotTests: XCTestCase {
         case home
         case oshi
         case settings
+
+        /// タブのアイコン（AppTab.systemImage）。iOS 27 の iPhone Duo の縦のタブは、このアイコン名を ID に持つボタンになる
+        var systemImage: String {
+            switch self {
+            case .home: "house"
+            case .oshi: "heart"
+            case .settings: "gearshape"
+            }
+        }
     }
 
-    /// iPhone はタブバー、iPad はサイドバーで切り替える（どちらも並びの位置で押す。List の行に付けた ID はセルに届かないため）。
-    /// サイドバーが隠れていたら出してから押す。
+    /// iPhone はタブバー、iPad はサイドバー、iPhone Duo（iOS 27）は縦のタブで切り替える。サイドバーが隠れていたら出してから押す。
     @MainActor
     private func openSection(_ section: Section, in app: XCUIApplication) {
         let tabBar = app.tabBars.firstMatch
@@ -94,15 +102,37 @@ final class AppStoreScreenshotTests: XCTestCase {
             tabBar.buttons.element(boundBy: section.rawValue).tap()
             return
         }
-        let item = app.collectionViews.firstMatch.cells.element(boundBy: section.rawValue)
-        if !item.exists || !item.isHittable {
+        if sidebarItem(section, in: app) == nil {
             let toggle = app.buttons["ToggleSidebar"].firstMatch
             if toggle.exists {
                 toggle.tap()
             }
         }
-        XCTAssertTrue(item.waitForExistence(timeout: 3))
-        item.tap()
+        // サイドバーの項目の要素の種類は OS や機種で変わる（iOS 26 の iPad は collection view のセルで、行に付けた ID が届かない）
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline {
+            if let item = sidebarItem(section, in: app) {
+                item.tap()
+                return
+            }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        // 見つからなかったときは、次に直せるよう画面の要素の一覧をログに残す
+        print(app.debugDescription)
+        XCTFail("サイドバーの項目 \(section) が見つかりません")
+    }
+
+    /// サイドバー・縦のタブの項目。縦のタブのアイコン名、ID、並びの位置（collection view・table・outline のセル）の順に探し、押せるものを返す。
+    @MainActor
+    private func sidebarItem(_ section: Section, in app: XCUIApplication) -> XCUIElement? {
+        let candidates = [
+            app.buttons[section.systemImage].firstMatch,
+            app.descendants(matching: .any)["sidebar.\(section)"].firstMatch,
+            app.collectionViews.firstMatch.cells.element(boundBy: section.rawValue),
+            app.tables.firstMatch.cells.element(boundBy: section.rawValue),
+            app.outlines.firstMatch.cells.element(boundBy: section.rawValue)
+        ]
+        return candidates.first { $0.exists && $0.isHittable }
     }
 
     @MainActor
