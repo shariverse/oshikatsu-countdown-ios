@@ -60,7 +60,7 @@ struct AppRouterTests {
 
         // アプリを開くだけのリンクでは、開いているシートは閉じない
         router.open(.home, hasCompletedOnboarding: true)
-        #expect(router.sheetDismissal.count == 2)
+        #expect(router.sheetDismissal == SheetDismissal(count: 2, keepsAddEvent: false))
     }
 
     @Test("初回の導線の途中は、ウィジェットのリンクで何も開かない")
