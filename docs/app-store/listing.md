@@ -80,3 +80,5 @@ iPad の大きな画面や横向きでも使えます。ダークモードにも
 ## スクリーンショット
 
 `scripts/app-store-screenshots.sh` で撮る（見本のデータで UI テストを流す。6.9 インチの iPhone と 13 インチの iPad）。README の「App Store 用スクリーンショット」を参照。
+
+このファイルの文面（各見出しの下のコードブロック）とスクリーンショットは、ワークフロー「App Store Metadata」で App Store Connect に登録する（README の「App Store の掲載文とスクリーンショットの登録」）。
