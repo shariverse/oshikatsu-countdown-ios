@@ -1,20 +1,34 @@
 name: App Store Metadata
 
-# App Store の掲載文（docs/app-store/listing.md・review-notes.md）とスクリーンショットを、
+# App Store の掲載文（docs/app-store/metadata/<言語>.md・review-notes.md）とスクリーンショットを、
 # App Store Connect API で App Store バージョンに登録する。手動実行のみ。
 #
-# スクリーンショットはその場で scripts/app-store-screenshots.sh で撮る（リポジトリに大きな画像を置かない）。
+# 表示サイズと機種は docs/app-store/screenshots.json、言語は docs/app-store/languages.json で決める。
+# スクリーンショットは表示サイズごとに別のジョブで並行して、scripts/app-store-screenshots.sh で撮る（リポジトリに大きな画像を置かない）。
+# iPhone Duo は xcode-27 のランナーで撮る（Xcode 27 と iOS 27.1 のランタイムが要る）。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリなどは入れないので、App Store Connect の画面で入れる。
 # 審査への提出は行わないので、提出は App Store Connect の画面から行う。
 on:
   workflow_dispatch:
     inputs:
+      display_types:
+        description: '撮る表示サイズ（カンマ区切り）。空なら screenshots.json の全サイズ（APP_IPHONE_67 / APP_IPHONE_61 / APP_IPAD_PRO_3GEN_129 / APP_IPHONE_DUO）'
+        type: string
+        default: ''
+      languages:
+        description: '登録する言語（カンマ区切り）。空なら languages.json の全言語'
+        type: string
+        default: ''
       version:
         description: App Store バージョン（空なら Configs/Project.xcconfig の MARKETING_VERSION）
         type: string
         default: ''
       screenshots:
         description: スクリーンショットを撮って差し替える
+        type: boolean
+        default: true
+      upload:
+        description: App Store Connect に登録する（外すと撮るだけ）
         type: boolean
         default: true
 
@@ -26,25 +40,95 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  upload:
+  plan:
     # App Store Connect にアプリが無いリポジトリでは、リポジトリ変数 ENABLE_DELIVERY=false でスキップする（upload.yml と同じ）
     if: vars.ENABLE_DELIVERY != 'false'
-    runs-on: macos-latest
-    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Resolve display types and languages
+        id: matrix
+        env:
+          DISPLAY_TYPES: ${{ inputs.display_types }}
+          LANGUAGES: ${{ inputs.languages }}
+          SCREENSHOTS: ${{ inputs.screenshots }}
+        run: |
+          set -euo pipefail
+          # 言語の指定ミスは、撮影（macOS のランナーで数十分）の前にここで落とす
+          jq -e --arg wanted "$LANGUAGES" '
+            ($wanted | split(",") | map(select(. != ""))) - (.languages | map(.language))
+            | if length > 0 then error("languages.json に無い言語: \(join(","))") else true end' docs/app-store/languages.json
+          if [ "$SCREENSHOTS" != "true" ]; then
+            echo 'matrix=[]' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          matrix=$(jq -c --arg wanted "$DISPLAY_TYPES" '
+            ($wanted | split(",") | map(select(. != ""))) as $w
+            | .displayTypes
+            | (if ($w | length) == 0 then keys_unsorted else $w end) as $types
+            | ($types - keys) as $unknown
+            | if ($unknown | length) > 0 then error("screenshots.json に無い表示サイズ: \($unknown | join(","))") else . end
+            | [$types[] as $t | .[$t] | {display_type: $t, label, runs_on: .runsOn, xcode_version: .xcodeVersion}]' docs/app-store/screenshots.json)
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "$matrix"
+
+  screenshots:
+    name: ${{ matrix.label }}
+    needs: plan
+    if: needs.plan.outputs.matrix != '[]'
+    runs-on: ${{ matrix.runs_on }}
+    timeout-minutes: 120
+    strategy:
+      # 1 つのサイズが失敗しても、ほかのサイズは撮り切って登録する
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      SCREENSHOTS_DIR: ${{ github.workspace }}/build/app-store-screenshots
 
     steps:
       - name: Select Xcode
-        # _build.yml と同じバージョンに固定する
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.6'
+          xcode-version: ${{ matrix.xcode_version }}
 
       - name: Checkout
         uses: actions/checkout@v7
 
       - name: Allow SwiftLint build tool plugin
-        if: ${{ inputs.screenshots }}
         run: defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
+
+      - name: Take screenshots
+        env:
+          DISPLAY_TYPE: ${{ matrix.display_type }}
+          LANGUAGES: ${{ inputs.languages }}
+        run: scripts/app-store-screenshots.sh "$DISPLAY_TYPE" "$LANGUAGES"
+
+      - name: Upload screenshots to GitHub
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshots-${{ matrix.display_type }}
+          path: ${{ env.SCREENSHOTS_DIR }}
+          # 途中で失敗しても撮れたぶんは残す
+          if-no-files-found: warn
+
+  upload:
+    needs: [plan, screenshots]
+    # スクリーンショットを撮らないとき（screenshots ジョブが飛ばされたとき）や、一部のサイズが失敗したときも、撮れたぶんと掲載文は登録する
+    if: ${{ always() && inputs.upload && needs.plan.result == 'success' }}
+    # 透過のある PNG を JPEG にするのに sips を使うので macOS で動かす
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
 
       - name: Set up environment
         env:
@@ -63,19 +147,19 @@ jobs:
           } >> "$GITHUB_ENV"
           echo "bundle_id=$bundle_id version=$version"
 
-      - name: Take screenshots
+      - name: Download screenshots
+        if: ${{ inputs.screenshots }}
+        uses: actions/download-artifact@v8
+        with:
+          pattern: screenshots-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/app-store-screenshots
+
+      - name: Set screenshot directory
         if: ${{ inputs.screenshots }}
         run: |
-          scripts/app-store-screenshots.sh "$RUNNER_TEMP/app-store-screenshots"
           echo "SCREENSHOT_DIR=$RUNNER_TEMP/app-store-screenshots" >> "$GITHUB_ENV"
-
-      - name: Upload screenshots to GitHub
-        if: ${{ inputs.screenshots }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-store-screenshots
-          path: ${{ env.SCREENSHOT_DIR }}
-          if-no-files-found: error
+          find "$RUNNER_TEMP/app-store-screenshots" -name manifest.json | sort
 
       - name: Create API private key
         # Secrets はシェル展開ではなく env 経由で渡す
@@ -89,4 +173,5 @@ jobs:
         env:
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          LANGUAGES: ${{ inputs.languages }}
         run: ruby .github/scripts/app-store-metadata/upload-app-store-metadata.rb

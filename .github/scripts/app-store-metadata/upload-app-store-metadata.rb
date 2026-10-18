@@ -6,23 +6,27 @@
 #
 #   1. Bundle ID からアプリを探し、VERSION の App Store バージョンを用意する
 #      （無ければ、審査前のバージョンの番号を VERSION に変える。それも無ければ作る）
-#   2. App 情報のローカリゼーションに、アプリ名・サブタイトルを入れる
-#   3. バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキストを入れる
+#   2. 言語（docs/app-store/languages.json）ごとに:
+#      - App 情報のローカリゼーションに、アプリ名・サブタイトルを入れる
+#      - バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキストを入れる
+#      - SCREENSHOT_DIR があれば、画像の寸法から表示サイズを決めて（docs/app-store/screenshots.json）、スクリーンショットを差し替える
+#   3. アプリの主要言語を languages.json の先頭の言語にする
 #   4. App Review に関する情報のメモに、審査用メモを入れる
-#   5. SCREENSHOT_DIR があれば、画像のサイズから端末の種類を決めて、スクリーンショットを差し替える
 #
-# 文面は docs/app-store/listing.md と review-notes.md の、見出しの下のコードブロックから読む（文面の正はこの 2 つ）。
+# 文面は docs/app-store/metadata/<language>.md と review-notes.md の、見出しの下のコードブロックから読む（文面の正はこれら）。
+# metadata/<language>.md が無い言語は飛ばす（ja だけは、無ければ docs/app-store/listing.md を読む）。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリ・年齢制限・価格は扱わないので、App Store Connect の画面で入れる。
 # 審査への提出は行わない。
 #
 # 使い方（環境変数で渡す）:
-#   BUNDLE_ID=jp.shilokuma.MyApp VERSION=1.0.0 LOCALE=ja \
+#   BUNDLE_ID=jp.shilokuma.MyApp VERSION=1.0.0 LANGUAGES=ja,en \
 #   SCREENSHOT_DIR=build/app-store-screenshots \
 #   API_KEY_PATH=AuthKey_XXXXXXXXXX.p8 APPLE_API_KEY_ID=XXXXXXXXXX APPLE_API_ISSUER_ID=xxxxxxxx-... \
 #   ruby .github/scripts/app-store-metadata/upload-app-store-metadata.rb
 #
-# SCREENSHOT_DIR は scripts/app-store-screenshots.sh の出力先（端末ごとのフォルダに画像と manifest.json がある）。
-# 空ならスクリーンショットは触らない。透過のある PNG は App Store Connect が受け付けないため、sips で JPEG にしてから上げる（macOS が要る）。
+# LANGUAGES は登録する言語（カンマ区切り）。空なら languages.json の全言語。
+# SCREENSHOT_DIR は scripts/app-store-screenshots.sh の出力先（<表示サイズ>/<言語>/ に画像と manifest.json がある）。
+# 空ならスクリーンショットは触らない。撮っていない表示サイズ・言語のスクリーンショットも触らない。透過のある PNG は App Store Connect が受け付けないため、sips で JPEG にしてから上げる（macOS が要る）。
 # GITHUB_STEP_SUMMARY が設定されていれば（GitHub Actions 上）、結果を Job Summary にも書き出す。
 #
 # Ruby の標準ライブラリだけで動く（gem のインストールは不要）。
@@ -43,13 +47,9 @@ PROCESSING_TIMEOUT = 15 * 60
 # App Store Connect の文字数の上限
 LIMITS = { name: 30, subtitle: 30, promotionalText: 170, keywords: 100, description: 4000, notes: 4000 }.freeze
 
-# 画像のサイズ（縦向き）→ スクリーンショットの種類。6.9 インチの iPhone は APP_IPHONE_67、13 インチの iPad は APP_IPAD_PRO_3GEN_129 に入る
-DISPLAY_TYPES = {
-  [1320, 2868] => 'APP_IPHONE_67',
-  [1290, 2796] => 'APP_IPHONE_67',
-  [2064, 2752] => 'APP_IPAD_PRO_3GEN_129',
-  [2048, 2732] => 'APP_IPAD_PRO_3GEN_129'
-}.freeze
+LANGUAGES_PATH = 'docs/app-store/languages.json'
+SCREENSHOTS_PATH = 'docs/app-store/screenshots.json'
+METADATA_DIR = 'docs/app-store/metadata'
 
 def env!(name)
   value = ENV.fetch(name, '')
@@ -146,21 +146,46 @@ def code_block(markdown, heading = nil)
   lines[(open + 1)...close].join.strip
 end
 
-def read_texts(listing_path, review_notes_path)
-  listing = File.read(listing_path, encoding: Encoding::UTF_8)
+def check_limits(texts, label)
+  over = texts.select { |key, value| value.length > LIMITS.fetch(key) }
+  return if over.empty?
+
+  abort over.map { |key, value| "#{label}: #{key} が #{value.length} 文字です（上限 #{LIMITS[key]} 文字）" }.join("\n")
+end
+
+# 言語の掲載文。ファイルが無ければ nil
+def read_listing(language)
+  path = File.join(METADATA_DIR, "#{language}.md")
+  path = 'docs/app-store/listing.md' if !File.exist?(path) && language == 'ja'
+  return nil unless File.exist?(path)
+
+  listing = File.read(path, encoding: Encoding::UTF_8)
   texts = {
     name: code_block(listing, 'アプリ名'),
     subtitle: code_block(listing, 'サブタイトル'),
     promotionalText: code_block(listing, 'プロモーションテキスト'),
     description: code_block(listing, '説明文'),
-    keywords: code_block(listing, 'キーワード'),
-    notes: code_block(File.read(review_notes_path, encoding: Encoding::UTF_8))
+    keywords: code_block(listing, 'キーワード')
   }
-  over = texts.select { |key, value| value.length > LIMITS.fetch(key) }
-  unless over.empty?
-    abort over.map { |key, value| "#{key} が #{value.length} 文字です（上限 #{LIMITS[key]} 文字）" }.join("\n")
-  end
+  check_limits(texts, path)
   texts
+end
+
+# languages.json の言語のうち、LANGUAGES で指定したもの（空なら全部）
+def select_languages(wanted)
+  languages = JSON.parse(File.read(LANGUAGES_PATH, encoding: Encoding::UTF_8)).fetch('languages')
+  return languages if wanted.empty?
+
+  unknown = wanted - languages.map { |l| l['language'] }
+  abort "#{LANGUAGES_PATH} に無い言語です: #{unknown.join(', ')}" unless unknown.empty?
+  languages.select { |l| wanted.include?(l['language']) }
+end
+
+# 画像の寸法（縦向き）→ 表示サイズ。screenshots.json の sizes から作る
+def display_types_by_size
+  JSON.parse(File.read(SCREENSHOTS_PATH, encoding: Encoding::UTF_8)).fetch('displayTypes').each_with_object({}) do |(type, spec), table|
+    spec.fetch('sizes').each { |size| table[size.split('x').map(&:to_i)] = type }
+  end
 end
 
 def find_app(client, bundle_id)
@@ -266,10 +291,11 @@ def png_info(path)
   { width: width, height: height, alpha: [4, 6].include?(color_type) }
 end
 
-# scripts/app-store-screenshots.sh の出力から、種類ごとに撮った順の画像を集める
-def collect_screenshots(screenshot_dir, work_dir)
+# scripts/app-store-screenshots.sh の出力から、ある言語の画像を、表示サイズごとに撮った順に集める
+def collect_screenshots(screenshot_dir, language, work_dir)
+  types = display_types_by_size
   groups = Hash.new { |h, k| h[k] = [] }
-  Dir.glob(File.join(screenshot_dir, '*/manifest.json')).sort.each do |manifest_path|
+  Dir.glob(File.join(screenshot_dir, '*', language, 'manifest.json')).sort.each do |manifest_path|
     device_dir = File.dirname(manifest_path)
     # 書き出したファイル名は UUID なので、添付の名前（「01-ホーム_0_…」）の順に並べる
     attachments = JSON.parse(File.read(manifest_path, encoding: Encoding::UTF_8)).flat_map { |test| test.fetch('attachments') }
@@ -277,11 +303,11 @@ def collect_screenshots(screenshot_dir, work_dir)
     files.each do |file|
       path = File.join(device_dir, file)
       info = png_info(path)
-      type = DISPLAY_TYPES[[info[:width], info[:height]]]
-      abort "#{path} のサイズ（#{info[:width]}x#{info[:height]}）に合うスクリーンショットの種類がありません" unless type
+      type = types[[info[:width], info[:height]]]
+      abort "#{path} のサイズ（#{info[:width]}x#{info[:height]}）に合う表示サイズが #{SCREENSHOTS_PATH} にありません" unless type
 
       if info[:alpha]
-        jpeg = File.join(work_dir, "#{File.basename(device_dir)}-#{File.basename(file, '.*')}.jpg")
+        jpeg = File.join(work_dir, "#{language}-#{File.basename(file, '.*')}.jpg")
         system('sips', '-s', 'format', 'jpeg', '-s', 'formatOptions', '95', path, '--out', jpeg, out: File::NULL, exception: true)
         path = jpeg
       end
@@ -342,7 +368,7 @@ def wait_screenshots(client, ids)
 end
 
 # 種類ごとに、既存のスクリーンショットを消してから撮った順に上げ直す
-def replace_screenshots(client, localization_id, groups)
+def replace_screenshots(client, localization_id, groups, locale)
   sets = client.get(
     "/v1/appStoreVersionLocalizations/#{localization_id}/appScreenshotSets",
     'fields[appScreenshotSets]' => 'screenshotDisplayType'
@@ -376,7 +402,7 @@ def replace_screenshots(client, localization_id, groups)
   end
 
   summary(<<~MARKDOWN)
-    ### スクリーンショット
+    ### スクリーンショット（#{locale}）
 
     | 種類 | ファイル | 状態 |
     | --- | --- | --- |
@@ -387,16 +413,18 @@ end
 
 bundle_id = env!('BUNDLE_ID')
 version_string = env!('VERSION')
-locale = ENV.fetch('LOCALE', 'ja')
-listing_path = ENV.fetch('LISTING_PATH', 'docs/app-store/listing.md')
 review_notes_path = ENV.fetch('REVIEW_NOTES_PATH', 'docs/app-store/review-notes.md')
 screenshot_dir = ENV.fetch('SCREENSHOT_DIR', '')
+languages = select_languages(ENV.fetch('LANGUAGES', '').split(',').map(&:strip).reject(&:empty?))
 
-texts = read_texts(listing_path, review_notes_path)
+# 文字数の上限は、何かを登録する前に全言語ぶん確かめる
+listings = languages.to_h { |l| [l['language'], read_listing(l['language'])] }
+notes = code_block(File.read(review_notes_path, encoding: Encoding::UTF_8))
+check_limits({ notes: notes }, review_notes_path)
 client = Client.new(key_path: env!('API_KEY_PATH'), key_id: env!('APPLE_API_KEY_ID'), issuer_id: env!('APPLE_API_ISSUER_ID'))
 
 begin
-  summary("## App Store の掲載文とスクリーンショットの登録（#{bundle_id} #{version_string} / #{locale}）\n")
+  summary("## App Store の掲載文とスクリーンショットの登録（#{bundle_id} #{version_string}）\n")
 
   app = find_app(client, bundle_id)
   unless app
@@ -404,55 +432,78 @@ begin
     puts "::error::App Store Connect に #{bundle_id} のアプリがありません"
     exit 1
   end
-  primary_locale = app.dig('attributes', 'primaryLocale')
-  summary("アプリ: #{app.dig('attributes', 'name')}（ID: `#{app['id']}`、主要言語: #{primary_locale}）\n")
-  puts "::warning::アプリの主要言語が #{primary_locale} です（#{locale} のローカリゼーションを入れます）" if primary_locale != locale
+  summary("アプリ: #{app.dig('attributes', 'name')}（ID: `#{app['id']}`、主要言語: #{app.dig('attributes', 'primaryLocale')}）\n")
 
   version, how = prepare_version(client, app['id'], version_string)
   summary("バージョン #{version_string}: #{how}（ID: `#{version['id']}`）\n")
 
-  rows = []
   app_info = editable_app_info(client, app['id'])
   abort '::error::編集できる（審査前の）App 情報がありません' unless app_info
-  _, done = upsert_localization(
-    client,
-    list_path: "/v1/appInfos/#{app_info['id']}/appInfoLocalizations",
-    type: 'appInfoLocalizations', parent_key: :appInfo, parent_type: 'appInfos', parent_id: app_info['id'],
-    locale: locale, attributes: { name: texts[:name], subtitle: texts[:subtitle] }
-  )
-  rows << "| App 情報 | アプリ名・サブタイトル | #{done} |"
 
-  localization_id, done = upsert_localization(
-    client,
-    list_path: "/v1/appStoreVersions/#{version['id']}/appStoreVersionLocalizations",
-    type: 'appStoreVersionLocalizations', parent_key: :appStoreVersion, parent_type: 'appStoreVersions', parent_id: version['id'],
-    locale: locale, attributes: texts.slice(:description, :keywords, :promotionalText)
-  )
-  rows << "| バージョン #{version_string} | 説明文・キーワード・プロモーションテキスト | #{done} |"
+  rows = []
+  screenshots_ok = true
+  Dir.mktmpdir do |work_dir|
+    languages.each do |language|
+      code = language['language']
+      locale = language['storeLocale']
+      texts = listings[code]
+      unless texts
+        rows << "| #{locale} | （#{METADATA_DIR}/#{code}.md が無いので飛ばしました） | |"
+        puts "::warning::#{code} の掲載文が無いので飛ばします"
+        next
+      end
 
-  done = upsert_review_notes(client, version['id'], texts[:notes])
-  rows << "| App Review に関する情報 | メモ（デモ用アカウントは不要） | #{done} |"
+      _, info_done = upsert_localization(
+        client,
+        list_path: "/v1/appInfos/#{app_info['id']}/appInfoLocalizations",
+        type: 'appInfoLocalizations', parent_key: :appInfo, parent_type: 'appInfos', parent_id: app_info['id'],
+        locale: locale, attributes: texts.slice(:name, :subtitle)
+      )
+      localization_id, version_done = upsert_localization(
+        client,
+        list_path: "/v1/appStoreVersions/#{version['id']}/appStoreVersionLocalizations",
+        type: 'appStoreVersionLocalizations', parent_key: :appStoreVersion, parent_type: 'appStoreVersions', parent_id: version['id'],
+        locale: locale, attributes: texts.slice(:description, :keywords, :promotionalText)
+      )
+      rows << "| #{locale} | #{texts[:name]} | App 情報: #{info_done} / バージョン: #{version_done} |"
+
+      next if screenshot_dir.empty?
+
+      groups = collect_screenshots(screenshot_dir, code, work_dir)
+      screenshots_ok &= replace_screenshots(client, localization_id, groups, locale) unless groups.empty?
+    end
+  end
+
+  done = upsert_review_notes(client, version['id'], notes)
+  rows << "| （共通） | App Review に関する情報のメモ（デモ用アカウントは不要） | #{done} |"
+
+  # 主要言語は、そのローカリゼーションができてから変える
+  primary = languages.first
+  if primary && listings[primary['language']] && app.dig('attributes', 'primaryLocale') != primary['storeLocale']
+    begin
+      client.patch("/v1/apps/#{app['id']}", { data: { type: 'apps', id: app['id'], attributes: { primaryLocale: primary['storeLocale'] } } })
+      rows << "| （共通） | 主要言語を #{primary['storeLocale']} に変更 | 更新 |"
+    rescue ApiError => e
+      rows << "| （共通） | 主要言語を #{primary['storeLocale']} に変更 | 失敗（画面で変えてください） |"
+      puts "::warning::主要言語を変えられませんでした: #{e.message.lines.first.strip}"
+    end
+  end
 
   summary(<<~MARKDOWN)
     ### 掲載文
 
-    | 場所 | 項目 | 結果 |
+    | ロケール | アプリ名・項目 | 結果 |
     | --- | --- | --- |
     #{rows.join("\n")}
   MARKDOWN
-
-  if screenshot_dir.empty?
-    summary("スクリーンショットは触っていません（SCREENSHOT_DIR が空）。\n")
-  else
-    groups = Dir.mktmpdir { |work_dir| replace_screenshots(client, localization_id, collect_screenshots(screenshot_dir, work_dir)) }
-    exit 1 unless groups
-  end
+  summary("スクリーンショットは触っていません（SCREENSHOT_DIR が空）。\n") if screenshot_dir.empty?
 
   summary(<<~MARKDOWN)
     ### 画面で入れるもの
 
     サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格と配信国・App のプライバシー・ビルドの選択は、このスクリプトでは入れていません。審査に出す前に App Store Connect の画面で入れてください。
   MARKDOWN
+  exit 1 unless screenshots_ok
 rescue ApiError => e
   summary("### エラー\n\n```\n#{e.message}\n```\n")
   puts "::error::#{e.message.lines.first.strip}"
