@@ -1,6 +1,6 @@
 //
 // App Store のクリエイティブアセット（プロダクトページのヘッダー / 検索結果）の試験用画像を生成する。
-// アプリアイコンとアプリ名をグラデーション背景の中央に置く（端がクロップされても崩れにくい構成）。
+// アプリアイコン（AppIcon.icon を ictool で書き出した角丸の PNG）とアプリ名をグラデーション背景の中央に置く（端がクロップされても崩れにくい構成）。
 //
 // 使い方:
 //   swift .github/scripts/creative-assets/generate-sample.swift <出力ディレクトリ> <アイコン PNG> <タイトル> <サブタイトル>
@@ -58,33 +58,50 @@ func drawBackground(in context: CGContext, colorSpace: CGColorSpace, size: CGSiz
     }
 }
 
-/// アイコン（角丸 + 影）とタイトル / サブタイトルを横並びで中央に描く
+/// タイトル / サブタイトルの書式とアイコンの大きさ。scale で全体を同じ比率で縮める
+struct ContentLayout {
+    let titleAttributes: [NSAttributedString.Key: Any]
+    let subtitleAttributes: [NSAttributedString.Key: Any]
+    let iconSize: CGFloat
+    let gap: CGFloat
+
+    init(height: CGFloat, scale: CGFloat) {
+        titleAttributes = [
+            .font: NSFont.systemFont(ofSize: height * 0.11 * scale, weight: .heavy),
+            .foregroundColor: NSColor.white
+        ]
+        subtitleAttributes = [
+            .font: NSFont.systemFont(ofSize: height * 0.045 * scale, weight: .semibold),
+            .foregroundColor: NSColor.white.withAlphaComponent(0.85)
+        ]
+        iconSize = height * 0.36 * scale
+        gap = height * 0.06 * scale
+    }
+
+    var titleSize: CGSize { title.size(withAttributes: titleAttributes) }
+    var subtitleSize: CGSize { subtitle.size(withAttributes: subtitleAttributes) }
+    var width: CGFloat { iconSize + gap + max(titleSize.width, subtitleSize.width) }
+}
+
+/// アイコン（影付き）とタイトル / サブタイトルを横並びで中央に描く。
+/// 横幅に収まらないとき（3:2 の検索結果と長いタイトルなど）は、全体を同じ比率で縮める
 func drawContent(in context: CGContext, size: CGSize) {
-    let titleAttributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.systemFont(ofSize: size.height * 0.11, weight: .heavy),
-        .foregroundColor: NSColor.white
-    ]
-    let subtitleAttributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.systemFont(ofSize: size.height * 0.045, weight: .semibold),
-        .foregroundColor: NSColor.white.withAlphaComponent(0.85)
-    ]
-    let titleSize = title.size(withAttributes: titleAttributes)
-    let subtitleSize = subtitle.size(withAttributes: subtitleAttributes)
-    let iconSize = size.height * 0.36
-    let gap = size.height * 0.06
-    let contentWidth = iconSize + gap + max(titleSize.width, subtitleSize.width)
+    // 端がクロップされても切れないよう、左右に 8% ずつの余白を残す
+    let maxWidth = size.width * 0.84
+    let baseWidth = ContentLayout(height: size.height, scale: 1).width
+    let layout = ContentLayout(height: size.height, scale: min(1, maxWidth / baseWidth))
+    let titleAttributes = layout.titleAttributes
+    let subtitleAttributes = layout.subtitleAttributes
+    let titleSize = layout.titleSize
+    let subtitleSize = layout.subtitleSize
+    let iconSize = layout.iconSize
+    let gap = layout.gap
+    let contentWidth = layout.width
 
     let iconRect = CGRect(x: (size.width - contentWidth) / 2, y: (size.height - iconSize) / 2, width: iconSize, height: iconSize)
-    let iconPath = CGPath(roundedRect: iconRect, cornerWidth: iconSize * 0.2237, cornerHeight: iconSize * 0.2237, transform: nil)
+    // アイコンは ictool が角丸に切り抜いて書き出す（角が透けている）ので、そのまま影を付けて描く
     context.saveGState()
     context.setShadow(offset: CGSize(width: 0, height: -size.height * 0.01), blur: size.height * 0.04, color: CGColor(gray: 0, alpha: 0.35))
-    context.addPath(iconPath)
-    context.setFillColor(.white)
-    context.fillPath()
-    context.restoreGState()
-    context.saveGState()
-    context.addPath(iconPath)
-    context.clip()
     context.draw(icon, in: iconRect)
     context.restoreGState()
 
