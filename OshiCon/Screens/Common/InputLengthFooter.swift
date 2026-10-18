@@ -43,7 +43,7 @@ struct InputLengthFooter: View {
     }
 
     private var count: some View {
-        Text("\(length) / \(field.maxLength)")
+        Text(verbatim: "\(length) / \(field.maxLength)")
             .monospacedDigit()
             .accessibilityLabel("\(field.maxLength) 文字中 \(length) 文字")
     }

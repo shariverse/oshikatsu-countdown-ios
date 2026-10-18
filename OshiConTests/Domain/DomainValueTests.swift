@@ -16,7 +16,7 @@ struct DomainValueTests {
 
     @Test("種類の文言と並び")
     func kindLabels() {
-        #expect(EventKind.allCases.map(\.label) == ["ライブ", "誕生日", "発売日", "配信", "その他"])
+        #expect(EventKind.allCases.map { $0.label(locale: DomainFixtures.japanese) } == ["ライブ", "誕生日", "発売日", "配信", "その他"])
     }
 
     @Test("推し色は 12 色で、既定はピンク")

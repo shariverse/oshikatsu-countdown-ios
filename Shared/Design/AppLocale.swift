@@ -6,14 +6,33 @@
 import Foundation
 
 extension Locale {
-    /// アプリの画面に使う locale。文言は日本語だけなので、端末の言語・地域にかかわらず日本の書き方で日付や時刻を出す
-    /// （英語の端末では「10/18/26」のような米国の書き方になるため）。
-    nonisolated static let app = Locale(identifier: "ja_JP")
+    /// アプリの画面に使う locale。言語はアプリが選んだ localization（対応していない言語の端末では英語）、地域・暦などは端末の設定。
+    /// 端末の言語をそのまま使うと、対応していない言語の端末で文言は英語なのに日付だけその言語になるため、言語をそろえる。
+    nonisolated static var app: Locale {
+        app(language: Bundle.main.preferredLocalizations.first ?? "en", base: .current)
+    }
+
+    /// `base` の地域・暦などを残し、言語だけ `language`（`ja`・`zh-Hant` など）にした locale。
+    nonisolated static func app(language: String, base: Locale) -> Locale {
+        var components = Locale.Components(locale: base)
+        components.languageComponents = Locale.Language.Components(identifier: language)
+        return Locale(components: components)
+    }
 
     /// 24 時間表記にした `app`。開始時刻は端末の設定にかかわらず 24 時間表記で出す（SPEC の 2.5）。
-    nonisolated static let app24Hour: Locale = {
-        var components = Locale.Components(locale: app)
+    nonisolated static var app24Hour: Locale {
+        app.twentyFourHour
+    }
+
+    /// 24 時間表記にした locale。
+    nonisolated var twentyFourHour: Locale {
+        var components = Locale.Components(locale: self)
         components.hourCycle = .zeroToTwentyThree
         return Locale(components: components)
-    }()
+    }
+
+    /// 日本語か。本文の書体（Zen Kaku Gothic New）を使うかを決める。
+    nonisolated var isJapanese: Bool {
+        language.languageCode == .japanese
+    }
 }

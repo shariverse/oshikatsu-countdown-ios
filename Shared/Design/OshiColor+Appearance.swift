@@ -41,6 +41,16 @@ extension OshiColor {
 
     /// 色の名前（読み上げと推し色を選ぶところ）。
     nonisolated var label: String {
+        label(locale: .app)
+    }
+
+    nonisolated func label(locale: Locale) -> String {
+        var resource = labelResource
+        resource.locale = locale
+        return String(localized: resource)
+    }
+
+    nonisolated private var labelResource: LocalizedStringResource {
         switch self {
         case .pink:
             "ピンク"

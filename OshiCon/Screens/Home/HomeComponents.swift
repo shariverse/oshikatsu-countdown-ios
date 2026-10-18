@@ -13,7 +13,7 @@ struct OshiFilterBar: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                chip(title: "すべて", color: nil, isSelected: selection == nil) {
+                chip(title: String(localized: "すべて"), color: nil, isSelected: selection == nil) {
                     selection = nil
                 }
                 ForEach(oshis) { oshi in
@@ -66,7 +66,7 @@ struct FeaturedEventCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(item.event.isPinned ? "ピン留め" : "いちばん近い予定")
+                Text(item.featuredBadgeText)
                     .font(AppFont.text(.caption, weight: .bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
@@ -91,10 +91,10 @@ struct FeaturedEventCard: View {
                 showsPrefix: true
             )
             HStack(spacing: 12) {
-                Text(EventText.dateBadge(item.scheduled.occurrenceDay))
+                Text(EventText.dateBadge(item.scheduled.occurrenceDay, locale: item.locale))
                     .font(AppFont.dateBadge)
                 if let startTime = item.event.startTime {
-                    Text(EventText.startTime(startTime, kind: item.event.kind))
+                    Text(EventText.startTime(startTime, kind: item.event.kind, locale: item.locale))
                         .font(AppFont.text(.subheadline, weight: .medium))
                 }
             }
@@ -144,7 +144,8 @@ struct HomeEventRow: View {
     }
 }
 
-/// 残り日数。これからは数字と「日」（先頭のカードは前に「あと」）、当日は「今日！」、終わった予定は「N 日前」。
+/// 残り日数。これからは数字と「日」（先頭のカードは「あと N 日」）、当日は「今日！」、終わった予定は「N 日前」。
+/// 数字の前後の文言は言語で変わる（en は `3 days`・`3 days left`）。
 struct DaysCountdownView: View {
     let scheduled: ScheduledEvent
     let color: Color
@@ -164,18 +165,21 @@ struct DaysCountdownView: View {
                 .font(AppFont.text(.subheadline))
                 .foregroundStyle(mutedColor)
         case .upcoming:
+            let parts = EventText.countdownParts(days: scheduled.daysUntil, withPrefix: showsPrefix)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                if showsPrefix {
-                    Text("あと")
+                if !parts.prefix.isEmpty {
+                    Text(parts.prefix)
                         .font(unitFont)
                 }
-                Text("\(scheduled.daysUntil)")
+                Text(parts.number)
                     .font(numberFont)
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                Text("日")
-                    .font(unitFont)
+                if !parts.suffix.isEmpty {
+                    Text(parts.suffix)
+                        .font(unitFont)
+                }
             }
             .foregroundStyle(color)
         }

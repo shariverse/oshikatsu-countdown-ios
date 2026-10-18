@@ -41,19 +41,40 @@ struct HomeContentTests {
 
     @Test("すべてのときは、ピン留めを先頭に、これからの予定を近い順に出す。終わった予定は設定で出す")
     func allEvents() {
-        let hidden = HomeContent(events: events, oshis: [minato, lumina], selectedOshiID: nil, showsPastEvents: false, today: today)
+        let hidden = HomeContent(
+            events: events,
+            oshis: [minato, lumina],
+            selectedOshiID: nil,
+            showsPastEvents: false,
+            today: today,
+            locale: DomainFixtures.japanese
+        )
         #expect(hidden.featured?.event.title == "ルミナのライブ")
         #expect(hidden.upcoming.map(\.event.title) == ["ルミナのライブ", "ミナトのライブ", "推しなしの予定"])
         #expect(hidden.past.isEmpty)
         #expect(hidden.emptyState == nil)
 
-        let shown = HomeContent(events: events, oshis: [minato, lumina], selectedOshiID: nil, showsPastEvents: true, today: today)
+        let shown = HomeContent(
+            events: events,
+            oshis: [minato, lumina],
+            selectedOshiID: nil,
+            showsPastEvents: true,
+            today: today,
+            locale: DomainFixtures.japanese
+        )
         #expect(shown.past.map(\.event.title) == ["終わったライブ"])
     }
 
     @Test("推しで絞り込むと、その推しの予定だけ。先頭はその中で選ぶ")
     func filterByOshi() {
-        let content = HomeContent(events: events, oshis: [minato, lumina], selectedOshiID: minato.id, showsPastEvents: true, today: today)
+        let content = HomeContent(
+            events: events,
+            oshis: [minato, lumina],
+            selectedOshiID: minato.id,
+            showsPastEvents: true,
+            today: today,
+            locale: DomainFixtures.japanese
+        )
         #expect(content.selectedOshiID == minato.id)
         #expect(content.featured?.event.title == "ミナトのライブ")
         #expect(content.upcoming.map(\.event.title) == ["ミナトのライブ"])
@@ -62,16 +83,32 @@ struct HomeContentTests {
 
     @Test("選んでいた推しが消えたら「すべて」に戻す")
     func removedOshiFallsBackToAll() {
-        let content = HomeContent(events: events, oshis: [lumina], selectedOshiID: minato.id, showsPastEvents: false, today: today)
+        let content = HomeContent(
+            events: events,
+            oshis: [lumina],
+            selectedOshiID: minato.id,
+            showsPastEvents: false,
+            today: today,
+            locale: DomainFixtures.japanese
+        )
         #expect(content.selectedOshiID == nil)
         #expect(content.upcoming.count == 3)
     }
 
     @Test("予定が 1 件も無いとき・絞り込んだ推しの予定が無いときの案内")
     func emptyStates() {
-        #expect(HomeContent(events: [], oshis: [], selectedOshiID: nil, showsPastEvents: false, today: today).emptyState == .noEvents)
+        #expect(HomeContent(
+            events: [], oshis: [], selectedOshiID: nil, showsPastEvents: false, today: today, locale: DomainFixtures.japanese
+        ).emptyState == .noEvents)
         let others = [event("ルミナのライブ", oshi: lumina, day: DomainFixtures.day(2026, 10, 20))]
-        let filtered = HomeContent(events: others, oshis: [minato, lumina], selectedOshiID: minato.id, showsPastEvents: false, today: today)
+        let filtered = HomeContent(
+            events: others,
+            oshis: [minato, lumina],
+            selectedOshiID: minato.id,
+            showsPastEvents: false,
+            today: today,
+            locale: DomainFixtures.japanese
+        )
         #expect(filtered.emptyState == .noEventsForOshi)
         #expect(filtered.featured == nil)
     }
@@ -79,15 +116,16 @@ struct HomeContentTests {
     @Test("終わった予定しか無いときは案内を出さず、これからの予定は空")
     func onlyPastEvents() {
         let past = [event("終わったライブ", oshi: minato, day: DomainFixtures.day(2026, 10, 1))]
-        let content = HomeContent(events: past, oshis: [minato], selectedOshiID: nil, showsPastEvents: false, today: today)
+        let content = HomeContent(
+            events: past, oshis: [minato], selectedOshiID: nil, showsPastEvents: false, today: today, locale: DomainFixtures.japanese
+        )
         #expect(content.emptyState == nil)
         #expect(content.featured == nil)
         #expect(content.upcoming.isEmpty)
     }
 
-    @Test("行の補足は日付と推しの名前。毎年くり返す予定は「毎年」、推しなしは「推しなし」。色は推し色か無彩色")
-    func itemTexts() {
-        let items = HomeContent(
+    private func itemsForTexts(locale: Locale) -> [HomeContent.Item] {
+        HomeContent(
             events: [
                 event("ライブ", oshi: minato, day: DomainFixtures.day(2026, 10, 25)),
                 event("誕生日", oshi: minato, day: DomainFixtures.day(2000, 10, 18), repeatsYearly: true),
@@ -96,8 +134,14 @@ struct HomeContentTests {
             oshis: [minato],
             selectedOshiID: nil,
             showsPastEvents: false,
-            today: today
+            today: today,
+            locale: locale
         ).upcoming
+    }
+
+    @Test("行の補足は日付と推しの名前。毎年くり返す予定は「毎年」、推しなしは「推しなし」。色は推し色か無彩色")
+    func itemTexts() {
+        let items = itemsForTexts(locale: DomainFixtures.japanese)
         #expect(items.map(\.supportingText) == ["10月18日(日) · 毎年", "10月25日(日) · ミナト", "11月1日(日) · 推しなし"])
         #expect(items.map(\.countdownText) == ["今日！", "あと 7 日", "あと 14 日"])
         #expect(items.map(\.color) == [.navy, .navy, .black])
@@ -109,10 +153,21 @@ struct HomeContentTests {
         #expect(items[1].featuredAccessibilityLabel == "いちばん近い予定、ミナト、ライブ、あと 7 日、10月25日 日曜日")
     }
 
+    @Test("英語では日付・残り日数・読み上げの区切りも英語の書き方になる")
+    func itemTextsInEnglish() {
+        let items = itemsForTexts(locale: DomainFixtures.english)
+        #expect(items.map(\.supportingText) == ["Sun, Oct 18 · Every year", "Sun, Oct 25 · ミナト", "Sun, Nov 1 · No oshi"])
+        #expect(items.map(\.countdownText) == ["Today!", "7 days left", "14 days left"])
+        #expect(items[1].accessibilityLabel == "ライブ, Sunday, October 25, ミナト, 7 days left")
+        #expect(items[1].featuredAccessibilityLabel == "Up Next, ミナト, ライブ, 7 days left, Sunday, October 25")
+    }
+
     @Test("推しが見つからない予定は推しなしとして出す")
     func missingOshi() {
         let orphan = event("消えた推しの予定", oshi: Oshi(name: "消えた"), day: DomainFixtures.day(2026, 10, 25))
-        let item = HomeContent(events: [orphan], oshis: [minato], selectedOshiID: nil, showsPastEvents: false, today: today).upcoming[0]
+        let item = HomeContent(
+            events: [orphan], oshis: [minato], selectedOshiID: nil, showsPastEvents: false, today: today, locale: DomainFixtures.japanese
+        ).upcoming[0]
         #expect(item.oshi == nil)
         #expect(item.supportingText == "10月25日(日) · 推しなし")
     }

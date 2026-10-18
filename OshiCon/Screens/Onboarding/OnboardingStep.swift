@@ -22,9 +22,9 @@ struct OnboardingStep {
     /// 1 歩目: 推しの登録。
     static func oshi(onSkip: @escaping () -> Void) -> Self {
         Self(
-            title: "ステップ 1 / 2",
-            heading: "あなたの推しを教えてね",
-            primaryActionTitle: "次へ：最初の予定を登録",
+            title: String(localized: "ステップ 1 / 2"),
+            heading: String(localized: "あなたの推しを教えてね"),
+            primaryActionTitle: String(localized: "次へ：最初の予定を登録"),
             onSkip: onSkip
         )
     }
@@ -32,10 +32,10 @@ struct OnboardingStep {
     /// 2 歩目: 最初の予定。
     static func firstEvent(onSkip: @escaping () -> Void) -> Self {
         Self(
-            title: "ステップ 2 / 2",
-            heading: "最初の予定を登録しよう",
-            message: "ライブ・誕生日・発売日など、楽しみな日を 1 つ入れてみてね。",
-            primaryActionTitle: "保存してはじめる",
+            title: String(localized: "ステップ 2 / 2"),
+            heading: String(localized: "最初の予定を登録しよう"),
+            message: String(localized: "ライブ・誕生日・発売日など、楽しみな日を 1 つ入れてみてね。"),
+            primaryActionTitle: String(localized: "保存してはじめる"),
             onSkip: onSkip
         )
     }

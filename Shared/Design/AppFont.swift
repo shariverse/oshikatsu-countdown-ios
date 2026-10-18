@@ -5,7 +5,8 @@
 
 import SwiftUI
 
-/// アプリの書体。数字は Outfit、本文は Zen Kaku Gothic New（どちらも同梱。SIL OFL 1.1）。
+/// アプリの書体。数字は Outfit、本文は日本語のときだけ Zen Kaku Gothic New（どちらも同梱。SIL OFL 1.1）。
+/// ほかの言語の本文はシステムの書体にする（Zen Kaku Gothic New には中国語・韓国語・タイ語などの字形が無いため）。
 /// どちらもダイナミックタイプの文字の大きさに合わせて大きさが変わる。
 nonisolated enum AppFont {
     /// Outfit の family 名。可変フォントで、既定のインスタンスは Thin なので、必ず太さを付けて使う。
@@ -38,11 +39,19 @@ nonisolated enum AppFont {
             .monospacedDigit()
     }
 
-    // MARK: - 本文（Zen Kaku Gothic New）
+    // MARK: - 本文（日本語は Zen Kaku Gothic New、ほかの言語はシステムの書体）
 
-    /// 本文の書体。太さは regular・medium・bold の 3 つに丸める。
-    static func text(_ style: Font.TextStyle, weight: Font.Weight = .regular) -> Font {
-        .custom(face(for: weight).rawValue, size: defaultSize(of: style), relativeTo: style)
+    /// 本文の書体。日本語では太さを regular・medium・bold の 3 つに丸める。
+    static func text(_ style: Font.TextStyle, weight: Font.Weight = .regular, locale: Locale = .app) -> Font {
+        guard usesBundledTextFace(locale: locale) else {
+            return .system(style, weight: weight)
+        }
+        return .custom(face(for: weight).rawValue, size: defaultSize(of: style), relativeTo: style)
+    }
+
+    /// 本文に同梱の書体（Zen Kaku Gothic New）を使うか。日本語のときだけ使う。
+    static func usesBundledTextFace(locale: Locale) -> Bool {
+        locale.isJapanese
     }
 
     static func face(for weight: Font.Weight) -> TextFace {

@@ -46,8 +46,16 @@ struct OshiFormTests {
 
     @Test("削除の確認は、一緒に消える予定があればその件数を出す")
     func deleteConfirmation() {
-        #expect(OshiForm.deleteTitle(name: "ミナト") == "「ミナト」を削除しますか？")
-        #expect(OshiForm.deleteMessage(eventCount: 0) == "元に戻せません。")
-        #expect(OshiForm.deleteMessage(eventCount: 3) == "この推しの予定 3 件も削除されます。元に戻せません。")
+        #expect(OshiForm.deleteTitle(name: "ミナト", locale: DomainFixtures.japanese) == "「ミナト」を削除しますか？")
+        #expect(OshiForm.deleteMessage(eventCount: 0, locale: DomainFixtures.japanese) == "元に戻せません。")
+        #expect(OshiForm.deleteMessage(eventCount: 3, locale: DomainFixtures.japanese) == "この推しの予定 3 件も削除されます。元に戻せません。")
+    }
+
+    @Test("削除の確認は英語では件数で単数・複数を変える")
+    func englishDeleteTexts() {
+        let en = DomainFixtures.english
+        #expect(OshiForm.deleteTitle(name: "Minato", locale: en) == "Delete \u{201C}Minato\u{201D}?")
+        #expect(OshiForm.deleteMessage(eventCount: 1, locale: en) == "This oshi's 1 event will also be deleted. This can't be undone.")
+        #expect(OshiForm.deleteMessage(eventCount: 3, locale: en) == "This oshi's 3 events will also be deleted. This can't be undone.")
     }
 }

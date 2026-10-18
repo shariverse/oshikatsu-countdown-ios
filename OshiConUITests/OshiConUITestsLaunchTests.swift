@@ -19,7 +19,8 @@ final class OshiConUITestsLaunchTests: XCTestCase {
     @MainActor
     func testLaunch() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-useInMemoryStore"]
+        // 文言で要素を探すので、Simulator の言語にかかわらず日本語で起動する
+        app.launchArguments = ["-useInMemoryStore", "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"]
         app.launch()
 
         // 起動直後のスクリーンショットをテスト結果に添付する

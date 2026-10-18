@@ -38,7 +38,7 @@ nonisolated struct EventEntity: AppEntity {
     /// 選んだあとに削除された（またはストアを読めず見つからない）予定。id を残して「予定が見つかりません」を出すために使う。
     init(missingID: OshiEvent.ID) {
         id = missingID
-        title = "見つからない予定"
+        title = String(localized: "見つからない予定")
         detail = ""
     }
 
@@ -46,7 +46,7 @@ nonisolated struct EventEntity: AppEntity {
         id = event.id
         title = event.title
         let occurrence = event.occurrence(from: today)
-        let oshiName = event.oshiID.flatMap { id in oshis.first { $0.id == id }?.name } ?? "推しなし"
+        let oshiName = event.oshiID.flatMap { id in oshis.first { $0.id == id }?.name } ?? String(localized: "推しなし")
         detail = "\(EventText.monthDayWeekday(occurrence)) · \(oshiName)"
     }
 }

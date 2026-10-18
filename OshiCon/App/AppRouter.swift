@@ -17,13 +17,17 @@ enum AppTab: String, CaseIterable, Identifiable {
     }
 
     var title: String {
+        title(locale: .app)
+    }
+
+    func title(locale: Locale) -> String {
         switch self {
         case .home:
-            "ホーム"
+            String(localized: LocalizedStringResource("ホーム", locale: locale))
         case .oshi:
-            "推し"
+            String(localized: LocalizedStringResource("推し", locale: locale))
         case .settings:
-            "設定"
+            String(localized: LocalizedStringResource("設定", locale: locale))
         }
     }
 

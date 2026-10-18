@@ -29,8 +29,8 @@ struct EventDetailContentTests {
         )
     }
 
-    private func content(_ event: OshiEvent, oshi: Oshi? = nil, now: Date) -> EventDetailContent {
-        EventDetailContent(event: event, oshi: oshi, now: now, calendar: DomainFixtures.tokyo)
+    private func content(_ event: OshiEvent, oshi: Oshi? = nil, now: Date, locale: Locale = DomainFixtures.japanese) -> EventDetailContent {
+        EventDetailContent(event: event, oshi: oshi, now: now, calendar: DomainFixtures.tokyo, locale: locale)
     }
 
     @Test("開始の前は、開始までの見出しと時:分:秒・読み上げ")
@@ -40,7 +40,9 @@ struct EventDetailContentTests {
         #expect(detail.untilLabel == "開演まで")
         #expect(detail.countdown.remainingParts.days == 3)
         #expect(detail.clockText == "07:05:09")
-        #expect(detail.remainingDescription == "残り 3 日 7 時間 5 分")
+        #expect(detail.remainingDescription == "残り 3日 7時間 5分")
+        #expect(detail.countdownAccessibilityLabel == "開演まで、残り 3日 7時間 5分")
+        #expect(detail.remainingDaysParts == .init(prefix: "", number: "3", suffix: "日"))
         #expect(detail.oshiName == "ミナト")
         #expect(detail.color == .navy)
     }
@@ -76,6 +78,8 @@ struct EventDetailContentTests {
         #expect(detail.progressStartText == "登録 9/2")
         #expect(detail.progressEndText == "当日 10/18")
         #expect(detail.progressPercent == 76)
+        #expect(detail.progressPercentText == "76% 経過")
+        #expect(detail.progressAccessibilityLabel == "登録 9/2、76% 経過、当日 10/18")
     }
 
     @Test("毎年くり返す予定の進み具合は、前の回のほうが後ならその日から")
@@ -100,5 +104,21 @@ struct EventDetailContentTests {
         #expect(detail.oshiName == "推しなし")
         #expect(detail.color == .black)
         #expect(detail.deleteMessage == "「5th LIVE」を削除します。元に戻せません。")
+    }
+
+    @Test("英語では見出し・残り・進み具合・日時を英語で出す")
+    func englishTexts() {
+        let detail = content(event(), oshi: minato, now: DomainFixtures.date(2026, 10, 15, 9, 54, 51), locale: DomainFixtures.english)
+        #expect(detail.untilLabel == "Until showtime")
+        #expect(detail.remainingDescription == "3 days, 7 hours, 5 minutes left")
+        #expect(detail.remainingDaysParts == .init(prefix: "", number: "3", suffix: "days"))
+        #expect(detail.dateText == "Sun, Oct 18 Show 17:00")
+        #expect(detail.kindLabel == "Live")
+        #expect(detail.progressStartText == "Added 9/2")
+        #expect(detail.progressEndText == "Day 10/18")
+        #expect(detail.deleteMessage == "\u{201C}5th LIVE\u{201D} will be deleted. This can't be undone.")
+        let noOshi = content(event(), now: DomainFixtures.date(2026, 10, 21, 9, 0), locale: DomainFixtures.english)
+        #expect(noOshi.oshiName == "No oshi")
+        #expect(noOshi.daysAgoText == "3 days ago")
     }
 }

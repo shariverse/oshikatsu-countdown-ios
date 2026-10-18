@@ -25,7 +25,9 @@ struct CountdownWidgetContentTests {
     @Test("選んだ予定は、推しの名前・タイトル・推し色・残り日数")
     func selectedEvent() throws {
         let live = event("5th LIVE", oshi: minato, day: DomainFixtures.day(2026, 10, 21))
-        let content = CountdownWidgetContent(eventID: live.id, events: [live], oshis: [minato], today: today)
+        let content = CountdownWidgetContent(
+            eventID: live.id, events: [live], oshis: [minato], today: today, locale: DomainFixtures.japanese
+        )
         guard case let .event(shown) = content else {
             Issue.record("予定の中身になっていない: \(content)")
             return
@@ -40,7 +42,9 @@ struct CountdownWidgetContentTests {
     @Test("推しなしの予定は種類を上に出し、無彩色")
     func eventWithoutOshi() {
         let release = event("2nd シングル", oshi: nil, kind: .release, day: DomainFixtures.day(2026, 10, 25))
-        guard case let .event(shown) = CountdownWidgetContent(eventID: release.id, events: [release], oshis: [], today: today) else {
+        guard case let .event(shown) = CountdownWidgetContent(
+            eventID: release.id, events: [release], oshis: [], today: today, locale: DomainFixtures.japanese
+        ) else {
             Issue.record("予定の中身になっていない")
             return
         }
@@ -54,7 +58,9 @@ struct CountdownWidgetContentTests {
         let ended = event("終わった", oshi: nil, day: DomainFixtures.day(2026, 10, 15))
         let birthday = event("誕生日", oshi: nil, kind: .birthday, day: DomainFixtures.day(2000, 10, 17), repeatsYearly: true)
         let texts = [todayEvent, ended, birthday].map { item -> String? in
-            guard case let .event(shown) = CountdownWidgetContent(eventID: item.id, events: [item], oshis: [], today: today) else {
+            guard case let .event(shown) = CountdownWidgetContent(
+                eventID: item.id, events: [item], oshis: [], today: today, locale: DomainFixtures.japanese
+            ) else {
                 return nil
             }
             return shown.countdownText
@@ -65,8 +71,12 @@ struct CountdownWidgetContentTests {
     @Test("予定を選んでいなければ未選択、選んだ予定が無ければ削除された")
     func notSelectedAndMissing() {
         let live = event("5th LIVE", oshi: minato, day: today)
-        #expect(CountdownWidgetContent(eventID: nil, events: [live], oshis: [minato], today: today) == .notSelected)
-        #expect(CountdownWidgetContent(eventID: UUID(), events: [live], oshis: [minato], today: today) == .missing)
+        #expect(CountdownWidgetContent(
+            eventID: nil, events: [live], oshis: [minato], today: today, locale: DomainFixtures.japanese
+        ) == .notSelected)
+        #expect(CountdownWidgetContent(
+            eventID: UUID(), events: [live], oshis: [minato], today: today, locale: DomainFixtures.japanese
+        ) == .missing)
     }
 
     @Test("選べる予定は当日とこれからの予定を近い順。終わった予定は出さない")

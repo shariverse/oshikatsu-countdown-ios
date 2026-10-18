@@ -9,6 +9,9 @@ import Foundation
 /// 規則のテストで使う暦と予定の作り方。
 nonisolated enum DomainFixtures {
     static let tokyo = calendar(timeZone: "Asia/Tokyo")
+    /// 文言と日付の書き方を確かめる言語（Simulator の言語に左右されないよう、テストでは locale を渡す）。
+    static let japanese = Locale(identifier: "ja_JP")
+    static let english = Locale(identifier: "en_US")
 
     static func calendar(timeZone identifier: String, identifier calendarIdentifier: Calendar.Identifier = .gregorian) -> Calendar {
         var calendar = Calendar(identifier: calendarIdentifier)
