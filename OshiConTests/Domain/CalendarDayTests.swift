@@ -79,4 +79,13 @@ struct CalendarDayTests {
         #expect(DomainFixtures.day(2026, 9, 30) < DomainFixtures.day(2026, 10, 1))
         #expect(DomainFixtures.day(2025, 12, 31) < DomainFixtures.day(2026, 1, 1))
     }
+
+    @Test("日付を足すと、月・年・うるう日をまたいで前にも後ろにも進む")
+    func addingDays() {
+        #expect(DomainFixtures.day(2026, 12, 30).adding(days: 3) == DomainFixtures.day(2027, 1, 2))
+        #expect(DomainFixtures.day(2028, 2, 28).adding(days: 1) == DomainFixtures.day(2028, 2, 29))
+        #expect(DomainFixtures.day(2026, 3, 1).adding(days: -1) == DomainFixtures.day(2026, 2, 28))
+        #expect(DomainFixtures.day(2027, 1, 1).adding(days: -1) == DomainFixtures.day(2026, 12, 31))
+        #expect(DomainFixtures.day(2026, 10, 18).adding(days: 0) == DomainFixtures.day(2026, 10, 18))
+    }
 }

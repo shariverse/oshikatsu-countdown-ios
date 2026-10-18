@@ -15,6 +15,13 @@ nonisolated enum LaunchOptions {
     static var usesInMemoryStore: Bool {
         ProcessInfo.processInfo.arguments.contains(inMemoryStoreArgument)
     }
+
+    /// 見本の推しと予定を入れる（App Store 用スクリーンショット）。端末のデータを書き換えないよう、メモリ上のストアのときだけ効く。
+    static let sampleDataArgument = "-seedSampleData"
+
+    static var seedsSampleData: Bool {
+        usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(sampleDataArgument)
+    }
 }
 
 /// `@AppStorage` に使うキー。値は UserDefaults（`PrivacyInfo.xcprivacy` の CA92.1）に置く。
