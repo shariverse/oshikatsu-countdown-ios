@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Widget Extension のプライバシーマニフェスト。アプリ（OshiCon/PrivacyInfo.xcprivacy）とは別のバンドルなので、別に置く -->
+	<!-- トラッキングしない -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<!-- データを収集しない -->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<!-- 理由の申告が要る API は使っていない（App Group のコンテナの SwiftData のストアと写真を読むだけ） -->
+	<!-- App Group の UserDefaults(suiteName:) をアプリと共有するなら UserDefaults の 1C8F.1 を、ファイルのタイムスタンプなどを使うならその理由を足す -->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

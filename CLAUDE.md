@@ -45,8 +45,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - `OshiConTests/`・`OshiConUITests/`: テスト。`Shared/` の型も `@testable import OshiCon` で使える
   - 新しいターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION` などをプロジェクトの階層から受け継ぐ。ターゲット側で上書きしていないか確かめる
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
-- `OshiCon/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今は UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告している。
-  申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら `1C8F.1` が要り、Widget Extension にも別にマニフェストが要る。データの収集・トラッキングはしない
+- `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
+  申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない
 
 ## アプリ固有の前提
 

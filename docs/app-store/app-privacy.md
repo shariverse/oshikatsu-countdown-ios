@@ -1,6 +1,6 @@
 # 「App のプライバシー」の回答案
 
-App Store Connect の「App のプライバシー」で答える内容の案。アプリのプライバシーマニフェスト（`OshiCon/PrivacyInfo.xcprivacy`）と食い違わないようにする。
+App Store Connect の「App のプライバシー」で答える内容の案。アプリと Widget Extension のプライバシーマニフェスト（`OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy`）と食い違わないようにする。
 
 ## データの収集
 
@@ -23,9 +23,10 @@ App Store の掲載では「データの収集なし」と表示される。
 | --- | --- | --- |
 | 収集するデータ（`NSPrivacyCollectedDataTypes`） | 空 | データを収集しない |
 | トラッキング（`NSPrivacyTracking`） | `false` | トラッキングしない |
-| 理由の申告が要る API（`NSPrivacyAccessedAPITypes`） | UserDefaults（`CA92.1`） | 回答の対象外（マニフェストだけで申告する） |
+| 理由の申告が要る API（`NSPrivacyAccessedAPITypes`） | アプリ: UserDefaults（`CA92.1`）。Widget Extension: なし | 回答の対象外（マニフェストだけで申告する） |
 
-ウィジェットと App Group の UserDefaults を共有する場合や、ファイルのタイムスタンプなどの API を使う場合は、マニフェスト（アプリと Widget Extension の両方）を見直す（epic/mvp のタスク 20）。
+アプリの UserDefaults は `@AppStorage`（初回の導線を終えたか・終わった予定を出すか）だけで、ウィジェットとは共有していない。ファイルは App Group のコンテナでフォルダを作る・写真を消すだけで、タイムスタンプ・空き容量などの API は使っていない。
+ウィジェットと App Group の UserDefaults を共有する場合（`1C8F.1`）や、ファイルのタイムスタンプなどの API を使う場合は、マニフェスト（アプリと Widget Extension の両方）を見直す。中身は `OshiConTests/App/PrivacyManifestTests.swift` で確かめている。
 
 ## 輸出コンプライアンス（暗号化）
 
