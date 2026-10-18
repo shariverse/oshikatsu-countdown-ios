@@ -25,11 +25,14 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
         let color: OshiColor
         let status: CountdownStatus
         let daysUntil: Int
+        /// 文言の言語。
+        let locale: Locale
 
-        init(event: OshiEvent, oshi: Oshi?, today: CalendarDay) {
+        init(event: OshiEvent, oshi: Oshi?, today: CalendarDay, locale: Locale = .app) {
             let scheduled = ScheduledEvent(event: event, today: today)
+            self.locale = locale
             eventID = event.id
-            heading = oshi?.name ?? event.kind.label
+            heading = oshi?.name ?? event.kind.label(locale: locale)
             title = event.title
             color = oshi?.color ?? .black
             status = scheduled.status
@@ -38,12 +41,22 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
 
         /// 読み上げ・1 行の表示（`あと 3 日`・`今日！`・`2 日前`）。
         var countdownText: String {
-            EventText.countdown(daysUntil: daysUntil, status: status)
+            EventText.countdown(daysUntil: daysUntil, status: status, locale: locale)
+        }
+
+        /// 「あと N 日」を数字と前後の文言に分けたもの。
+        var countdownParts: EventText.CountdownParts {
+            EventText.countdownParts(days: daysUntil, withPrefix: true, locale: locale)
+        }
+
+        /// 読み上げ（`ミナト、5th LIVE、あと 3 日`）。
+        var accessibilityLabel: String {
+            EventText.joinedForSpeech([heading, title, countdownText], locale: locale)
         }
     }
 
     /// `eventID` の予定を `events` から探して中身を作る。選んでいなければ `.notSelected`、見つからなければ `.missing`。
-    init(eventID: OshiEvent.ID?, events: [OshiEvent], oshis: [Oshi], today: CalendarDay) {
+    init(eventID: OshiEvent.ID?, events: [OshiEvent], oshis: [Oshi], today: CalendarDay, locale: Locale = .app) {
         guard let eventID else {
             self = .notSelected
             return
@@ -52,7 +65,8 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
             self = .missing
             return
         }
-        self = .event(Event(event: event, oshi: event.oshiID.flatMap { id in oshis.first { $0.id == id } }, today: today))
+        let oshi = event.oshiID.flatMap { id in oshis.first { $0.id == id } }
+        self = .event(Event(event: event, oshi: oshi, today: today, locale: locale))
     }
 
     /// ウィジェットで選べる予定（当日とこれからの予定を近い順）。

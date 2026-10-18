@@ -20,19 +20,21 @@ nonisolated enum UpcomingWidgetContent: Equatable, Sendable {
         let color: OshiColor
         let status: CountdownStatus
         let daysUntil: Int
+        /// 文言の言語。
+        let locale: Locale
 
         /// 残り日数（`3日`。当日は `今日！`）。
         var daysText: String {
-            status == .today ? "今日！" : "\(daysUntil)日"
+            EventText.compactDays(daysUntil: daysUntil, status: status, locale: locale)
         }
 
         /// 行の読み上げ（`5th LIVE、あと 3 日`）。
         var accessibilityLabel: String {
-            "\(title)、\(EventText.countdown(daysUntil: daysUntil, status: status))"
+            EventText.joinedForSpeech([title, EventText.countdown(daysUntil: daysUntil, status: status, locale: locale)], locale: locale)
         }
     }
 
-    init(events: [OshiEvent], oshis: [Oshi], today: CalendarDay, maxRows: Int) {
+    init(events: [OshiEvent], oshis: [Oshi], today: CalendarDay, maxRows: Int, locale: Locale = .app) {
         let colors = Dictionary(oshis.map { ($0.id, $0.color) }) { first, _ in first }
         let rows = EventSchedule(events: events, today: today).upcoming.prefix(max(maxRows, 0)).map { scheduled in
             Row(
@@ -40,7 +42,8 @@ nonisolated enum UpcomingWidgetContent: Equatable, Sendable {
                 title: scheduled.event.title,
                 color: scheduled.event.oshiID.flatMap { colors[$0] } ?? .black,
                 status: scheduled.status,
-                daysUntil: scheduled.daysUntil
+                daysUntil: scheduled.daysUntil,
+                locale: locale
             )
         }
         self = .rows(Array(rows))

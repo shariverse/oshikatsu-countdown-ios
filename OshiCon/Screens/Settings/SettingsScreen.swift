@@ -25,10 +25,7 @@ struct SettingsScreen: View {
                 VStack(alignment: .leading, spacing: 4) {
                     // iPad では iPad の絵にする
                     Label("この端末の中だけに保存", systemImage: UIDevice.current.userInterfaceIdiom == .pad ? "ipad" : "iphone")
-                    Text(
-                        "推し・写真・予定は端末の外に送りません。アプリを削除すると消えます。"
-                            + "端末のバックアップ（iCloud・パソコン）には含まれます。"
-                    )
+                    Text("推し・写真・予定は端末の外に送りません。アプリを削除すると消えます。端末のバックアップ（iCloud・パソコン）には含まれます。")
                     .font(AppFont.text(.footnote))
                     .foregroundStyle(AppPalette.onSurfaceVariant.color)
                 }
@@ -89,7 +86,7 @@ struct OpenSourceLicenseScreen: View {
 
     var body: some View {
         ScrollView {
-            Text(license.licenseText() ?? "ライセンスの本文を読み込めませんでした")
+            Text(license.licenseText() ?? String(localized: "ライセンスの本文を読み込めませんでした"))
                 // ライセンスの本文は英語なので、本文の書体（日本語）ではなくシステムの書体で出す
                 .font(.footnote.monospaced())
                 .textSelection(.enabled)

@@ -175,7 +175,7 @@ struct HomeScreen: View {
 
 /// ホームの見出しつきのまとまり。中身はカードの地に並べる。
 private struct HomeSection<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     @ViewBuilder var content: () -> Content
 
     var body: some View {

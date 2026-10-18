@@ -80,18 +80,23 @@ nonisolated enum EventKind: String, CaseIterable, Codable, Sendable {
     case stream
     case other
 
+    /// 種類の名前（アプリの言語）。
     var label: String {
+        label(locale: .app)
+    }
+
+    func label(locale: Locale) -> String {
         switch self {
         case .live:
-            "ライブ"
+            String(localized: LocalizedStringResource("ライブ", locale: locale))
         case .birthday:
-            "誕生日"
+            String(localized: LocalizedStringResource("誕生日", locale: locale))
         case .release:
-            "発売日"
+            String(localized: LocalizedStringResource("発売日", locale: locale))
         case .stream:
-            "配信"
+            String(localized: LocalizedStringResource("配信", locale: locale))
         case .other:
-            "その他"
+            String(localized: LocalizedStringResource("その他", locale: locale))
         }
     }
 

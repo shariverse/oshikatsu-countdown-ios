@@ -15,7 +15,14 @@ struct SampleDataTests {
     @Test("見本は今日から数えた日付で、先頭はピン留めのライブ。当日の予定と推しなしの予定も入る")
     func sampleSchedule() {
         let sample = SampleData.make(today: today, now: now, language: .japanese)
-        let content = HomeContent(events: sample.events, oshis: sample.oshis, selectedOshiID: nil, showsPastEvents: false, today: today)
+        let content = HomeContent(
+            events: sample.events,
+            oshis: sample.oshis,
+            selectedOshiID: nil,
+            showsPastEvents: false,
+            today: today,
+            locale: DomainFixtures.japanese
+        )
         #expect(content.featured?.event.title == "ドームツアー 東京公演")
         #expect(content.featured?.event.venue == "東京ドーム")
         #expect(content.featured?.event.startTime == TimeOfDay(hour: 17, minute: 0))
@@ -33,7 +40,14 @@ struct SampleDataTests {
     ])
     func stableAcrossDates(day: CalendarDay) {
         let sample = SampleData.make(today: day, now: now, language: .japanese)
-        let content = HomeContent(events: sample.events, oshis: sample.oshis, selectedOshiID: nil, showsPastEvents: false, today: day)
+        let content = HomeContent(
+            events: sample.events,
+            oshis: sample.oshis,
+            selectedOshiID: nil,
+            showsPastEvents: false,
+            today: day,
+            locale: DomainFixtures.japanese
+        )
         #expect(content.upcoming.map(\.countdownText) == countdowns)
     }
 

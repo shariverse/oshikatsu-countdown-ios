@@ -75,7 +75,7 @@ struct PaletteContrastTests {
 
     @Test("推し色は 12 色で名前がそろう")
     func labels() {
-        #expect(Set(OshiColor.allCases.map(\.label)).count == 12)
-        #expect(OshiColor.pink.label == "ピンク")
+        #expect(Set(OshiColor.allCases.map { $0.label(locale: DomainFixtures.japanese) }).count == 12)
+        #expect(OshiColor.pink.label(locale: DomainFixtures.japanese) == "ピンク")
     }
 }

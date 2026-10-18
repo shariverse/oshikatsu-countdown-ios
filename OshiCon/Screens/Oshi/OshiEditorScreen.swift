@@ -66,7 +66,7 @@ struct OshiEditorScreen: View {
             .scrollContentBackground(.hidden)
             .background(AppPalette.background.color)
             .disabled(isBusy)
-            .navigationTitle(onboarding?.title ?? (oshi == nil ? "推しを登録" : "推しを編集"))
+            .navigationTitle(onboarding?.title ?? (oshi == nil ? String(localized: "推しを登録") : String(localized: "推しを編集")))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
             .safeAreaInset(edge: .bottom) {
@@ -182,7 +182,7 @@ struct OshiEditorScreen: View {
                 dismiss()
             }
         } catch {
-            failureMessage = "保存できませんでした"
+            failureMessage = String(localized: "保存できませんでした")
         }
     }
 
@@ -195,7 +195,7 @@ struct OshiEditorScreen: View {
             deleteRequest = DeleteRequest(oshi: oshi, eventCount: eventCount)
         } catch {
             // 一緒に消える件数を出せないまま消させない
-            failureMessage = "削除できませんでした"
+            failureMessage = String(localized: "削除できませんでした")
         }
     }
 
@@ -208,7 +208,7 @@ struct OshiEditorScreen: View {
             try OshiEditing(store: OshiConStore(context: modelContext)).delete(oshiID: oshi.id)
             dismiss()
         } catch {
-            failureMessage = "削除できませんでした"
+            failureMessage = String(localized: "削除できませんでした")
         }
     }
 }

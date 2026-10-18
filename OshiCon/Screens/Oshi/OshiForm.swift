@@ -34,12 +34,14 @@ nonisolated struct OshiForm: Equatable, Sendable {
     }
 
     /// 削除の確認の見出し。
-    static func deleteTitle(name: String) -> String {
-        "「\(name)」を削除しますか？"
+    static func deleteTitle(name: String, locale: Locale = .app) -> String {
+        String(localized: LocalizedStringResource("「\(name)」を削除しますか？", locale: locale))
     }
 
     /// 削除の確認の本文。一緒に消える予定があればその件数を出す。
-    static func deleteMessage(eventCount: Int) -> String {
-        eventCount > 0 ? "この推しの予定 \(eventCount) 件も削除されます。元に戻せません。" : "元に戻せません。"
+    static func deleteMessage(eventCount: Int, locale: Locale = .app) -> String {
+        eventCount > 0
+            ? String(localized: LocalizedStringResource("この推しの予定 \(eventCount) 件も削除されます。元に戻せません。", locale: locale))
+            : String(localized: LocalizedStringResource("元に戻せません。", locale: locale))
     }
 }

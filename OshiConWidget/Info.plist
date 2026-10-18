@@ -6,7 +6,18 @@
 	<string>$(APP_GROUP_IDENTIFIER)</string>
 	<key>CFBundleLocalizations</key>
 	<array>
+		<string>en</string>
 		<string>ja</string>
+		<string>zh-Hans</string>
+		<string>zh-Hant</string>
+		<string>ko</string>
+		<string>fr</string>
+		<string>de</string>
+		<string>es</string>
+		<string>pt-BR</string>
+		<string>it</string>
+		<string>th</string>
+		<string>id</string>
 	</array>
 	<key>NSExtension</key>
 	<dict>

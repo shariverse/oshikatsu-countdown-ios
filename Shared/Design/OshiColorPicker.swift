@@ -36,7 +36,7 @@ struct OshiColorPicker: View {
     /// 読み上げで何個目かを伝える（iOS にはラジオボタンの trait が無いので、選択中の trait と合わせて伝える）。
     private func position(of color: OshiColor) -> String {
         let index = (OshiColor.allCases.firstIndex(of: color) ?? 0) + 1
-        return "\(OshiColor.allCases.count) 個中 \(index) 個目"
+        return String(localized: "\(OshiColor.allCases.count) 個中 \(index) 個目")
     }
 
     private func dot(_ color: OshiColor, isSelected: Bool) -> some View {

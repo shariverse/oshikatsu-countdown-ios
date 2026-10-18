@@ -34,12 +34,13 @@ nonisolated struct UpcomingEntry: TimelineEntry {
         let today = CalendarDay(.now, calendar: calendar)
         let day = { (days: Double) in CalendarDay(Date.now.addingTimeInterval(86_400 * days), calendar: calendar) }
         let lumina = Oshi(name: "LUMINA", color: .pink)
-        let minato = Oshi(name: "ミナト", color: .navy)
-        let sora = Oshi(name: "ソラ", color: .mint)
+        let minato = Oshi(name: String(localized: "ミナト"), color: .navy)
+        let sora = Oshi(name: String(localized: "ソラ"), color: .mint)
+        // 見本の名前と予定名はアプリの言語で出す
         let events = [
-            OshiEvent(oshiID: minato.id, kind: .birthday, title: "ミナトの誕生日", day: today, createdAt: .now),
-            OshiEvent(oshiID: lumina.id, kind: .live, title: "5th LIVE 東京公演", day: day(12), createdAt: .now),
-            OshiEvent(oshiID: sora.id, kind: .release, title: "2nd シングル発売", day: day(25), createdAt: .now)
+            OshiEvent(oshiID: minato.id, kind: .birthday, title: String(localized: "ミナトの誕生日"), day: today, createdAt: .now),
+            OshiEvent(oshiID: lumina.id, kind: .live, title: String(localized: "5th LIVE 東京公演"), day: day(12), createdAt: .now),
+            OshiEvent(oshiID: sora.id, kind: .release, title: String(localized: "2nd シングル発売"), day: day(25), createdAt: .now)
         ]
         let content = UpcomingWidgetContent(events: events, oshis: [lumina, minato, sora], today: today, maxRows: maxRows)
         return Self(date: .now, content: content)
@@ -175,7 +176,7 @@ struct UpcomingWidgetView: View {
         }
     }
 
-    private func message(_ text: String) -> some View {
+    private func message(_ text: LocalizedStringKey) -> some View {
         Text(text)
             .font(AppFont.text(.footnote))
             .foregroundStyle(AppPalette.onSurfaceVariant.color)

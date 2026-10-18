@@ -30,6 +30,17 @@ struct AppFontTests {
         #expect(variation?[NSNumber(value: 0x7767_6874)]?.intValue == expectedWeightAxis)
     }
 
+    @Test("本文に同梱の書体を使うのは日本語のときだけ（ほかの言語はシステムの書体）")
+    func bundledTextFaceOnlyForJapanese() {
+        #expect(AppFont.usesBundledTextFace(locale: DomainFixtures.japanese))
+        #expect(AppFont.usesBundledTextFace(locale: Locale(identifier: "ja_US")))
+        for identifier in ["en_US", "zh-Hans_CN", "zh-Hant_TW", "ko_KR", "th_TH", "fr_FR"] {
+            #expect(!AppFont.usesBundledTextFace(locale: Locale(identifier: identifier)))
+        }
+        #expect(AppFont.text(.body, locale: DomainFixtures.english) == .system(.body, weight: .regular))
+        #expect(AppFont.text(.body, locale: DomainFixtures.japanese) != .system(.body, weight: .regular))
+    }
+
     @Test("太さは regular・medium・bold に丸める")
     func faceForWeight() {
         #expect(AppFont.face(for: .light) == .regular)

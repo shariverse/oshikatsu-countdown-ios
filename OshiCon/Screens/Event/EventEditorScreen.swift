@@ -36,7 +36,7 @@ struct EventEditorScreen: View {
                     EventFormFields(form: form, oshis: storedOshis.map(OshiConStore.oshi(from:)), onboarding: onboarding)
                 }
             }
-            .navigationTitle(onboarding?.title ?? (event == nil ? "予定を追加" : "予定を編集"))
+            .navigationTitle(onboarding?.title ?? (event == nil ? String(localized: "予定を追加") : String(localized: "予定を編集")))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
             .safeAreaInset(edge: .bottom) {
@@ -97,7 +97,7 @@ struct EventEditorScreen: View {
                 dismiss()
             }
         } catch {
-            failureMessage = "保存できませんでした"
+            failureMessage = String(localized: "保存できませんでした")
         }
     }
 }

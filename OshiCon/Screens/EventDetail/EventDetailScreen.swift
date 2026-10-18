@@ -143,7 +143,7 @@ struct EventDetailScreen: View {
         do {
             try OshiConStore(context: modelContext).setPinned(isPinned, eventID: event.id)
         } catch {
-            failureMessage = "保存できませんでした"
+            failureMessage = String(localized: "保存できませんでした")
         }
     }
 
@@ -152,7 +152,7 @@ struct EventDetailScreen: View {
             try OshiConStore(context: modelContext).deleteEvent(id: event.id)
             // 予定が消えると onChange で前の画面に戻る（leave）
         } catch {
-            failureMessage = "削除できませんでした"
+            failureMessage = String(localized: "削除できませんでした")
         }
     }
 }

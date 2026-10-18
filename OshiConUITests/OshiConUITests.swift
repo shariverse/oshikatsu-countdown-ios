@@ -18,7 +18,8 @@ final class OshiConUITests: XCTestCase {
     @MainActor
     private func launch(hasCompletedOnboarding: Bool) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-useInMemoryStore"]
+        // 文言で要素を探すので、Simulator の言語にかかわらず日本語で起動する
+        app.launchArguments = ["-useInMemoryStore", "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"]
         app.launchEnvironment = [
             "OSHICON_DEFAULT_hasCompletedOnboarding": hasCompletedOnboarding ? "YES" : "NO",
             "OSHICON_DEFAULT_showsPastEvents": "NO"

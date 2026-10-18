@@ -14,8 +14,10 @@ struct EventDetailCard: View {
             VStack(alignment: .leading, spacing: 20) {
                 heading
                 countdown
-                if let percent = detail.progressPercent, let progress = detail.countdown.progress {
-                    progressBar(progress: progress, percent: percent)
+                if let progress = detail.countdown.progress,
+                   let percentText = detail.progressPercentText,
+                   let accessibilityLabel = detail.progressAccessibilityLabel {
+                    progressBar(progress: progress, percentText: percentText, accessibilityLabel: accessibilityLabel)
                 }
             }
             .padding(.horizontal, 20)
@@ -28,7 +30,7 @@ struct EventDetailCard: View {
                 infoRow(systemImage: "mappin.and.ellipse", title: "会場・場所", value: detail.event.venue)
             }
             if detail.event.repeatsYearly {
-                infoRow(systemImage: "repeat", title: "くり返し", value: "毎年この日を数えます")
+                infoRow(systemImage: "repeat", title: "くり返し", value: String(localized: "毎年この日を数えます"))
             }
         }
         .padding(.bottom, 24)
@@ -42,7 +44,7 @@ struct EventDetailCard: View {
     private var heading: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Text(detail.event.kind.label)
+                Text(detail.kindLabel)
                     .font(AppFont.text(.caption, weight: .bold))
                     .foregroundStyle(AppPalette.onSurface.color)
                     .padding(.horizontal, 10)
@@ -68,12 +70,19 @@ struct EventDetailCard: View {
                     .foregroundStyle(AppPalette.onSurfaceVariant.color)
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text("\(detail.countdown.remainingParts.days)")
+                        let days = detail.remainingDaysParts
+                        if !days.prefix.isEmpty {
+                            Text(days.prefix)
+                                .font(AppFont.text(.title3, weight: .bold))
+                        }
+                        Text(days.number)
                             .font(AppFont.countdownHero)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
-                        Text("日")
-                            .font(AppFont.text(.title3, weight: .bold))
+                        if !days.suffix.isEmpty {
+                            Text(days.suffix)
+                                .font(AppFont.text(.title3, weight: .bold))
+                        }
                     }
                     Text(detail.clockText)
                         .font(AppFont.countdownClock)
@@ -83,7 +92,7 @@ struct EventDetailCard: View {
                 .foregroundStyle(detail.color.text.color)
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(detail.untilLabel)、\(detail.remainingDescription)")
+            .accessibilityLabel(detail.countdownAccessibilityLabel)
         case .today:
             VStack(alignment: .leading, spacing: 4) {
                 Text("今日は当日！")
@@ -107,14 +116,14 @@ struct EventDetailCard: View {
         }
     }
 
-    private func progressBar(progress: Double, percent: Int) -> some View {
+    private func progressBar(progress: Double, percentText: String, accessibilityLabel: String) -> some View {
         VStack(spacing: 6) {
             ProgressView(value: progress)
                 .tint(detail.color.text.color)
             HStack {
                 Text(detail.progressStartText)
                 Spacer()
-                Text("\(percent)% 経過")
+                Text(percentText)
                     .fontWeight(.bold)
                 Spacer()
                 Text(detail.progressEndText)
@@ -123,10 +132,10 @@ struct EventDetailCard: View {
             .foregroundStyle(AppPalette.onSurfaceVariant.color)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(detail.progressStartText)、\(percent)% 経過、\(detail.progressEndText)")
+        .accessibilityLabel(accessibilityLabel)
     }
 
-    private func infoRow(systemImage: String, title: String, value: String) -> some View {
+    private func infoRow(systemImage: String, title: LocalizedStringKey, value: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
             Image(systemName: systemImage)
                 .foregroundStyle(AppPalette.onSurfaceVariant.color)

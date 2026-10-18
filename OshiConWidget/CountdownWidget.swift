@@ -32,7 +32,7 @@ nonisolated struct CountdownEntry: TimelineEntry {
         let event = OshiEvent(
             oshiID: oshi.id,
             kind: .live,
-            title: "5th LIVE 東京公演",
+            title: String(localized: "5th LIVE 東京公演", comment: "ウィジェットの一覧に出す見本の予定名"),
             day: CalendarDay(Date.now.addingTimeInterval(86_400 * 11), calendar: .autoupdatingCurrent),
             createdAt: .now
         )
@@ -110,7 +110,7 @@ struct CountdownWidgetView: View {
         .environment(\.locale, .app)
     }
 
-    private func message(title: String, detail: String) -> some View {
+    private func message(title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(AppFont.text(.subheadline, weight: .bold))
@@ -144,22 +144,30 @@ private struct EventCountdownView: View {
         .foregroundStyle(event.color.onFill)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(event.heading)、\(event.title)、\(event.countdownText)")
+        .accessibilityLabel(event.accessibilityLabel)
     }
 
     @ViewBuilder private var countdown: some View {
         switch event.status {
         case .upcoming:
             // 桁が多いときは数字を小さくして 1 行に収める
+            let parts = event.countdownParts
             HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text("あと")
-                    .font(AppFont.text(.caption, weight: .bold))
-                Text("\(event.daysUntil)")
+                if !parts.prefix.isEmpty {
+                    Text(parts.prefix)
+                        .font(AppFont.text(.caption, weight: .bold))
+                        .lineLimit(1)
+                }
+                Text(parts.number)
                     .font(AppFont.numeral(size: 48, relativeTo: .largeTitle))
                     .lineLimit(1)
                     .minimumScaleFactor(0.4)
-                Text("日")
-                    .font(AppFont.text(.caption, weight: .bold))
+                if !parts.suffix.isEmpty {
+                    Text(parts.suffix)
+                        .font(AppFont.text(.caption, weight: .bold))
+                        .lineLimit(1)
+                        .fixedSize()
+                }
             }
         case .today:
             Text("今日！")

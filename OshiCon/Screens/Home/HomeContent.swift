@@ -12,6 +12,8 @@ nonisolated struct HomeContent: Equatable, Sendable {
         let scheduled: ScheduledEvent
         /// 結び付いた推し。推しなしの予定・推しが見つからない予定は nil。
         let oshi: Oshi?
+        /// 文言と日付の書き方の言語。
+        let locale: Locale
 
         var id: OshiEvent.ID {
             scheduled.event.id
@@ -28,31 +30,47 @@ nonisolated struct HomeContent: Equatable, Sendable {
 
         /// 行の補足（`10月18日(日) · ミナト`、毎年くり返す予定は `· 毎年`）。
         var supportingText: String {
-            let detail = event.repeatsYearly ? "毎年" : (oshi?.name ?? "推しなし")
-            return "\(EventText.monthDayWeekday(scheduled.occurrenceDay)) · \(detail)"
+            "\(EventText.monthDayWeekday(scheduled.occurrenceDay, locale: locale)) · \(detailText)"
         }
 
         var countdownText: String {
-            EventText.countdown(daysUntil: scheduled.daysUntil, status: scheduled.status)
+            EventText.countdown(daysUntil: scheduled.daysUntil, status: scheduled.status, locale: locale)
+        }
+
+        /// 先頭のカードの見出し（`ピン留め`・`いちばん近い予定`）。
+        var featuredBadgeText: String {
+            event.isPinned
+                ? String(localized: LocalizedStringResource("ピン留め", locale: locale))
+                : String(localized: LocalizedStringResource("いちばん近い予定", locale: locale))
         }
 
         /// 行の読み上げ（`5th LIVE、10月25日 日曜日、ミナト、あと 7 日`）。
         var accessibilityLabel: String {
-            let detail = event.repeatsYearly ? "毎年" : (oshi?.name ?? "推しなし")
-            return [event.title, EventText.spokenMonthDayWeekday(scheduled.occurrenceDay), detail, countdownText].joined(separator: "、")
+            EventText.joinedForSpeech(
+                [event.title, EventText.spokenMonthDayWeekday(scheduled.occurrenceDay, locale: locale), detailText, countdownText],
+                locale: locale
+            )
         }
 
         /// 先頭のカードの読み上げ（`ピン留め、ミナト、5th LIVE、あと 7 日、10月25日 日曜日、開演 17:00`）。
         var featuredAccessibilityLabel: String {
-            var parts = [event.isPinned ? "ピン留め" : "いちばん近い予定"]
+            var parts = [featuredBadgeText]
             if let oshi {
                 parts.append(oshi.name)
             }
-            parts += [event.title, countdownText, EventText.spokenMonthDayWeekday(scheduled.occurrenceDay)]
+            parts += [event.title, countdownText, EventText.spokenMonthDayWeekday(scheduled.occurrenceDay, locale: locale)]
             if let startTime = event.startTime {
-                parts.append(EventText.startTime(startTime, kind: event.kind))
+                parts.append(EventText.startTime(startTime, kind: event.kind, locale: locale))
             }
-            return parts.joined(separator: "、")
+            return EventText.joinedForSpeech(parts, locale: locale)
+        }
+
+        /// 補足の後半（毎年くり返す予定は `毎年`、ほかは推しの名前か `推しなし`）。
+        private var detailText: String {
+            if event.repeatsYearly {
+                return String(localized: LocalizedStringResource("毎年", locale: locale))
+            }
+            return oshi?.name ?? String(localized: LocalizedStringResource("推しなし", locale: locale))
         }
     }
 
@@ -74,13 +92,13 @@ nonisolated struct HomeContent: Equatable, Sendable {
     let past: [Item]
     let emptyState: EmptyState?
 
-    init(events: [OshiEvent], oshis: [Oshi], selectedOshiID: Oshi.ID?, showsPastEvents: Bool, today: CalendarDay) {
+    init(events: [OshiEvent], oshis: [Oshi], selectedOshiID: Oshi.ID?, showsPastEvents: Bool, today: CalendarDay, locale: Locale = .app) {
         let oshiByID = Dictionary(oshis.map { ($0.id, $0) }) { first, _ in first }
         let validSelectedID = selectedOshiID.flatMap { oshiByID[$0] == nil ? nil : $0 }
         let filtered = validSelectedID.map { id in events.filter { $0.oshiID == id } } ?? events
         let schedule = EventSchedule(events: filtered, today: today)
         let item = { (scheduled: ScheduledEvent) in
-            Item(scheduled: scheduled, oshi: scheduled.event.oshiID.flatMap { oshiByID[$0] })
+            Item(scheduled: scheduled, oshi: scheduled.event.oshiID.flatMap { oshiByID[$0] }, locale: locale)
         }
 
         self.oshis = oshis
