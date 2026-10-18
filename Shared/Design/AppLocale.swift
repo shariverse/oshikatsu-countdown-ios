@@ -13,9 +13,15 @@ extension Locale {
     }
 
     /// `base` の地域・暦などを残し、言語だけ `language`（`ja`・`zh-Hant` など）にした locale。
+    /// 地域は言語の中にも入っているので、言語を差し替えるときに `base` の地域を移す（`pt-BR` のように言語が地域を持つときはそれを使う）。
+    /// `base` に地域が無ければ地域なしのまま。
     nonisolated static func app(language: String, base: Locale) -> Locale {
         var components = Locale.Components(locale: base)
-        components.languageComponents = Locale.Language.Components(identifier: language)
+        var languageComponents = Locale.Language.Components(identifier: language)
+        if languageComponents.region == nil {
+            languageComponents.region = base.region
+        }
+        components.languageComponents = languageComponents
         return Locale(components: components)
     }
 

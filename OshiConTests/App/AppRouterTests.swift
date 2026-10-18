@@ -91,18 +91,40 @@ struct AppRouterTests {
         #expect(strings["CFBundleDisplayName"] as? String == name)
     }
 
-    @Test("アプリの言語は英語を既定に 12 言語。画面の locale はアプリが選んだ言語に端末の地域を合わせる")
+    @Test("アプリの言語は英語を既定に 12 言語")
     func languages() {
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleDevelopmentRegion") as? String == "en")
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleLocalizations") as? [String] == Self.languages)
         #expect(Set(Self.languages).isSubset(of: Set(Bundle.main.localizations)))
         #expect(Self.languages.contains(Bundle.main.preferredLocalizations.first ?? ""))
+        #expect(Locale(identifier: "en_US").twentyFourHour.hourCycle == .zeroToTwentyThree)
+    }
 
-        let locale = Locale.app(language: "zh-Hant", base: Locale(identifier: "en_JP"))
+    @Test(
+        "画面の locale は、言語をアプリが選んだ言語にし、地域は端末の地域を残す",
+        arguments: [
+            ("zh-Hant", "en_JP", Locale.LanguageCode.chinese, Locale.Region.japan),
+            ("ja", "en_US", .japanese, .unitedStates),
+            ("en", "de_DE", .english, .germany),
+            // 端末の地域の上書き（rg）も残す
+            ("en", "de_DE@rg=gbzzzz", .english, .unitedKingdom),
+            // 言語が地域を持つときは言語の地域
+            ("pt-BR", "en_US", .portuguese, .brazil)
+        ]
+    )
+    func appLocale(language: String, base: String, languageCode: Locale.LanguageCode, region: Locale.Region) {
+        let locale = Locale.app(language: language, base: Locale(identifier: base))
+        #expect(locale.language.languageCode == languageCode)
+        #expect(locale.region == region)
+    }
+
+    @Test("端末に地域が無いときは、言語だけ差し替えて地域なしのまま")
+    func appLocaleWithoutRegion() {
+        let locale = Locale.app(language: "zh-Hant", base: Locale(identifier: "en"))
         #expect(locale.language.languageCode == .chinese)
         #expect(locale.language.script == .hanTraditional)
-        #expect(locale.region == .japan)
-        #expect(Locale.app(language: "ja", base: Locale(identifier: "en_US")).isJapanese)
-        #expect(Locale(identifier: "en_US").twentyFourHour.hourCycle == .zeroToTwentyThree)
+        #expect(locale.region == nil)
+        #expect(!locale.isJapanese)
+        #expect(Locale.app(language: "ja", base: Locale(identifier: "en")).isJapanese)
     }
 }
