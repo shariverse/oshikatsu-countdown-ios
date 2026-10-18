@@ -17,6 +17,7 @@ struct MainNavigationView: View {
             NavigationSplitView {
                 List(AppTab.allCases, selection: sidebarSelection) { tab in
                     Label(tab.title, systemImage: tab.systemImage)
+                        .accessibilityIdentifier("sidebar.\(tab.rawValue)")
                 }
                 .navigationTitle("推し活カウントダウン")
                 .navigationBarTitleDisplayMode(.inline)

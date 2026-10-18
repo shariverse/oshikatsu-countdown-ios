@@ -75,6 +75,7 @@ struct OshiListScreen: View {
                 OshiRow(oshi: oshi, eventCount: eventCounts[oshi.id, default: 0])
             }
             .listRowBackground(AppPalette.surface.color)
+            .accessibilityIdentifier("oshiList.row")
         }
         .scrollContentBackground(.hidden)
     }
