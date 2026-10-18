@@ -83,14 +83,10 @@ final class AppStoreScreenshotTests: XCTestCase {
         case home
         case oshi
         case settings
-
-        /// サイドバーの項目の ID（MainNavigationView の `sidebar.<AppTab の rawValue>`）。
-        var identifier: String {
-            "sidebar.\(self)"
-        }
     }
 
-    /// iPhone はタブバー（並びの位置で押す）、iPad はサイドバーで切り替える。サイドバーが隠れていたら出してから押す。
+    /// iPhone はタブバー、iPad はサイドバーで切り替える（どちらも並びの位置で押す。List の行に付けた ID はセルに届かないため）。
+    /// サイドバーが隠れていたら出してから押す。
     @MainActor
     private func openSection(_ section: Section, in app: XCUIApplication) {
         let tabBar = app.tabBars.firstMatch
@@ -98,11 +94,9 @@ final class AppStoreScreenshotTests: XCTestCase {
             tabBar.buttons.element(boundBy: section.rawValue).tap()
             return
         }
-        let item = app.descendants(matching: .any)[section.identifier].firstMatch
+        let item = app.collectionViews.firstMatch.cells.element(boundBy: section.rawValue)
         if !item.exists || !item.isHittable {
-            let toggle = app.buttons.matching(
-                NSPredicate(format: "identifier == %@ OR label CONTAINS %@", "ToggleSidebar", "サイドバー")
-            ).firstMatch
+            let toggle = app.buttons["ToggleSidebar"].firstMatch
             if toggle.exists {
                 toggle.tap()
             }
