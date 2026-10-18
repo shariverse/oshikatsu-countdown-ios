@@ -168,6 +168,18 @@ scripts/app-store-screenshots.sh
 - ステータスバーは 9:41・電池満タンにそろえます。ふだんのテスト（CI を含む）では、このテストは飛ばされます
 - 予定の追加の画面はキーボードも写ります。キーボードは Simulator 全体の設定に従うので、日本語のキーボードで撮りたいときは、Simulator の設定 →「一般」→「キーボード」で日本語のキーボードを足しておきます
 
+### 9. App Store の掲載文とスクリーンショットの登録
+
+Actions タブの「App Store Metadata」を手動実行すると、[docs/app-store/listing.md](docs/app-store/listing.md) のアプリ名・サブタイトル・プロモーションテキスト・説明文・キーワードと、[docs/app-store/review-notes.md](docs/app-store/review-notes.md) の審査用メモを、App Store Connect API で App Store バージョン（既定は `MARKETING_VERSION`）に登録します。スクリーンショットは上の `scripts/app-store-screenshots.sh` でその場で撮り、6.9 インチの iPhone と 13 インチの iPad の分を差し替えます。
+
+```bash
+gh workflow run app-store-metadata.yml --ref develop
+```
+
+- 文面は各見出しの下のコードブロックから読みます。文字数の上限を超えていたら何も登録せずに止まります
+- 指定したバージョンが無ければ、審査前のバージョンの番号を変えます（新規アプリに最初からある「1.0」など）。それも無ければ作ります
+- サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格・App のプライバシー・ビルドの選択は扱いません。App Store Connect の画面で入れてから審査に提出します（提出もこのワークフローでは行いません）
+
 ## 構成
 
 ```
@@ -183,13 +195,14 @@ scripts/app-store-screenshots.sh
 └── .github/
     ├── ISSUE_TEMPLATE/      # Issue テンプレート
     ├── pull_request_template.md
-    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）・embed-entitlements.rb（Archive に Entitlements を埋め込む）
+    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）・embed-entitlements.rb（Archive に Entitlements を埋め込む）・app-store-metadata/（掲載文とスクリーンショットの登録）
     └── workflows/
         ├── _build.yml       # 共通処理: ビルド + テスト + SwiftLint（workflow_call）
         ├── _archive.yml     # 共通処理: Archive → Export（→ Upload）（workflow_call）
         ├── build.yml        # 全ブランチの push / Fork からの PR
         ├── archive.yml      # main の push
-        └── upload.yml       # develop / release/** の push
+        ├── upload.yml       # develop / release/** の push
+        └── app-store-metadata.yml # 掲載文とスクリーンショットの登録（手動実行）
 ```
 
 - プロジェクトはフォルダ同期グループ（Xcode 16 以降の形式）で管理しているため、ファイルの追加・削除で pbxproj は変わりません
