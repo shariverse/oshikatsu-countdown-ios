@@ -2,12 +2,14 @@
 # frozen_string_literal: true
 
 #
-# App Store Connect API（App Asset Library）で、クリエイティブアセットの画像をアップロードする試験用スクリプト。
+# App Store Connect API（App Asset Library）で、クリエイティブアセットの画像をアップロードして配置する。
 #
 #   1. Bundle ID からアプリを探し、App Store バージョンの一覧と状態を出す
 #   2. アプリの Asset Library と、ヘッダー / 検索結果向けの仕様（reference data）を取得して出す
 #   3. ASSET_DIR の画像を CREATIVE_ASSETS として Asset Library にアップロードし、処理完了まで待つ
-#   4. PLACEMENT が none 以外なら、編集できる App Store バージョンの全ローカリゼーションに配置する
+#      ASSET_DIR に言語ごとのフォルダ（docs/app-store/languages.json の language。scripts/render-creative-assets.sh の出力）があれば、言語ごとに上げる
+#   4. PLACEMENT が none 以外なら、編集できる App Store バージョンのローカリゼーションに配置する
+#      （言語ごとのフォルダのときは、その言語のローカリゼーションだけ。そうでなければ全ローカリゼーション）
 #      - dedicated: ヘッダー専用の画像をヘッダーに、検索結果専用の画像を検索結果に配置する
 #      - universal: 兼用（universalAsset）の画像をヘッダーと検索結果の両方に配置する
 #      同じ種類・グループに配置済みのものがあれば削除してから配置し直す（各グループの上限は 1 件のため）
@@ -203,7 +205,8 @@ def upload_image(client, library_id, path)
         fileName: file_name,
         fileSize: bytes.bytesize,
         category: 'CREATIVE_ASSETS',
-        referenceName: "#{File.basename(file_name, '.*')} (#{Time.now.utc.strftime('%Y-%m-%d %H:%M')} UTC)"
+        # 言語ごとのフォルダの画像は、名前に言語を入れて見分けられるようにする
+        referenceName: "#{File.basename(File.dirname(path))}/#{File.basename(file_name, '.*')} (#{Time.now.utc.strftime('%Y-%m-%d %H:%M')} UTC)"
       },
       relationships: { assetLibrary: { data: { type: 'appAssetLibraries', id: library_id } } }
     }
@@ -267,11 +270,16 @@ def choose_assets(placement, images, ref)
   end
 end
 
-def place_assets(client, version, assets, ref)
+def place_assets(client, version, assets, ref, only_locale: nil)
   localizations = client.get(
     "/v1/appStoreVersions/#{version['id']}/appStoreVersionLocalizations",
     'fields[appStoreVersionLocalizations]' => 'locale'
   ).fetch('data')
+  localizations = localizations.select { |loc| loc.dig('attributes', 'locale') == only_locale } if only_locale
+  if localizations.empty?
+    summary("ローカリゼーション #{only_locale} が無いので配置していません。先に App Store Metadata で掲載文を登録してください。\n")
+    return false
+  end
   mappings = ref['placementTypes'].to_h { |t| [t['placementTypeId'], t['specMappings']] }
 
   rows = []
@@ -312,7 +320,7 @@ def place_assets(client, version, assets, ref)
   end
 
   summary(<<~MARKDOWN)
-    ### 配置結果（バージョン #{version.dig('attributes', 'versionString')}）
+    ### 配置結果（バージョン #{version.dig('attributes', 'versionString')}#{only_locale ? " / #{only_locale}" : ''}）
 
     | ロケール | placementType | placementGroup | 結果 |
     | --- | --- | --- | --- |
@@ -351,25 +359,42 @@ begin
   save_json('ref-data.json', ref)
   report_ref_data(ref)
 
-  paths = Dir.glob(File.join(asset_dir, '*.{png,jpg,jpeg}')).sort
-  abort "::error::#{asset_dir} に画像がありません" if paths.empty?
-  images = paths.to_h { |path| [path, upload_image(client, library['id'], path)] }
-  save_json('images.json', images.values)
-  report_images(images, ref)
-  failed = images.values.reject { |i| i.dig('attributes', 'state') == 'PREPARE_FOR_SUBMISSION' }
+  # 言語ごとのフォルダがあれば言語ごとに、無ければ ASSET_DIR の画像をまとめて扱う
+  languages = JSON.parse(File.read('docs/app-store/languages.json', encoding: Encoding::UTF_8)).fetch('languages')
+  groups = languages.filter_map do |l|
+    dir = File.join(asset_dir, l['language'])
+    [l['storeLocale'], dir] if Dir.exist?(dir)
+  end
+  groups = [[nil, asset_dir]] if groups.empty?
 
-  if placement == 'none'
-    summary("配置はしていません（PLACEMENT=none）。App Store Connect の Asset Library で画像を確認できます。\n")
-  else
+  version = nil
+  if placement != 'none'
     version = versions.find { |v| EDITABLE_VERSION_STATES.include?(v.dig('attributes', 'appVersionState') || v.dig('attributes', 'appStoreState')) }
     if version.nil?
       summary("配置できる（審査前の）App Store バージョンがないため、配置はしていません。App Store Connect で新しいバージョンを作成してから再実行してください。\n")
       exit 1
     end
-    placed = place_assets(client, version, choose_assets(placement, images, ref), ref)
-    exit 1 unless placed
   end
 
+  failed = []
+  placed = true
+  all_images = []
+  groups.each do |locale, dir|
+    paths = Dir.glob(File.join(dir, '*.{png,jpg,jpeg}')).sort
+    abort "::error::#{dir} に画像がありません" if paths.empty?
+    summary("### #{locale || '全ローカリゼーション'}\n")
+    images = paths.to_h { |path| [path, upload_image(client, library['id'], path)] }
+    all_images.concat(images.values)
+    report_images(images, ref)
+    failed.concat(images.values.reject { |i| i.dig('attributes', 'state') == 'PREPARE_FOR_SUBMISSION' })
+    next if placement == 'none'
+
+    placed &= place_assets(client, version, choose_assets(placement, images, ref), ref, only_locale: locale)
+  end
+  save_json('images.json', all_images)
+
+  summary("配置はしていません（PLACEMENT=none）。App Store Connect の Asset Library で画像を確認できます。\n") if placement == 'none'
+  exit 1 unless placed
   exit 1 unless failed.empty?
 rescue ApiError => e
   summary("### エラー\n\n```\n#{e.message}\n```\n")
