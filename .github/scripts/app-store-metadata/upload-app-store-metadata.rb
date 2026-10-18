@@ -271,8 +271,10 @@ def collect_screenshots(screenshot_dir, work_dir)
   groups = Hash.new { |h, k| h[k] = [] }
   Dir.glob(File.join(screenshot_dir, '*/manifest.json')).sort.each do |manifest_path|
     device_dir = File.dirname(manifest_path)
-    files = JSON.parse(File.read(manifest_path, encoding: Encoding::UTF_8)).flat_map { |test| test.fetch('attachments') }.map { |a| a.fetch('exportedFileName') }
-    files.sort.each do |file|
+    # 書き出したファイル名は UUID なので、添付の名前（「01-ホーム_0_…」）の順に並べる
+    attachments = JSON.parse(File.read(manifest_path, encoding: Encoding::UTF_8)).flat_map { |test| test.fetch('attachments') }
+    files = attachments.sort_by { |a| a.fetch('suggestedHumanReadableName') }.map { |a| a.fetch('exportedFileName') }
+    files.each do |file|
       path = File.join(device_dir, file)
       info = png_info(path)
       type = DISPLAY_TYPES[[info[:width], info[:height]]]
