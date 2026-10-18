@@ -118,6 +118,7 @@ struct EventDetailScreen: View {
             ) {
                 setPinned(!event.isPinned, event: event)
             }
+            .accessibilityIdentifier("eventDetail.pin")
             Button("編集", systemImage: "pencil") {
                 isEditing = true
             }

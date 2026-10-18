@@ -31,6 +31,7 @@ struct HomeScreen: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("予定を追加", systemImage: "plus", action: presentAddEvent)
+                    .accessibilityIdentifier("home.addEvent")
             }
         }
         // ウィジェットのリンクで画面を切り替えるときは、予定の追加のシートを閉じる（予定の追加のリンクのときは開いたまま）
@@ -137,6 +138,8 @@ struct HomeScreen: View {
             .buttonStyle(.plain)
             // 読み上げはリンク（ボタン）そのものに付け、中の文字を別々に読ませない
             .accessibilityLabel(featured.featuredAccessibilityLabel)
+            // UI テスト（App Store 用スクリーンショット）は言語によらずこの ID で探す
+            .accessibilityIdentifier("home.featuredEvent")
         }
         HomeSection(title: "これからの予定") {
             if content.upcoming.isEmpty {

@@ -141,6 +141,7 @@ private struct EventFormFields: View {
             Section {
                 TextField("例：5th LIVE 東京公演", text: $form.title)
                     .accessibilityLabel("タイトル")
+                    .accessibilityIdentifier("eventEditor.title")
             } header: {
                 Text("タイトル")
             } footer: {
