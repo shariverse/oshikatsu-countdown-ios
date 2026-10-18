@@ -268,7 +268,17 @@ def upsert_review_notes(client, version_id, notes)
   end
 
   if detail
-    client.patch("/v1/appStoreReviewDetails/#{detail['id']}", { data: { type: 'appStoreReviewDetails', id: detail['id'], attributes: attributes } })
+    return '変更なし' if detail.dig('attributes', 'notes') == notes
+
+    begin
+      client.patch("/v1/appStoreReviewDetails/#{detail['id']}", { data: { type: 'appStoreReviewDetails', id: detail['id'], attributes: attributes } })
+    rescue ApiError => e
+      # 一度作った後の更新では、連絡先（氏名・電話・メール）が未入力だと 409 で弾かれる。連絡先は画面で入れるので、警告にとどめる
+      raise unless e.status == 409
+
+      puts "::warning::審査用メモを更新できませんでした。App Review の連絡先を画面で入れてから再実行してください"
+      return '失敗（連絡先が未入力）'
+    end
     '更新'
   else
     client.post('/v1/appStoreReviewDetails', {
