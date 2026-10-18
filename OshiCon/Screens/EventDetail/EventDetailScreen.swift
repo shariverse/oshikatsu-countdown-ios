@@ -82,6 +82,11 @@ struct EventDetailScreen: View {
         .ignoresSafeArea(edges: .top)
         .background(AppPalette.surface.color.ignoresSafeArea())
         .toolbar { toolbar(event: event) }
+        // ウィジェットのリンクで画面を切り替えるときは、編集のシートと削除の確認を閉じる
+        .onChange(of: router.sheetDismissal) {
+            isEditing = false
+            isConfirmingDelete = false
+        }
         .sheet(isPresented: $isEditing) {
             // 開いた時点の最新の予定を渡す（古い値だと、外したピン留めを書き戻してしまう）
             EventEditorScreen(event: event)
