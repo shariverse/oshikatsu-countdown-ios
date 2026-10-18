@@ -71,7 +71,12 @@ jobs:
 
       - name: Export app icon
         run: |
-          ictool="$(xcode-select -p)/Applications/Icon Composer.app/Contents/Executables/ictool"
+          # xcode-select -p は Xcode.app/Contents/Developer を返す。Icon Composer は 1 つ上の Contents/Applications にある
+          ictool="$(xcode-select -p)/../Applications/Icon Composer.app/Contents/Executables/ictool"
+          if [ ! -x "$ictool" ]; then
+            echo "::error::ictool が見つかりません: $ictool"
+            exit 1
+          fi
           "$ictool" "$PROJECT_NAME/AppIcon.icon" --export-image \
             --output-file "$RUNNER_TEMP/AppIcon.png" \
             --platform iOS --rendition Default --width 1024 --height 1024 --scale 1

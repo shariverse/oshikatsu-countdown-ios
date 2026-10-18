@@ -1,6 +1,6 @@
 //
 // App Store のクリエイティブアセット（プロダクトページのヘッダー / 検索結果）の試験用画像を生成する。
-// アプリアイコンとアプリ名をグラデーション背景の中央に置く（端がクロップされても崩れにくい構成）。
+// アプリアイコン（AppIcon.icon を ictool で書き出した角丸の PNG）とアプリ名をグラデーション背景の中央に置く（端がクロップされても崩れにくい構成）。
 //
 // 使い方:
 //   swift .github/scripts/creative-assets/generate-sample.swift <出力ディレクトリ> <アイコン PNG> <タイトル> <サブタイトル>
@@ -83,7 +83,7 @@ struct ContentLayout {
     var width: CGFloat { iconSize + gap + max(titleSize.width, subtitleSize.width) }
 }
 
-/// アイコン（角丸 + 影）とタイトル / サブタイトルを横並びで中央に描く。
+/// アイコン（影付き）とタイトル / サブタイトルを横並びで中央に描く。
 /// 横幅に収まらないとき（3:2 の検索結果と長いタイトルなど）は、全体を同じ比率で縮める
 func drawContent(in context: CGContext, size: CGSize) {
     // 端がクロップされても切れないよう、左右に 8% ずつの余白を残す
@@ -99,16 +99,9 @@ func drawContent(in context: CGContext, size: CGSize) {
     let contentWidth = layout.width
 
     let iconRect = CGRect(x: (size.width - contentWidth) / 2, y: (size.height - iconSize) / 2, width: iconSize, height: iconSize)
-    let iconPath = CGPath(roundedRect: iconRect, cornerWidth: iconSize * 0.2237, cornerHeight: iconSize * 0.2237, transform: nil)
+    // アイコンは ictool が角丸に切り抜いて書き出す（角が透けている）ので、そのまま影を付けて描く
     context.saveGState()
     context.setShadow(offset: CGSize(width: 0, height: -size.height * 0.01), blur: size.height * 0.04, color: CGColor(gray: 0, alpha: 0.35))
-    context.addPath(iconPath)
-    context.setFillColor(.white)
-    context.fillPath()
-    context.restoreGState()
-    context.saveGState()
-    context.addPath(iconPath)
-    context.clip()
     context.draw(icon, in: iconRect)
     context.restoreGState()
 
