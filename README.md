@@ -105,6 +105,8 @@ API Key は App Store Connect の「ユーザとアクセス → 統合 → App 
 ### 5. App Store Connect にアプリを作成する
 
 Bundle ID・証明書・プロビジョニングプロファイルは、Export のときに API Key で自動的に作成されます（`-allowProvisioningUpdates`）。
+アプリと Widget Extension の 2 つの Bundle ID が登録されます。Archive は署名せずに作るため、Export の前に各ターゲットの Entitlements（App Group）をアドホック署名で埋め込み（[.github/scripts/embed-entitlements.rb](.github/scripts/embed-entitlements.rb)）、Export した IPA に残っていることを確かめてからアップロードします。
+「Check entitlements in IPA」で App Group が無いと止まったときは、Export の自動署名が App Group を登録・割り当てできていません。Apple Developer の Identifiers で App Group（`group.<アプリの Bundle ID>`）を作り、アプリと Widget Extension の両方の App ID に割り当ててから、ワークフローを再実行してください。
 App Store Connect でのアプリ作成だけは API で行えないため、Web 画面で行います。
 
 アプリを作らずに `develop` へ push しても問題ありません。Upload ワークフローがアップロードの前にアプリの有無を確認し（[.github/scripts/check-app-store-app.rb](.github/scripts/check-app-store-app.rb)）、アプリが無ければ「新規アプリ」画面に入力する値（名前・バンドル ID・SKU など）を Job Summary に表示して止まります。表示された値でアプリを作成してから、ワークフローを再実行してください。
@@ -153,6 +155,19 @@ body=$(gh pr view <番号> --json body -q .body) &&
   | gh pr edit <番号> --body-file -
 ```
 
+### 8. App Store 用スクリーンショット
+
+見本の推しと予定で、App Store に載せるスクリーンショットを撮ります。6.9 インチの iPhone（iPhone 17 Pro Max）と 13 インチの iPad（iPad Pro 13-inch (M5)）で UI テスト（`AppStoreScreenshotTests`）を流し、画像を `build/app-store-screenshots/<端末>/` に書き出します。
+
+```bash
+scripts/app-store-screenshots.sh
+```
+
+- 見本のデータは起動引数 `-useInMemoryStore -seedSampleData` でメモリ上のストアにだけ入ります（端末のデータは書き換えません）。日付は今日から数えるので、いつ撮っても同じ残り日数になります
+- 撮る画面はホーム・予定の詳細・予定の追加・推しの一覧です。画面の名前は書き出した `manifest.json` にあります
+- ステータスバーは 9:41・電池満タンにそろえます。ふだんのテスト（CI を含む）では、このテストは飛ばされます
+- 予定の追加の画面はキーボードも写ります。キーボードは Simulator 全体の設定に従うので、日本語のキーボードで撮りたいときは、Simulator の設定 →「一般」→「キーボード」で日本語のキーボードを足しておきます
+
 ## 構成
 
 ```
@@ -163,12 +178,12 @@ body=$(gh pr view <番号> --json body -q .body) &&
 ├── OshiConUITests/   # UI テスト（XCTest）
 ├── OshiCon.xcodeproj # 共有スキーム OshiCon を含む
 ├── docs/                    # ExportOptions.plist のサンプル
-├── scripts/                 # rename.sh
+├── scripts/                 # rename.sh・app-store-screenshots.sh（App Store 用スクリーンショット）
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/
     ├── ISSUE_TEMPLATE/      # Issue テンプレート
     ├── pull_request_template.md
-    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）
+    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）・embed-entitlements.rb（Archive に Entitlements を埋め込む）
     └── workflows/
         ├── _build.yml       # 共通処理: ビルド + テスト + SwiftLint（workflow_call）
         ├── _archive.yml     # 共通処理: Archive → Export（→ Upload）（workflow_call）
@@ -180,7 +195,7 @@ body=$(gh pr view <番号> --json body -q .body) &&
 - プロジェクトはフォルダ同期グループ（Xcode 16 以降の形式）で管理しているため、ファイルの追加・削除で pbxproj は変わりません
 - SwiftLint は Build Tool Plugin として全ターゲットに適用され、CI では `swiftlint lint --strict` としても実行されます。ルールは [.swiftlint.yml](.swiftlint.yml) で管理します
 - CI のワークフローは `*.xcodeproj` の名前と同名の共有スキームが存在することを前提にしています
-- [OshiCon/PrivacyInfo.xcprivacy](OshiCon/PrivacyInfo.xcprivacy) はプライバシーマニフェストです。UserDefaults（`@AppStorage`）の利用だけを申告しています。データの収集・トラッキング・ほかの理由の申告が必要な API を足したら、ここと App Store Connect の「App のプライバシー」を更新してください
+- [OshiCon/PrivacyInfo.xcprivacy](OshiCon/PrivacyInfo.xcprivacy) と [OshiConWidget/PrivacyInfo.xcprivacy](OshiConWidget/PrivacyInfo.xcprivacy) はプライバシーマニフェストです。アプリは UserDefaults（`@AppStorage`）の利用だけを申告し、Widget Extension は何も申告していません。データの収集・トラッキング・ほかの理由の申告が必要な API を足したら、ここと App Store Connect の「App のプライバシー」を更新してください
 
 ## License
 

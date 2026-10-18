@@ -73,6 +73,15 @@ jobs:
             -archivePath "$RUNNER_TEMP/build.xcarchive" \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Embed entitlements
+        # 署名しない Archive には Entitlements（App Group）が入らず、Export の署名でも抜け落ちる。
+        # アプリと App Extension（ウィジェット）にアドホック署名で Entitlements を載せ、Export に引き継がせる
+        run: |
+          ARCHIVE_PATH="$RUNNER_TEMP/build.xcarchive" \
+          PROJECT_PATH="$PROJECT_NAME.xcodeproj" \
+          CONFIGURATION=Release \
+            ruby .github/scripts/embed-entitlements.rb
+
       - name: Create ExportOptions.plist and API private key
         # Secrets はシェル展開ではなく env 経由で渡す
         env:
@@ -98,6 +107,42 @@ jobs:
             -authenticationKeyPath "$API_KEY_PATH" \
             -authenticationKeyID "$APPLE_API_KEY_ID" \
             -authenticationKeyIssuerID "$APPLE_API_ISSUER_ID"
+
+      - name: Check entitlements in IPA
+        # Archive に埋め込んだ Entitlements のキーが、Export した IPA の各バンドルに残っていることを確かめる
+        # （プロファイルに App Group が無いと、Export は通っても Entitlements から落とされることがある）。
+        # アップロードは同じ Archive をもう一度 Export して署名し直したものだが、プロファイルと Entitlements は同じになる
+        run: |
+          mkdir -p "$RUNNER_TEMP/ipa"
+          unzip -q "$RUNNER_TEMP"/export/*.ipa -d "$RUNNER_TEMP/ipa"
+          applications="$RUNNER_TEMP/build.xcarchive/Products/Applications"
+          # 署名が無い・Entitlements が無いバンドルは {} として扱う
+          entitlements() {
+            local xml
+            xml=$(codesign -d --entitlements - --xml "$1" 2>/dev/null)
+            if [[ -z "$xml" ]]; then echo '{}'; else plutil -convert json -o - - <<<"$xml"; fi
+          }
+          status=0
+          count=0
+          while IFS= read -r -d '' archived; do
+            count=$((count + 1))
+            exported="$RUNNER_TEMP/ipa/Payload/${archived#"$applications"/}"
+            missing=$(jq -n -r \
+              --argjson archived "$(entitlements "$archived")" \
+              --argjson exported "$(entitlements "$exported")" \
+              '$archived | to_entries | map(select($exported[.key] != .value) | .key) | join(" ")')
+            if [[ -n "$missing" ]]; then
+              echo "::error::${exported##*/} の Entitlements に無い・値が違うもの: ${missing}"
+              status=1
+            else
+              echo "${exported##*/}: Entitlements を引き継いでいる"
+            fi
+          done < <(find "$applications" \( -name '*.app' -o -name '*.appex' \) -print0)
+          if [[ "$count" -eq 0 ]]; then
+            echo "::error::Archive にアプリが見つかりません"
+            status=1
+          fi
+          exit "$status"
 
       - name: Upload IPA to GitHub
         uses: actions/upload-artifact@v7

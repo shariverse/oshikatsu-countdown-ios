@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4FB000000000000000000001 /* OshiConWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4FB000000000000000000002 /* OshiConWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4FC9E1FA2BF1049C00F630AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +25,34 @@
 			remoteGlobalIDString = 4FC9E1E82BF1049B00F630AB;
 			remoteInfo = OshiCon;
 		};
+		4FB000000000000000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FC9E1E12BF1049B00F630AB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4FB000000000000000000010;
+			remoteInfo = OshiConWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4FB000000000000000000004 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4FB000000000000000000001 /* OshiConWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		4FC9E1E92BF1049B00F630AB /* OshiCon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OshiCon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FC9E1F92BF1049C00F630AB /* OshiConTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OshiConTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FC9E2032BF1049C00F630AB /* OshiConUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OshiConUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FB000000000000000000002 /* OshiConWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OshiConWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FA0000000000000000000C1 /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
 		4FA0000000000000000000C2 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		4FA0000000000000000000C3 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -39,6 +65,13 @@
 				Info.plist,
 			);
 			target = 4FC9E1E82BF1049B00F630AB /* OshiCon */;
+		};
+		4FB000000000000000000005 /* Exceptions for "OshiConWidget" folder in "OshiConWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4FB000000000000000000010 /* OshiConWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -59,6 +92,19 @@
 		4FA0000000000000000000B3 /* OshiConUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = OshiConUITests;
+			sourceTree = "<group>";
+		};
+		4FB000000000000000000006 /* OshiConWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4FB000000000000000000005 /* Exceptions for "OshiConWidget" folder in "OshiConWidgetExtension" target */,
+			);
+			path = OshiConWidget;
+			sourceTree = "<group>";
+		};
+		4FB000000000000000000007 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -85,6 +131,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4FB000000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -92,6 +145,8 @@
 			isa = PBXGroup;
 			children = (
 				4FA0000000000000000000B1 /* OshiCon */,
+				4FB000000000000000000007 /* Shared */,
+				4FB000000000000000000006 /* OshiConWidget */,
 				4FA0000000000000000000B2 /* OshiConTests */,
 				4FA0000000000000000000B3 /* OshiConUITests */,
 				4FC9E1EA2BF1049B00F630AB /* Products */,
@@ -105,6 +160,7 @@
 				4FC9E1E92BF1049B00F630AB /* OshiCon.app */,
 				4FC9E1F92BF1049C00F630AB /* OshiConTests.xctest */,
 				4FC9E2032BF1049C00F630AB /* OshiConUITests.xctest */,
+				4FB000000000000000000002 /* OshiConWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -129,14 +185,17 @@
 				4FC9E1E52BF1049B00F630AB /* Sources */,
 				4FC9E1E62BF1049B00F630AB /* Frameworks */,
 				4FC9E1E72BF1049B00F630AB /* Resources */,
+				4FB000000000000000000004 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				4F27869F2BF3744F00E9F5EF /* PBXTargetDependency */,
+				4FB000000000000000000009 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4FA0000000000000000000B1 /* OshiCon */,
+				4FB000000000000000000007 /* Shared */,
 			);
 			name = OshiCon;
 			productName = OshiCon;
@@ -187,6 +246,28 @@
 			productReference = 4FC9E2032BF1049C00F630AB /* OshiConUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		4FB000000000000000000010 /* OshiConWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FB000000000000000000011 /* Build configuration list for PBXNativeTarget "OshiConWidgetExtension" */;
+			buildPhases = (
+				4FB000000000000000000012 /* Sources */,
+				4FB000000000000000000008 /* Frameworks */,
+				4FB000000000000000000013 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4FB000000000000000000014 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4FB000000000000000000006 /* OshiConWidget */,
+				4FB000000000000000000007 /* Shared */,
+			);
+			name = OshiConWidgetExtension;
+			productName = OshiConWidgetExtension;
+			productReference = 4FB000000000000000000002 /* OshiConWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -207,6 +288,9 @@
 					4FC9E2022BF1049C00F630AB = {
 						CreatedOnToolsVersion = 15.3;
 						TestTargetID = 4FC9E1E82BF1049B00F630AB;
+					};
+					4FB000000000000000000010 = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -230,6 +314,7 @@
 				4FC9E1E82BF1049B00F630AB /* OshiCon */,
 				4FC9E1F82BF1049C00F630AB /* OshiConTests */,
 				4FC9E2022BF1049C00F630AB /* OshiConUITests */,
+				4FB000000000000000000010 /* OshiConWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -250,6 +335,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4FC9E2012BF1049C00F630AB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4FB000000000000000000013 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -280,6 +372,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4FB000000000000000000012 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -304,6 +403,15 @@
 		4FA0000000000000000000E1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = 4FA0000000000000000000E2 /* SwiftLintBuildToolPlugin */;
+		};
+		4FB000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4FB000000000000000000010 /* OshiConWidgetExtension */;
+			targetProxy = 4FB000000000000000000003 /* PBXContainerItemProxy */;
+		};
+		4FB000000000000000000014 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 4FB000000000000000000015 /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -444,6 +552,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = OshiCon/OshiCon.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"OshiCon/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
@@ -470,6 +579,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = OshiCon/OshiCon.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"OshiCon/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
@@ -551,6 +661,48 @@
 			};
 			name = Release;
 		};
+		4FB000000000000000000016 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = OshiConWidget/OshiConWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OshiConWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "推し活カウント";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_IDENTIFIER).Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4FB000000000000000000017 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = OshiConWidget/OshiConWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OshiConWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "推し活カウント";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_IDENTIFIER).Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -590,6 +742,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		4FB000000000000000000011 /* Build configuration list for PBXNativeTarget "OshiConWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FB000000000000000000016 /* Debug */,
+				4FB000000000000000000017 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -615,6 +776,11 @@
 			productName = "plugin:SwiftLintBuildToolPlugin";
 		};
 		4FA0000000000000000000E2 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4F27869D2BF373B800E9F5EF /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		4FB000000000000000000015 /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4F27869D2BF373B800E9F5EF /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
 			productName = "plugin:SwiftLintBuildToolPlugin";

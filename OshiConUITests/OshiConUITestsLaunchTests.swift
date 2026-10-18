@@ -19,6 +19,7 @@ final class OshiConUITestsLaunchTests: XCTestCase {
     @MainActor
     func testLaunch() throws {
         let app = XCUIApplication()
+        app.launchArguments = ["-useInMemoryStore"]
         app.launch()
 
         // 起動直後のスクリーンショットをテスト結果に添付する

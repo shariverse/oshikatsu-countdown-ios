@@ -2,6 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AppGroupIdentifier</key>
+	<string>$(APP_GROUP_IDENTIFIER)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ja</string>
+	</array>
+	<key>CFBundleDisplayName</key>
+	<string>推し活カウント</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Outfit-Variable.ttf</string>
+		<string>ZenKakuGothicNew-Regular.ttf</string>
+		<string>ZenKakuGothicNew-Medium.ttf</string>
+		<string>ZenKakuGothicNew-Bold.ttf</string>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>
