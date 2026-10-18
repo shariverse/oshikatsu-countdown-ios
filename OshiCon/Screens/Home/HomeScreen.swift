@@ -19,6 +19,8 @@ struct HomeScreen: View {
     @State private var selectedOshiID: Oshi.ID?
     @Environment(AppRouter.self) private var router
     @State private var isAddingEvent = false
+    /// 予定の追加のシートが実際に出ている（開こうとしても出せなかったときと分ける）。
+    @State private var isAddEventSheetVisible = false
 
     var body: some View {
         TimelineView(.everyMinute) { context in
@@ -28,14 +30,12 @@ struct HomeScreen: View {
         .navigationTitle("推し活カウントダウン")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("予定を追加", systemImage: "plus") {
-                    isAddingEvent = true
-                }
+                Button("予定を追加", systemImage: "plus", action: presentAddEvent)
             }
         }
-        // ウィジェットのリンクで画面を切り替えるときは、予定の追加のシートを閉じる（予定の追加の要求のときは開いたまま）
-        .onChange(of: router.sheetDismissal) {
-            if !router.pendingAddEvent {
+        // ウィジェットのリンクで画面を切り替えるときは、予定の追加のシートを閉じる（予定の追加のリンクのときは開いたまま）
+        .onChange(of: router.sheetDismissal) { _, dismissal in
+            if !dismissal.keepsAddEvent {
                 isAddingEvent = false
             }
         }
@@ -45,18 +45,40 @@ struct HomeScreen: View {
                 return
             }
             router.pendingAddEvent = false
-            guard !isAddingEvent else {
+            guard !isAddEventSheetVisible else {
                 return
             }
             Task {
                 // ほかの画面のシートが閉じきるのを待ってから開く（閉じている途中に出すと出せない）
                 try? await Task.sleep(for: Self.sheetPresentationDelay)
-                isAddingEvent = true
+                presentAddEvent()
             }
         }
         .sheet(isPresented: $isAddingEvent) {
             // 推しで絞り込んでいるときは、その推しを選んでおく
             EventEditorScreen(event: nil, preselectedOshiID: selectedOshiID)
+                .onAppear {
+                    isAddEventSheetVisible = true
+                }
+                .onDisappear {
+                    isAddEventSheetVisible = false
+                }
+        }
+    }
+
+    /// 予定の追加のシートを開く。ほかのシートと重なって開けずに残っていたら、一度戻してから開き直す。
+    private func presentAddEvent() {
+        guard !isAddEventSheetVisible else {
+            return
+        }
+        guard isAddingEvent else {
+            isAddingEvent = true
+            return
+        }
+        isAddingEvent = false
+        Task {
+            try? await Task.sleep(for: .milliseconds(50))
+            isAddingEvent = true
         }
     }
 
@@ -79,9 +101,7 @@ struct HomeScreen: View {
             } description: {
                 Text("ライブ・誕生日・発売日を登録すると、その日まであと何日かを数えます。")
             } actions: {
-                Button("予定を追加") {
-                    isAddingEvent = true
-                }
+                Button("予定を追加", action: presentAddEvent)
                 .buttonStyle(.borderedProminent)
                 .font(AppFont.text(.headline, weight: .bold))
             }

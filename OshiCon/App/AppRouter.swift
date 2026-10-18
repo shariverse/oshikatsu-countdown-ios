@@ -52,7 +52,7 @@ final class AppRouter {
     var homePath: [HomeRoute] = []
     /// ウィジェットのリンクで画面を切り替えるときに、各画面へ自分のシートを閉じさせる合図。値が変わったら閉じる。
     /// ほかのシートが開いたままだと、ホームで予定の追加のシートを出せない（2 枚目のシートは出せない）ため。
-    private(set) var sheetDismissal = 0
+    private(set) var sheetDismissal = SheetDismissal()
     /// 予定の追加のシートを開く要求。ホームが受け取ったら false に戻し、ほかのシートが閉じてから開く。
     var pendingAddEvent = false
 
@@ -71,16 +71,24 @@ final class AppRouter {
         case let .eventDetail(id):
             // 開いているシート（予定の追加の入力中を含む）は閉じる。ウィジェットから別の予定を開くのは利用者の操作なので、確かめない
             pendingAddEvent = false
-            sheetDismissal += 1
+            sheetDismissal = SheetDismissal(count: sheetDismissal.count + 1, keepsAddEvent: false)
             openInHome(.eventDetail(id))
         case .addEvent:
             // ホームの最初の画面に戻し、ほかのシートを閉じてから予定の追加のシートを開く
             selectedTab = .home
             homePath = []
             pendingAddEvent = true
-            sheetDismissal += 1
+            sheetDismissal = SheetDismissal(count: sheetDismissal.count + 1, keepsAddEvent: true)
         case .home:
             selectedTab = .home
         }
     }
+}
+
+/// ウィジェットのリンクで画面を切り替えるときに、各画面へ自分のシートを閉じさせる合図。
+nonisolated struct SheetDismissal: Equatable, Sendable {
+    /// 合図の回数。変わったら閉じる。
+    var count = 0
+    /// 予定の追加のリンクから来た。ホームの予定の追加のシートは閉じない（入力中なら入力を残す）。
+    var keepsAddEvent = false
 }

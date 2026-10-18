@@ -43,6 +43,7 @@ struct OshiCon: App {
                 RootView()
                     .environment(router)
                     .modelContainer(container)
+                    .refreshesWidgets()
             case .failure:
                 StoreUnavailableView()
             }
