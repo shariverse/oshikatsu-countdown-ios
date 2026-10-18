@@ -1,0 +1,184 @@
+<!doctype html>
+<!--
+  App Store のクリエイティブアセット（プロダクトページのヘッダー / 検索結果）の元。
+  scripts/render-creative-assets.sh が Chrome のヘッドレスで開いて実寸で書き出す。直接開くときは
+  creative.html?type=header&lang=ja&name=推し活カウントダウン のように指定する
+  （同じフォルダの screens/<言語>/01.png〜04.png に 6.9 インチのスクリーンショット、icon.png にアプリアイコンが要る）。
+
+  方針（https://developer.apple.com/app-store/asset-best-practices/）
+  - ヘッダー: 初めて来た人に「推しに会える日まであと何日かを数える」ことだけを伝える。
+    端末によって左右が切れるので、文言と端末は中央に寄せる。
+  - 検索結果: 何をするアプリかが一目でわかるよう、実際の画面と主な機能を見せる。
+  - 実在の人物・作品・他社のロゴ・価格・受賞歴は入れない。文言は短く、言語ごとに書く。
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --background: #fcf8fa;
+    --brand: #c8326a;
+    --brand-container: #f4d6e1;
+    --on-surface: #1d1b20;
+    --on-surface-variant: #49454f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    background: var(--background);
+    color: var(--on-surface);
+    font-family: "SF Pro Display", "Hiragino Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-lang="ja"] { font-family: "Hiragino Sans", "SF Pro Display", sans-serif; }
+  body[data-lang="zh-Hans"] { font-family: "SF Pro Display", "PingFang SC", sans-serif; }
+  body[data-lang="zh-Hant"] { font-family: "SF Pro Display", "PingFang TC", sans-serif; }
+  body[data-lang="ko"] { font-family: "SF Pro Display", "Apple SD Gothic Neo", sans-serif; }
+  body[data-lang="th"] { font-family: "SF Pro Display", "Sukhumvit Set", "Thonburi", sans-serif; }
+
+  .canvas { position: relative; width: 100vw; height: 100vh; overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 80% at 50% 110%, rgba(200, 50, 106, 0.28), transparent 70%),
+      radial-gradient(ellipse 90% 90% at 50% -10%, #ffffff, var(--background) 60%, var(--brand-container)); }
+
+  /* 推し色の紙吹雪（アプリの推し色のパレットから） */
+  .confetti { position: absolute; border-radius: 50%; }
+  .heart { position: absolute; line-height: 1; }
+
+  .phone { position: absolute; border-radius: 9.5%/4.4%; background: #121114; padding: 1.6%;
+    box-shadow: 0 0 0 4px #4a4650, 0 60px 140px rgba(60, 10, 30, 0.35); }
+  .phone img { display: block; width: 100%; border-radius: 8.4%/3.9%; }
+
+  .headline { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; letter-spacing: -0.01em; line-height: 1.15; }
+  .headline em, .copy .title em { font-style: normal; color: var(--brand); }
+  .sub { position: absolute; left: 0; right: 0; text-align: center; color: var(--on-surface-variant); font-weight: 600; }
+
+  .copy { position: absolute; }
+  .copy .title { font-weight: 800; line-height: 1.18; letter-spacing: -0.01em; }
+  .chips { display: flex; flex-direction: column; gap: 0.55em; }
+  .chip { display: inline-flex; align-items: center; gap: 0.6em; align-self: flex-start;
+    padding: 0.45em 0.95em 0.5em 0.7em; border-radius: 999px; font-weight: 700; color: var(--on-surface);
+    background: #ffffff; box-shadow: inset 0 0 0 4px var(--brand-container), 0 16px 40px rgba(200, 50, 106, 0.12); }
+  .chip i { font-style: normal; display: grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%;
+    background: var(--brand); color: #fff; font-size: 0.8em; }
+  .brand { position: absolute; display: flex; align-items: center; gap: 0.6em; font-weight: 800; color: var(--brand); }
+  .brand img { height: 1.9em; border-radius: 22%; box-shadow: 0 10px 30px rgba(200, 50, 106, 0.25); }
+</style>
+</head>
+<body>
+<div class="canvas" id="canvas"></div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const type = params.get("type") || "header";
+  const lang = params.get("lang") || "ja";
+  const appName = params.get("name") || "Oshi Countdown";
+  document.body.dataset.lang = lang;
+
+  // 言語ごとの文言。header: 見出しと補足、search: 見出しと主な機能 3 つ。<em> は推し色で強調する
+  const copy = {
+    en: {
+      header: { title: "Count down to every <em>oshi</em> moment.", sub: "Lives, birthdays, release days — see how many days are left at a glance." },
+      search: { title: "Your <em>fan days</em>,<br>counted down.", chips: ["Countdowns in your oshi's color", "Home Screen widgets", "iPhone and iPad"] },
+    },
+    ja: {
+      header: { title: "推しに会える日まで、<em>あと何日</em>？", sub: "ライブ・誕生日・発売日。楽しみな日を推し色で数えよう。" },
+      search: { title: "推し活の予定を、<br><em>推し色</em>でカウント。", chips: ["推し色のカウントダウン", "ホーム画面ウィジェット", "iPhone と iPad に対応"] },
+    },
+    "zh-Hans": {
+      header: { title: "距离见到<em>本命</em>还有几天？", sub: "演唱会、生日、发售日——用应援色倒数每个期待的日子。" },
+      search: { title: "追星日程，<br>用<em>应援色</em>倒数。", chips: ["应援色倒计时", "主屏幕小组件", "支持 iPhone 和 iPad"] },
+    },
+    "zh-Hant": {
+      header: { title: "距離見到<em>本命</em>還有幾天？", sub: "演唱會、生日、發售日——用應援色倒數每個期待的日子。" },
+      search: { title: "追星行程，<br>用<em>應援色</em>倒數。", chips: ["應援色倒數計時", "主畫面小工具", "支援 iPhone 與 iPad"] },
+    },
+    ko: {
+      header: { title: "<em>최애</em>를 만나는 날까지 D-며칠?", sub: "콘서트, 생일, 발매일. 기다리는 날을 최애 컬러로 카운트다운." },
+      search: { title: "덕질 일정을<br><em>최애 컬러</em>로 카운트다운.", chips: ["최애 컬러 카운트다운", "홈 화면 위젯", "iPhone·iPad 지원"] },
+    },
+    fr: {
+      header: { title: "Combien de jours avant <em>votre idole</em> ?", sub: "Concerts, anniversaires, sorties : comptez les jours aux couleurs de votre favori." },
+      search: { title: "Vos jours de fan,<br><em>à rebours</em>.", chips: ["Compte à rebours en couleur", "Widgets d'écran d'accueil", "iPhone et iPad"] },
+    },
+    de: {
+      header: { title: "Wie lange noch bis zu <em>deinem Star</em>?", sub: "Konzerte, Geburtstage, Releases – zähl die Tage in der Farbe deines Lieblings." },
+      search: { title: "Deine Fan-Termine,<br><em>im Countdown</em>.", chips: ["Countdown in Fanfarbe", "Widgets für den Home-Bildschirm", "iPhone und iPad"] },
+    },
+    es: {
+      header: { title: "¿Cuántos días faltan para ver a <em>tu bias</em>?", sub: "Conciertos, cumpleaños, lanzamientos: cuenta los días con el color de tu favorito." },
+      search: { title: "Tus días de fan,<br><em>en cuenta regresiva</em>.", chips: ["Cuenta regresiva con su color", "Widgets de inicio", "iPhone y iPad"] },
+    },
+    "pt-BR": {
+      header: { title: "Quantos dias faltam para ver <em>seu bias</em>?", sub: "Shows, aniversários, lançamentos: conte os dias com a cor do seu favorito." },
+      search: { title: "Seus dias de fã,<br><em>em contagem regressiva</em>.", chips: ["Contagem na cor do seu bias", "Widgets na Tela de Início", "iPhone e iPad"] },
+    },
+    it: {
+      header: { title: "Quanti giorni mancano al <em>tuo idolo</em>?", sub: "Concerti, compleanni, uscite: conta i giorni con il colore del tuo preferito." },
+      search: { title: "I tuoi giorni da fan,<br><em>in conto alla rovescia</em>.", chips: ["Countdown nel suo colore", "Widget nella schermata Home", "iPhone e iPad"] },
+    },
+    th: {
+      header: { title: "อีกกี่วันจะได้เจอ<em>เมน</em>?", sub: "คอนเสิร์ต วันเกิด วันวางจำหน่าย นับถอยหลังด้วยสีของเมน" },
+      search: { title: "ตารางติ่ง<br>นับถอยหลังด้วย<em>สีเมน</em>", chips: ["นับถอยหลังสีเมน", "วิดเจ็ตหน้าจอโฮม", "รองรับ iPhone และ iPad"] },
+    },
+    id: {
+      header: { title: "Berapa hari lagi ketemu <em>bias</em>-mu?", sub: "Konser, ulang tahun, rilisan — hitung mundur dengan warna favoritmu." },
+      search: { title: "Jadwal fangirling,<br><em>dihitung mundur</em>.", chips: ["Hitung mundur warna bias", "Widget Layar Utama", "iPhone dan iPad"] },
+    },
+  }[lang];
+  // 文言の無い言語は、背景だけの画像を書き出さないようここで止める（render-creative-assets.sh でも先に確かめる）
+  if (!copy) {
+    document.body.innerHTML = `<h1 style="color:red;font-size:200px">No copy for "${lang}"</h1>`;
+    throw new Error(`creative.html に ${lang} の文言がありません`);
+  }
+
+  const canvas = document.getElementById("canvas");
+  const W = innerWidth, H = innerHeight;
+  const add = (html) => { canvas.insertAdjacentHTML("beforeend", html); return canvas.lastElementChild; };
+
+  // 紙吹雪とハート。毎回同じ位置になるよう乱数の種を固定し、文言の上には置かない
+  const clear = type === "header"
+    ? [[W * 0.08, 90, W * 0.92, 520]]
+    : [[150, 120, 2050, 2200]];
+  const blocked = (x, y) => clear.some(([l, t, r, b]) => x > l - 60 && x < r + 60 && y > t - 60 && y < b + 60);
+  const colors = ["#c8326a", "#3f51b5", "#00897b", "#ef6c00", "#8e24aa", "#fbc02d", "#e91e63"];
+  let seed = 11;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 70; i++) {
+    const size = 10 + rand() * 22, x = rand() * W, y = rand() * H, color = colors[i % colors.length], opacity = 0.35 + rand() * 0.45;
+    if (blocked(x, y)) continue;
+    add(`<div class="confetti" style="left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};opacity:${opacity}"></div>`);
+  }
+  for (let i = 0; i < 14; i++) {
+    const x = rand() * W, y = rand() * H * 0.9, size = 60 + rand() * 70, color = colors[i % colors.length], opacity = 0.5 + rand() * 0.4;
+    if (blocked(x + size / 2, y + size / 2)) continue;
+    add(`<div class="heart" style="left:${x}px;top:${y}px;font-size:${size}px;color:${color};opacity:${opacity}">♥</div>`);
+  }
+
+  const phone = (screen, x, y, width, rotate = 0, z = 1) => add(
+    `<div class="phone" style="left:${x - width / 2}px;top:${y}px;width:${width}px;transform:rotate(${rotate}deg);z-index:${z}">` +
+    `<img src="screens/${lang}/${screen}.png"></div>`);
+
+  // 文字の多い言語は見出しを小さくする
+  const long = ["fr", "de", "es", "pt-BR", "it", "id"].includes(lang);
+
+  if (type === "header") {
+    // 21:9。中央に寄せる（左右は端末によって切れる）
+    const title = add(`<div class="headline" style="top:130px;font-size:${long ? 112 : 128}px">${copy.header.title}</div>`);
+    add(`<div class="sub" style="top:${130 + title.offsetHeight + 30}px;font-size:56px">${copy.header.sub}</div>`);
+    phone("02", W / 2 - 720, 700, 560, -7, 1);
+    phone("04", W / 2 + 720, 700, 560, 7, 1);
+    phone("01", W / 2, 560, 640, 0, 2);
+  } else {
+    // 3:2。左に何のアプリかと主な機能、右に実際の画面
+    add(`<div class="brand" style="left:250px;top:220px;font-size:86px"><img src="icon.png" onerror="this.remove()">${appName}</div>`);
+    add(`<div class="copy" style="left:250px;top:520px;width:1800px;font-size:${long ? 128 : 150}px">` +
+        `<div class="title">${copy.search.title}</div>` +
+        `<div class="chips" style="font-size:76px;margin-top:110px">` +
+        copy.search.chips.map((c, i) => `<div class="chip"><i>${i + 1}</i>${c}</div>`).join("") +
+        `</div></div>`);
+    phone("02", W - 1700, 520, 860, -6, 1);
+    phone("01", W - 900, 360, 980, 4, 2);
+  }
+</script>
+</body>
+</html>
