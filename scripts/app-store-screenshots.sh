@@ -74,11 +74,24 @@ latest_runtime() {
     | sort_by(.version | ver) | last | .identifier // empty'
 }
 
+# SDK と同じ版のランタイムがあるか（新しい機種は新しいランタイムにしか無い。iPhone Duo には iOS 27.1 が要る）
+has_sdk_runtime() {
+  xcrun simctl list -j runtimes | jq -e --arg sdk "$SDK_VERSION" '
+    def ver: split(".") | map(tonumber);
+    any(.runtimes[]; .isAvailable and (.identifier | contains("SimRuntime.iOS")) and (.version | ver)[:2] == ($sdk | ver)[:2])' >/dev/null
+}
+
+# ランナーのイメージには、選んだ Xcode の SDK と同じ版のランタイムが入っていないことがある
+# （xcode-27 のイメージは iOS 27.0 だけ）ので、無ければダウンロードする
+if ! has_sdk_runtime; then
+  echo "iOS ${SDK_VERSION} のランタイムが無いのでダウンロードします"
+  xcodebuild -downloadPlatform iOS
+fi
 RUNTIME_ID=$(latest_runtime)
 if [[ -z "$RUNTIME_ID" ]]; then
-  echo "iOS ${SDK_VERSION} 以下のランタイムが無いのでダウンロードします"
-  xcodebuild -downloadPlatform iOS
-  RUNTIME_ID=$(latest_runtime)
+  echo "iOS ${SDK_VERSION} 以下のランタイムがありません" >&2
+  xcrun simctl list runtimes >&2 || true
+  exit 1
 fi
 # macOS の bash 3.2 は、変数名の直後に全角文字が続くと変数名の一部と見なすことがあるので、必ず波括弧で閉じる
 echo "ランタイム: ${RUNTIME_ID}（SDK ${SDK_VERSION}）"
