@@ -182,7 +182,7 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 - 文面は各見出しの下のコードブロックから読みます。文字数の上限を超えていたら何も登録せずに止まります。`metadata/<言語>.md` が無い言語は飛ばします（ja は無ければ `listing.md` を読みます）
 - アプリの主要言語は languages.json の先頭の言語（en-US）にそろえます
 - 6.9 インチを撮ったときは、そのスクリーンショットからクリエイティブアセット（プロダクトページのヘッダー 3840x1646・検索結果 3840x2560）を [docs/app-store/creative/creative.html](docs/app-store/creative/creative.html) と `scripts/render-creative-assets.sh` で言語ごとに書き出し、App Asset Library に上げて各言語のローカリゼーションに配置します（`creative_assets` を外すと飛ばします）。文言は creative.html の `copy` に言語ごとに書きます
-- iPhone Duo は `xcode-27` のランナーで撮ります。このランナーが使えないと、Duo のジョブが待ちになったままになるので、そのときは `display_types` で Duo を外して流します
+- iPhone Duo は GitHub の標準イメージ `xcode-27`（actions/runner-images の xcode-27-arm64。org で用意するものは無い）で撮ります。イメージに iOS 27.1 のランタイムが無いので、撮影の前にダウンロードします（数分かかります）
 - 1 つの表示サイズの撮影が失敗しても、撮れたぶんと掲載文は登録します。撮った画像は Artifact（`screenshots-<表示サイズ>`）にも残ります
 - 指定したバージョンが無ければ、審査前のバージョンの番号を変えます（新規アプリに最初からある「1.0」など）。それも無ければ作ります
 - サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格・App のプライバシー・ビルドの選択は扱いません。App Store Connect の画面で入れてから審査に提出します（提出もこのワークフローでは行いません）
