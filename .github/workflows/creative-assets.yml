@@ -3,7 +3,8 @@ name: Creative Assets
 # App Store のクリエイティブアセット（プロダクトページのヘッダー / 検索結果）を、
 # App Store Connect API（App Asset Library）でアップロードする試験用のワークフロー。手動実行のみ。
 #
-# 画像はアプリアイコンから試験用のものをその場で生成する（リポジトリに大きな画像を置かない）。
+# 画像はアプリアイコン（<プロジェクト名>/AppIcon.icon を Icon Composer の ictool で書き出したもの）と
+# アプリ名・サブタイトルから、試験用のものをその場で生成する（リポジトリに大きな画像を置かない）。
 # 結果（仕様の一覧・アップロード結果・配置結果）は Job Summary に、API のレスポンスは Artifact に残す。
 # 審査への提出は行わないので、提出は App Store Connect の画面から行う。
 on:
@@ -25,6 +26,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # App Store の掲載文（docs/app-store/listing.md）のアプリ名とサブタイトルにそろえる
+  APP_NAME: 推し活カウントダウン
+  APP_SUBTITLE: 推しのライブ・誕生日まであと何日？
+
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
@@ -35,6 +41,12 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Select Xcode
+        # Icon Composer（ictool）が入っている Xcode を使う。_build.yml と同じバージョンに固定する
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.6'
+
       - name: Checkout
         uses: actions/checkout@v7
 
@@ -57,13 +69,22 @@ jobs:
           } >> "$GITHUB_ENV"
           echo "bundle_id=$bundle_id project=$project"
 
+      - name: Export app icon
+        run: |
+          ictool="$(xcode-select -p)/Applications/Icon Composer.app/Contents/Executables/ictool"
+          "$ictool" "$PROJECT_NAME/AppIcon.icon" --export-image \
+            --output-file "$RUNNER_TEMP/AppIcon.png" \
+            --platform iOS --rendition Default --width 1024 --height 1024 --scale 1
+          sips -g pixelWidth -g pixelHeight "$RUNNER_TEMP/AppIcon.png"
+          echo "ICON_PATH=$RUNNER_TEMP/AppIcon.png" >> "$GITHUB_ENV"
+
       - name: Generate sample images
         run: |
           swift .github/scripts/creative-assets/generate-sample.swift \
             "$ASSET_DIR" \
-            "$PROJECT_NAME/Assets.xcassets/AppIcon.appiconset/AppIcon.png" \
-            "$PROJECT_NAME" \
-            "SwiftUI iOS Application Template"
+            "$ICON_PATH" \
+            "$APP_NAME" \
+            "$APP_SUBTITLE"
           for f in "$ASSET_DIR"/*; do sips -g pixelWidth -g pixelHeight -g hasAlpha "$f"; done
 
       - name: Upload sample images to GitHub
