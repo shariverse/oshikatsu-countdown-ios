@@ -42,6 +42,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Allow SwiftLint build tool plugin
+        if: ${{ inputs.screenshots }}
+        run: defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
+
       - name: Set up environment
         env:
           INPUT_VERSION: ${{ inputs.version }}
