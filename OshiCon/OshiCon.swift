@@ -23,10 +23,11 @@ struct OshiCon: App {
         }
     }
 
-    /// 見本の推しと予定を入れる（メモリ上のストアのときだけ呼ぶ）。
+    /// 見本の推しと予定を入れる（メモリ上のストアのときだけ呼ぶ）。名前と予定名は端末の言語（`-AppleLanguages` で変えられる）で選ぶ。
     private static func seedSampleData(into container: ModelContainer) {
         let now = Date.now
-        let sample = SampleData.make(today: CalendarDay(now, calendar: .autoupdatingCurrent), now: now)
+        let language = Locale(identifier: Locale.preferredLanguages.first ?? "en")
+        let sample = SampleData.make(today: CalendarDay(now, calendar: .autoupdatingCurrent), now: now, locale: language)
         let store = OshiConStore(context: container.mainContext)
         for (index, oshi) in sample.oshis.enumerated() {
             // 登録した順に並ぶよう、1 秒ずつずらす
