@@ -53,12 +53,19 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - **仕様の正は Android 版の SPEC**（`shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`）。機能・文言・規則・配色はこれを移植する。
   ただし Material 3・`FilterChip`・Snackbar・48dp など Android 固有の部分は移さず、SwiftUI の標準とデザインに従う
 - 画面デザインの正はデザインキャンバス「推し活カウントダウン 画面デザイン」。デザインの無い画面は主要画面の雰囲気に合わせる
-- **作らないもの**: 通知・広告・シェア・検索・カレンダー・英語の文言・丸いウィジェット・ロック画面ウィジェット・iCloud 同期。入力欄に通知の項目や広告の枠を置かない。**通信しない**（データは端末の中だけ）
+- **作らないもの**: 通知・広告・シェア・検索・カレンダー・丸いウィジェット・ロック画面ウィジェット・iCloud 同期。入力欄に通知の項目や広告の枠を置かない。**通信しない**（データは端末の中だけ）
 - 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents / Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
 - ホーム画面ウィジェットは 2 種: カウントダウン（予定 1 件。`AppIntentConfiguration` で予定を選ぶ）と推しカウント（これからの予定の一覧）
 - データ（SwiftData のストアと推しの写真）は**最初から App Group のコンテナに置く**（ウィジェットと共有するため。後から移すとデータの移し替えが要る）
 - SwiftData のスキーマを最初の TestFlight 配信の後に変えると移行が要る。モデルの形を変えるときは移行を用意する
-- 文言は日本語だけ。String Catalog を使う場合も日本語だけでよい
+- 文言は 12 言語（en 既定・ja・zh-Hans・zh-Hant・ko・fr・de・es・pt-BR・it・th・id）。`DEVELOPMENT_LANGUAGE = en` で、対応していない言語の端末では英語で出す
+  - 文言は `Shared/Resources/Localizable.xcstrings`（アプリと Widget Extension の両方に入る）に置き、キーは日本語の文言そのもの。文言を足したら 12 言語ぶん訳を入れる。
+    ホーム画面の表示名は `OshiCon/InfoPlist.xcstrings`・`OshiConWidget/InfoPlist.xcstrings`（ja は「推し活カウント」）
+  - 画面の外（規則・中身の型）で作る文言は `String(localized: LocalizedStringResource("…", locale: locale))` にし、`locale` を注入する（既定は `Locale.app`）。
+    日付・時刻は `Date.FormatStyle` を `locale` で書き、日数は catalog の複数形にする。テストでは `DomainFixtures.japanese`・`english` を渡す
+  - `String` を受ける引数（`Text(title)` など）に渡すと訳されない。文言を受ける引数は `LocalizedStringKey` にするか、`String(localized:)` で渡す
+  - 本文の書体 Zen Kaku Gothic New は日本語のときだけ使い、ほかの言語はシステムの書体（中国語・韓国語・タイ語の字形が無いため）。数字の Outfit はどの言語でも使う
+  - 用語は App Store の掲載文（`docs/app-store/metadata/`）にそろえる（推し: zh-Hans 本命・zh-Hant 我推・ko 최애・ほかは oshi）
 - 規則（残り日数は暦の日数・毎年くり返す予定・2/29 は平年 2/28・同じ日の並び・ピン留め 1 件・書記素で数える文字数 など）は**画面から切り離した型に置き、Swift Testing でテストする**。
   日付は `Calendar` と現在時刻を注入してテストする（`Date()` や `Calendar.current` を規則の中で直接使わない）
 - iPhone と iPad の両方が対象。広い画面は `NavigationSplitView` などで組み、横向きでも崩れないこと

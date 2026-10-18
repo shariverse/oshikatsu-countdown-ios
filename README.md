@@ -180,6 +180,24 @@ gh workflow run app-store-metadata.yml --ref develop
 - 指定したバージョンが無ければ、審査前のバージョンの番号を変えます（新規アプリに最初からある「1.0」など）。それも無ければ作ります
 - サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格・App のプライバシー・ビルドの選択は扱いません。App Store Connect の画面で入れてから審査に提出します（提出もこのワークフローでは行いません）
 
+## 多言語対応
+
+アプリと Widget Extension は 12 言語に対応しています（英語が既定。対応していない言語の端末では英語で出ます）。
+
+| 言語 | コード |
+| --- | --- |
+| 英語（既定） | `en` |
+| 日本語 | `ja` |
+| 中国語（簡体字・繁体字） | `zh-Hans`・`zh-Hant` |
+| 韓国語 | `ko` |
+| フランス語・ドイツ語・スペイン語・イタリア語 | `fr`・`de`・`es`・`it` |
+| ポルトガル語（ブラジル） | `pt-BR` |
+| タイ語・インドネシア語 | `th`・`id` |
+
+- 文言は `Shared/Resources/Localizable.xcstrings`、ホーム画面の表示名は `OshiCon/InfoPlist.xcstrings`・`OshiConWidget/InfoPlist.xcstrings` にあります。文言を足したら 12 言語ぶん訳を入れてください
+- 別の言語で確かめるときは、Xcode のスキームの「Run」→「Options」→「App Language」を変えるか、起動引数に `-AppleLanguages (zh-Hant)` を付けます
+- UI テストは文言で要素を探すので、`-AppleLanguages (ja)` を付けて日本語で起動します
+
 ## 構成
 
 ```
