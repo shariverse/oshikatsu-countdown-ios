@@ -7,8 +7,8 @@ import Foundation
 
 /// 起動引数で切り替える動き（UI テスト用）。
 ///
-/// 初回の導線を飛ばすときは `-hasCompletedOnboarding YES` を渡す。起動引数の設定は初期値として UserDefaults に書き写す
-/// （`applyUserDefaultsArguments()`）。
+/// 初回の導線を飛ばすときは `-hasCompletedOnboarding YES` を渡す。導線を通すときなど、アプリの中で書き換わる設定は
+/// 環境変数で初期値を渡す（`applyDefaultEnvironment()`）。
 nonisolated enum LaunchOptions {
     /// メモリ上のストアで起動する（UI テストで、端末に残ったデータに左右されないようにする）。
     static let inMemoryStoreArgument = "-useInMemoryStore"
@@ -24,20 +24,25 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(sampleDataArgument)
     }
 
-    /// 起動引数で渡した設定（`-hasCompletedOnboarding NO` など）を UserDefaults に書き写し、引数のドメインを外す。
+    /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
+    static let defaultEnvironmentPrefix = "OSHICON_DEFAULT_"
+
+    /// UI テストが環境変数で渡した設定の初期値を UserDefaults に書く。メモリ上のストアのときだけ効く。
     ///
-    /// 引数のドメインは UserDefaults への書き込みより優先されるため、そのままだと導線を終えても
-    /// `hasCompletedOnboarding` が NO のまま読まれ、タブに切り替わらない。UI テスト（メモリ上のストア）のときだけ行う。
-    static func applyUserDefaultsArguments(to defaults: UserDefaults = .standard) {
+    /// 起動引数（`-hasCompletedOnboarding NO`）で渡すと引数のドメインが UserDefaults への書き込みより優先され、
+    /// 導線を終えても NO のまま読まれてタブに切り替わらないため、書き換わる設定は環境変数で渡す。
+    static func applyDefaultEnvironment(
+        _ environment: [String: String] = ProcessInfo.processInfo.environment,
+        to defaults: UserDefaults = .standard
+    ) {
         guard usesInMemoryStore else {
             return
         }
-        let arguments = defaults.volatileDomain(forName: UserDefaults.argumentDomain)
-        // 引数の値は文字列（"NO"）なので、Bool に直して書く
-        for key in AppStorageKey.all where arguments[key] != nil {
-            defaults.set(defaults.bool(forKey: key), forKey: key)
+        for key in AppStorageKey.all {
+            if let value = environment[defaultEnvironmentPrefix + key] {
+                defaults.set(value == "YES", forKey: key)
+            }
         }
-        defaults.removeVolatileDomain(forName: UserDefaults.argumentDomain)
     }
 }
 
@@ -48,6 +53,6 @@ nonisolated enum AppStorageKey {
     /// 終わった予定もホームに表示する（既定は OFF）。
     static let showsPastEvents = "showsPastEvents"
 
-    /// 起動引数で初期値を渡せるキー。どれも Bool（`LaunchOptions.applyUserDefaultsArguments()`）
+    /// UI テストが初期値を渡せるキー。どれも Bool（`LaunchOptions.applyDefaultEnvironment()`）
     static let all = [hasCompletedOnboarding, showsPastEvents]
 }

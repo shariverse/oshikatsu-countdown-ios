@@ -15,7 +15,7 @@ struct OshiCon: App {
     private let container: Result<ModelContainer, any Error>
 
     init() {
-        LaunchOptions.applyUserDefaultsArguments()
+        LaunchOptions.applyDefaultEnvironment()
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
         if LaunchOptions.seedsSampleData, case let .success(container) = container {

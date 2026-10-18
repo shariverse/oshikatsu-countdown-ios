@@ -13,14 +13,15 @@ final class OshiConUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// 端末に残ったデータに左右されないよう、メモリ上のストアで起動し、設定（UserDefaults）も起動引数で決める。
+    /// 端末に残ったデータに左右されないよう、メモリ上のストアで起動し、設定（UserDefaults）の初期値も決める。
+    /// 起動引数で渡すとアプリの中で書き換えられなくなる（導線を終えてもタブに切り替わらない）ので、環境変数で渡す。
     @MainActor
     private func launch(hasCompletedOnboarding: Bool) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = [
-            "-useInMemoryStore",
-            "-hasCompletedOnboarding", hasCompletedOnboarding ? "YES" : "NO",
-            "-showsPastEvents", "NO"
+        app.launchArguments = ["-useInMemoryStore"]
+        app.launchEnvironment = [
+            "OSHICON_DEFAULT_hasCompletedOnboarding": hasCompletedOnboarding ? "YES" : "NO",
+            "OSHICON_DEFAULT_showsPastEvents": "NO"
         ]
         app.launch()
         return app
