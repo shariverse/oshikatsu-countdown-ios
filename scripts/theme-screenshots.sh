@@ -8,7 +8,8 @@
 #   scripts/theme-screenshots.sh <テーマの id> <Simulator の UDID>
 #   scripts/theme-screenshots.sh standard 9B5AF7FD-96D2-4113-916C-B2261D99ED0C
 #
-# Simulator は手元のもの（言語を日本語にしたもの）を使う。外観を切り替え、ステータスバーを 9:41 にそろえて撮り、終わったらライトと元のステータスバーに戻す。
+# Simulator は手元のものを使う。外観を切り替え、ステータスバーを 9:41 にそろえて撮り、終わったらライトと元のステータスバーに戻す。
+# テストの言語と地域は日本語・日本にそろえる（テーマ案の書体は日本語の本文だけに使うため）。
 #
 # 出力先: $SCREENSHOTS_DIR/<テーマの id>/<light|dark>/（画像と manifest.json。既定は build/theme-screenshots）
 #
@@ -22,6 +23,11 @@ cd "$(dirname "$0")/.."
 
 THEME_ID="${1:?テーマの id（例: standard）を指定してください}"
 UDID="${2:?Simulator の UDID を指定してください（xcrun simctl list devices available）}"
+# 出力先の名前に使うので、id は英数字だけに限る（AppTheme の id は英字）
+if [[ ! "$THEME_ID" =~ ^[A-Za-z0-9]+$ ]]; then
+  echo "テーマの id は英数字だけにしてください: ${THEME_ID}" >&2
+  exit 1
+fi
 SCREENSHOTS_DIR="${SCREENSHOTS_DIR:-build/theme-screenshots}"
 DERIVED_DATA_ARGS=()
 if [[ -n "${DERIVED_DATA_PATH:-}" ]]; then
@@ -48,9 +54,10 @@ for appearance in light dark; do
   rm -rf "$out"
   mkdir -p "$out"
   echo "テーマ ${THEME_ID} を ${appearance} で撮ります"
-  TEST_RUNNER_THEME_SCREENSHOTS=1 TEST_RUNNER_THEME_ID="$THEME_ID" xcodebuild test \
+  TEST_RUNNER_THEME_SCREENSHOTS=1 TEST_RUNNER_THEME_ID="$THEME_ID" TEST_RUNNER_THEME_APPEARANCE="$appearance" xcodebuild test \
     -project OshiCon.xcodeproj -scheme OshiCon \
     -destination "platform=iOS Simulator,id=${UDID}" \
+    -testLanguage ja -testRegion JP \
     "${DERIVED_DATA_ARGS[@]+"${DERIVED_DATA_ARGS[@]}"}" \
     -parallel-testing-enabled NO \
     -only-testing:OshiConUITests/ThemeScreenshotTests \

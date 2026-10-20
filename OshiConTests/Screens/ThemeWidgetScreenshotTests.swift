@@ -11,8 +11,8 @@ import XCTest
 /// テーマ案の見本のウィジェット 2 種を、ウィジェットの大きさの枠に入れて PNG に撮る（README の「テーマの見本」）。
 ///
 /// ふだんのテストでは流さない。環境変数 `THEME_SCREENSHOTS=1`（xcodebuild には `TEST_RUNNER_THEME_SCREENSHOTS=1`）のときだけ流れ、
-/// テーマは `THEME_ID`（`AppTheme` の id。無ければ既定のテーマ）で選ぶ。ライト / ダークは Simulator の外観に合わせる。
-/// 文言はアプリの言語（Simulator の言語）で出るので、日本語の書体を見るときは Simulator の言語を日本語にしておく。
+/// テーマは `THEME_ID`（`AppTheme` の id。無ければ既定のテーマ）、外観は `THEME_APPEARANCE`（`light` / `dark`。無ければライト）で選ぶ。
+/// 文言はアプリの言語で出るので、日本語の書体を見るときは日本語で流す（`scripts/theme-screenshots.sh` は `-testLanguage ja` を付ける）。
 nonisolated final class ThemeWidgetScreenshotTests: XCTestCase {
     override func setUpWithError() throws {
         try XCTSkipUnless(
@@ -24,8 +24,9 @@ nonisolated final class ThemeWidgetScreenshotTests: XCTestCase {
     @MainActor
     func testCaptureWidgets() throws {
         PreviewFonts.registerIfNeeded()
-        let theme = AppTheme.theme(id: ProcessInfo.processInfo.environment["THEME_ID"] ?? AppTheme.standard.id)
-        let colorScheme: ColorScheme = UIScreen.main.traitCollection.userInterfaceStyle == .dark ? .dark : .light
+        let environment = ProcessInfo.processInfo.environment
+        let theme = AppTheme.theme(id: environment["THEME_ID"] ?? AppTheme.standard.id)
+        let colorScheme: ColorScheme = environment["THEME_APPEARANCE"] == "dark" ? .dark : .light
         try capture("05-ウィジェット-カウントダウン", WidgetPreview.countdown(.sample, theme: theme), colorScheme: colorScheme)
         try capture("06-ウィジェット-推しカウント", WidgetPreview.upcoming(.sample, theme: theme), colorScheme: colorScheme)
     }
