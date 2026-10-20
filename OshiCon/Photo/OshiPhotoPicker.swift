@@ -21,6 +21,7 @@ struct OshiPhotoPicker<Placeholder: View>: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var preview: Image?
     @State private var loadFailed = false
+    @Environment(\.appTheme) private var theme
 
     private let avatarSize: CGFloat = 96
 
@@ -56,12 +57,12 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                     }
                 }
             }
-            .font(AppFont.text(.subheadline, weight: .bold))
+            .font(theme.typography.text(.subheadline, weight: .bold))
             .disabled(isLoading)
             if loadFailed {
                 Text("写真を読み込めませんでした")
-                    .font(AppFont.text(.footnote))
-                    .foregroundStyle(AppPalette.destructive.color)
+                    .font(theme.typography.text(.footnote))
+                    .foregroundStyle(theme.palette.destructive.color)
             }
         }
         .task(id: currentPhotoFileName) {

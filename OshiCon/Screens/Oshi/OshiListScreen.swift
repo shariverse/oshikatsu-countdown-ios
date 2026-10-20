@@ -13,6 +13,7 @@ struct OshiListScreen: View {
     @Query private var storedEvents: [StoredEvent]
     @State private var editorTarget: EditorTarget?
     @Environment(AppRouter.self) private var router
+    @Environment(\.appTheme) private var theme
 
     /// 開いているシート。
     private enum EditorTarget: Identifiable {
@@ -46,7 +47,7 @@ struct OshiListScreen: View {
                 list
             }
         }
-        .background(AppPalette.background.color.ignoresSafeArea())
+        .background(theme.palette.background.color.ignoresSafeArea())
         .navigationTitle("推し")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -74,7 +75,7 @@ struct OshiListScreen: View {
             } label: {
                 OshiRow(oshi: oshi, eventCount: eventCounts[oshi.id, default: 0])
             }
-            .listRowBackground(AppPalette.surface.color)
+            .listRowBackground(theme.palette.surface.color)
             .accessibilityIdentifier("oshiList.row")
         }
         .scrollContentBackground(.hidden)
@@ -90,7 +91,7 @@ struct OshiListScreen: View {
                 editorTarget = .register
             }
             .buttonStyle(.borderedProminent)
-            .font(AppFont.text(.headline, weight: .bold))
+            .font(theme.typography.text(.headline, weight: .bold))
         }
     }
 }
@@ -100,21 +101,23 @@ private struct OshiRow: View {
     let oshi: Oshi
     let eventCount: Int
 
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         HStack(spacing: 12) {
             OshiPhotoAvatar(oshi: oshi, size: 48)
             VStack(alignment: .leading, spacing: 2) {
                 Text(oshi.name)
-                    .font(AppFont.text(.body, weight: .bold))
-                    .foregroundStyle(AppPalette.onSurface.color)
+                    .font(theme.typography.text(.body, weight: .bold))
+                    .foregroundStyle(theme.palette.onSurface.color)
                 Text("予定 \(eventCount) 件")
-                    .font(AppFont.text(.subheadline))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.subheadline))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
             }
             Spacer(minLength: 0)
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 .accessibilityHidden(true)
         }
         .padding(.vertical, 4)
