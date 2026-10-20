@@ -21,7 +21,7 @@ struct EventDetailScreen: View {
     @State private var isConfirmingDelete = false
     @State private var failureMessage: String?
     /// ピン留めを切り替えたときの触覚。
-    @State private var haptic = HapticTrigger()
+    @Environment(\.haptic) private var haptic
 
     private static let photoHeight: CGFloat = 300
     /// 横向きの iPhone（縦が狭い）では、写真で画面が埋まらないよう低くする。
@@ -52,7 +52,6 @@ struct EventDetailScreen: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .modifier(DetailNavigationBarBackground())
-        .hapticFeedback(haptic)
         // 予定が消えた・読めないときは前の画面に戻る。作り直しや遷移の途中でも戻れるよう、ホームの積み重ねから外す
         .onChange(of: current == nil, initial: true) { _, isMissing in
             if isMissing {
@@ -146,7 +145,7 @@ struct EventDetailScreen: View {
     private func setPinned(_ isPinned: Bool, event: OshiEvent) {
         do {
             try OshiConStore(context: modelContext).setPinned(isPinned, eventID: event.id)
-            haptic.fire(.pinChanged(isPinned: isPinned))
+            haptic(.pinChanged(isPinned: isPinned))
         } catch {
             failureMessage = String(localized: "保存できませんでした")
         }

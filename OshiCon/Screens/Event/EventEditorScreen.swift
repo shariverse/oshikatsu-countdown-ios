@@ -30,7 +30,7 @@ struct EventEditorScreen: View {
     @State private var newEventID = UUID()
     @State private var failureMessage: String?
     /// 保存が成功したときの触覚。
-    @State private var haptic = HapticTrigger()
+    @Environment(\.haptic) private var haptic
 
     var body: some View {
         NavigationStack {
@@ -50,7 +50,6 @@ struct EventEditorScreen: View {
         }
         .font(theme.typography.text(.body))
         .tint(theme.palette.brand.color)
-        .hapticFeedback(haptic)
         .task {
             guard form == nil else {
                 return
@@ -96,7 +95,7 @@ struct EventEditorScreen: View {
         }
         do {
             try OshiConStore(context: modelContext).save(saved)
-            haptic.fire(.saved)
+            haptic(.saved)
             onSaved(saved)
             if onboarding == nil {
                 dismiss()

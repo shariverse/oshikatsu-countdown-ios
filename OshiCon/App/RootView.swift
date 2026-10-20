@@ -10,6 +10,8 @@ struct RootView: View {
     @AppStorage(AppStorageKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @Environment(AppRouter.self) private var router
     @Environment(\.appTheme) private var theme
+    /// 保存・ピン留めの触覚。保存した画面は直後に閉じたり導線の次の歩に進んだりするので、ずっと残るここで鳴らす。
+    @State private var haptic = HapticTrigger()
 
     var body: some View {
         Group {
@@ -24,6 +26,8 @@ struct RootView: View {
         .font(theme.typography.text(.body))
         .tint(theme.palette.brand.color)
         .environment(\.locale, .app)
+        .environment(\.haptic, HapticAction { haptic.fire($0) })
+        .hapticFeedback(haptic)
         .onOpenURL(perform: open)
     }
 
