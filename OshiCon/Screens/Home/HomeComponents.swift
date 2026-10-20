@@ -10,6 +10,8 @@ struct OshiFilterBar: View {
     let oshis: [Oshi]
     @Binding var selection: Oshi.ID?
 
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
@@ -35,19 +37,19 @@ struct OshiFilterBar: View {
                     OshiColorDot(color: color)
                 }
                 Text(title)
-                    .font(AppFont.text(.subheadline, weight: isSelected ? .bold : .regular))
+                    .font(theme.typography.text(.subheadline, weight: isSelected ? .bold : .regular))
                     .lineLimit(1)
             }
-            .foregroundStyle(AppPalette.onSurface.color)
+            .foregroundStyle(theme.palette.onSurface.color)
             .padding(.horizontal, 14)
             .frame(minHeight: 36)
             .background(
-                (isSelected ? (color?.container ?? AppPalette.brandContainer) : AppPalette.surface).color,
+                (isSelected ? (color?.container(in: theme) ?? theme.palette.brandContainer) : theme.palette.surface).color,
                 in: Capsule()
             )
             .overlay {
                 Capsule()
-                    .strokeBorder(isSelected ? Color.clear : AppPalette.outlineVariant.color)
+                    .strokeBorder(isSelected ? Color.clear : theme.palette.outlineVariant.color)
             }
             .frame(minHeight: 44)
             .contentShape(Rectangle())
@@ -62,54 +64,59 @@ struct FeaturedEventCard: View {
     let item: HomeContent.Item
 
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(item.featuredBadgeText)
-                    .font(AppFont.text(.caption, weight: .bold))
+                    .font(theme.typography.text(.caption, weight: .bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(.white.opacity(0.2), in: Capsule())
                 Spacer(minLength: 8)
                 if let oshi = item.oshi {
                     Text(oshi.name)
-                        .font(AppFont.text(.subheadline, weight: .medium))
+                        .font(theme.typography.text(.subheadline, weight: .medium))
                         .lineLimit(1)
                 }
             }
             Text(item.event.title)
-                .font(AppFont.text(.title2, weight: .bold))
+                .font(theme.typography.text(.title2, weight: .bold))
                 .lineLimit(2)
             DaysCountdownView(
                 scheduled: item.scheduled,
                 color: item.color.onFill,
                 mutedColor: item.color.onFill,
                 // 横向きの iPhone（縦が狭い）では、カードで画面が埋まらないよう数字を小さくする
-                numberFont: verticalSizeClass == .compact ? AppFont.countdownClock : AppFont.countdownLarge,
-                unitFont: AppFont.text(.title3, weight: .bold),
-                showsPrefix: true
+                numberFont: verticalSizeClass == .compact ? theme.typography.countdownClock : theme.typography.countdownLarge,
+                unitFont: theme.typography.text(.title3, weight: .bold),
+                showsPrefix: true,
+                oshiColor: item.color
             )
             HStack(spacing: 12) {
                 Text(EventText.dateBadge(item.scheduled.occurrenceDay, locale: item.locale))
-                    .font(AppFont.dateBadge)
+                    .font(theme.typography.dateBadge)
                 if let startTime = item.event.startTime {
                     Text(EventText.startTime(startTime, kind: item.event.kind, locale: item.locale))
-                        .font(AppFont.text(.subheadline, weight: .medium))
+                        .font(theme.typography.text(.subheadline, weight: .medium))
                 }
             }
         }
         .foregroundStyle(item.color.onFill)
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(item.color.fill, in: RoundedRectangle(cornerRadius: 28))
-        .contentShape(RoundedRectangle(cornerRadius: 28))
+        .background(item.color.fill, in: RoundedRectangle(cornerRadius: theme.shape.heroCard))
+        .themeCardBorder(RoundedRectangle(cornerRadius: theme.shape.heroCard))
+        .contentShape(RoundedRectangle(cornerRadius: theme.shape.heroCard))
     }
 }
 
 /// ホームの予定の行。アバター・タイトル・補足と、右に残り日数を推し色で出す。
 struct HomeEventRow: View {
     let item: HomeContent.Item
+
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         HStack(spacing: 12) {
@@ -120,22 +127,23 @@ struct HomeEventRow: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.event.title)
-                    .font(AppFont.text(.body, weight: .bold))
-                    .foregroundStyle(AppPalette.onSurface.color)
+                    .font(theme.typography.text(.body, weight: .bold))
+                    .foregroundStyle(theme.palette.onSurface.color)
                     .lineLimit(1)
                 Text(item.supportingText)
-                    .font(AppFont.text(.footnote))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.footnote))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
             DaysCountdownView(
                 scheduled: item.scheduled,
-                color: item.color.text.color,
-                mutedColor: AppPalette.onSurfaceVariant.color,
-                numberFont: AppFont.countdownSmall,
-                unitFont: AppFont.text(.caption, weight: .bold),
-                showsPrefix: false
+                color: item.color.text(in: theme).color,
+                mutedColor: theme.palette.onSurfaceVariant.color,
+                numberFont: theme.typography.countdownSmall,
+                unitFont: theme.typography.text(.caption, weight: .bold),
+                showsPrefix: false,
+                oshiColor: item.color
             )
         }
         .padding(.horizontal, 12)
@@ -153,6 +161,10 @@ struct DaysCountdownView: View {
     let numberFont: Font
     let unitFont: Font
     let showsPrefix: Bool
+    /// 数字の効果（テーマの装飾）に使う推し色。
+    let oshiColor: OshiColor
+
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         switch scheduled.status {
@@ -162,7 +174,7 @@ struct DaysCountdownView: View {
                 .foregroundStyle(color)
         case .ended:
             Text(EventText.countdown(daysUntil: scheduled.daysUntil, status: .ended))
-                .font(AppFont.text(.subheadline))
+                .font(theme.typography.text(.subheadline))
                 .foregroundStyle(mutedColor)
         case .upcoming:
             let parts = EventText.countdownParts(days: scheduled.daysUntil, withPrefix: showsPrefix)
@@ -176,6 +188,7 @@ struct DaysCountdownView: View {
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
+                    .themeNumeralEffect(oshiColor)
                 if !parts.suffix.isEmpty {
                     Text(parts.suffix)
                         .font(unitFont)

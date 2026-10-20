@@ -9,6 +9,8 @@ import SwiftUI
 struct EventDetailCard: View {
     let detail: EventDetailContent
 
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 20) {
@@ -36,8 +38,8 @@ struct EventDetailCard: View {
         .padding(.bottom, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            AppPalette.surface.color,
-            in: UnevenRoundedRectangle(topLeadingRadius: 28, topTrailingRadius: 28)
+            theme.palette.surface.color,
+            in: UnevenRoundedRectangle(topLeadingRadius: theme.shape.detailCard, topTrailingRadius: theme.shape.detailCard)
         )
     }
 
@@ -45,18 +47,18 @@ struct EventDetailCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Text(detail.kindLabel)
-                    .font(AppFont.text(.caption, weight: .bold))
-                    .foregroundStyle(AppPalette.onSurface.color)
+                    .font(theme.typography.text(.caption, weight: .bold))
+                    .foregroundStyle(theme.palette.onSurface.color)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(detail.color.container.color, in: RoundedRectangle(cornerRadius: 8))
+                    .background(detail.color.container(in: theme).color, in: RoundedRectangle(cornerRadius: theme.shape.tag))
                 Text(detail.oshiName)
-                    .font(AppFont.text(.subheadline))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.subheadline))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
             }
             Text(detail.event.title)
-                .font(AppFont.text(.title2, weight: .bold))
-                .foregroundStyle(AppPalette.onSurface.color)
+                .font(theme.typography.text(.title2, weight: .bold))
+                .foregroundStyle(theme.palette.onSurface.color)
                 .accessibilityAddTraits(.isHeader)
         }
     }
@@ -66,51 +68,52 @@ struct EventDetailCard: View {
         case .upcoming:
             VStack(alignment: .leading, spacing: 4) {
                 Text(detail.untilLabel)
-                    .font(AppFont.text(.subheadline, weight: .bold))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.subheadline, weight: .bold))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
                         let days = detail.remainingDaysParts
                         if !days.prefix.isEmpty {
                             Text(days.prefix)
-                                .font(AppFont.text(.title3, weight: .bold))
+                                .font(theme.typography.text(.title3, weight: .bold))
                         }
                         Text(days.number)
-                            .font(AppFont.countdownHero)
+                            .font(theme.typography.countdownHero)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
+                            .themeNumeralEffect(detail.color)
                         if !days.suffix.isEmpty {
                             Text(days.suffix)
-                                .font(AppFont.text(.title3, weight: .bold))
+                                .font(theme.typography.text(.title3, weight: .bold))
                         }
                     }
                     Text(detail.clockText)
-                        .font(AppFont.countdownClock)
+                        .font(theme.typography.countdownClock)
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 }
-                .foregroundStyle(detail.color.text.color)
+                .foregroundStyle(detail.color.text(in: theme).color)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(detail.countdownAccessibilityLabel)
         case .today:
             VStack(alignment: .leading, spacing: 4) {
                 Text("今日は当日！")
-                    .font(AppFont.text(.title, weight: .bold))
-                    .foregroundStyle(detail.color.text.color)
+                    .font(theme.typography.text(.title, weight: .bold))
+                    .foregroundStyle(detail.color.text(in: theme).color)
                 Text("楽しんできてね")
-                    .font(AppFont.text(.body))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.body))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
             }
             .accessibilityElement(children: .combine)
         case .ended:
             VStack(alignment: .leading, spacing: 4) {
                 Text("終わった予定")
-                    .font(AppFont.text(.subheadline, weight: .bold))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.subheadline, weight: .bold))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 Text(detail.daysAgoText)
-                    .font(AppFont.text(.title, weight: .bold))
-                    .foregroundStyle(AppPalette.onSurface.color)
+                    .font(theme.typography.text(.title, weight: .bold))
+                    .foregroundStyle(theme.palette.onSurface.color)
             }
             .accessibilityElement(children: .combine)
         }
@@ -119,7 +122,7 @@ struct EventDetailCard: View {
     private func progressBar(progress: Double, percentText: String, accessibilityLabel: String) -> some View {
         VStack(spacing: 6) {
             ProgressView(value: progress)
-                .tint(detail.color.text.color)
+                .tint(detail.color.text(in: theme).color)
             HStack {
                 Text(detail.progressStartText)
                 Spacer()
@@ -128,8 +131,8 @@ struct EventDetailCard: View {
                 Spacer()
                 Text(detail.progressEndText)
             }
-            .font(AppFont.text(.caption))
-            .foregroundStyle(AppPalette.onSurfaceVariant.color)
+            .font(theme.typography.text(.caption))
+            .foregroundStyle(theme.palette.onSurfaceVariant.color)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
@@ -138,16 +141,16 @@ struct EventDetailCard: View {
     private func infoRow(systemImage: String, title: LocalizedStringKey, value: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
             Image(systemName: systemImage)
-                .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 .frame(width: 24)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(AppFont.text(.caption))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.caption))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 Text(value)
-                    .font(AppFont.text(.body))
-                    .foregroundStyle(AppPalette.onSurface.color)
+                    .font(theme.typography.text(.body))
+                    .foregroundStyle(theme.palette.onSurface.color)
             }
         }
         .padding(.horizontal, 20)
