@@ -27,17 +27,17 @@ struct CountdownWidgetView: View {
                 message(title: "データを読み込めませんでした", detail: "しばらくしてからもう一度表示します")
             }
         }
-        .containerBackground(Self.containerColor(for: content, in: theme), for: .widget)
+        .containerBackground(Self.containerColor(for: content, in: theme).color, for: .widget)
         .environment(\.locale, .app)
     }
 
     /// ウィジェットの地。予定は推し色の塗り、ほかはカードの地。
-    static func containerColor(for content: CountdownWidgetContent, in theme: AppTheme) -> Color {
+    static func containerColor(for content: CountdownWidgetContent, in theme: AppTheme) -> AdaptiveColor {
         switch content {
         case let .event(event):
-            event.color.fill
+            AdaptiveColor(light: event.color.rgb, dark: event.color.rgb)
         case .notSelected, .missing, .unavailable:
-            theme.palette.surface.color
+            theme.palette.surface
         }
     }
 

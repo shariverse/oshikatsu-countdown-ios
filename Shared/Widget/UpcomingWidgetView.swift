@@ -35,13 +35,13 @@ struct UpcomingWidgetView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetURL(WidgetLink.home.url)
-        .containerBackground(Self.containerColor(in: theme), for: .widget)
+        .containerBackground(Self.containerColor(in: theme).color, for: .widget)
         .environment(\.locale, .app)
     }
 
     /// ウィジェットの地（入力欄の地）。
-    static func containerColor(in theme: AppTheme) -> Color {
-        theme.palette.surfaceContainer.color
+    static func containerColor(in theme: AppTheme) -> AdaptiveColor {
+        theme.palette.surfaceContainer
     }
 
     /// 見出し（押すとアプリ）と、右上の ＋（押すと予定の追加）。
