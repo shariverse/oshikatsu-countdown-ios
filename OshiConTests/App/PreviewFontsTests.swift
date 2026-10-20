@@ -27,6 +27,31 @@ struct PreviewFontsTests {
         #expect(text.contains("SIL OPEN FONT LICENSE Version 1.1"))
     }
 
+    @Test("テーマ案の書体とライセンス文は、Release の構成で出荷物から外す名前に当たる（同梱の書体は外さない）")
+    func previewFontsAreExcludedFromRelease() throws {
+        // テストは Simulator で動くので、リポジトリの Configs/Release.xcconfig をソースの場所から読む
+        let repository = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let config = repository.appendingPathComponent("Configs/Release.xcconfig")
+        let text = try String(contentsOf: config, encoding: .utf8)
+        let line = try #require(text.split(separator: "\n").first { $0.hasPrefix("EXCLUDED_SOURCE_FILE_NAMES") })
+        let patterns = line.split(separator: "=", maxSplits: 1)[1].split(separator: " ").map(String.init)
+        func isExcluded(_ fileName: String) -> Bool {
+            patterns.contains { fnmatch($0, fileName, 0) == 0 }
+        }
+        let licenses = PreviewFonts.licenseFileNames.filter { $0 != "ZenKakuGothicNew-OFL" }
+        for fileName in PreviewFonts.fileNames.map({ "\($0).ttf" }) + licenses.map({ "\($0).txt" }) {
+            #expect(isExcluded(fileName), "\(fileName)")
+        }
+        let bundled = AppFont.TextFace.allCases.map { "\($0.rawValue).ttf" }
+            + ["Outfit-Variable.ttf", "Outfit-OFL.txt", "ZenKakuGothicNew-OFL.txt"]
+        for fileName in bundled {
+            #expect(!isExcluded(fileName), "\(fileName)")
+        }
+    }
+
     @Test("アプリの日本語の文言と日本語の見本の文字が、テーマ案のどの書体にも字形としてある", arguments: PreviewFonts.fileNames)
     func fontCoversJapaneseText(name: String) throws {
         PreviewFonts.registerIfNeeded()
