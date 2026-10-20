@@ -27,29 +27,38 @@ struct PreviewFontsTests {
         #expect(text.contains("SIL OPEN FONT LICENSE Version 1.1"))
     }
 
-    @Test("テーマ案の書体とライセンス文は、Release の構成で出荷物から外す名前に当たる（同梱の書体は外さない）")
+    @Test("Preview 用の書体のフォルダのファイルは Release の構成ですべて出荷物から外れ、同梱の書体のフォルダのファイルはどれも外れない")
     func previewFontsAreExcludedFromRelease() throws {
-        // テストは Simulator で動くので、リポジトリの Configs/Release.xcconfig をソースの場所から読む
+        // テストは Simulator で動くので、リポジトリのファイルをソースの場所から読む
         let repository = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let config = repository.appendingPathComponent("Configs/Release.xcconfig")
-        let text = try String(contentsOf: config, encoding: .utf8)
+        let text = try String(contentsOf: repository.appendingPathComponent("Configs/Release.xcconfig"), encoding: .utf8)
         let line = try #require(text.split(separator: "\n").first { $0.hasPrefix("EXCLUDED_SOURCE_FILE_NAMES") })
         let patterns = line.split(separator: "=", maxSplits: 1)[1].split(separator: " ").map(String.init)
         func isExcluded(_ fileName: String) -> Bool {
             patterns.contains { fnmatch($0, fileName, 0) == 0 }
         }
-        let licenses = PreviewFonts.licenseFileNames.filter { $0 != "ZenKakuGothicNew-OFL" }
-        for fileName in PreviewFonts.fileNames.map({ "\($0).ttf" }) + licenses.map({ "\($0).txt" }) {
+        func fileNames(in folder: String) throws -> [String] {
+            try FileManager.default.contentsOfDirectory(atPath: repository.appendingPathComponent(folder).path)
+                .filter { !$0.hasPrefix(".") }
+        }
+        let previewFiles = try fileNames(in: "OshiCon/Preview Content/Fonts")
+        #expect(Set(previewFiles.filter { $0.hasSuffix(".ttf") }) == Set(PreviewFonts.fileNames.map { "\($0).ttf" }))
+        for fileName in previewFiles {
             #expect(isExcluded(fileName), "\(fileName)")
         }
-        let bundled = AppFont.TextFace.allCases.map { "\($0.rawValue).ttf" }
-            + ["Outfit-Variable.ttf", "Outfit-OFL.txt", "ZenKakuGothicNew-OFL.txt"]
-        for fileName in bundled {
+        let bundledFiles = try fileNames(in: "Shared/Resources/Fonts")
+        #expect(bundledFiles.contains("ZenKakuGothicNew-Regular.ttf"))
+        for fileName in bundledFiles {
             #expect(!isExcluded(fileName), "\(fileName)")
         }
+    }
+
+    @Test("書体の無いバンドルでは、書体のファイルが見つからない（登録するものが無い）")
+    func noFontsInOtherBundle() {
+        #expect(PreviewFonts.fontURLs(in: Bundle(for: BundleToken.self)).isEmpty)
     }
 
     @Test("アプリの日本語の文言と日本語の見本の文字が、テーマ案のどの書体にも字形としてある", arguments: PreviewFonts.fileNames)
@@ -74,10 +83,11 @@ struct PreviewFontsTests {
         let strings = try #require(bundle.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "ja"))
         let dictionary = try #require(NSDictionary(contentsOf: strings) as? [String: String])
         texts += Array(dictionary.keys) + Array(dictionary.values)
-        if let plurals = bundle.url(forResource: "Localizable", withExtension: "stringsdict", subdirectory: nil, localization: "ja"),
-           let dictionary = NSDictionary(contentsOf: plurals) {
-            texts += Self.strings(in: dictionary)
-        }
+        let plurals = try #require(
+            bundle.url(forResource: "Localizable", withExtension: "stringsdict", subdirectory: nil, localization: "ja")
+        )
+        texts += Self.strings(in: try #require(NSDictionary(contentsOf: plurals)))
+        texts += Self.japaneseDates()
         let sample = SampleData.make(
             today: DomainFixtures.day(2026, 10, 18),
             now: DomainFixtures.date(2026, 10, 18, 9, 41),
@@ -93,12 +103,29 @@ struct PreviewFontsTests {
         return characters.sorted()
     }
 
+    /// 画面に出る日本語の日付と時刻（12 か月と 7 つの曜日）。
+    private static func japaneseDates() -> [String] {
+        let locale = DomainFixtures.japanese
+        let days = (1...12).flatMap { month in (1...7).map { DomainFixtures.day(2026, month, $0) } }
+        let dates = days.flatMap { day in
+            [
+                EventText.monthDayWeekday(day, locale: locale),
+                EventText.spokenMonthDayWeekday(day, locale: locale),
+                EventText.fullDate(day, locale: locale),
+                EventText.shortDate(day, locale: locale),
+                EventText.dateBadge(day, locale: locale)
+            ]
+        }
+        let times = [TimeOfDay(hour: 9, minute: 5), TimeOfDay(hour: 18, minute: 30)].map { EventText.time($0, locale: locale) }
+        return dates + times
+    }
+
     private static func strings(in value: Any) -> [String] {
         switch value {
         case let string as String:
             [string]
         case let dictionary as NSDictionary:
-            dictionary.allValues.flatMap { strings(in: $0) }
+            dictionary.allKeys.flatMap { strings(in: $0) } + dictionary.allValues.flatMap { strings(in: $0) }
         case let array as NSArray:
             array.flatMap { strings(in: $0) }
         default:
@@ -124,3 +151,6 @@ struct PreviewThemeLaunchOptionTests {
         #expect(AppTheme.theme(id: "standard") == .standard)
     }
 }
+
+/// テストのバンドルを指すための型。
+private final class BundleToken {}
