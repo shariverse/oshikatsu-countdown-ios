@@ -82,7 +82,12 @@ extension OshiColor {
     /// 推し色を地（画面の地・カード）の上の文字や細い線に使うときの色。ダークでは暗い推し色が沈まないよう白に寄せる。
     /// 4.5:1 を保てるのは画面の地（background）とカードの地（surface）の上だけで、ライトの surfaceContainer の上には置かない。
     nonisolated var text: AdaptiveColor {
-        AdaptiveColor(light: rgb, dark: rgb.mixed(with: .white, fraction: Self.darkTextLightenFraction))
+        text(in: .standard)
+    }
+
+    /// `text` のテーマを受ける版。白に寄せる割合はテーマが持つ。
+    nonisolated func text(in theme: AppTheme) -> AdaptiveColor {
+        AdaptiveColor(light: rgb, dark: rgb.mixed(with: .white, fraction: theme.oshiText.darkTextLightenFraction))
     }
 
     /// ライトの surfaceContainer（推しカウントウィジェットの地 `#F3EDF1`）の上で推し色を文字に使うとき、黒に寄せる割合。
@@ -92,14 +97,27 @@ extension OshiColor {
     /// 推し色を surfaceContainer（推しカウントウィジェットの地）の上の文字に使うときの色。
     /// ライトでは少し黒に寄せて 4.5:1 を保つ。ダークは `text` と同じ。
     nonisolated var textOnSurfaceContainer: AdaptiveColor {
-        AdaptiveColor(light: rgb.mixed(with: .black, fraction: Self.surfaceContainerTextDarkenFraction), dark: text.dark)
+        textOnSurfaceContainer(in: .standard)
+    }
+
+    /// `textOnSurfaceContainer` のテーマを受ける版。黒に寄せる割合はテーマが持つ。
+    nonisolated func textOnSurfaceContainer(in theme: AppTheme) -> AdaptiveColor {
+        AdaptiveColor(
+            light: rgb.mixed(with: .black, fraction: theme.oshiText.surfaceContainerTextDarkenFraction),
+            dark: text(in: theme).dark
+        )
     }
 
     /// 推し色を薄く敷いた地（選択中の印など）。文字は `AppPalette.onSurface`。
     nonisolated var container: AdaptiveColor {
+        container(in: .standard)
+    }
+
+    /// `container` のテーマを受ける版。テーマのカードの地に、テーマが持つ割合だけ推し色を混ぜる。
+    nonisolated func container(in theme: AppTheme) -> AdaptiveColor {
         AdaptiveColor(
-            light: RGBColor.white.mixed(with: rgb, fraction: 0.18),
-            dark: AppPalette.surface.dark.mixed(with: rgb, fraction: 0.35)
+            light: theme.palette.surface.light.mixed(with: rgb, fraction: theme.oshiText.containerLightFraction),
+            dark: theme.palette.surface.dark.mixed(with: rgb, fraction: theme.oshiText.containerDarkFraction)
         )
     }
 
