@@ -29,6 +29,8 @@ struct EventEditorScreen: View {
     /// 新しく追加するときの id。保存に失敗してやり直しても同じ予定として保存する。
     @State private var newEventID = UUID()
     @State private var failureMessage: String?
+    /// 保存が成功したときの触覚。
+    @Environment(\.haptic) private var haptic
 
     var body: some View {
         NavigationStack {
@@ -93,6 +95,7 @@ struct EventEditorScreen: View {
         }
         do {
             try OshiConStore(context: modelContext).save(saved)
+            haptic(.saved)
             onSaved(saved)
             if onboarding == nil {
                 dismiss()

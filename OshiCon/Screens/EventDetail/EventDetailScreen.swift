@@ -20,6 +20,8 @@ struct EventDetailScreen: View {
     @State private var isEditing = false
     @State private var isConfirmingDelete = false
     @State private var failureMessage: String?
+    /// ピン留めを切り替えたときの触覚。
+    @Environment(\.haptic) private var haptic
 
     private static let photoHeight: CGFloat = 300
     /// 横向きの iPhone（縦が狭い）では、写真で画面が埋まらないよう低くする。
@@ -143,6 +145,7 @@ struct EventDetailScreen: View {
     private func setPinned(_ isPinned: Bool, event: OshiEvent) {
         do {
             try OshiConStore(context: modelContext).setPinned(isPinned, eventID: event.id)
+            haptic(.pinChanged(isPinned: isPinned))
         } catch {
             failureMessage = String(localized: "保存できませんでした")
         }
