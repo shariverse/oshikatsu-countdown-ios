@@ -189,6 +189,7 @@ struct DaysCountdownView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
                     .themeNumeralEffect(oshiColor)
+                    .countdownNumberTransition(scheduled.daysUntil)
                 if !parts.suffix.isEmpty {
                     Text(parts.suffix)
                         .font(unitFont)
