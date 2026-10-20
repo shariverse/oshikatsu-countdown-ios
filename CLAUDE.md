@@ -53,7 +53,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 日本語の本文だけテーマの書体にし、ほかの言語はどのテーマでもシステムの書体（`AppFont.usesBundledTextFace(locale:)`）
   - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`themeNumeralEffect(_:)`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
     画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
-  - テーマ案の日本語の書体は `OshiCon/Preview Content/Fonts/`（Archive に入らない）に置き、`PreviewFonts.registerIfNeeded()` で登録する。`OshiCon/Preview Content/` のものをリリースのコードから参照しない。見方と撮り方は README の「テーマの見本」
+  - テーマ案の日本語の書体は `OshiCon/Preview Content/Fonts/` に置き、`PreviewFonts.registerIfNeeded()` で登録する。
+    Archive から外すのは `Configs/Release.xcconfig` の `EXCLUDED_SOURCE_FILE_NAMES`（フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では外れない）。書体を足したら除外の名前にも足す。`OshiCon/Preview Content/` のものをリリースのコードから参照しない。見方と撮り方は README の「テーマの見本」
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない

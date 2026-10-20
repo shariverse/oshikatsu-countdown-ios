@@ -8,8 +8,10 @@ import Foundation
 
 /// テーマ案の日本語の書体（Preview・DEBUG の見本・テストだけで使う。どれも SIL OFL 1.1）。
 ///
-/// ファイルは `OshiCon/Preview Content/Fonts/` にあり（`DEVELOPMENT_ASSET_PATHS` なので Archive には入らない）、
-/// `UIAppFonts` に足さずに、ここで process の範囲に登録する。出荷するアプリではファイルが無いので何もしない。
+/// ファイルは `OshiCon/Preview Content/Fonts/` にあり、`UIAppFonts` に足さずに、ここで process の範囲に登録する。
+/// フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では Archive から外れないので、Release の構成の
+/// `EXCLUDED_SOURCE_FILE_NAMES`（`Configs/Release.xcconfig`）で名前で外す。書体を足したら、ここと除外の名前の両方に足す。
+/// 出荷するアプリではファイルが無いので何もしない。
 nonisolated enum PreviewFonts {
     /// 書体のファイル（拡張子 `.ttf`）。ファイル名は PostScript 名と同じ。
     static let fileNames = [
