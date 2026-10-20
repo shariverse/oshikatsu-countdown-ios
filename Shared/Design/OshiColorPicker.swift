@@ -32,6 +32,8 @@ struct OshiColorPicker: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("推し色")
+        // 選んだ色が変わったときだけ返す（選んでいる色を押し直しても鳴らない）
+        .sensoryFeedback(.selection, trigger: selection)
     }
 
     /// 読み上げで何個目かを伝える（iOS にはラジオボタンの trait が無いので、選択中の trait と合わせて伝える）。
