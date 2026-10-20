@@ -44,6 +44,13 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - `OshiConWidget/`: Widget Extension（`OshiConWidgetExtension`、Bundle ID は `$(APP_BUNDLE_IDENTIFIER).Widget`）。Info.plist に `AppGroupIdentifier` と `UIAppFonts` を持つ
   - `OshiConTests/`・`OshiConUITests/`: テスト。`Shared/` の型も `@testable import OshiCon` で使える
   - 新しいターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION` などをプロジェクトの階層から受け継ぐ。ターゲット側で上書きしていないか確かめる
+- テーマ（`Shared/Design/AppTheme.swift`）: 地の配色・推し色の文字の調整の割合・角の丸み・書体・装飾をまとめた型。画面とウィジェットは `@Environment(\.appTheme)` から引く
+  - **出荷するアプリは既定のテーマ `AppTheme.standard`（今のデザイン。`AppPalette`・`AppFont`・角の丸み・縞と同じ値）だけを使う。** ほかの案は Preview・DEBUG の見本・テストの中だけで使い、テーマの選択は保存しない
+  - 推し色の役割（先頭のカードの塗り・写真が無いときの縞・残り日数の文字・印）はテーマで置き換えない。テーマが変えるのは地・形・装飾・書体と、推し色の文字を地に合わせる割合（`OshiColor.text(in:)` など）だけ。
+    どの案も推し色の文字が地とカードの上で 4.5:1 以上（`PaletteContrastTests` が `AppTheme.all` で回る）
+  - 日本語の本文だけテーマの書体にし、ほかの言語はどのテーマでもシステムの書体（`AppFont.usesBundledTextFace(locale:)`）
+  - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/` の View。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
+    画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない
