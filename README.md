@@ -187,6 +187,25 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 - 指定したバージョンが無ければ、審査前のバージョンの番号を変えます（新規アプリに最初からある「1.0」など）。それも無ければ作ります
 - サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格・App のプライバシー・ビルドの選択は扱いません。App Store Connect の画面で入れてから審査に提出します（提出もこのワークフローでは行いません）
 
+### 10. テーマの見本
+
+テーマ案（`Shared/Design/AppTheme.swift` の `AppTheme.all`）は、Preview・DEBUG のビルドの見本・テストの中だけで使います。出荷するアプリは既定のテーマ（`AppTheme.standard`）だけです。
+
+- **Preview**: ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます。
+  テーマ案の日本語の書体を使う Preview では、先に `PreviewFonts.registerIfNeeded()` を呼びます
+- **DEBUG の見本**: DEBUG のビルドを起動引数 `-previewTheme <テーマの id>` で起動すると、アプリ全体にそのテーマを当て、テーマ案の書体を登録します（知らない id は既定のテーマ。リリースのビルドでは効きません）。
+  Xcode では Scheme の Run の Arguments に `-previewTheme yumekawaPastel` のように足します
+- **撮影**: 見本の推しと予定で、アプリの画面（ホーム・予定の詳細・予定の追加）とウィジェット 2 種を、ライトとダークで撮って `build/theme-screenshots/<テーマの id>/<light|dark>/` に書き出します。
+  Simulator は言語を日本語にしたものを使います（ウィジェットの文言は Simulator の言語で出ます）
+
+```bash
+scripts/theme-screenshots.sh yumekawaPastel <Simulator の UDID>
+```
+
+- 画面は UI テスト `ThemeScreenshotTests`、ウィジェットは Unit テスト `ThemeWidgetScreenshotTests`（`ImageRenderer` で 3 倍の PNG）が撮ります。どちらも環境変数 `THEME_SCREENSHOTS=1` のときだけ流れ、ふだんのテスト（CI を含む）では飛ばされます。テーマは `THEME_ID` で選びます
+- テーマ案の書体（Kiwi Maru・Zen Maru Gothic・Zen Kaku Gothic New の Light・Kaisei Decol・Mochiy Pop One。どれも SIL OFL 1.1）は google/fonts から取得したものを改変せずに `OshiCon/Preview Content/Fonts/` に置いています。
+  `DEVELOPMENT_ASSET_PATHS` なので Archive（出荷物）には入らず、Widget Extension にも入りません。`UIAppFonts` とオープンソースライセンスの画面には足していません（採用したら出荷物へ移して足します）
+
 ## 多言語対応
 
 アプリと Widget Extension は 12 言語に対応しています（英語が既定。対応していない言語の端末では英語で出ます）。

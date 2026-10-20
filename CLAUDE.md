@@ -42,6 +42,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - `OshiCon/`: アプリだけのコード（画面・写真の取り込み）
   - `Shared/`: アプリと Widget Extension の両方に入るコード（規則・ストア・配色・書体）。ウィジェットからも使う型は `nonisolated` にする
   - `OshiConWidget/`: Widget Extension（`OshiConWidgetExtension`、Bundle ID は `$(APP_BUNDLE_IDENTIFIER).Widget`）。Info.plist に `AppGroupIdentifier` と `UIAppFonts` を持つ
+  - ウィジェットの View（`CountdownWidgetView`・`UpcomingWidgetView`）と見本は `Shared/Widget/` に置き、アプリの Preview・見本の撮影からも描く。`Widget`・`TimelineProvider`・`AppIntent` は `OshiConWidget/` に置く
   - `OshiConTests/`・`OshiConUITests/`: テスト。`Shared/` の型も `@testable import OshiCon` で使える
   - 新しいターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION` などをプロジェクトの階層から受け継ぐ。ターゲット側で上書きしていないか確かめる
 - テーマ（`Shared/Design/AppTheme.swift`）: 地の配色・推し色の文字の調整の割合・角の丸み・書体・装飾をまとめた型。画面とウィジェットは `@Environment(\.appTheme)` から引く
@@ -52,6 +53,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 日本語の本文だけテーマの書体にし、ほかの言語はどのテーマでもシステムの書体（`AppFont.usesBundledTextFace(locale:)`）
   - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`themeNumeralEffect(_:)`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
     画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
+  - テーマ案の日本語の書体は `OshiCon/Preview Content/Fonts/`（Archive に入らない）に置き、`PreviewFonts.registerIfNeeded()` で登録する。`OshiCon/Preview Content/` のものをリリースのコードから参照しない。見方と撮り方は README の「テーマの見本」
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない
