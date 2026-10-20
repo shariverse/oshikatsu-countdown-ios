@@ -8,6 +8,7 @@ import SwiftUI
 /// 設定。終わった予定の表示、データの保存先の説明、バージョンとオープンソースライセンス。
 struct SettingsScreen: View {
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         Form {
@@ -16,8 +17,8 @@ struct SettingsScreen: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("終わった予定も表示する")
                         Text("ホームの下に、過ぎた予定を新しい順に出します")
-                            .font(AppFont.text(.footnote))
-                            .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                            .font(theme.typography.text(.footnote))
+                            .foregroundStyle(theme.palette.onSurfaceVariant.color)
                     }
                 }
             }
@@ -26,8 +27,8 @@ struct SettingsScreen: View {
                     // iPad では iPad の絵にする
                     Label("この端末の中だけに保存", systemImage: UIDevice.current.userInterfaceIdiom == .pad ? "ipad" : "iphone")
                     Text("推し・写真・予定は端末の外に送りません。アプリを削除すると消えます。端末のバックアップ（iCloud・パソコン）には含まれます。")
-                    .font(AppFont.text(.footnote))
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .font(theme.typography.text(.footnote))
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 }
                 .padding(.vertical, 2)
                 .accessibilityElement(children: .combine)
@@ -40,20 +41,22 @@ struct SettingsScreen: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("オープンソースライセンス")
                         Text("このアプリで使っているライブラリとライセンス")
-                            .font(AppFont.text(.footnote))
-                            .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                            .font(theme.typography.text(.footnote))
+                            .foregroundStyle(theme.palette.onSurfaceVariant.color)
                     }
                 }
             }
         }
         .scrollContentBackground(.hidden)
-        .background(AppPalette.background.color)
+        .background(theme.palette.background.color)
         .navigationTitle("設定")
     }
 }
 
 /// オープンソースライセンスの一覧。行を押すとライセンスの本文を出す。
 struct OpenSourceLicenseListScreen: View {
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         List(OpenSourceLicense.all) { license in
             NavigationLink {
@@ -61,20 +64,20 @@ struct OpenSourceLicenseListScreen: View {
             } label: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(license.name)
-                        .font(AppFont.text(.body, weight: .bold))
+                        .font(theme.typography.text(.body, weight: .bold))
                     Text("\(license.author) · バージョン \(license.version)")
-                        .font(AppFont.text(.footnote))
-                        .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                        .font(theme.typography.text(.footnote))
+                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
                     Text(license.licenseName)
-                        .font(AppFont.text(.footnote))
-                        .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                        .font(theme.typography.text(.footnote))
+                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 }
                 .padding(.vertical, 2)
                 .accessibilityElement(children: .combine)
             }
         }
         .scrollContentBackground(.hidden)
-        .background(AppPalette.background.color)
+        .background(theme.palette.background.color)
         .navigationTitle("オープンソースライセンス")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -83,6 +86,8 @@ struct OpenSourceLicenseListScreen: View {
 /// ライセンスの本文。
 struct OpenSourceLicenseScreen: View {
     let license: OpenSourceLicense
+
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         ScrollView {
@@ -93,7 +98,7 @@ struct OpenSourceLicenseScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
         }
-        .background(AppPalette.background.color)
+        .background(theme.palette.background.color)
         .navigationTitle(license.name)
         .navigationBarTitleDisplayMode(.inline)
     }

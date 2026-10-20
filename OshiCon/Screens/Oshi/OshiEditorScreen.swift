@@ -18,6 +18,7 @@ struct OshiEditorScreen: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appTheme) private var theme
     @State private var form: OshiForm
     /// 新しく登録するときの id。保存に失敗してやり直しても同じ推しとして保存する。
     @State private var newOshiID = UUID()
@@ -64,7 +65,7 @@ struct OshiEditorScreen: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(AppPalette.background.color)
+            .background(theme.palette.background.color)
             .disabled(isBusy)
             .navigationTitle(onboarding?.title ?? (oshi == nil ? String(localized: "推しを登録") : String(localized: "推しを編集")))
             .navigationBarTitleDisplayMode(.inline)
@@ -79,8 +80,8 @@ struct OshiEditorScreen: View {
                 }
             }
         }
-        .font(AppFont.text(.body))
-        .tint(AppPalette.brand.color)
+        .font(theme.typography.text(.body))
+        .tint(theme.palette.brand.color)
         .interactiveDismissDisabled(isBusy)
         .alert(
             failureMessage ?? "",
