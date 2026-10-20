@@ -82,6 +82,7 @@ struct EventDetailCard: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                             .themeNumeralEffect(detail.color)
+                            .countdownNumberTransition(detail.countdown.remainingParts.days)
                         if !days.suffix.isEmpty {
                             Text(days.suffix)
                                 .font(theme.typography.text(.title3, weight: .bold))

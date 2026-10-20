@@ -18,6 +18,7 @@ struct HomeScreen: View {
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @State private var selectedOshiID: Oshi.ID?
     @Environment(AppRouter.self) private var router
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.appTheme) private var theme
     @State private var isAddingEvent = false
     /// 予定の追加のシートが実際に出ている（開こうとしても出せなかったときと分ける）。
@@ -124,6 +125,8 @@ struct HomeScreen: View {
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
+                // 予定が増える・消える・絞り込みやピン留めで入れ替わるときに、カードと行を短く出入りさせる
+                .animation(AppMotion.animation(for: cardMotion), value: content)
                 // 広い画面でも読みやすい幅に収める
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
@@ -141,6 +144,9 @@ struct HomeScreen: View {
             .accessibilityLabel(featured.featuredAccessibilityLabel)
             // UI テスト（App Store 用スクリーンショット）は言語によらずこの ID で探す
             .accessibilityIdentifier("home.featuredEvent")
+            // 先頭の予定が別の予定に替わったら、入れ替わりとして出入りさせる
+            .id(featured.id)
+            .transition(AppMotion.transition(for: cardMotion))
         }
         HomeSection(title: "これからの予定") {
             if content.upcoming.isEmpty {
@@ -170,7 +176,12 @@ struct HomeScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(item.accessibilityLabel)
+            .transition(AppMotion.transition(for: cardMotion))
         }
+    }
+
+    private var cardMotion: AppMotion.Style {
+        AppMotion.style(for: .homeCards, reduceMotion: reduceMotion)
     }
 }
 
