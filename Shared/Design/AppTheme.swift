@@ -22,6 +22,11 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     /// テストと見本で使う、すべてのテーマ。先頭は既定のテーマ。
     static let all: [Self] = [.standard]
 
+    /// id のテーマ。知らない id なら既定のテーマ。
+    static func theme(id: String) -> Self {
+        all.first { $0.id == id } ?? .standard
+    }
+
     /// 今のデザイン。`AppPalette`・`AppFont`・角の丸み・縞と同じ値。
     static let standard = Self(
         id: "standard",
