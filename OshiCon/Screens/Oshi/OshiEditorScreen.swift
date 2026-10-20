@@ -26,6 +26,8 @@ struct OshiEditorScreen: View {
     @State private var isLoadingPhoto = false
     @State private var isBusy = false
     @State private var failureMessage: String?
+    /// 保存が成功したときの触覚。
+    @State private var haptic = HapticTrigger()
     @State private var deleteRequest: DeleteRequest?
 
     /// 削除の確認に出す中身。
@@ -82,6 +84,7 @@ struct OshiEditorScreen: View {
         }
         .font(theme.typography.text(.body))
         .tint(theme.palette.brand.color)
+        .hapticFeedback(haptic)
         .interactiveDismissDisabled(isBusy)
         .alert(
             failureMessage ?? "",
@@ -178,6 +181,7 @@ struct OshiEditorScreen: View {
             ) else {
                 return
             }
+            haptic.fire(.saved)
             onSaved(saved)
             if onboarding == nil {
                 dismiss()

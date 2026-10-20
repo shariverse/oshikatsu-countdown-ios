@@ -29,6 +29,8 @@ struct EventEditorScreen: View {
     /// 新しく追加するときの id。保存に失敗してやり直しても同じ予定として保存する。
     @State private var newEventID = UUID()
     @State private var failureMessage: String?
+    /// 保存が成功したときの触覚。
+    @State private var haptic = HapticTrigger()
 
     var body: some View {
         NavigationStack {
@@ -48,6 +50,7 @@ struct EventEditorScreen: View {
         }
         .font(theme.typography.text(.body))
         .tint(theme.palette.brand.color)
+        .hapticFeedback(haptic)
         .task {
             guard form == nil else {
                 return
@@ -93,6 +96,7 @@ struct EventEditorScreen: View {
         }
         do {
             try OshiConStore(context: modelContext).save(saved)
+            haptic.fire(.saved)
             onSaved(saved)
             if onboarding == nil {
                 dismiss()
