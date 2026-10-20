@@ -15,6 +15,7 @@ struct EventDetailScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.appTheme) private var theme
     @Query private var storedEvents: [StoredEvent]
     @State private var isEditing = false
     @State private var isConfirmingDelete = false
@@ -43,7 +44,7 @@ struct EventDetailScreen: View {
             if let current {
                 content(event: current.event, oshi: current.oshi)
             } else {
-                AppPalette.background.color
+                ThemeScreenBackground()
                     .ignoresSafeArea()
             }
         }
@@ -80,7 +81,7 @@ struct EventDetailScreen: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .background(AppPalette.surface.color.ignoresSafeArea())
+        .background(theme.palette.surface.color.ignoresSafeArea())
         .toolbar { toolbar(event: event) }
         // ウィジェットのリンクで画面を切り替えるときは、編集のシートと削除の確認を閉じる
         .onChange(of: router.sheetDismissal) {
@@ -183,7 +184,7 @@ private struct EventDetailHeader: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                StripedBackground(color: color)
+                ThemePhotoPlaceholder(color: color)
                 if let photo {
                     photo
                         .resizable()
