@@ -191,8 +191,11 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 
 テーマ案（`Shared/Design/AppTheme.swift` の `AppTheme.all`）は、Preview・DEBUG のビルドの見本・テストの中だけで使います。出荷するアプリは既定のテーマ（`AppTheme.standard`）だけです。
 
-- **Preview**: ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます。
-  テーマ案の日本語の書体を使う Preview では、先に `PreviewFonts.registerIfNeeded()` を呼びます
+- **Preview**: 各案の Preview は `OshiCon/Screens/ThemePreviews/<案>Previews.swift` にあります（ホーム・予定の詳細・予定の追加・ウィジェット 2 種を、ライトとダークで）。
+  どれも `ThemePreviewCanvas(<テーマ>, <画面>, <外観>)` で描き、日本語の見本の推しと予定をメモリ上のストアに入れ、テーマ案の書体を登録します。
+  テーマ案の日本語の書体はアプリの言語が日本語のときだけ使われるので、Scheme の Run の Options の App Language を日本語にして見ます。
+  ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます。
+  案の値は `Shared/Design/Themes/<案>.swift` に置き、`AppTheme.all` に足します（`PaletteContrastTests` がすべての案のコントラストを確かめます）
 - **DEBUG の見本**: DEBUG のビルドを起動引数 `-previewTheme <テーマの id>` で起動すると、アプリ全体にそのテーマを当て、テーマ案の書体を登録します（知らない id は既定のテーマ。リリースのビルドでは効きません）。
   Xcode では Scheme の Run の Arguments に `-previewTheme yumekawaPastel` のように足します
 - **撮影**: 見本の推しと予定で、アプリの画面（ホーム・予定の詳細・予定の追加）とウィジェット 2 種を、ライトとダークで撮って `build/theme-screenshots/<テーマの id>/<light|dark>/` に書き出します。
