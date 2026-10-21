@@ -43,6 +43,10 @@ struct ThemePhotoPlaceholder: View {
             TonalBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
+        case .gingham:
+            GinghamBackground(color: color)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -79,6 +83,12 @@ private struct ThemeCardBorderModifier<CardShape: InsettableShape>: ViewModifier
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
             }
+        case let .lace(color):
+            content.overlay {
+                LaceBorder(shape: shape, color: color)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+            }
         }
     }
 }
@@ -92,10 +102,12 @@ private struct ThemeHeadingOrnamentModifier: ViewModifier {
             content
         case let .symbol(name, color):
             // 飾りは見出しの文字の前に並べ、文字には重ねない。大きさは見出しに合わせてダイナミックタイプで変わる
-            HStack(spacing: 6) {
+            // 2 行になっても 1 行目にそろえる。大きな文字では見出しの幅を削りすぎないよう、飾りの大きさに上限を付ける
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: name)
                     .font(.headline)
                     .imageScale(.small)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                     .foregroundStyle(color.color)
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
@@ -107,6 +119,14 @@ private struct ThemeHeadingOrnamentModifier: ViewModifier {
                 content
                     .layoutPriority(1)
                 ThinRule(color: color)
+            }
+        case let .ribbon(color):
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                RibbonOrnament(color: color)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+                content
             }
         }
     }

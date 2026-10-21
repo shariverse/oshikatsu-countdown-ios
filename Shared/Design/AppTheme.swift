@@ -20,7 +20,7 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     let decoration: Decoration
 
     /// テストと見本で使う、すべてのテーマ。先頭は既定のテーマ。
-    static let all: [Self] = [.standard, .yumekawaPastel, .koreanMinimal]
+    static let all: [Self] = [.standard, .yumekawaPastel, .ryosangataGirly, .koreanMinimal]
 
     /// id のテーマ。知らない id なら既定のテーマ。
     static func theme(id: String) -> Self {
@@ -268,6 +268,8 @@ extension AppTheme {
         case none
         /// カードの内側に沿う線。
         case outline(color: AdaptiveColor, width: CGFloat)
+        /// レース風の縁取り（縁の細い線と、その内側に並べた小さな玉）。
+        case lace(color: AdaptiveColor)
     }
 
     nonisolated enum HeadingOrnament: Hashable, Sendable {
@@ -276,6 +278,8 @@ extension AppTheme {
         case symbol(name: String, color: AdaptiveColor)
         /// 見出しの後ろに、残りの幅いっぱいの細い線を引く。
         case trailingRule(color: AdaptiveColor)
+        /// 見出しの前に置くリボン（`RibbonOrnament`）。
+        case ribbon(color: AdaptiveColor)
     }
 
     nonisolated enum NumeralEffect: Hashable, Sendable {
@@ -289,6 +293,8 @@ extension AppTheme {
         case hearts
         /// 推し色の地を、上から下へわずかに濃くする（`TonalBackground`）。
         case tonal
+        /// 推し色の地に、白い帯を縦横に重ねたギンガムチェック（`GinghamBackground`）。
+        case gingham
     }
 }
 

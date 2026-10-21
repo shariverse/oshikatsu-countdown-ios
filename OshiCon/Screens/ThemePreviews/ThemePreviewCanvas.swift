@@ -26,6 +26,8 @@ struct ThemePreviewCanvas: View {
     let colorScheme: ColorScheme
 
     @State private var store = ThemePreviewStore()
+    /// 画面遷移の状態を描き直しのあとも保つため、`@State` で持つ。
+    @State private var router = AppRouter()
 
     init(_ theme: AppTheme, _ screen: ThemePreviewScreen, _ colorScheme: ColorScheme) {
         PreviewFonts.registerIfNeeded()
@@ -42,7 +44,7 @@ struct ThemePreviewCanvas: View {
                 Text(verbatim: "見本のストアを作れませんでした")
             }
         }
-        .environment(AppRouter())
+        .environment(router)
         .environment(\.appTheme, theme)
         .preferredColorScheme(colorScheme)
     }
