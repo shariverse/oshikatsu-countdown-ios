@@ -15,6 +15,24 @@ struct AppFontTests {
         #expect(UIFont(name: face.rawValue, size: 17) != nil)
     }
 
+    @Test("地雷系・ゴシックの本文の書体（Kaisei Decol）を、アプリと Widget Extension の両方に同梱して UIAppFonts で登録する")
+    func jiraiGothicTextFacesAreBundled() throws {
+        let faces = AppTheme.jiraiGothic.typography.textFaces
+        let fileNames = Set([faces.regular, faces.medium, faces.bold].map { "\($0).ttf" })
+        let widget = try #require(Bundle.main.builtInPlugInsURL).appending(path: "OshiConWidgetExtension.appex")
+        for bundle in [Bundle.main, try #require(Bundle(url: widget))] {
+            let name = bundle.bundleURL.lastPathComponent
+            let fonts = try #require(bundle.object(forInfoDictionaryKey: "UIAppFonts") as? [String])
+            for fileName in fileNames {
+                #expect(fonts.contains(fileName), "\(name) の UIAppFonts に \(fileName) が無い")
+                #expect(bundle.url(forResource: fileName, withExtension: nil) != nil, "\(name) に \(fileName) が無い")
+            }
+        }
+        for name in [faces.regular, faces.medium, faces.bold] {
+            #expect(UIFont(name: name, size: 17) != nil, "\(name)")
+        }
+    }
+
     @Test(
         "同梱した数字の書体（可変フォント）は、太さを付けるとその太さの字形になる（既定の Thin にならない）",
         arguments: [(UIFont.Weight.regular, 400), (.medium, 500), (.bold, 700)]

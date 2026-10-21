@@ -171,9 +171,12 @@ struct AppThemeTests {
         }
     }
 
-    @Test("どのテーマの本文の書体も、同梱の書体か Preview 用の書体のどれか", arguments: AppTheme.all)
+    @Test("どのテーマの本文の書体も、同梱の書体（UIAppFonts）か Preview 用の書体のどれか", arguments: AppTheme.all)
     func textFacesAreAvailable(theme: AppTheme) {
-        let available = Set(AppFont.TextFace.allCases.map(\.rawValue) + PreviewFonts.fileNames)
+        // 同梱の書体はファイル名が PostScript 名と同じ
+        let fontFiles = Bundle.main.object(forInfoDictionaryKey: "UIAppFonts") as? [String] ?? []
+        let bundled = fontFiles.map { ($0 as NSString).deletingPathExtension }
+        let available = Set(bundled + PreviewFonts.fileNames)
         let faces = theme.typography.textFaces
         for face in [faces.regular, faces.medium, faces.bold] {
             #expect(available.contains(face), "\(face)")

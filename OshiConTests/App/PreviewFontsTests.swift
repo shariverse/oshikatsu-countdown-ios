@@ -61,7 +61,7 @@ struct PreviewFontsTests {
         #expect(PreviewFonts.fontURLs(in: Bundle(for: BundleToken.self)).isEmpty)
     }
 
-    @Test("アプリの日本語の文言と日本語の見本の文字が、テーマ案のどの書体にも字形としてある", arguments: PreviewFonts.fileNames)
+    @Test("アプリの日本語の文言と日本語の見本の文字が、どのテーマの本文の書体にも字形としてある", arguments: Self.textFaceNames)
     func fontCoversJapaneseText(name: String) throws {
         PreviewFonts.registerIfNeeded()
         let font = CTFontCreateWithName(name as CFString, 17, nil)
@@ -75,6 +75,12 @@ struct PreviewFontsTests {
         }
         #expect(missing.isEmpty, "\(name) に字形が無い: \(String(missing))")
     }
+
+    /// すべてのテーマの本文の書体（同梱の書体とテーマ案の書体）の PostScript 名。
+    nonisolated private static let textFaceNames: [String] = {
+        let faces = AppTheme.all.map(\.typography.textFaces)
+        return Array(Set(faces.flatMap { [$0.regular, $0.medium, $0.bold] })).sorted()
+    }()
 
     /// 文言（日本語の訳。キーも日本語の文言）と、日本語の見本の推し・予定の文字。空白・制御文字と絵文字は除く（システムの書体に任せる）。
     private static func japaneseCharacters() throws -> [Character] {

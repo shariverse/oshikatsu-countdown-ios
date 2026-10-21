@@ -6,7 +6,8 @@
 import CoreText
 import Foundation
 
-/// テーマ案の日本語の書体（Preview・DEBUG の見本・テストだけで使う。どれも SIL OFL 1.1）。
+/// 採用しなかったテーマ案の日本語の書体（Preview・DEBUG の見本・テストだけで使う。どれも SIL OFL 1.1）。
+/// 採用した「地雷系・ゴシック」の Kaisei Decol は出荷物（`Shared/Resources/Fonts/`）に入れ、`UIAppFonts` で登録するので、ここには無い。
 ///
 /// ファイルは `OshiCon/Preview Content/Fonts/` にあり、`UIAppFonts` に足さずに、ここで process の範囲に登録する。
 /// フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では Archive から外れないので、Release の構成の
@@ -20,8 +21,6 @@ nonisolated enum PreviewFonts {
         "ZenMaruGothic-Regular",
         "ZenMaruGothic-Bold",
         "ZenKakuGothicNew-Light",
-        "KaiseiDecol-Regular",
-        "KaiseiDecol-Bold",
         "MochiyPopOne-Regular"
     ]
 
@@ -31,7 +30,6 @@ nonisolated enum PreviewFonts {
         "KiwiMaru-OFL",
         "ZenMaruGothic-OFL",
         "ZenKakuGothicNew-OFL",
-        "KaiseiDecol-OFL",
         "MochiyPopOne-OFL"
     ]
 

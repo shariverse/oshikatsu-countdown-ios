@@ -34,6 +34,13 @@ nonisolated struct OpenSourceLicense: Identifiable, Hashable, Sendable {
             version: "1.002",
             licenseName: "SIL Open Font License 1.1",
             licenseFileName: "ZenKakuGothicNew-OFL"
+        ),
+        Self(
+            name: "Kaisei Decol",
+            author: "The Kaisei Project Authors",
+            version: "5.003",
+            licenseName: "SIL Open Font License 1.1",
+            licenseFileName: "KaiseiDecol-OFL"
         )
     ]
 
