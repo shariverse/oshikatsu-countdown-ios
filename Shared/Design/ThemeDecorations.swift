@@ -24,6 +24,10 @@ struct ThemeScreenBackground: View {
             CrossesAndHeartsBackground(ground: theme.palette.background, ornament: ornament)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
+        case let .stage(gradient, beam):
+            StageBackground(gradient: gradient, beam: beam)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -54,6 +58,10 @@ struct ThemePhotoPlaceholder: View {
             CrossPatternBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
+        case .penlights:
+            PenlightBokehBackground(color: color)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -69,9 +77,9 @@ extension View {
         modifier(ThemeHeadingOrnamentModifier())
     }
 
-    /// 残り日数の数字の効果（光・グラデーション）。`color` はその予定の推し色。
-    func themeNumeralEffect(_ color: OshiColor) -> some View {
-        modifier(ThemeNumeralEffectModifier(color: color))
+    /// 残り日数の数字の効果（光・グラデーション）。`color` はその予定の推し色、`ground` は数字が乗る地。
+    func themeNumeralEffect(_ color: OshiColor, on ground: AppTheme.NumeralGround = .ground) -> some View {
+        modifier(ThemeNumeralEffectModifier(color: color, ground: ground))
     }
 }
 
@@ -99,6 +107,12 @@ private struct ThemeCardBorderModifier<CardShape: InsettableShape>: ViewModifier
         case let .doubleLine(color):
             content.overlay {
                 DoubleLineBorder(shape: shape, color: color)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+            }
+        case let .neon(color):
+            content.overlay {
+                NeonBorder(shape: shape, color: color)
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
             }
@@ -147,6 +161,7 @@ private struct ThemeHeadingOrnamentModifier: ViewModifier {
 
 private struct ThemeNumeralEffectModifier: ViewModifier {
     let color: OshiColor
+    let ground: AppTheme.NumeralGround
 
     @Environment(\.appTheme) private var theme
 
@@ -154,6 +169,13 @@ private struct ThemeNumeralEffectModifier: ViewModifier {
         switch theme.decoration.numeralEffect {
         case .none:
             content
+        case .glow:
+            // 光は数字の下に敷く影で描き、数字の色・大きさ・並びは変えない
+            if let glow = theme.decoration.numeralEffect.glow(for: color, on: ground) {
+                content.shadow(color: glow.color.color.opacity(glow.opacity), radius: glow.radius)
+            } else {
+                content
+            }
         }
     }
 }

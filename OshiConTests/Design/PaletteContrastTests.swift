@@ -88,6 +88,23 @@ struct PaletteContrastTests {
         #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: palette.brandContainer.resolved(isDark: isDark)) >= 4.5)
     }
 
+    @Test("数字の光のいちばん濃いところと数字の差は、大きな文字の 3:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    func numeralGlowKeepsNumeralsReadable(theme: AppTheme, isDark: Bool) {
+        let effect = theme.decoration.numeralEffect
+        for color in OshiColor.allCases {
+            // 先頭のカード: 推し色の塗りの上の白い数字
+            if let glow = effect.glow(for: color, on: .oshiFill) {
+                #expect(RGBColor.white.contrastRatio(with: glow.peak(over: color.rgb, isDark: isDark)) >= 3, "\(color)")
+            }
+            // 一覧の行・予定の詳細: カードの地の上の推し色の数字
+            if let glow = effect.glow(for: color, on: .ground) {
+                let text = color.text(in: theme).resolved(isDark: isDark)
+                let surface = theme.palette.surface.resolved(isDark: isDark)
+                #expect(text.contrastRatio(with: glow.peak(over: surface, isDark: isDark)) >= 3, "\(color)")
+            }
+        }
+    }
+
     @Test("推し色を薄く敷いた地に乗せた本文は 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all, [false, true])
     func textOnOshiContainer(theme: AppTheme, isDark: Bool) {
         let text = theme.palette.onSurface.resolved(isDark: isDark)
