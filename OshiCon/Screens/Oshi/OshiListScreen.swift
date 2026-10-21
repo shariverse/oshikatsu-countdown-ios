@@ -75,7 +75,7 @@ struct OshiListScreen: View {
             } label: {
                 OshiRow(oshi: oshi, eventCount: eventCounts[oshi.id, default: 0])
             }
-            .listRowBackground(theme.palette.surface.color)
+            .themeRowBackground()
             .accessibilityIdentifier("oshiList.row")
         }
         .scrollContentBackground(.hidden)
