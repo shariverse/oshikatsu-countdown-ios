@@ -8,7 +8,8 @@ import SwiftUI
 /// アプリの中でウィジェットの中身を、ホーム画面のウィジェットと同じ大きさ・余白・地で描く枠（Preview・見本の撮影で使う）。
 /// アプリでは `containerBackground(for: .widget)` が描かれないので、地はこの枠が描く。
 struct WidgetPreviewFrame<Content: View>: View {
-    /// ウィジェットの大きさ（iPhone 17 のホーム画面の大きさ）。
+    /// ウィジェットの大きさ。HIG の Widgets のサイズの表の、幅 430pt の iPhone の値（2×2 は 170×170、4×2 は 364×170）。
+    /// iPhone 17（幅 402pt）の実際の大きさとはわずかに違うが、テーマの見比べには十分なので 1 つに固定する。
     enum Family {
         case systemSmall
         case systemMedium
@@ -50,7 +51,7 @@ struct WidgetPreviewFrame<Content: View>: View {
 enum WidgetPreview {
     /// カウントダウンウィジェット（2×2）。
     static func countdown(_ content: CountdownWidgetContent, theme: AppTheme = .standard) -> some View {
-        WidgetPreviewFrame(family: .systemSmall, background: CountdownWidgetView.containerColor(for: content, in: theme)) {
+        WidgetPreviewFrame(family: .systemSmall, background: CountdownWidgetView.containerColor(for: content, in: theme).color) {
             CountdownWidgetView(content: content)
         }
         .environment(\.appTheme, theme)
@@ -58,7 +59,7 @@ enum WidgetPreview {
 
     /// 推しカウントウィジェット（4×2）。
     static func upcoming(_ content: UpcomingWidgetContent, theme: AppTheme = .standard) -> some View {
-        WidgetPreviewFrame(family: .systemMedium, background: UpcomingWidgetView.containerColor(in: theme)) {
+        WidgetPreviewFrame(family: .systemMedium, background: UpcomingWidgetView.containerColor(in: theme).color) {
             UpcomingWidgetView(content: content)
         }
         .environment(\.appTheme, theme)

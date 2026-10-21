@@ -22,9 +22,6 @@ extension CountdownWidgetContent {
 }
 
 extension UpcomingWidgetContent {
-    /// 4×2 に収まる行の数。
-    nonisolated static let maxRows = 4
-
     /// ウィジェットの一覧とアプリの Preview に出す見本。
     nonisolated static var sample: Self {
         let calendar = Calendar.autoupdatingCurrent
