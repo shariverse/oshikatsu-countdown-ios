@@ -71,6 +71,16 @@ struct PaletteContrastTests {
         }
     }
 
+    @Test("アクセント（brand）を文字に使ったとき、画面の地とカードの地に 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    func brandTextOnGrounds(theme: AppTheme, isDark: Bool) {
+        // brand は `.tint` でボタンや値の文字にもなる
+        let palette = theme.palette
+        let brand = palette.brand.resolved(isDark: isDark)
+        for ground in [palette.background, palette.surface] + theme.decoration.screenBackground.grounds(background: palette.background) {
+            #expect(brand.contrastRatio(with: ground.resolved(isDark: isDark)) >= 4.5)
+        }
+    }
+
     @Test("推し色を薄く敷いた地に乗せた本文は 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all, [false, true])
     func textOnOshiContainer(theme: AppTheme, isDark: Bool) {
         let text = theme.palette.onSurface.resolved(isDark: isDark)
