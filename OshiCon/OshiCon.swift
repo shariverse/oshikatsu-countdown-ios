@@ -39,14 +39,7 @@ struct OshiCon: App {
     private static func seedSampleData(into container: ModelContainer) {
         let now = Date.now
         let sample = SampleData.make(today: CalendarDay(now, calendar: .autoupdatingCurrent), now: now, locale: .app)
-        let store = OshiConStore(context: container.mainContext)
-        for (index, oshi) in sample.oshis.enumerated() {
-            // 登録した順に並ぶよう、1 秒ずつずらす
-            try? store.save(oshi, now: now.addingTimeInterval(Double(index - sample.oshis.count)))
-        }
-        for event in sample.events {
-            try? store.save(event)
-        }
+        SampleData.insert(sample, into: container.mainContext, now: now)
     }
 
     var body: some Scene {

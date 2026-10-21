@@ -20,7 +20,7 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     let decoration: Decoration
 
     /// テストと見本で使う、すべてのテーマ。先頭は既定のテーマ。
-    static let all: [Self] = [.standard]
+    static let all: [Self] = [.standard, .yumekawaPastel]
 
     /// id のテーマ。知らない id なら既定のテーマ。
     static func theme(id: String) -> Self {
@@ -46,6 +46,7 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
             destructive: AppPalette.destructive
         ),
         oshiText: OshiTextAdjustment(
+            lightTextDarkenFraction: 0,
             darkTextLightenFraction: OshiColor.darkTextLightenFraction,
             surfaceContainerTextDarkenFraction: OshiColor.surfaceContainerTextDarkenFraction,
             containerLightFraction: 0.18,
@@ -104,6 +105,8 @@ extension AppTheme {
 
     /// 推し色を地の上の文字や薄い地に使うときの調整の割合。テーマの地で 4.5:1 を保てるよう、テーマごとに持つ。
     nonisolated struct OshiTextAdjustment: Hashable, Sendable {
+        /// ライトの地で推し色を文字に使うとき、黒に寄せる割合。地が色付きで 4.5:1 を保てないテーマだけが持つ（既定のテーマは 0 で推し色のまま）。
+        let lightTextDarkenFraction: Double
         /// ダークの地で推し色を文字に使うとき、白に寄せる割合。
         let darkTextLightenFraction: Double
         /// ライトの surfaceContainer の上で推し色を文字に使うとき、黒に寄せる割合。
@@ -227,14 +230,50 @@ extension AppTheme {
 
     nonisolated enum ScreenBackground: Hashable, Sendable {
         case none
+        /// 上から下へ淡い色を移し（`gradient` は上から順の色）、星とハートを小さく散らす（`ornament` を `ornamentOpacity` で薄めて描く）。
+        case sparkles(gradient: [AdaptiveColor], ornament: AdaptiveColor)
+
+        /// 星とハートの不透明度。
+        static let ornamentOpacity = 0.4
+
+        /// 画面の地の色（模様を除く）。`background` はテーマの画面の地の色。
+        func grounds(background: AdaptiveColor) -> [AdaptiveColor] {
+            switch self {
+            case .none:
+                [background]
+            case let .sparkles(gradient, _):
+                gradient
+            }
+        }
+
+        /// 画面の地の上の文字（見出しなど）が乗りうる色。地の色に、模様の色を重ねたところも含める。
+        /// 推し色の文字は画面の地の上に置かない（行・札・カードの地の上に置く）ので、模様を重ねたところは本文の色だけで確かめる。
+        func textGrounds(background: AdaptiveColor) -> [AdaptiveColor] {
+            let grounds = grounds(background: background)
+            switch self {
+            case .none:
+                return grounds
+            case let .sparkles(_, ornament):
+                return grounds + grounds.map { ground in
+                    AdaptiveColor(
+                        light: ground.light.mixed(with: ornament.light, fraction: Self.ornamentOpacity),
+                        dark: ground.dark.mixed(with: ornament.dark, fraction: Self.ornamentOpacity)
+                    )
+                }
+            }
+        }
     }
 
     nonisolated enum CardBorder: Hashable, Sendable {
         case none
+        /// カードの内側に沿う線。
+        case outline(color: AdaptiveColor, width: CGFloat)
     }
 
     nonisolated enum HeadingOrnament: Hashable, Sendable {
         case none
+        /// 見出しの前に置く SF Symbols（`name` はシンボルの名前）。
+        case symbol(name: String, color: AdaptiveColor)
     }
 
     nonisolated enum NumeralEffect: Hashable, Sendable {
@@ -244,6 +283,8 @@ extension AppTheme {
     nonisolated enum PhotoPlaceholder: Hashable, Sendable {
         /// 推し色の斜めの縞（`StripedBackground`）。
         case stripes
+        /// 推し色の地に、白いハートを散らす（`HeartPatternBackground`）。
+        case hearts
     }
 }
 

@@ -96,12 +96,37 @@ struct AppThemeTests {
         #expect(decoration.photoPlaceholder == .stripes)
     }
 
+    @Test("模様の無い画面の地で文字が乗るのは、地の色だけ")
+    func textGroundsWithoutPattern() {
+        let background = AdaptiveColor(light: 0xFFFFFF, dark: 0x000000)
+        #expect(AppTheme.ScreenBackground.none.grounds(background: background) == [background])
+        #expect(AppTheme.ScreenBackground.none.textGrounds(background: background) == [background])
+    }
+
+    @Test("星とハートの地の色はグラデーションの色で、文字が乗るのはその色と、模様の色を不透明度の分だけ重ねた色")
+    func textGroundsWithSparkles() {
+        let top = AdaptiveColor(light: 0xFFFFFF, dark: 0x000000)
+        let bottom = AdaptiveColor(light: 0xEEEEEE, dark: 0x111111)
+        let ornament = AdaptiveColor(light: 0xFF0000, dark: 0x0000FF)
+        let opacity = AppTheme.ScreenBackground.ornamentOpacity
+        let sparkles = AppTheme.ScreenBackground.sparkles(gradient: [top, bottom], ornament: ornament)
+        let background = AdaptiveColor(light: 0x123456, dark: 0x123456)
+        #expect(sparkles.grounds(background: background) == [top, bottom])
+        let grounds = sparkles.textGrounds(background: background)
+        #expect(grounds.count == 4)
+        #expect(Array(grounds.prefix(2)) == [top, bottom])
+        #expect(grounds[2].light == top.light.mixed(with: ornament.light, fraction: opacity))
+        #expect(grounds[3].dark == bottom.dark.mixed(with: ornament.dark, fraction: opacity))
+    }
+
     @Test("推し色の文字・薄い地のテーマを受ける版は、既定のテーマでは今の値と同じ", arguments: OshiColor.allCases)
     func oshiColorInStandardTheme(color: OshiColor) {
         #expect(color.text(in: .standard) == color.text)
         #expect(color.textOnSurfaceContainer(in: .standard) == color.textOnSurfaceContainer)
         #expect(color.container(in: .standard) == color.container)
-        // 今の値（割合 0.45・0.1・0.18 / 0.35 とカードの地）で作った色と同じ
+        // 今の値（ライトは推し色のまま・割合 0.45・0.1・0.18 / 0.35 とカードの地）で作った色と同じ
+        #expect(AppTheme.standard.oshiText.lightTextDarkenFraction == 0)
+        #expect(color.text.light == color.rgb)
         #expect(color.text.dark == color.rgb.mixed(with: .white, fraction: 0.45))
         #expect(color.textOnSurfaceContainer.light == color.rgb.mixed(with: .black, fraction: 0.1))
         #expect(color.container.light == RGBColor.white.mixed(with: color.rgb, fraction: 0.18))
@@ -116,6 +141,34 @@ struct AppThemeTests {
             #expect(!theme.id.isEmpty)
             #expect(theme.id.allSatisfy { $0.isASCII && $0.isLetter })
             #expect(!theme.displayName.isEmpty)
+        }
+    }
+
+    @Test("どのテーマの本文の書体も、同梱の書体か Preview 用の書体のどれか", arguments: AppTheme.all)
+    func textFacesAreAvailable(theme: AppTheme) {
+        let available = Set(AppFont.TextFace.allCases.map(\.rawValue) + PreviewFonts.fileNames)
+        let faces = theme.typography.textFaces
+        for face in [faces.regular, faces.medium, faces.bold] {
+            #expect(available.contains(face), "\(face)")
+        }
+    }
+
+    @Test("ゆめかわパステルは Kiwi Maru・丸い角・星とハートの装飾で、推し色の値は変えない")
+    func yumekawaPastel() {
+        let theme = AppTheme.yumekawaPastel
+        #expect(AppTheme.theme(id: "yumekawaPastel") == theme)
+        #expect(theme.typography.textFaces == AppTheme.TextFaces(
+            regular: "KiwiMaru-Regular",
+            medium: "KiwiMaru-Medium",
+            bold: "KiwiMaru-Medium"
+        ))
+        #expect(theme.typography.numeralFamily == AppFont.numeralFamily)
+        #expect(theme.shape.heroCard > AppTheme.standard.shape.heroCard)
+        #expect(theme.shape.section > AppTheme.standard.shape.section)
+        #expect(theme.decoration.screenBackground != .none)
+        #expect(theme.decoration.photoPlaceholder == .hearts)
+        for color in OshiColor.allCases {
+            #expect(color.text(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.08))
         }
     }
 

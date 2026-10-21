@@ -50,6 +50,27 @@ struct PaletteContrastTests {
         #expect(onContainer.contrastRatio(with: palette.brandContainer.resolved(isDark: isDark)) >= 4.5)
     }
 
+    @Test("見出しなどの本文は、画面の地の模様（グラデーション・模様の色）の上でも 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all, [false, true])
+    func textOnScreenDecoration(theme: AppTheme, isDark: Bool) {
+        let palette = theme.palette
+        for ground in theme.decoration.screenBackground.textGrounds(background: palette.background) {
+            let resolved = ground.resolved(isDark: isDark)
+            #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: resolved) >= 4.5)
+            #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: resolved) >= 4.5)
+        }
+    }
+
+    @Test("推し色の文字は、画面の地のグラデーションの上でも 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    func oshiTextOnScreenGradient(theme: AppTheme, isDark: Bool) {
+        let grounds = theme.decoration.screenBackground.grounds(background: theme.palette.background)
+        for color in OshiColor.allCases {
+            let text = color.text(in: theme).resolved(isDark: isDark)
+            for ground in grounds {
+                #expect(text.contrastRatio(with: ground.resolved(isDark: isDark)) >= 4.5, "\(color)")
+            }
+        }
+    }
+
     @Test("推し色を薄く敷いた地に乗せた本文は 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all, [false, true])
     func textOnOshiContainer(theme: AppTheme, isDark: Bool) {
         let text = theme.palette.onSurface.resolved(isDark: isDark)
