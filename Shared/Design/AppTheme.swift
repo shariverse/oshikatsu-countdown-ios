@@ -46,6 +46,7 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
             destructive: AppPalette.destructive
         ),
         oshiText: OshiTextAdjustment(
+            lightTextDarkenFraction: 0,
             darkTextLightenFraction: OshiColor.darkTextLightenFraction,
             surfaceContainerTextDarkenFraction: OshiColor.surfaceContainerTextDarkenFraction,
             containerLightFraction: 0.18,
@@ -104,6 +105,8 @@ extension AppTheme {
 
     /// 推し色を地の上の文字や薄い地に使うときの調整の割合。テーマの地で 4.5:1 を保てるよう、テーマごとに持つ。
     nonisolated struct OshiTextAdjustment: Hashable, Sendable {
+        /// ライトの地で推し色を文字に使うとき、黒に寄せる割合。地が色付きで 4.5:1 を保てないテーマだけが持つ（既定のテーマは 0 で推し色のまま）。
+        let lightTextDarkenFraction: Double
         /// ダークの地で推し色を文字に使うとき、白に寄せる割合。
         let darkTextLightenFraction: Double
         /// ライトの surfaceContainer の上で推し色を文字に使うとき、黒に寄せる割合。

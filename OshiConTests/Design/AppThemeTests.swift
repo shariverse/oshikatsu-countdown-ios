@@ -101,7 +101,9 @@ struct AppThemeTests {
         #expect(color.text(in: .standard) == color.text)
         #expect(color.textOnSurfaceContainer(in: .standard) == color.textOnSurfaceContainer)
         #expect(color.container(in: .standard) == color.container)
-        // 今の値（割合 0.45・0.1・0.18 / 0.35 とカードの地）で作った色と同じ
+        // 今の値（ライトは推し色のまま・割合 0.45・0.1・0.18 / 0.35 とカードの地）で作った色と同じ
+        #expect(AppTheme.standard.oshiText.lightTextDarkenFraction == 0)
+        #expect(color.text.light == color.rgb)
         #expect(color.text.dark == color.rgb.mixed(with: .white, fraction: 0.45))
         #expect(color.textOnSurfaceContainer.light == color.rgb.mixed(with: .black, fraction: 0.1))
         #expect(color.container.light == RGBColor.white.mixed(with: color.rgb, fraction: 0.18))

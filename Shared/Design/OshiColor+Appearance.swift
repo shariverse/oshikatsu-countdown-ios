@@ -85,9 +85,12 @@ extension OshiColor {
         text(in: .standard)
     }
 
-    /// `text` のテーマを受ける版。白に寄せる割合はテーマが持つ。
+    /// `text` のテーマを受ける版。ライトで黒に寄せる割合・ダークで白に寄せる割合はテーマが持つ。
     nonisolated func text(in theme: AppTheme) -> AdaptiveColor {
-        AdaptiveColor(light: rgb, dark: rgb.mixed(with: .white, fraction: theme.oshiText.darkTextLightenFraction))
+        AdaptiveColor(
+            light: rgb.mixed(with: .black, fraction: theme.oshiText.lightTextDarkenFraction),
+            dark: rgb.mixed(with: .white, fraction: theme.oshiText.darkTextLightenFraction)
+        )
     }
 
     /// ライトの surfaceContainer（推しカウントウィジェットの地 `#F3EDF1`）の上で推し色を文字に使うとき、黒に寄せる割合。
