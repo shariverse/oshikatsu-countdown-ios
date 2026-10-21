@@ -5,7 +5,8 @@
 
 import Foundation
 
-/// アプリの配色。地・文字・線は Android 版と同じ値で、アクセント（brand）は推し色のピンクと同じ。
+/// 標準のテーマ（採用前のデザイン `AppTheme.standard`）の配色。地・文字・線は Android 版と同じ値で、アクセント（brand）は推し色のピンクと同じ。
+/// 画面とウィジェットは、出荷するテーマの配色を `@Environment(\.appTheme)` の `palette` から引く。
 /// SwiftUI では `AppPalette.background.color` のように引く。推しの色は `OshiColor` から引く。
 nonisolated enum AppPalette {
     /// 画面の地。

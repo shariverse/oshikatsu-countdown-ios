@@ -5,7 +5,8 @@
 
 import SwiftUI
 
-/// アプリの書体。数字は Outfit、本文は日本語のときだけ Zen Kaku Gothic New（どちらも同梱。SIL OFL 1.1）。
+/// 標準のテーマ（採用前のデザイン `AppTheme.standard`）の書体。数字は Outfit、本文は日本語のときだけ Zen Kaku Gothic New（どちらも同梱。SIL OFL 1.1）。
+/// 画面とウィジェットは、出荷するテーマの書体を `@Environment(\.appTheme)` の `typography` から引く。ここの数字の定数と `text`・`numeral` は標準のテーマの値。
 /// ほかの言語の本文はシステムの書体にする（Zen Kaku Gothic New には中国語・韓国語・タイ語などの字形が無いため）。
 /// どちらもダイナミックタイプの文字の大きさに合わせて大きさが変わる。
 nonisolated enum AppFont {
@@ -19,7 +20,7 @@ nonisolated enum AppFont {
         case bold = "ZenKakuGothicNew-Bold"
     }
 
-    // MARK: - 数字（Outfit）。桁の幅をそろえ、秒が進んでも横に揺れない。値は既定のテーマ（`AppTheme.standard`）のもの
+    // MARK: - 数字（Outfit）。桁の幅をそろえ、秒が進んでも横に揺れない。値は標準のテーマ（`AppTheme.standard`）のもの
 
     /// 詳細の残り日数。
     static let countdownHero = standard.countdownHero

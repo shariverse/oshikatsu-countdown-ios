@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-// テーマ案 4「地雷系・ゴシック」の見本（`AppTheme.jiraiGothic`）。出荷するアプリは既定のテーマのまま。
+// テーマ案 4「地雷系・ゴシック」の見本（`AppTheme.jiraiGothic`）。採用し、出荷するテーマ（`AppTheme.shipping`）にした。
 
 #Preview("地雷系・ゴシック・ホーム・ライト") {
     ThemePreviewCanvas(.jiraiGothic, .home, .light)

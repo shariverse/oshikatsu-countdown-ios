@@ -113,7 +113,7 @@ struct PaletteContrastTests {
         }
     }
 
-    @Test("既定のテーマのライトの入力欄の地は、推し色の文字が 4.5:1 を保てない色がある（推し色の文字を置かない）")
+    @Test("標準のテーマのライトの入力欄の地は、推し色の文字が 4.5:1 を保てない色がある（推し色の文字を置かない）")
     func oshiTextIsNotForLightSurfaceContainer() {
         let ground = AppTheme.standard.palette.surfaceContainer.light
         let ratios = OshiColor.allCases.map { $0.text(in: .standard).light.contrastRatio(with: ground) }

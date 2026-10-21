@@ -9,7 +9,7 @@ import Testing
 
 @MainActor
 struct ThemeComparisonBoardTests {
-    @Test("比べる見本は、既定のテーマとすべての案を AppTheme.all の順に並べる")
+    @Test("比べる見本は、標準のテーマとすべての案を AppTheme.all の順に並べる")
     func showsAllThemes() {
         let board = ThemeComparisonBoard()
         #expect(board.themes.map(\.id) == AppTheme.all.map(\.id))

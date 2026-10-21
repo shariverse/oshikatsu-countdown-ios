@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-// テーマ案 2「量産型ガーリー」の見本（`AppTheme.ryosangataGirly`）。出荷するアプリは既定のテーマのまま。
+// テーマ案 2「量産型ガーリー」の見本（`AppTheme.ryosangataGirly`）。採用しなかった案（出荷するテーマは地雷系・ゴシック）。
 
 #Preview("量産型ガーリー・ホーム・ライト") {
     ThemePreviewCanvas(.ryosangataGirly, .home, .light)

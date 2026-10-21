@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-// テーマ案 3「韓国風ミニマル」の見本（`AppTheme.koreanMinimal`）。出荷するアプリは既定のテーマのまま。
+// テーマ案 3「韓国風ミニマル」の見本（`AppTheme.koreanMinimal`）。採用しなかった案（出荷するテーマは地雷系・ゴシック）。
 
 #Preview("韓国風ミニマル・ホーム・ライト") {
     ThemePreviewCanvas(.koreanMinimal, .home, .light)

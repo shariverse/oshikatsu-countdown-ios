@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-// テーマ案 5「アイドル・ペンライト」の見本（`AppTheme.idolPenlight`）。出荷するアプリは既定のテーマのまま。
+// テーマ案 5「アイドル・ペンライト」の見本（`AppTheme.idolPenlight`）。採用しなかった案（出荷するテーマは地雷系・ゴシック）。
 
 #Preview("アイドル・ペンライト・ホーム・ライト") {
     ThemePreviewCanvas(.idolPenlight, .home, .light)
