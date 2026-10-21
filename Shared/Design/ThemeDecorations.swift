@@ -42,7 +42,6 @@ struct ThemePhotoPlaceholder: View {
             HeartPatternBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
-
         case .tonal:
             TonalBackground(color: color)
                 .accessibilityHidden(true)
