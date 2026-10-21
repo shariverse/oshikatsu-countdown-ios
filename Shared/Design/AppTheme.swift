@@ -20,7 +20,7 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     let decoration: Decoration
 
     /// テストと見本で使う、すべてのテーマ。先頭は既定のテーマ。
-    static let all: [Self] = [.standard, .yumekawaPastel, .ryosangataGirly, .koreanMinimal, .jiraiGothic]
+    static let all: [Self] = [.standard, .yumekawaPastel, .ryosangataGirly, .koreanMinimal, .jiraiGothic, .idolPenlight]
 
     /// id のテーマ。知らない id なら既定のテーマ。
     static func theme(id: String) -> Self {
@@ -234,11 +234,15 @@ extension AppTheme {
         case sparkles(gradient: [AdaptiveColor], ornament: AdaptiveColor)
         /// 地の色に、十字とハートを小さく散らす（`ornament` を `markOpacity` で薄めて描く）。
         case crossesAndHearts(ornament: AdaptiveColor)
+        /// 上から下へ色を移し（`gradient` は上から順の色）、上からライブ会場の照明の光の筋を差す（`beam` を `beamOpacity` で薄めて描く）。
+        case stage(gradient: [AdaptiveColor], beam: AdaptiveColor)
 
         /// 星とハートの不透明度。
         static let ornamentOpacity = 0.4
         /// 十字とハートの不透明度。
         static let markOpacity = 0.35
+        /// 照明の光の筋の不透明度（いちばん濃いところ）。
+        static let beamOpacity = 0.18
 
         /// 画面の地の色（模様を除く）。`background` はテーマの画面の地の色。
         func grounds(background: AdaptiveColor) -> [AdaptiveColor] {
@@ -249,6 +253,8 @@ extension AppTheme {
                 gradient
             case .crossesAndHearts:
                 [background]
+            case let .stage(gradient, _):
+                gradient
             }
         }
 
@@ -273,6 +279,13 @@ extension AppTheme {
                         dark: ground.dark.mixed(with: ornament.dark, fraction: Self.markOpacity)
                     )
                 }
+            case let .stage(_, beam):
+                return grounds + grounds.map { ground in
+                    AdaptiveColor(
+                        light: ground.light.mixed(with: beam.light, fraction: Self.beamOpacity),
+                        dark: ground.dark.mixed(with: beam.dark, fraction: Self.beamOpacity)
+                    )
+                }
             }
         }
     }
@@ -285,6 +298,8 @@ extension AppTheme {
         case lace(color: AdaptiveColor)
         /// カードの内側に沿う 2 本の線（外は太く、内は細く薄く）。
         case doubleLine(color: AdaptiveColor)
+        /// ネオン管のような縁（細い線と、カードの外側に広がる光）。
+        case neon(color: AdaptiveColor)
     }
 
     nonisolated enum HeadingOrnament: Hashable, Sendable {
@@ -299,6 +314,48 @@ extension AppTheme {
 
     nonisolated enum NumeralEffect: Hashable, Sendable {
         case none
+        /// 数字の下に、推し色から作った光を敷く（ペンライト）。数字の色は変えない。
+        case glow
+
+        /// 先頭のカード（推し色の塗りの上の白い数字）の光の不透明度。白い光で、白い数字と塗りの縁の差を 3:1 以上に保つ。
+        static let fillGlowOpacity = 0.25
+        /// 地の上の推し色の数字の光の不透明度。
+        static let groundGlowOpacity = 0.3
+
+        /// 推し色 `color` の数字が `ground` に乗るときの光。効果が無ければ nil。
+        func glow(for color: OshiColor, on ground: NumeralGround) -> NumeralGlow? {
+            switch self {
+            case .none:
+                return nil
+            case .glow:
+                switch ground {
+                case .oshiFill:
+                    return NumeralGlow(color: AdaptiveColor(light: .white, dark: .white), opacity: Self.fillGlowOpacity, radius: 14)
+                case .ground:
+                    return NumeralGlow(color: AdaptiveColor(light: color.rgb, dark: color.rgb), opacity: Self.groundGlowOpacity, radius: 10)
+                }
+            }
+        }
+    }
+
+    /// 残り日数の数字が乗る地。
+    nonisolated enum NumeralGround: Hashable, Sendable {
+        /// 推し色の塗り（先頭のカード）。数字は白。
+        case oshiFill
+        /// 画面の地・カードの地（一覧の行・予定の詳細）。数字は推し色の文字の色（`OshiColor.text(in:)`）。
+        case ground
+    }
+
+    /// 数字の下に敷く光。`opacity` は光のいちばん濃いところ（数字の縁）の不透明度。
+    nonisolated struct NumeralGlow: Hashable, Sendable {
+        let color: AdaptiveColor
+        let opacity: Double
+        let radius: CGFloat
+
+        /// 光のいちばん濃いところの色（`base` は数字の下の地の色）。数字の色とのコントラストを確かめるのに使う。
+        func peak(over base: RGBColor, isDark: Bool) -> RGBColor {
+            base.mixed(with: color.resolved(isDark: isDark), fraction: opacity)
+        }
     }
 
     nonisolated enum PhotoPlaceholder: Hashable, Sendable {
@@ -312,6 +369,8 @@ extension AppTheme {
         case gingham
         /// 推し色を黒に寄せた地に、白い十字とハートを散らす（`CrossPatternBackground`）。
         case crosses
+        /// 推し色の地に、ぼけたペンライトの光の玉を散らす（`PenlightBokehBackground`）。
+        case penlights
     }
 }
 

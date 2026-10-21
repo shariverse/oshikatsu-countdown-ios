@@ -125,7 +125,7 @@ private extension CGRect {
 }
 
 /// カードのレース風の縁取り。縁に沿う細い線と、その内側に小さな玉を並べる。
-/// 玉は縁から 6pt の内側に収まり、カードの中の文字（余白 12pt 以上）には重ならない。
+/// 玉は縁から 6.5pt（内側に寄せる 5pt と玉の太さ 3pt の半分）の内側に収まり、カードの中の文字（余白 12pt 以上）には重ならない。
 struct LaceBorder<CardShape: InsettableShape>: View {
     let shape: CardShape
     let color: AdaptiveColor
