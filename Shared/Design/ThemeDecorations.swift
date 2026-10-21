@@ -43,6 +43,10 @@ struct ThemePhotoPlaceholder: View {
             TonalBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
+        case .gingham:
+            GinghamBackground(color: color)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -79,6 +83,12 @@ private struct ThemeCardBorderModifier<CardShape: InsettableShape>: ViewModifier
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
             }
+        case let .lace(color):
+            content.overlay {
+                LaceBorder(shape: shape, color: color)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+            }
         }
     }
 }
@@ -109,6 +119,14 @@ private struct ThemeHeadingOrnamentModifier: ViewModifier {
                 content
                     .layoutPriority(1)
                 ThinRule(color: color)
+            }
+        case let .ribbon(color):
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                RibbonOrnament(color: color)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+                content
             }
         }
     }
