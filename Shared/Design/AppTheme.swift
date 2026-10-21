@@ -232,9 +232,13 @@ extension AppTheme {
         case none
         /// 上から下へ淡い色を移し（`gradient` は上から順の色）、星とハートを小さく散らす（`ornament` を `ornamentOpacity` で薄めて描く）。
         case sparkles(gradient: [AdaptiveColor], ornament: AdaptiveColor)
+        /// 地の色に、十字とハートを小さく散らす（`ornament` を `markOpacity` で薄めて描く）。
+        case crossesAndHearts(ornament: AdaptiveColor)
 
         /// 星とハートの不透明度。
         static let ornamentOpacity = 0.4
+        /// 十字とハートの不透明度。
+        static let markOpacity = 0.35
 
         /// 画面の地の色（模様を除く）。`background` はテーマの画面の地の色。
         func grounds(background: AdaptiveColor) -> [AdaptiveColor] {
@@ -243,6 +247,8 @@ extension AppTheme {
                 [background]
             case let .sparkles(gradient, _):
                 gradient
+            case .crossesAndHearts:
+                [background]
             }
         }
 
@@ -260,6 +266,13 @@ extension AppTheme {
                         dark: ground.dark.mixed(with: ornament.dark, fraction: Self.ornamentOpacity)
                     )
                 }
+            case let .crossesAndHearts(ornament):
+                return grounds + grounds.map { ground in
+                    AdaptiveColor(
+                        light: ground.light.mixed(with: ornament.light, fraction: Self.markOpacity),
+                        dark: ground.dark.mixed(with: ornament.dark, fraction: Self.markOpacity)
+                    )
+                }
             }
         }
     }
@@ -270,6 +283,8 @@ extension AppTheme {
         case outline(color: AdaptiveColor, width: CGFloat)
         /// レース風の縁取り（縁の細い線と、その内側に並べた小さな玉）。
         case lace(color: AdaptiveColor)
+        /// カードの内側に沿う 2 本の線（外は太く、内は細く薄く）。
+        case doubleLine(color: AdaptiveColor)
     }
 
     nonisolated enum HeadingOrnament: Hashable, Sendable {
@@ -295,6 +310,8 @@ extension AppTheme {
         case tonal
         /// 推し色の地に、白い帯を縦横に重ねたギンガムチェック（`GinghamBackground`）。
         case gingham
+        /// 推し色を黒に寄せた地に、白い十字とハートを散らす（`CrossPatternBackground`）。
+        case crosses
     }
 }
 
