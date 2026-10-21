@@ -20,7 +20,7 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     let decoration: Decoration
 
     /// テストと見本で使う、すべてのテーマ。先頭は既定のテーマ。
-    static let all: [Self] = [.standard, .yumekawaPastel]
+    static let all: [Self] = [.standard, .yumekawaPastel, .koreanMinimal]
 
     /// id のテーマ。知らない id なら既定のテーマ。
     static func theme(id: String) -> Self {
@@ -274,6 +274,8 @@ extension AppTheme {
         case none
         /// 見出しの前に置く SF Symbols（`name` はシンボルの名前）。
         case symbol(name: String, color: AdaptiveColor)
+        /// 見出しの後ろに、残りの幅いっぱいの細い線を引く。
+        case trailingRule(color: AdaptiveColor)
     }
 
     nonisolated enum NumeralEffect: Hashable, Sendable {
@@ -285,6 +287,8 @@ extension AppTheme {
         case stripes
         /// 推し色の地に、白いハートを散らす（`HeartPatternBackground`）。
         case hearts
+        /// 推し色の地を、上から下へわずかに濃くする（`TonalBackground`）。
+        case tonal
     }
 }
 

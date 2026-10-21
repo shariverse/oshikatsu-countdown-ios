@@ -172,6 +172,29 @@ struct AppThemeTests {
         }
     }
 
+    @Test("韓国風ミニマルは細めの書体と数字・細い線の装飾で、模様は置かず、推し色の値は変えない")
+    func koreanMinimal() {
+        let theme = AppTheme.koreanMinimal
+        #expect(AppTheme.theme(id: "koreanMinimal") == theme)
+        #expect(theme.typography.textFaces == AppTheme.TextFaces(
+            regular: "ZenKakuGothicNew-Light",
+            medium: "ZenKakuGothicNew-Regular",
+            bold: "ZenKakuGothicNew-Medium"
+        ))
+        #expect(theme.typography.numeralFamily == AppFont.numeralFamily)
+        #expect(theme.typography.numeralWeight == .light)
+        #expect(theme.shape == AppTheme.CornerRadii(heroCard: 20, section: 16, detailCard: 24, tag: 6))
+        #expect(theme.decoration.screenBackground == .none)
+        #expect(theme.decoration.cardBorder == .outline(color: theme.palette.surfaceContainerHigh, width: 1))
+        #expect(theme.decoration.headingOrnament == .trailingRule(color: theme.palette.outlineVariant))
+        #expect(theme.decoration.numeralEffect == .none)
+        #expect(theme.decoration.photoPlaceholder == .tonal)
+        for color in OshiColor.allCases {
+            #expect(color.text(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.1))
+            #expect(color.textOnSurfaceContainer(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.14))
+        }
+    }
+
     @Test("Environment のテーマの既定は既定のテーマ")
     func environmentDefault() {
         #expect(EnvironmentValues().appTheme == .standard)
