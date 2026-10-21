@@ -55,6 +55,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
     画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
   - テーマ案の日本語の書体は `OshiCon/Preview Content/Fonts/` に置き、`PreviewFonts.registerIfNeeded()` で登録する。
     Archive から外すのは `Configs/Release.xcconfig` の `EXCLUDED_SOURCE_FILE_NAMES`（フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では外れない）。書体を足したら除外の名前にも足す。`OshiCon/Preview Content/` のものをリリースのコードから参照しない。見方と撮り方は README の「テーマの見本」
+  - テーマ案の一覧（狙い・配色・書体・コントラスト）と、案を採用するときに要る作業（書体を出荷物へ移す・設定で選ぶ仕組み・Android 版 SPEC への記載など）は `docs/design/themes.md`
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない
