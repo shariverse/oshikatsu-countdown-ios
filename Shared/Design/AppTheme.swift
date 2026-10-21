@@ -230,14 +230,50 @@ extension AppTheme {
 
     nonisolated enum ScreenBackground: Hashable, Sendable {
         case none
+        /// 上から下へ淡い色を移し（`gradient` は上から順の色）、星とハートを小さく散らす（`ornament` を `ornamentOpacity` で薄めて描く）。
+        case sparkles(gradient: [AdaptiveColor], ornament: AdaptiveColor)
+
+        /// 星とハートの不透明度。
+        static let ornamentOpacity = 0.4
+
+        /// 画面の地の色（模様を除く）。`background` はテーマの画面の地の色。
+        func grounds(background: AdaptiveColor) -> [AdaptiveColor] {
+            switch self {
+            case .none:
+                [background]
+            case let .sparkles(gradient, _):
+                gradient
+            }
+        }
+
+        /// 画面の地の上の文字（見出しなど）が乗りうる色。地の色に、模様の色を重ねたところも含める。
+        /// 推し色の文字は画面の地の上に置かない（行・札・カードの地の上に置く）ので、模様を重ねたところは本文の色だけで確かめる。
+        func textGrounds(background: AdaptiveColor) -> [AdaptiveColor] {
+            let grounds = grounds(background: background)
+            switch self {
+            case .none:
+                return grounds
+            case let .sparkles(_, ornament):
+                return grounds + grounds.map { ground in
+                    AdaptiveColor(
+                        light: ground.light.mixed(with: ornament.light, fraction: Self.ornamentOpacity),
+                        dark: ground.dark.mixed(with: ornament.dark, fraction: Self.ornamentOpacity)
+                    )
+                }
+            }
+        }
     }
 
     nonisolated enum CardBorder: Hashable, Sendable {
         case none
+        /// カードの内側に沿う線。
+        case outline(color: AdaptiveColor, width: CGFloat)
     }
 
     nonisolated enum HeadingOrnament: Hashable, Sendable {
         case none
+        /// 見出しの前に置く SF Symbols（`name` はシンボルの名前）。
+        case symbol(name: String, color: AdaptiveColor)
     }
 
     nonisolated enum NumeralEffect: Hashable, Sendable {
@@ -247,6 +283,8 @@ extension AppTheme {
     nonisolated enum PhotoPlaceholder: Hashable, Sendable {
         /// 推し色の斜めの縞（`StripedBackground`）。
         case stripes
+        /// 推し色の地に、白いハートを散らす（`HeartPatternBackground`）。
+        case hearts
     }
 }
 

@@ -96,6 +96,29 @@ struct AppThemeTests {
         #expect(decoration.photoPlaceholder == .stripes)
     }
 
+    @Test("模様の無い画面の地で文字が乗るのは、地の色だけ")
+    func textGroundsWithoutPattern() {
+        let background = AdaptiveColor(light: 0xFFFFFF, dark: 0x000000)
+        #expect(AppTheme.ScreenBackground.none.grounds(background: background) == [background])
+        #expect(AppTheme.ScreenBackground.none.textGrounds(background: background) == [background])
+    }
+
+    @Test("星とハートの地の色はグラデーションの色で、文字が乗るのはその色と、模様の色を不透明度の分だけ重ねた色")
+    func textGroundsWithSparkles() {
+        let top = AdaptiveColor(light: 0xFFFFFF, dark: 0x000000)
+        let bottom = AdaptiveColor(light: 0xEEEEEE, dark: 0x111111)
+        let ornament = AdaptiveColor(light: 0xFF0000, dark: 0x0000FF)
+        let opacity = AppTheme.ScreenBackground.ornamentOpacity
+        let sparkles = AppTheme.ScreenBackground.sparkles(gradient: [top, bottom], ornament: ornament)
+        let background = AdaptiveColor(light: 0x123456, dark: 0x123456)
+        #expect(sparkles.grounds(background: background) == [top, bottom])
+        let grounds = sparkles.textGrounds(background: background)
+        #expect(grounds.count == 4)
+        #expect(Array(grounds.prefix(2)) == [top, bottom])
+        #expect(grounds[2].light == top.light.mixed(with: ornament.light, fraction: opacity))
+        #expect(grounds[3].dark == bottom.dark.mixed(with: ornament.dark, fraction: opacity))
+    }
+
     @Test("推し色の文字・薄い地のテーマを受ける版は、既定のテーマでは今の値と同じ", arguments: OshiColor.allCases)
     func oshiColorInStandardTheme(color: OshiColor) {
         #expect(color.text(in: .standard) == color.text)

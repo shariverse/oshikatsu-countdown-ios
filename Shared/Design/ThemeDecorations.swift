@@ -16,6 +16,10 @@ struct ThemeScreenBackground: View {
         switch theme.decoration.screenBackground {
         case .none:
             theme.palette.background.color
+        case let .sparkles(gradient, ornament):
+            SparkleBackground(gradient: gradient, ornament: ornament)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -30,6 +34,10 @@ struct ThemePhotoPlaceholder: View {
         switch theme.decoration.photoPlaceholder {
         case .stripes:
             StripedBackground(color: color)
+        case .hearts:
+            HeartPatternBackground(color: color)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -60,6 +68,12 @@ private struct ThemeCardBorderModifier<CardShape: InsettableShape>: ViewModifier
         switch theme.decoration.cardBorder {
         case .none:
             content
+        case let .outline(color, width):
+            content.overlay {
+                shape.strokeBorder(color.color, lineWidth: width)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+            }
         }
     }
 }
@@ -71,6 +85,17 @@ private struct ThemeHeadingOrnamentModifier: ViewModifier {
         switch theme.decoration.headingOrnament {
         case .none:
             content
+        case let .symbol(name, color):
+            // 飾りは見出しの文字の前に並べ、文字には重ねない。大きさは見出しに合わせてダイナミックタイプで変わる
+            HStack(spacing: 6) {
+                Image(systemName: name)
+                    .font(.headline)
+                    .imageScale(.small)
+                    .foregroundStyle(color.color)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+                content
+            }
         }
     }
 }
