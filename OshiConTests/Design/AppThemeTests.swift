@@ -144,6 +144,34 @@ struct AppThemeTests {
         }
     }
 
+    @Test("どのテーマの本文の書体も、同梱の書体か Preview 用の書体のどれか", arguments: AppTheme.all)
+    func textFacesAreAvailable(theme: AppTheme) {
+        let available = Set(AppFont.TextFace.allCases.map(\.rawValue) + PreviewFonts.fileNames)
+        let faces = theme.typography.textFaces
+        for face in [faces.regular, faces.medium, faces.bold] {
+            #expect(available.contains(face), "\(face)")
+        }
+    }
+
+    @Test("ゆめかわパステルは Kiwi Maru・丸い角・星とハートの装飾で、推し色の値は変えない")
+    func yumekawaPastel() {
+        let theme = AppTheme.yumekawaPastel
+        #expect(AppTheme.theme(id: "yumekawaPastel") == theme)
+        #expect(theme.typography.textFaces == AppTheme.TextFaces(
+            regular: "KiwiMaru-Regular",
+            medium: "KiwiMaru-Medium",
+            bold: "KiwiMaru-Medium"
+        ))
+        #expect(theme.typography.numeralFamily == AppFont.numeralFamily)
+        #expect(theme.shape.heroCard > AppTheme.standard.shape.heroCard)
+        #expect(theme.shape.section > AppTheme.standard.shape.section)
+        #expect(theme.decoration.screenBackground != .none)
+        #expect(theme.decoration.photoPlaceholder == .hearts)
+        for color in OshiColor.allCases {
+            #expect(color.text(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.08))
+        }
+    }
+
     @Test("Environment のテーマの既定は既定のテーマ")
     func environmentDefault() {
         #expect(EnvironmentValues().appTheme == .standard)
