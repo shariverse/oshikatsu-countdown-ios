@@ -38,6 +38,11 @@ struct ThemePhotoPlaceholder: View {
             HeartPatternBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
+
+        case .tonal:
+            TonalBackground(color: color)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -95,6 +100,13 @@ private struct ThemeHeadingOrnamentModifier: ViewModifier {
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
                 content
+            }
+        case let .trailingRule(color):
+            // 線は見出しの文字の後ろに並べ、文字を押しのけない（文字が先に幅を取り、線は残りの幅だけ）
+            HStack(spacing: 12) {
+                content
+                    .layoutPriority(1)
+                ThinRule(color: color)
             }
         }
     }
