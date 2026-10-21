@@ -195,6 +195,28 @@ struct AppThemeTests {
         }
     }
 
+    @Test("量産型ガーリーは Zen Maru Gothic・レースの縁取り・リボンの見出しで、推し色の値は変えない")
+    func ryosangataGirly() {
+        let theme = AppTheme.ryosangataGirly
+        #expect(AppTheme.theme(id: "ryosangataGirly") == theme)
+        #expect(theme.typography.textFaces == AppTheme.TextFaces(
+            regular: "ZenMaruGothic-Regular",
+            medium: "ZenMaruGothic-Regular",
+            bold: "ZenMaruGothic-Bold"
+        ))
+        #expect(theme.typography.numeralFamily == AppFont.numeralFamily)
+        #expect(theme.typography.numeralWeight == .bold)
+        #expect(theme.shape == AppTheme.CornerRadii(heroCard: 30, section: 24, detailCard: 30, tag: 14))
+        #expect(theme.decoration.screenBackground == .none)
+        #expect(theme.decoration.cardBorder == .lace(color: AdaptiveColor(light: 0xF7B6CE, dark: 0x8A4D68)))
+        #expect(theme.decoration.headingOrnament == .ribbon(color: AdaptiveColor(light: 0xE86A9A, dark: 0xFF9DC0)))
+        #expect(theme.decoration.photoPlaceholder == .gingham)
+        for color in OshiColor.allCases {
+            #expect(color.text(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.08))
+            #expect(color.text(in: theme).dark == color.rgb.mixed(with: .white, fraction: 0.45))
+        }
+    }
+
     @Test("Environment のテーマの既定は既定のテーマ")
     func environmentDefault() {
         #expect(EnvironmentValues().appTheme == .standard)
