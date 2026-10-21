@@ -13,7 +13,9 @@ struct UpcomingWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: Self.kind, provider: UpcomingProvider()) { entry in
+            // 設定の「デバッグ」で選んだテーマ（DebugTheme。確認用のブランチだけ）
             UpcomingWidgetView(content: entry.content)
+                .environment(\.appTheme, DebugTheme.storedTheme())
         }
         .configurationDisplayName("推しカウント")
         .description("これからの予定を近い順に表示します")

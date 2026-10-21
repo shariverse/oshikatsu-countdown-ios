@@ -13,7 +13,9 @@ struct CountdownWidget: Widget {
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: Self.kind, intent: SelectEventIntent.self, provider: CountdownProvider()) { entry in
+            // 設定の「デバッグ」で選んだテーマ（DebugTheme。確認用のブランチだけ）
             CountdownWidgetView(content: entry.content)
+                .environment(\.appTheme, DebugTheme.storedTheme())
         }
         .configurationDisplayName("カウントダウン")
         .description("選んだ予定まであと何日かを推し色で表示します")
