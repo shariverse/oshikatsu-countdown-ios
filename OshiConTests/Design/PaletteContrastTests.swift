@@ -81,6 +81,13 @@ struct PaletteContrastTests {
         }
     }
 
+    @Test("選択中の印の地（brandContainer）に乗せた本文は 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    func textOnBrandContainer(theme: AppTheme, isDark: Bool) {
+        // ホームの絞り込みの札は、選択中でも本文の色（onSurface）で書く
+        let palette = theme.palette
+        #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: palette.brandContainer.resolved(isDark: isDark)) >= 4.5)
+    }
+
     @Test("推し色を薄く敷いた地に乗せた本文は 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all, [false, true])
     func textOnOshiContainer(theme: AppTheme, isDark: Bool) {
         let text = theme.palette.onSurface.resolved(isDark: isDark)
