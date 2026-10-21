@@ -27,7 +27,10 @@ struct PreviewFontsTests {
         #expect(text.contains("SIL OPEN FONT LICENSE Version 1.1"))
     }
 
-    @Test("Preview 用の書体のフォルダのファイルは Release の構成ですべて出荷物から外れ、同梱の書体のフォルダのファイルはどれも外れない")
+    @Test(
+        "Preview 用の書体のフォルダのファイルは Release の構成ですべて出荷物から外れ、同梱の書体のフォルダのファイルはどれも外れない",
+        .disabled("TestFlight の確認用のブランチ（testflight/theme-trial）では、書体を Release のビルドにも入れる")
+    )
     func previewFontsAreExcludedFromRelease() throws {
         // テストは Simulator で動くので、リポジトリのファイルをソースの場所から読む
         let repository = URL(fileURLWithPath: #filePath)

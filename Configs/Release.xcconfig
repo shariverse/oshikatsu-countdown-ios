@@ -10,4 +10,7 @@
 // テーマ案の Preview 用の書体とライセンス文（OshiCon/Preview Content/Fonts/）を出荷物に入れない。
 // フォルダ同期グループのリソースは DEVELOPMENT_ASSET_PATHS では Archive から外れないので、名前で外す。
 // 書体を足したらここにも足す（PreviewFontsTests が確かめる）
-EXCLUDED_SOURCE_FILE_NAMES = KiwiMaru-* ZenMaruGothic-* ZenKakuGothicNew-Light.ttf KaiseiDecol-* MochiyPopOne-*
+//
+// TestFlight の確認用のブランチ（testflight/theme-trial）では、デバッグ用のテーマの切り替え（DebugTheme）で 5 案を実機で比べるため、
+// 書体を外さずに Release のビルドにも入れる（このブランチは epic・develop にマージしない）
+// EXCLUDED_SOURCE_FILE_NAMES = KiwiMaru-* ZenMaruGothic-* ZenKakuGothicNew-Light.ttf KaiseiDecol-* MochiyPopOne-*
