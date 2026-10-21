@@ -14,7 +14,7 @@ struct SparkleBackground: View {
     let gradient: [AdaptiveColor]
     let ornament: AdaptiveColor
 
-    /// 模様 1 つ。`position` はタイルの中の中心、`size` は一辺の大きさ。
+    /// 模様 1 つ。`position` はタイルの中の中心、`size` は記号の文字の大きさ。
     private struct Mark {
         let symbol: String
         let position: CGPoint
@@ -37,22 +37,20 @@ struct SparkleBackground: View {
             .overlay {
                 Canvas { context, size in
                     let color = ornament.color.opacity(AppTheme.ScreenBackground.ornamentOpacity)
+                    // 記号はタイルをくり返す前に 1 回だけ解決する。長いほうの辺を大きさに合わせ、縦横の比を保つ
+                    let images = Self.marks.map { mark in
+                        var image = context.resolve(Image(systemName: mark.symbol))
+                        image.shading = .color(color)
+                        return (image, fittedSize(image.size, longerSide: mark.size))
+                    }
                     let tile = Self.tileSize
                     var origin = CGPoint.zero
                     while origin.y < size.height {
                         origin.x = 0
                         while origin.x < size.width {
-                            for mark in Self.marks {
-                                var image = context.resolve(Image(systemName: mark.symbol))
-                                image.shading = .color(color)
+                            for (mark, (image, imageSize)) in zip(Self.marks, images) {
                                 let center = CGPoint(x: origin.x + mark.position.x, y: origin.y + mark.position.y)
-                                let rect = CGRect(
-                                    x: center.x - mark.size / 2,
-                                    y: center.y - mark.size / 2,
-                                    width: mark.size,
-                                    height: mark.size
-                                )
-                                context.draw(image, in: rect)
+                                context.draw(image, in: CGRect(centeredAt: center, size: imageSize))
                             }
                             origin.x += tile.width
                         }
@@ -79,21 +77,37 @@ struct HeartPatternBackground: View {
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(color.fill))
             var heart = context.resolve(Image(systemName: "heart.fill"))
             heart.shading = .color(.white.opacity(Self.heartOpacity))
+            // 長いほうの辺を大きさに合わせ、縦横の比を保つ
+            let heartFrame = fittedSize(heart.size, longerSide: heartSize)
             var row = 0
             var y = spacing / 2
             while y - heartSize < size.height {
                 var x = row.isMultiple(of: 2) ? spacing / 2 : spacing
                 while x - heartSize < size.width {
-                    context.draw(
-                        heart,
-                        in: CGRect(x: x - heartSize / 2, y: y - heartSize / 2, width: heartSize, height: heartSize)
-                    )
+                    context.draw(heart, in: CGRect(centeredAt: CGPoint(x: x, y: y), size: heartFrame))
                     x += spacing
                 }
                 y += spacing
                 row += 1
             }
         }
+    }
+}
+
+/// `size` の縦横の比のまま、長いほうの辺を `longerSide` にした大きさ。
+private func fittedSize(_ size: CGSize, longerSide: CGFloat) -> CGSize {
+    let longest = max(size.width, size.height)
+    guard longest > 0 else {
+        return CGSize(width: longerSide, height: longerSide)
+    }
+    let scale = longerSide / longest
+    return CGSize(width: size.width * scale, height: size.height * scale)
+}
+
+private extension CGRect {
+    /// `center` を中心にした `size` の矩形。
+    init(centeredAt center: CGPoint, size: CGSize) {
+        self.init(x: center.x - size.width / 2, y: center.y - size.height / 2, width: size.width, height: size.height)
     }
 }
 
