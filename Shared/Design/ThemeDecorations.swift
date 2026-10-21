@@ -20,6 +20,10 @@ struct ThemeScreenBackground: View {
             SparkleBackground(gradient: gradient, ornament: ornament)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
+        case let .crossesAndHearts(ornament):
+            CrossesAndHeartsBackground(ground: theme.palette.background, ornament: ornament)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -38,13 +42,16 @@ struct ThemePhotoPlaceholder: View {
             HeartPatternBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
-
         case .tonal:
             TonalBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
         case .gingham:
             GinghamBackground(color: color)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
+        case .crosses:
+            CrossPatternBackground(color: color)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
         }
@@ -86,6 +93,12 @@ private struct ThemeCardBorderModifier<CardShape: InsettableShape>: ViewModifier
         case let .lace(color):
             content.overlay {
                 LaceBorder(shape: shape, color: color)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+            }
+        case let .doubleLine(color):
+            content.overlay {
+                DoubleLineBorder(shape: shape, color: color)
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
             }
