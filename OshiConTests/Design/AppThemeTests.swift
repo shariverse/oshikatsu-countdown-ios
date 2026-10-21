@@ -282,6 +282,36 @@ struct AppThemeTests {
         #expect(grounds[1].dark == background.dark.mixed(with: ornament.dark, fraction: opacity))
     }
 
+    @Test("アイドル・ペンライトは Mochiy Pop One・太い数字の光・照明の地で、推し色の値は変えない")
+    func idolPenlight() {
+        let theme = AppTheme.idolPenlight
+        #expect(AppTheme.theme(id: "idolPenlight") == theme)
+        #expect(theme.typography.textFaces == AppTheme.TextFaces(
+            regular: "MochiyPopOne-Regular",
+            medium: "MochiyPopOne-Regular",
+            bold: "MochiyPopOne-Regular"
+        ))
+        #expect(theme.typography.numeralFamily == AppFont.numeralFamily)
+        #expect(theme.typography.numeralWeight == .black)
+        #expect(theme.shape == AppTheme.CornerRadii(heroCard: 32, section: 24, detailCard: 32, tag: 12))
+        #expect(theme.decoration.cardBorder == .neon(color: AdaptiveColor(light: 0xC77DFF, dark: 0xB57BFF)))
+        #expect(theme.decoration.headingOrnament == .symbol(name: "music.note", color: AdaptiveColor(light: 0x9B2FC8, dark: 0xFF8AD0)))
+        #expect(theme.decoration.numeralEffect == .glow)
+        #expect(theme.decoration.photoPlaceholder == .penlights)
+        guard case let .stage(gradient, _) = theme.decoration.screenBackground else {
+            Issue.record("照明の地ではない")
+            return
+        }
+        #expect(gradient.first == theme.palette.background)
+        for color in OshiColor.allCases {
+            #expect(color.text(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.08))
+            #expect(color.text(in: theme).dark == color.rgb.mixed(with: .white, fraction: 0.45))
+            #expect(color.textOnSurfaceContainer(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.12))
+            // 数字の光は推し色から作る
+            #expect(theme.decoration.numeralEffect.glow(for: color, on: .ground)?.color.light == color.rgb)
+        }
+    }
+
     @Test("Environment のテーマの既定は既定のテーマ")
     func environmentDefault() {
         #expect(EnvironmentValues().appTheme == .standard)
