@@ -15,9 +15,9 @@ struct AppFontTests {
         #expect(UIFont(name: face.rawValue, size: 17) != nil)
     }
 
-    @Test("地雷系・ゴシックの本文の書体（Kaisei Decol）を、アプリと Widget Extension の両方に同梱して UIAppFonts で登録する")
-    func jiraiGothicTextFacesAreBundled() throws {
-        let faces = AppTheme.jiraiGothic.typography.textFaces
+    @Test("出荷するテーマの本文の書体を、アプリと Widget Extension の両方に同梱して UIAppFonts で登録する")
+    func shippingTextFacesAreBundled() throws {
+        let faces = AppTheme.shipping.typography.textFaces
         let fileNames = Set([faces.regular, faces.medium, faces.bold].map { "\($0).ttf" })
         let widget = try #require(Bundle.main.builtInPlugInsURL).appending(path: "OshiConWidgetExtension.appex")
         for bundle in [Bundle.main, try #require(Bundle(url: widget))] {

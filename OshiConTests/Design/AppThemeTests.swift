@@ -160,9 +160,10 @@ struct AppThemeTests {
         #expect(color.container.dark == AppPalette.surface.dark.mixed(with: color.rgb, fraction: 0.35))
     }
 
-    @Test("テーマの一覧は既定のテーマから始まり、id は英字で重ならない")
+    @Test("テーマの一覧は採用前のデザインから始まり、出荷するテーマを含み、id は英字で重ならない")
     func allThemes() {
         #expect(AppTheme.all.first == .standard)
+        #expect(AppTheme.all.contains(.shipping))
         #expect(Set(AppTheme.all.map(\.id)).count == AppTheme.all.count)
         for theme in AppTheme.all {
             #expect(!theme.id.isEmpty)
@@ -315,9 +316,10 @@ struct AppThemeTests {
         }
     }
 
-    @Test("Environment のテーマの既定は既定のテーマ")
+    @Test("出荷するテーマは地雷系・ゴシックで、Environment のテーマの既定も出荷するテーマ")
     func environmentDefault() {
-        #expect(EnvironmentValues().appTheme == .standard)
+        #expect(AppTheme.shipping == .jiraiGothic)
+        #expect(EnvironmentValues().appTheme == .shipping)
     }
 }
 

@@ -146,14 +146,14 @@ struct PreviewThemeLaunchOptionTests {
         #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-useInMemoryStore"]) == nil)
     }
 
-    @Test("起動引数の id のテーマにする。知らない id・id が無いときは既定のテーマ")
+    @Test("起動引数の id のテーマにする。知らない id・id が無いときは出荷するテーマ")
     func themeFromArgument() {
         for theme in AppTheme.all {
             #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme", theme.id]) == theme)
         }
-        #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme", "unknownTheme"]) == .standard)
-        #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme"]) == .standard)
-        #expect(AppTheme.theme(id: "unknownTheme") == .standard)
+        #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme", "unknownTheme"]) == .shipping)
+        #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme"]) == .shipping)
+        #expect(AppTheme.theme(id: "unknownTheme") == .shipping)
         #expect(AppTheme.theme(id: "standard") == .standard)
     }
 }
