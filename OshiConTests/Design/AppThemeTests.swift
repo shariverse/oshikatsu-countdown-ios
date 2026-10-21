@@ -217,6 +217,44 @@ struct AppThemeTests {
         }
     }
 
+    @Test("地雷系・ゴシックは Kaisei Decol・太い数字・十字とハートの装飾で、推し色の値は変えない")
+    func jiraiGothic() {
+        let theme = AppTheme.jiraiGothic
+        #expect(AppTheme.theme(id: "jiraiGothic") == theme)
+        #expect(theme.typography.textFaces == AppTheme.TextFaces(
+            regular: "KaiseiDecol-Regular",
+            medium: "KaiseiDecol-Regular",
+            bold: "KaiseiDecol-Bold"
+        ))
+        #expect(theme.typography.numeralFamily == AppFont.numeralFamily)
+        #expect(theme.typography.numeralWeight == .heavy)
+        #expect(theme.shape == AppTheme.CornerRadii(heroCard: 16, section: 12, detailCard: 20, tag: 4))
+        #expect(theme.decoration.screenBackground == .crossesAndHearts(ornament: AdaptiveColor(light: 0xF2B6CF, dark: 0x4A2A3C)))
+        #expect(theme.decoration.cardBorder == .doubleLine(color: AdaptiveColor(light: 0x1A0F16, dark: 0xFF7EB3)))
+        #expect(theme.decoration.headingOrnament == .symbol(name: "heart.fill", color: theme.palette.brand))
+        #expect(theme.decoration.numeralEffect == .none)
+        #expect(theme.decoration.photoPlaceholder == .crosses)
+        for color in OshiColor.allCases {
+            #expect(color.text(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.08))
+            #expect(color.text(in: theme).dark == color.rgb.mixed(with: .white, fraction: 0.45))
+            #expect(color.textOnSurfaceContainer(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.12))
+        }
+    }
+
+    @Test("十字とハートの地の色は画面の地の色で、文字が乗るのはその色と、模様の色を不透明度の分だけ重ねた色")
+    func textGroundsWithCrossesAndHearts() {
+        let background = AdaptiveColor(light: 0xFFFFFF, dark: 0x000000)
+        let ornament = AdaptiveColor(light: 0xFF0000, dark: 0x0000FF)
+        let opacity = AppTheme.ScreenBackground.markOpacity
+        let marks = AppTheme.ScreenBackground.crossesAndHearts(ornament: ornament)
+        #expect(marks.grounds(background: background) == [background])
+        let grounds = marks.textGrounds(background: background)
+        #expect(grounds.count == 2)
+        #expect(grounds[0] == background)
+        #expect(grounds[1].light == background.light.mixed(with: ornament.light, fraction: opacity))
+        #expect(grounds[1].dark == background.dark.mixed(with: ornament.dark, fraction: opacity))
+    }
+
     @Test("Environment のテーマの既定は既定のテーマ")
     func environmentDefault() {
         #expect(EnvironmentValues().appTheme == .standard)
