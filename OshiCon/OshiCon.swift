@@ -14,8 +14,8 @@ struct OshiCon: App {
     /// SwiftData のストア。開けなかったときはその旨の画面を出す。
     private let container: Result<ModelContainer, any Error>
     #if DEBUG
-    /// テーマ案の見本（`-previewTheme`）。引数が無ければ既定のテーマ。
-    private let previewTheme: AppTheme
+    /// テーマ案の見本（`-previewTheme`）。引数が無ければ nil（設定の「デバッグ」で選んだテーマ）。
+    private let previewTheme: AppTheme?
     #endif
 
     init() {
@@ -25,7 +25,7 @@ struct OshiCon: App {
         if previewTheme != nil {
             PreviewFonts.registerIfNeeded()
         }
-        self.previewTheme = previewTheme ?? .standard
+        self.previewTheme = previewTheme
         #endif
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
@@ -42,6 +42,15 @@ struct OshiCon: App {
         SampleData.insert(sample, into: container.mainContext, now: now)
     }
 
+    /// 起動引数で選んだテーマ（DEBUG のビルドだけ）。
+    private var launchTheme: AppTheme? {
+        #if DEBUG
+        previewTheme
+        #else
+        nil
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
             switch container {
@@ -50,9 +59,7 @@ struct OshiCon: App {
                     .environment(router)
                     .modelContainer(container)
                     .refreshesWidgets()
-                    #if DEBUG
-                    .environment(\.appTheme, previewTheme)
-                    #endif
+                    .debugTheme(override: launchTheme)
             case .failure:
                 StoreUnavailableView()
             }

@@ -5,9 +5,10 @@
 
 import SwiftUI
 
-/// 設定。終わった予定の表示、データの保存先の説明、バージョンとオープンソースライセンス。
+/// 設定。終わった予定の表示、データの保存先の説明、バージョンとオープンソースライセンス、デバッグ用のテーマの切り替え。
 struct SettingsScreen: View {
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
+    @AppStorage(DebugTheme.storageKey) private var debugThemeID = AppTheme.standard.id
     @Environment(\.appTheme) private var theme
 
     var body: some View {
@@ -46,10 +47,29 @@ struct SettingsScreen: View {
                     }
                 }
             }
+            debugSection
         }
         .scrollContentBackground(.hidden)
         .background(theme.palette.background.color)
         .navigationTitle("設定")
+    }
+
+    /// デバッグ用のテーマの切り替え（`DebugTheme`。確認用のブランチだけ）。出荷する画面ではないので文言は訳さない。
+    private var debugSection: some View {
+        Section {
+            Picker(selection: $debugThemeID) {
+                ForEach(AppTheme.all) { theme in
+                    Text(verbatim: theme.displayName)
+                        .tag(theme.id)
+                }
+            } label: {
+                Text(verbatim: "テーマ")
+            }
+        } header: {
+            Text(verbatim: "デバッグ")
+        } footer: {
+            Text(verbatim: "TestFlight でテーマ案を比べるための切り替えです。アプリとホーム画面のウィジェットに当てます。書体が変わるのは日本語の画面だけです。")
+        }
     }
 }
 
