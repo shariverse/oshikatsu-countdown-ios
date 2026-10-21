@@ -28,7 +28,7 @@ nonisolated enum LaunchOptions {
     /// テーマ案の見本で起動する（`-previewTheme yumekawaPastel` のように id を続ける）。DEBUG のビルドだけで効く。
     static let previewThemeArgument = "-previewTheme"
 
-    /// 起動引数で選んだテーマ。引数が無ければ nil、知らない id なら既定のテーマ。
+    /// 起動引数で選んだテーマ。引数が無ければ nil、知らない id なら出荷するテーマ。
     static func previewTheme(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppTheme? {
         guard let index = arguments.firstIndex(of: previewThemeArgument) else {
             return nil

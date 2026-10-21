@@ -9,7 +9,7 @@ import SwiftUI
 import Testing
 
 struct AppThemeTests {
-    @Test("既定のテーマの配色は、今の AppPalette の全役割と同じ")
+    @Test("標準のテーマの配色は、今の AppPalette の全役割と同じ")
     func standardPaletteMatchesAppPalette() {
         let palette = AppTheme.standard.palette
         #expect(palette.background == AppPalette.background)
@@ -26,7 +26,7 @@ struct AppThemeTests {
         #expect(palette.destructive == AppPalette.destructive)
     }
 
-    @Test("既定のテーマの数字の書体は、今と同じ Font（Outfit・太字・桁の幅をそろえる）")
+    @Test("標準のテーマの数字の書体は、今と同じ Font（Outfit・太字・桁の幅をそろえる）")
     func standardNumeralsMatchCurrentFonts() {
         func outfit(_ size: CGFloat, _ style: Font.TextStyle, _ weight: Font.Weight = .bold) -> Font {
             .custom("Outfit", size: size, relativeTo: style).weight(weight).monospacedDigit()
@@ -48,7 +48,7 @@ struct AppThemeTests {
     }
 
     @Test(
-        "既定のテーマの本文の書体は、今と同じ Font（日本語は Zen Kaku Gothic New の 3 つの太さ、ほかの言語はシステムの書体）",
+        "標準のテーマの本文の書体は、今と同じ Font（日本語は Zen Kaku Gothic New の 3 つの太さ、ほかの言語はシステムの書体）",
         arguments: [Font.Weight.light, .regular, .medium, .semibold, .bold, .heavy]
     )
     func standardTextMatchesCurrentFonts(weight: Font.Weight) {
@@ -64,7 +64,7 @@ struct AppThemeTests {
         }
     }
 
-    @Test("既定のテーマの本文の書体の名前は、同梱の Zen Kaku Gothic New と同じ")
+    @Test("標準のテーマの本文の書体の名前は、同梱の Zen Kaku Gothic New と同じ")
     func standardTextFaces() {
         let faces = AppTheme.standard.typography.textFaces
         #expect(faces.regular == AppFont.TextFace.regular.rawValue)
@@ -77,7 +77,7 @@ struct AppThemeTests {
         #expect(AppTheme.standard.typography.numeralWeight == .bold)
     }
 
-    @Test("既定のテーマの角の丸みは今の値（先頭のカード 28・まとまり 20・詳細のカード 28・札 8）")
+    @Test("標準のテーマの角の丸みは今の値（先頭のカード 28・まとまり 20・詳細のカード 28・札 8）")
     func standardCornerRadii() {
         let shape = AppTheme.standard.shape
         #expect(shape.heroCard == 28)
@@ -86,7 +86,7 @@ struct AppThemeTests {
         #expect(shape.tag == 8)
     }
 
-    @Test("既定のテーマは装飾を描かず、写真が無いときは今の縞")
+    @Test("標準のテーマは装飾を描かず、写真が無いときは今の縞")
     func standardDecoration() {
         let decoration = AppTheme.standard.decoration
         #expect(decoration.screenBackground == .none)
@@ -146,7 +146,7 @@ struct AppThemeTests {
         #expect(peak == RGBColor.white.mixed(with: color.rgb, fraction: AppTheme.NumeralEffect.groundGlowOpacity))
     }
 
-    @Test("推し色の文字・薄い地のテーマを受ける版は、既定のテーマでは今の値と同じ", arguments: OshiColor.allCases)
+    @Test("推し色の文字・薄い地のテーマを受ける版は、標準のテーマでは今の値と同じ", arguments: OshiColor.allCases)
     func oshiColorInStandardTheme(color: OshiColor) {
         #expect(color.text(in: .standard) == color.text)
         #expect(color.textOnSurfaceContainer(in: .standard) == color.textOnSurfaceContainer)
@@ -160,9 +160,10 @@ struct AppThemeTests {
         #expect(color.container.dark == AppPalette.surface.dark.mixed(with: color.rgb, fraction: 0.35))
     }
 
-    @Test("テーマの一覧は既定のテーマから始まり、id は英字で重ならない")
+    @Test("テーマの一覧は採用前のデザインから始まり、出荷するテーマを含み、id は英字で重ならない")
     func allThemes() {
         #expect(AppTheme.all.first == .standard)
+        #expect(AppTheme.all.contains(.shipping))
         #expect(Set(AppTheme.all.map(\.id)).count == AppTheme.all.count)
         for theme in AppTheme.all {
             #expect(!theme.id.isEmpty)
@@ -171,9 +172,12 @@ struct AppThemeTests {
         }
     }
 
-    @Test("どのテーマの本文の書体も、同梱の書体か Preview 用の書体のどれか", arguments: AppTheme.all)
+    @Test("どのテーマの本文の書体も、同梱の書体（UIAppFonts）か Preview 用の書体のどれか", arguments: AppTheme.all)
     func textFacesAreAvailable(theme: AppTheme) {
-        let available = Set(AppFont.TextFace.allCases.map(\.rawValue) + PreviewFonts.fileNames)
+        // 同梱の書体はファイル名が PostScript 名と同じ
+        let fontFiles = Bundle.main.object(forInfoDictionaryKey: "UIAppFonts") as? [String] ?? []
+        let bundled = fontFiles.map { ($0 as NSString).deletingPathExtension }
+        let available = Set(bundled + PreviewFonts.fileNames)
         let faces = theme.typography.textFaces
         for face in [faces.regular, faces.medium, faces.bold] {
             #expect(available.contains(face), "\(face)")
@@ -312,9 +316,10 @@ struct AppThemeTests {
         }
     }
 
-    @Test("Environment のテーマの既定は既定のテーマ")
+    @Test("出荷するテーマは地雷系・ゴシックで、Environment のテーマの既定も出荷するテーマ")
     func environmentDefault() {
-        #expect(EnvironmentValues().appTheme == .standard)
+        #expect(AppTheme.shipping == .jiraiGothic)
+        #expect(EnvironmentValues().appTheme == .shipping)
     }
 }
 

@@ -5,10 +5,10 @@
 
 import SwiftUI
 
-// テーマの装飾の差し込み口。どれも `@Environment(\.appTheme)` の装飾を描き、既定のテーマ（装飾が「無し」）では何も変えない。
+// テーマの装飾の差し込み口。どれも `@Environment(\.appTheme)` の装飾を描き、標準のテーマ（装飾が「無し」）では何も変えない。
 // 装飾は読み上げ・押せる範囲・並びを変えず（`accessibilityHidden(true)`・`allowsHitTesting(false)`）、文字の上に重ねない。
 
-/// 画面の地。テーマの地の色に、テーマの模様を重ねる（既定のテーマは色だけ）。
+/// 画面の地。テーマの地の色に、テーマの模様を重ねる（標準のテーマは色だけ）。
 struct ThemeScreenBackground: View {
     @Environment(\.appTheme) private var theme
 
@@ -32,7 +32,7 @@ struct ThemeScreenBackground: View {
     }
 }
 
-/// 写真が無いときに写真の場所を埋める模様。既定のテーマは推し色の斜めの縞。
+/// 写真が無いときに写真の場所を埋める模様。標準のテーマは推し色の斜めの縞。
 struct ThemePhotoPlaceholder: View {
     let color: OshiColor
 

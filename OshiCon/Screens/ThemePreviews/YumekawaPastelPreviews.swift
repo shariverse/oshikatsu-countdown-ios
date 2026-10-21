@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-// テーマ案 1「ゆめかわパステル」の見本（`AppTheme.yumekawaPastel`）。出荷するアプリは既定のテーマのまま。
+// テーマ案 1「ゆめかわパステル」の見本（`AppTheme.yumekawaPastel`）。採用しなかった案（出荷するテーマは地雷系・ゴシック）。
 
 #Preview("ゆめかわパステル・ホーム・ライト") {
     ThemePreviewCanvas(.yumekawaPastel, .home, .light)

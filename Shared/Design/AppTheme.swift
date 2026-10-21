@@ -7,7 +7,8 @@ import SwiftUI
 
 /// アプリのテーマ。地の配色・角の丸み・書体・装飾をまとめて持つ。アプリとウィジェットの両方で使う。
 /// 推し色（`OshiColor`）の役割は置き換えない。テーマが変えるのは、推し色の文字を地に合わせて調整する割合だけ。
-/// 出荷するアプリは既定のテーマ（`standard`）だけを使う。ほかの案は Preview・DEBUG の見本・テストの中だけで使う。
+/// 出荷するアプリは採用したテーマ（`shipping`。Discussion #80 の「地雷系・ゴシック」）だけを使う。
+/// ほかの案（採用前のデザインの `standard` を含む）は Preview・DEBUG の見本・テストの中だけで使う。
 nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     /// 英字の安定した値（DEBUG の見本の起動引数・テストで使う）。
     let id: String
@@ -19,15 +20,20 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     let typography: Typography
     let decoration: Decoration
 
-    /// テストと見本で使う、すべてのテーマ。先頭は既定のテーマ。
+    /// テストと見本で使う、すべてのテーマ。先頭は採用前のデザイン（`standard`。見本で比べる基準）。
     static let all: [Self] = [.standard, .yumekawaPastel, .ryosangataGirly, .koreanMinimal, .jiraiGothic, .idolPenlight]
 
-    /// id のテーマ。知らない id なら既定のテーマ。
-    static func theme(id: String) -> Self {
-        all.first { $0.id == id } ?? .standard
+    /// 出荷するアプリとウィジェットのテーマ。Discussion #80 の 5 案から「地雷系・ゴシック」を採用し、`standard` を置き換えた。
+    static var shipping: Self {
+        .jiraiGothic
     }
 
-    /// 今のデザイン。`AppPalette`・`AppFont`・角の丸み・縞と同じ値。
+    /// id のテーマ。知らない id なら出荷するテーマ。
+    static func theme(id: String) -> Self {
+        all.first { $0.id == id } ?? .shipping
+    }
+
+    /// 採用前のデザイン（デザインキャンバス「推し活カウントダウン 画面デザイン」）。`AppPalette`・`AppFont`・角の丸み・縞と同じ値。
     static let standard = Self(
         id: "standard",
         displayName: "標準",
@@ -105,7 +111,7 @@ extension AppTheme {
 
     /// 推し色を地の上の文字や薄い地に使うときの調整の割合。テーマの地で 4.5:1 を保てるよう、テーマごとに持つ。
     nonisolated struct OshiTextAdjustment: Hashable, Sendable {
-        /// ライトの地で推し色を文字に使うとき、黒に寄せる割合。地が色付きで 4.5:1 を保てないテーマだけが持つ（既定のテーマは 0 で推し色のまま）。
+        /// ライトの地で推し色を文字に使うとき、黒に寄せる割合。地が色付きで 4.5:1 を保てないテーマだけが持つ（標準のテーマは 0 で推し色のまま）。
         let lightTextDarkenFraction: Double
         /// ダークの地で推し色を文字に使うとき、白に寄せる割合。
         let darkTextLightenFraction: Double
@@ -377,6 +383,6 @@ extension AppTheme {
 // MARK: - 配り方
 
 extension EnvironmentValues {
-    /// 画面とウィジェットが使うテーマ。出荷するアプリは既定のテーマのまま（DEBUG の見本だけがほかの案を入れる）。
-    @Entry var appTheme: AppTheme = .standard
+    /// 画面とウィジェットが使うテーマ。出荷するアプリは `AppTheme.shipping` のまま（DEBUG の見本だけがほかの案を入れる）。
+    @Entry var appTheme: AppTheme = .shipping
 }

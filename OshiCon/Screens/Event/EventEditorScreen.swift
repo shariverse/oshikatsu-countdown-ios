@@ -132,6 +132,7 @@ private struct EventFormFields: View {
                     }
                 }
             }
+            .themeRowBackground()
             Section("種類") {
                 if dynamicTypeSize.isAccessibilitySize {
                     // 大きな文字では 5 つのセグメントに収まらないので、メニューで選ぶ
@@ -143,6 +144,7 @@ private struct EventFormFields: View {
                         .labelsHidden()
                 }
             }
+            .themeRowBackground()
             Section {
                 TextField("例：5th LIVE 東京公演", text: $form.title)
                     .accessibilityLabel("タイトル")
@@ -152,10 +154,12 @@ private struct EventFormFields: View {
             } footer: {
                 InputLengthFooter(field: .eventTitle, text: form.title)
             }
+            .themeRowBackground()
             Section {
                 DatePicker("日付", selection: day, displayedComponents: .date)
                 startTimeRow
             }
+            .themeRowBackground()
             Section {
                 TextField("会場・場所（任意）", text: $form.venue)
                     .accessibilityLabel("会場・場所（任意）")
@@ -164,6 +168,7 @@ private struct EventFormFields: View {
             } footer: {
                 InputLengthFooter(field: .eventVenue, text: form.venue)
             }
+            .themeRowBackground()
             Section {
                 Toggle(isOn: $form.repeatsYearly) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -174,6 +179,7 @@ private struct EventFormFields: View {
                     }
                 }
             }
+            .themeRowBackground()
         }
         .scrollContentBackground(.hidden)
         .background(theme.palette.background.color)

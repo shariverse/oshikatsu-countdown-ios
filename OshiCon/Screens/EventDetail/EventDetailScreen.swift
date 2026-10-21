@@ -6,7 +6,7 @@
 import SwiftData
 import SwiftUI
 
-/// 予定の詳細。推しの写真（無ければテーマの模様。既定のテーマは推し色の斜めの縞）の上に中身のカードを重ね、秒単位のカウントダウンと進み具合を出す。
+/// 予定の詳細。推しの写真（無ければテーマの模様。出荷するテーマは推し色を黒に寄せた地に十字とハート）の上に中身のカードを重ね、秒単位のカウントダウンと進み具合を出す。
 /// 上のボタンでピン留めの切り替え・編集・削除（確認を出す）をする。予定が消えたら（削除・推しの削除など）前の画面に戻る。
 struct EventDetailScreen: View {
     let eventID: OshiEvent.ID
@@ -175,7 +175,7 @@ private struct DetailNavigationBarBackground: ViewModifier {
     }
 }
 
-/// 詳細の上に敷く推しの写真。写真が無い・読めないときはテーマの模様（既定のテーマは推し色の斜めの縞）。
+/// 詳細の上に敷く推しの写真。写真が無い・読めないときはテーマの模様（出荷するテーマは推し色を黒に寄せた地に十字とハート）。
 private struct EventDetailHeader: View {
     let oshi: Oshi?
     let color: OshiColor

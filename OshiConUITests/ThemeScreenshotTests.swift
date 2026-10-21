@@ -8,7 +8,7 @@ import XCTest
 /// テーマ案の見本のアプリの画面を撮る（README の「テーマの見本」）。見本の推しと予定で、DEBUG の起動引数 `-previewTheme` のテーマで起動する。
 ///
 /// ふだんのテストでは流さない。環境変数 `THEME_SCREENSHOTS=1`（xcodebuild には `TEST_RUNNER_THEME_SCREENSHOTS=1`）のときだけ流れ、
-/// テーマは `THEME_ID`（`AppTheme` の id。無ければ既定のテーマ）で選ぶ。ライト / ダークは Simulator の外観に合わせる。
+/// テーマは `THEME_ID`（`AppTheme` の id。無ければ標準のテーマ）で選ぶ。ライト / ダークは Simulator の外観に合わせる。
 /// ウィジェットは `ThemeWidgetScreenshotTests`（Unit テスト）が撮る。
 final class ThemeScreenshotTests: XCTestCase {
     override func setUpWithError() throws {

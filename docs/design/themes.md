@@ -2,8 +2,9 @@
 
 推し活カウントダウンの見た目（地の配色・角の丸み・書体・装飾）を変える 5 つの案です。依頼は Issue #79、決定は Discussion #80 にあります。
 
-**出荷するアプリは既定のテーマ（`AppTheme.standard`。今のデザイン）のままです。**
-5 案は Preview・DEBUG のビルドの見本（`-previewTheme`）・テストの中だけで使い、どれを採用するか（採用の形・何案残すか）は人間が見て決めます（Q1）。
+**案 4「地雷系・ゴシック」（`jiraiGothic`）を採用し、出荷するアプリとウィジェットの見た目にしました（Issue #114）。**
+採用の形は「1 案で既定のデザインを置き換える」で、設定でテーマを選ぶ仕組みは作っていません。出荷するテーマは `AppTheme.shipping`（= `jiraiGothic`）です。
+採用前のデザイン（標準のテーマ `AppTheme.standard`）と残りの 4 案は、Preview・DEBUG のビルドの見本（`-previewTheme`）・テストの中だけで使います。
 
 ## 共通の決まり
 
@@ -16,7 +17,7 @@
 
 ## 見方
 
-- **並べて比べる**: `OshiCon/Screens/ThemePreviews/ThemeComparisonBoard.swift` の Preview「テーマ案を並べる・ライト / ダーク」。既定のテーマと 5 案を横に並べ、ホームの先頭のカードとこれからの予定・ウィジェット 2 種を描きます
+- **並べて比べる**: `OshiCon/Screens/ThemePreviews/ThemeComparisonBoard.swift` の Preview「テーマ案を並べる・ライト / ダーク」。標準のテーマと 5 案を横に並べ、ホームの先頭のカードとこれからの予定・ウィジェット 2 種を描きます
 - **案ごと**: `OshiCon/Screens/ThemePreviews/<案>Previews.swift`（ホーム・予定の詳細・予定の追加・ウィジェット 2 種を、ライト / ダーク・大きな文字・横向きで）
 - **実際の画面**: DEBUG のビルドを `-previewTheme <id>` で起動します（Xcode の Scheme の Run の Arguments）。日本語の書体を見るときは App Language を日本語にします
 - **撮る**: README の「テーマの見本」（`scripts/theme-screenshots.sh <id> <UDID>`、並べた見本は `ThemeComparisonScreenshotTests`）
@@ -25,11 +26,11 @@
 
 | 案 | id | 方向性 | 本文の書体 | 数字 | 角の丸み（先頭のカード・まとまり・詳細・札） |
 | --- | --- | --- | --- | --- | --- |
-| 標準（今のデザイン） | `standard` | — | Zen Kaku Gothic New（Regular / Medium / Bold。出荷物に同梱） | Outfit Bold | 28・20・28・8 |
+| 標準（採用前のデザイン） | `standard` | — | Zen Kaku Gothic New（Regular / Medium / Bold。出荷物に同梱） | Outfit Bold | 28・20・28・8 |
 | ゆめかわパステル | `yumekawaPastel` | 薄いピンク・ラベンダー・水色の地、丸い角、星やハートの小さな装飾 | Kiwi Maru（Regular / Medium。太字は Medium に寄せる） | Outfit SemiBold | 36・28・36・12 |
 | 量産型ガーリー | `ryosangataGirly` | ピンク × 白、リボン・レース風の縁取り、丸ゴシックの見出し | Zen Maru Gothic（Regular / Bold。Medium は Regular に寄せる） | Outfit Bold | 30・24・30・14 |
 | 韓国風ミニマル | `koreanMinimal` | くすみカラー、余白多め、細い線と細めの数字 | Zen Kaku Gothic New を 1 段ずつ細く（Light / Regular / Medium） | Outfit Light | 20・16・24・6 |
-| 地雷系・ゴシック | `jiraiGothic` | 黒 × ピンク、ダークが主役、ハートや十字の装飾 | Kaisei Decol（Regular / Bold。Medium は Regular に寄せる） | Outfit Heavy | 16・12・20・4 |
+| **地雷系・ゴシック（採用）** | `jiraiGothic` | 黒 × ピンク、ダークが主役、ハートや十字の装飾 | Kaisei Decol（Regular / Bold。Medium は Regular に寄せる。出荷物に同梱） | Outfit Heavy | 16・12・20・4 |
 | アイドル・ペンライト | `idolPenlight` | 推し色を大きく光らせる、ネオンの数字、ライブ会場の高揚感 | Mochiy Pop One（太さは 1 つ。3 つの太さをすべてこれに寄せる） | Outfit Black | 32・24・32・12 |
 
 ### ゆめかわパステル（`yumekawaPastel`）
@@ -81,11 +82,12 @@
 | destructive | `#A8322B` | `#F2B8B5` |
 | カードの線 / 見出しの線 | `#E2D9D0` / `#D8CEC5` | `#3A3532` / `#4A443F` |
 
-### 地雷系・ゴシック（`jiraiGothic`）
+### 地雷系・ゴシック（`jiraiGothic`。採用）
 
 - 狙い: 黒 × ピンクで、ダークが主役。ライトも薄いピンクの地に黒の文字・黒の縁取りで世界観が分かるようにする。装飾的な明朝でゴシックの雰囲気を出す
 - 装飾: ホームの地に十字とハート（不透明度 0.35）・カードに二重の線（外 1.5pt・4pt 内側に 1pt）・見出しの前にハート・写真が無いときは推し色を黒に寄せた地に白い十字とハート
-- PR: #105
+- PR: #105（案）・Issue #114（採用）
+- 画面: 設定・予定と推しの編集・ライセンスの一覧の Form / List の行の地も、カードの地（`surface`）にそろえています（`themeRowBackground()`）。採用前はシステムの既定の地で、ダークでは灰色でした
 
 | 役割 | ライト | ダーク |
 | --- | --- | --- |
@@ -130,27 +132,26 @@
 
 ## 書体
 
-どれも [google/fonts](https://github.com/google/fonts) のコミット `47d54ca1ebb14fd864695f1d39dc734f39017c33` から取得し、改変せずに `OshiCon/Preview Content/Fonts/` に置いています（ライセンスはすべて SIL Open Font License 1.1。ライセンス文は同じフォルダの `<Family>-OFL.txt`）。
-Preview と DEBUG のビルドだけで使い、Archive（出荷物）・Widget Extension には入りません（`Configs/Release.xcconfig` の `EXCLUDED_SOURCE_FILE_NAMES`）。
+どれも [google/fonts](https://github.com/google/fonts) のコミット `47d54ca1ebb14fd864695f1d39dc734f39017c33` から取得し、改変せずに置いています（ライセンスはすべて SIL Open Font License 1.1。ライセンス文は書体と同じフォルダの `<Family>-OFL.txt`）。
+
+- **採用した Kaisei Decol**: `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の両方に入れて `UIAppFonts` で登録します。オープンソースライセンスの画面にも載せています
+- **採用しなかった案の書体**: `OshiCon/Preview Content/Fonts/` に置き、Preview と DEBUG のビルドだけで使います。Archive（出荷物）・Widget Extension には入りません（`Configs/Release.xcconfig` の `EXCLUDED_SOURCE_FILE_NAMES`）
 
 | 案 | 書体（google/fonts のフォルダ） | ファイルと大きさ（バイト） |
 | --- | --- | --- |
 | ゆめかわパステル | Kiwi Maru（`ofl/kiwimaru`） | `KiwiMaru-Regular.ttf`（5,065,572）・`KiwiMaru-Medium.ttf`（5,123,612） |
 | 量産型ガーリー | Zen Maru Gothic（`ofl/zenmarugothic`） | `ZenMaruGothic-Regular.ttf`（3,832,756）・`ZenMaruGothic-Bold.ttf`（3,779,008） |
 | 韓国風ミニマル | Zen Kaku Gothic New の Light（`ofl/zenkakugothicnew`） | `ZenKakuGothicNew-Light.ttf`（2,181,020）。Regular / Medium は出荷物に同梱済みのもの |
-| 地雷系・ゴシック | Kaisei Decol（`ofl/kaiseidecol`） | `KaiseiDecol-Regular.ttf`（4,503,152）・`KaiseiDecol-Bold.ttf`（4,286,896） |
+| 地雷系・ゴシック（採用。出荷物に同梱） | Kaisei Decol（`ofl/kaiseidecol`） | `KaiseiDecol-Regular.ttf`（4,503,152）・`KaiseiDecol-Bold.ttf`（4,286,896） |
 | アイドル・ペンライト | Mochiy Pop One（`ofl/mochiypopone`） | `MochiyPopOne-Regular.ttf`（5,163,948） |
 
-## 採用するときに要る作業
+## 採用でしたこと・残っていること
 
-この epic では出荷する見た目を変えていません。案を採用するときは、次を別の依頼として行います。
-
-1. **採用の形を決める**（Q1）: 1 案で既定のデザインを置き換えるか、設定でテーマを選べるようにするか。何案残すか
-2. **デザインキャンバス**（Q8）: 元のキャンバス「推し活カウントダウン 画面デザイン」は変えずに、採用案のキャンバスを別に足してから実装する（人間の作業）
-3. **書体を出荷物へ移す**: 採用した案の書体を `OshiCon/Preview Content/Fonts/` から出荷物のフォルダ（`Shared/Resources/Fonts/` など）へ移し、アプリと Widget Extension の `UIAppFonts` に足し、
-   `Configs/Release.xcconfig` の除外の名前と `PreviewFonts.fileNames` から外す。オープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。
-   容量は 1 書体あたり 2〜10 MB 増える（ウィジェットにも入れるとその分も増える）
-4. **設定で選べるようにする場合**（Q6）: テーマの選択を App Group の `UserDefaults(suiteName:)` でウィジェットと共有し、変えたら `WidgetCenter` で描き直す。
-   アプリと Widget Extension の両方の `PrivacyInfo.xcprivacy` に UserDefaults の `1C8F.1` を足す（`PrivacyManifestTests` も直す）。設定の画面の文言は 12 言語ぶん訳す
-5. **Android 版の SPEC**（Q2）: iOS の見た目を変えたら、`shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`（§4「デザインからの読み替え」など）に iOS のテーマを書く
-6. **不採用の案**: 狙い・配色・書体・装飾（この文書と各案の PR）を shilokuma-inc/design-knowledge に残してから、このリポジトリから片付ける
+1. **採用の形**（Q1）: 地雷系・ゴシックの 1 案で既定のデザインを置き換えた（Issue #114）。設定でテーマを選ぶ仕組み（Q6 の App Group での共有・`1C8F.1` の申告）は作っていない
+2. **書体を出荷物へ移す**: Kaisei Decol を `Shared/Resources/Fonts/` へ移し、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に足し、`Configs/Release.xcconfig` の除外と `PreviewFonts.fileNames` から外した（Issue #114）。
+   容量はアプリと Widget Extension でそれぞれ約 8.8 MB 増える
+3. **デザインキャンバス**（Q8）: 元のキャンバス「推し活カウントダウン 画面デザイン」は変えずに、地雷系・ゴシックのキャンバスを別に足す（人間の作業。未）
+4. **Android 版の SPEC**（Q2）: `shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`（§4「デザインからの読み替え」など）に、iOS のテーマ（地雷系・ゴシック）を書く（未）
+5. **App Store 用スクリーンショット**: 見た目が変わったので撮り直す（未）
+6. **不採用の案**: 標準のテーマと残りの 4 案の狙い・配色・書体・装飾（この文書と各案の PR）を shilokuma-inc/design-knowledge に残してから、このリポジトリから片付ける（未）。
+   標準のテーマの書体 Zen Kaku Gothic New（Regular / Medium / Bold。約 7 MB）は出荷物に入ったままで、出荷するテーマでは使っていない。片付けるときに Preview 用のフォルダへ移すか消す

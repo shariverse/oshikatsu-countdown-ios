@@ -22,6 +22,7 @@ struct SettingsScreen: View {
                     }
                 }
             }
+            .themeRowBackground()
             Section("データ") {
                 VStack(alignment: .leading, spacing: 4) {
                     // iPad では iPad の絵にする
@@ -33,6 +34,7 @@ struct SettingsScreen: View {
                 .padding(.vertical, 2)
                 .accessibilityElement(children: .combine)
             }
+            .themeRowBackground()
             Section("このアプリについて") {
                 LabeledContent("バージョン", value: AppVersion.displayText())
                 NavigationLink {
@@ -46,6 +48,7 @@ struct SettingsScreen: View {
                     }
                 }
             }
+            .themeRowBackground()
         }
         .scrollContentBackground(.hidden)
         .background(theme.palette.background.color)
@@ -75,6 +78,7 @@ struct OpenSourceLicenseListScreen: View {
                 .padding(.vertical, 2)
                 .accessibilityElement(children: .combine)
             }
+            .themeRowBackground()
         }
         .scrollContentBackground(.hidden)
         .background(theme.palette.background.color)

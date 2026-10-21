@@ -59,11 +59,13 @@ struct OshiEditorScreen: View {
                 } footer: {
                     Text("写真と推し色はこの端末の中だけに保存されます")
                 }
+                .themeRowBackground()
                 if oshi != nil {
                     Section {
                         Button("推しを削除", role: .destructive, action: requestDelete)
                             .frame(maxWidth: .infinity)
                     }
+                    .themeRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)
@@ -129,6 +131,7 @@ struct OshiEditorScreen: View {
         } footer: {
             InputLengthFooter(field: .oshiName, text: form.name)
         }
+        .themeRowBackground()
     }
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
