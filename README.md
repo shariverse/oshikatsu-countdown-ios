@@ -189,16 +189,17 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 
 ### 10. テーマの見本
 
-テーマ案（`Shared/Design/AppTheme.swift` の `AppTheme.all`）は、Preview・DEBUG のビルドの見本・テストの中だけで使います。出荷するアプリは既定のテーマ（`AppTheme.standard`）だけです。
+出荷するアプリとウィジェットは、テーマ案から採用した「地雷系・ゴシック」（`AppTheme.shipping` = `AppTheme.jiraiGothic`）だけを使います。
+採用前のデザイン（標準のテーマ `AppTheme.standard`）とほかの案（`Shared/Design/AppTheme.swift` の `AppTheme.all`）は、Preview・DEBUG のビルドの見本・テストの中だけで使います。
 
 - **Preview**: 各案の Preview は `OshiCon/Screens/ThemePreviews/<案>Previews.swift` にあります（ホーム・予定の詳細・予定の追加・ウィジェット 2 種を、ライトとダークで）。
   どれも `ThemePreviewCanvas(<テーマ>, <画面>, <外観>)` で描き、日本語の見本の推しと予定をメモリ上のストアに入れ、テーマ案の書体を登録します。
   テーマ案の日本語の書体はアプリの言語が日本語のときだけ使われるので、Scheme の Run の Options の App Language を日本語にして見ます。
   ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます。
   案の値は `Shared/Design/Themes/<案>.swift` に置き、`AppTheme.all` に足します（`PaletteContrastTests` がすべての案のコントラストを確かめます）
-- **並べて比べる**: `OshiCon/Screens/ThemePreviews/ThemeComparisonBoard.swift` の Preview は、既定のテーマとすべての案を横に並べて、ホームの先頭のカードとこれからの予定・ウィジェット 2 種を描きます。
-  各案の狙い・配色・書体・コントラスト・採用するときに要る作業は [docs/design/themes.md](docs/design/themes.md) にまとめています
-- **DEBUG の見本**: DEBUG のビルドを起動引数 `-previewTheme <テーマの id>` で起動すると、アプリ全体にそのテーマを当て、テーマ案の書体を登録します（知らない id は既定のテーマ。リリースのビルドでは効きません）。
+- **並べて比べる**: `OshiCon/Screens/ThemePreviews/ThemeComparisonBoard.swift` の Preview は、標準のテーマとすべての案を横に並べて、ホームの先頭のカードとこれからの予定・ウィジェット 2 種を描きます。
+  各案の狙い・配色・書体・コントラストと、採用でしたこと・残っていることは [docs/design/themes.md](docs/design/themes.md) にまとめています
+- **DEBUG の見本**: DEBUG のビルドを起動引数 `-previewTheme <テーマの id>` で起動すると、アプリ全体にそのテーマを当て、テーマ案の書体を登録します（知らない id は出荷するテーマ。リリースのビルドでは効きません）。
   Xcode では Scheme の Run の Arguments に `-previewTheme yumekawaPastel` のように足します
 - **撮影**: 見本の推しと予定で、アプリの画面（ホーム・予定の詳細・予定の追加）とウィジェット 2 種を、ライトとダークで撮って `build/theme-screenshots/<テーマの id>/<light|dark>/` に書き出します。
   Simulator は言語を日本語にしたものを使います（ウィジェットの文言は Simulator の言語で出ます）
@@ -217,9 +218,10 @@ TEST_RUNNER_THEME_SCREENSHOTS=1 TEST_RUNNER_THEME_APPEARANCE=dark xcodebuild tes
 xcrun xcresulttool export attachments --path build/theme-comparison.xcresult --output-path build/theme-comparison
 ```
 
-- テーマ案の書体（Kiwi Maru・Zen Maru Gothic・Zen Kaku Gothic New の Light・Kaisei Decol・Mochiy Pop One。どれも SIL OFL 1.1）は google/fonts から取得したものを改変せずに `OshiCon/Preview Content/Fonts/` に置いています。
+- 採用しなかった案の書体（Kiwi Maru・Zen Maru Gothic・Zen Kaku Gothic New の Light・Mochiy Pop One。どれも SIL OFL 1.1）は google/fonts から取得したものを改変せずに `OshiCon/Preview Content/Fonts/` に置いています。
+  採用した Kaisei Decol は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に載せています。
   フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では Archive から外れないので、`Configs/Release.xcconfig` の `EXCLUDED_SOURCE_FILE_NAMES` で名前で外しています（Archive の出荷物にも Widget Extension にも入りません）。
-  書体を足したら、`PreviewFonts.fileNames` と除外の名前の両方に足します（`PreviewFontsTests` が確かめます）。`UIAppFonts` とオープンソースライセンスの画面には足していません（採用したら出荷物へ移して足します）
+  書体を足したら、`PreviewFonts.fileNames` と除外の名前の両方に足します（`PreviewFontsTests` が確かめます）。`UIAppFonts` とオープンソースライセンスの画面には足していません
 
 ## 多言語対応
 

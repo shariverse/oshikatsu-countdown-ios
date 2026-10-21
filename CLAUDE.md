@@ -46,16 +46,19 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - `OshiConTests/`・`OshiConUITests/`: テスト。`Shared/` の型も `@testable import OshiCon` で使える
   - 新しいターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION` などをプロジェクトの階層から受け継ぐ。ターゲット側で上書きしていないか確かめる
 - テーマ（`Shared/Design/AppTheme.swift`）: 地の配色・推し色の文字の調整の割合・角の丸み・書体・装飾をまとめた型。画面とウィジェットは `@Environment(\.appTheme)` から引く
-  - **出荷するアプリは既定のテーマ `AppTheme.standard`（今のデザイン。`AppPalette`・`AppFont`・角の丸み・縞と同じ値）だけを使う。** ほかの案は Preview・DEBUG の見本・テストの中だけで使い、テーマの選択は保存しない
+  - **出荷するアプリとウィジェットは、Discussion #80 で採用した地雷系・ゴシック `AppTheme.shipping`（= `AppTheme.jiraiGothic`）だけを使う**（Environment の既定値）。
+    採用前のデザインは標準のテーマ `AppTheme.standard`（`AppPalette`・`AppFont`・角の丸み・縞と同じ値）で、ほかの案と同じく Preview・DEBUG の見本・テストの中だけで使う。テーマの選択は保存しない
   - 推し色の役割（先頭のカードの塗り・写真が無いときの模様の色・残り日数の文字・印）はテーマで置き換えない。テーマが変えるのは地・形・装飾・書体と、推し色の文字を地に合わせる割合（`OshiColor.text(in:)` など）だけ。
-    写真が無いときの模様（既定のテーマは縞）は、推し色で塗ることを変えずに形だけテーマで変えられる（`ThemePhotoPlaceholder`）
+    写真が無いときの模様（出荷するテーマは十字とハート、標準のテーマは縞）は、推し色で塗ることを変えずに形だけテーマで変えられる（`ThemePhotoPlaceholder`）
     どの案も推し色の文字が地とカードの上で 4.5:1 以上（`PaletteContrastTests` が `AppTheme.all` で回る）
   - 日本語の本文だけテーマの書体にし、ほかの言語はどのテーマでもシステムの書体（`AppFont.usesBundledTextFace(locale:)`）
   - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`themeNumeralEffect(_:)`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
     画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
-  - テーマ案の日本語の書体は `OshiCon/Preview Content/Fonts/` に置き、`PreviewFonts.registerIfNeeded()` で登録する。
+  - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。
+    採用しなかった案の日本語の書体は `OshiCon/Preview Content/Fonts/` に置き、`PreviewFonts.registerIfNeeded()` で登録する。
     Archive から外すのは `Configs/Release.xcconfig` の `EXCLUDED_SOURCE_FILE_NAMES`（フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では外れない）。書体を足したら除外の名前にも足す。`OshiCon/Preview Content/` のものをリリースのコードから参照しない。見方と撮り方は README の「テーマの見本」
-  - テーマ案の一覧（狙い・配色・書体・コントラスト）と、案を採用するときに要る作業（書体を出荷物へ移す・設定で選ぶ仕組み・Android 版 SPEC への記載など）は `docs/design/themes.md`
+  - Form・List の行の地は `themeRowBackground()` でテーマのカードの地（`surface`）にする（システムの既定の地のままにしない）
+  - テーマ案の一覧（狙い・配色・書体・コントラスト）と、採用でしたこと・残っていること（デザインキャンバス・Android 版 SPEC への記載・不採用の案の片付けなど）は `docs/design/themes.md`
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない
@@ -64,7 +67,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 
 - **仕様の正は Android 版の SPEC**（`shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`）。機能・文言・規則・配色はこれを移植する。
   ただし Material 3・`FilterChip`・Snackbar・48dp など Android 固有の部分は移さず、SwiftUI の標準とデザインに従う
-- 画面デザインの正はデザインキャンバス「推し活カウントダウン 画面デザイン」。デザインの無い画面は主要画面の雰囲気に合わせる
+- 画面デザインの正はデザインキャンバス「推し活カウントダウン 画面デザイン」。デザインの無い画面は主要画面の雰囲気に合わせる。
+  ただし配色・書体・角の丸み・装飾は、採用した地雷系・ゴシック（`AppTheme.jiraiGothic` と `docs/design/themes.md`）に従う（採用案のキャンバスは別に足す。Discussion #80 の Q8）
 - **作らないもの**: 通知・広告・シェア・検索・カレンダー・丸いウィジェット・ロック画面ウィジェット・iCloud 同期。入力欄に通知の項目や広告の枠を置かない。**通信しない**（データは端末の中だけ）
 - 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents / Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
 - ホーム画面ウィジェットは 2 種: カウントダウン（予定 1 件。`AppIntentConfiguration` で予定を選ぶ）と推しカウント（これからの予定の一覧）
@@ -76,7 +80,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 画面の外（規則・中身の型）で作る文言は `String(localized: LocalizedStringResource("…", locale: locale))` にし、`locale` を注入する（既定は `Locale.app`）。
     日付・時刻は `Date.FormatStyle` を `locale` で書き、日数は catalog の複数形にする。テストでは `DomainFixtures.japanese`・`english` を渡す
   - `String` を受ける引数（`Text(title)` など）に渡すと訳されない。文言を受ける引数は `LocalizedStringKey` にするか、`String(localized:)` で渡す
-  - 本文の書体 Zen Kaku Gothic New は日本語のときだけ使い、ほかの言語はシステムの書体（中国語・韓国語・タイ語の字形が無いため）。数字の Outfit はどの言語でも使う
+  - 本文の書体（出荷するテーマは Kaisei Decol）は日本語のときだけ使い、ほかの言語はシステムの書体（中国語・韓国語・タイ語の字形が無いため）。数字の Outfit はどの言語でも使う
   - 用語は App Store の掲載文（`docs/app-store/metadata/`）にそろえる（推し: zh-Hans 本命・zh-Hant 我推・ko 최애・ほかは oshi）
 - 規則（残り日数は暦の日数・毎年くり返す予定・2/29 は平年 2/28・同じ日の並び・ピン留め 1 件・書記素で数える文字数 など）は**画面から切り離した型に置き、Swift Testing でテストする**。
   日付は `Calendar` と現在時刻を注入してテストする（`Date()` や `Calendar.current` を規則の中で直接使わない）
