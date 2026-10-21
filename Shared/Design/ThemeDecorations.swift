@@ -92,10 +92,12 @@ private struct ThemeHeadingOrnamentModifier: ViewModifier {
             content
         case let .symbol(name, color):
             // 飾りは見出しの文字の前に並べ、文字には重ねない。大きさは見出しに合わせてダイナミックタイプで変わる
-            HStack(spacing: 6) {
+            // 2 行になっても 1 行目にそろえる。大きな文字では見出しの幅を削りすぎないよう、飾りの大きさに上限を付ける
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: name)
                     .font(.headline)
                     .imageScale(.small)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                     .foregroundStyle(color.color)
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
