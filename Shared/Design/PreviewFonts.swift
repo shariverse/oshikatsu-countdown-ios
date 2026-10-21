@@ -12,6 +12,9 @@ import Foundation
 /// フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では Archive から外れないので、Release の構成の
 /// `EXCLUDED_SOURCE_FILE_NAMES`（`Configs/Release.xcconfig`）で名前で外す。書体を足したら、ここと除外の名前の両方に足す。
 /// 出荷するアプリではファイルが無いので何もしない。
+///
+/// TestFlight の確認用のブランチ（`testflight/theme-trial`）では、デバッグ用のテーマの切り替え（`DebugTheme`）のために
+/// Release のビルドにも書体を入れ、ウィジェットからも登録する。そのため、このファイルをアプリだけの `OshiCon/` から `Shared/` に移した。
 nonisolated enum PreviewFonts {
     /// 書体のファイル（拡張子 `.ttf`）。ファイル名は PostScript 名と同じ。
     static let fileNames = [
@@ -45,8 +48,18 @@ nonisolated enum PreviewFonts {
         fileNames.compactMap { bundle.url(forResource: $0, withExtension: "ttf") }
     }
 
+    /// 書体のファイルがあるバンドル。書体はアプリのターゲットのリソースなので、Widget Extension ではアプリのバンドル
+    /// （`OshiCon.app/PlugIns/OshiConWidgetExtension.appex` の 2 つ上）から読む。
+    static var fontBundle: Bundle {
+        let main = Bundle.main
+        guard main.bundleURL.pathExtension == "appex" else {
+            return main
+        }
+        return Bundle(url: main.bundleURL.deletingLastPathComponent().deletingLastPathComponent()) ?? main
+    }
+
     private static let registration: Void = {
-        for url in fontURLs() {
+        for url in fontURLs(in: fontBundle) {
             CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
         }
     }()
