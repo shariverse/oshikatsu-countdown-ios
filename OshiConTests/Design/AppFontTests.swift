@@ -55,8 +55,9 @@ struct AppFontTests {
         for identifier in ["en_US", "zh-Hans_CN", "zh-Hant_TW", "ko_KR", "th_TH", "fr_FR"] {
             #expect(!AppFont.usesBundledTextFace(locale: Locale(identifier: identifier)))
         }
-        #expect(AppFont.text(.body, locale: DomainFixtures.english) == .system(.body, weight: .regular))
-        #expect(AppFont.text(.body, locale: DomainFixtures.japanese) != .system(.body, weight: .regular))
+        let typography = AppTheme.shipping.typography
+        #expect(typography.text(.body, locale: DomainFixtures.english) == .system(.body, weight: .regular))
+        #expect(typography.text(.body, locale: DomainFixtures.japanese) != .system(.body, weight: .regular))
     }
 
     @Test("太さは regular・medium・bold に丸める")

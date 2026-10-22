@@ -13,7 +13,7 @@ struct PaletteContrastTests {
         #expect(RGBColor.white.contrastRatio(with: color.rgb) >= 4.5)
     }
 
-    @Test("推し色の文字は、画面の地とカードの地に 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    @Test("推し色の文字は、画面の地とカードの地に 4.5:1 以上（ライトとダーク）", arguments: [AppTheme.shipping], [false, true])
     func oshiTextOnGrounds(theme: AppTheme, isDark: Bool) {
         for color in OshiColor.allCases {
             let text = color.text(in: theme).resolved(isDark: isDark)
@@ -23,14 +23,14 @@ struct PaletteContrastTests {
         }
     }
 
-    @Test("推し色の文字は、ダークの入力欄の地にも 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all)
+    @Test("推し色の文字は、ダークの入力欄の地にも 4.5:1 以上", arguments: [AppTheme.shipping])
     func oshiTextOnDarkSurfaceContainer(theme: AppTheme) {
         for color in OshiColor.allCases {
             #expect(color.text(in: theme).dark.contrastRatio(with: theme.palette.surfaceContainer.dark) >= 4.5, "\(color)")
         }
     }
 
-    @Test("推しカウントの地（surfaceContainer）の上の推し色の文字は 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    @Test("推しカウントの地（surfaceContainer）の上の推し色の文字は 4.5:1 以上（ライトとダーク）", arguments: [AppTheme.shipping], [false, true])
     func oshiTextOnSurfaceContainer(theme: AppTheme, isDark: Bool) {
         let ground = theme.palette.surfaceContainer.resolved(isDark: isDark)
         for color in OshiColor.allCases {
@@ -38,7 +38,7 @@ struct PaletteContrastTests {
         }
     }
 
-    @Test("本文と補助テキストは地に 4.5:1 以上。アクセントの塗りに乗る文字も（すべてのテーマ）", arguments: AppTheme.all, [false, true])
+    @Test("本文と補助テキストは地に 4.5:1 以上。アクセントの塗りに乗る文字も", arguments: [AppTheme.shipping], [false, true])
     func textOnGrounds(theme: AppTheme, isDark: Bool) {
         let palette = theme.palette
         for ground in [palette.background, palette.surface, palette.surfaceContainer] {
@@ -50,7 +50,7 @@ struct PaletteContrastTests {
         #expect(onContainer.contrastRatio(with: palette.brandContainer.resolved(isDark: isDark)) >= 4.5)
     }
 
-    @Test("見出しなどの本文は、画面の地の模様（グラデーション・模様の色）の上でも 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all, [false, true])
+    @Test("見出しなどの本文は、画面の地の模様（グラデーション・模様の色）の上でも 4.5:1 以上", arguments: [AppTheme.shipping], [false, true])
     func textOnScreenDecoration(theme: AppTheme, isDark: Bool) {
         let palette = theme.palette
         for ground in theme.decoration.screenBackground.textGrounds(background: palette.background) {
@@ -60,7 +60,7 @@ struct PaletteContrastTests {
         }
     }
 
-    @Test("推し色の文字は、画面の地のグラデーションの上でも 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    @Test("推し色の文字は、画面の地のグラデーションの上でも 4.5:1 以上（ライトとダーク）", arguments: [AppTheme.shipping], [false, true])
     func oshiTextOnScreenGradient(theme: AppTheme, isDark: Bool) {
         let grounds = theme.decoration.screenBackground.grounds(background: theme.palette.background)
         for color in OshiColor.allCases {
@@ -71,7 +71,7 @@ struct PaletteContrastTests {
         }
     }
 
-    @Test("アクセント（brand）を文字に使ったとき、画面の地とカードの地に 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    @Test("アクセント（brand）を文字に使ったとき、画面の地とカードの地に 4.5:1 以上（ライトとダーク）", arguments: [AppTheme.shipping], [false, true])
     func brandTextOnGrounds(theme: AppTheme, isDark: Bool) {
         // brand は `.tint` でボタンや値の文字にもなる
         let palette = theme.palette
@@ -81,14 +81,14 @@ struct PaletteContrastTests {
         }
     }
 
-    @Test("選択中の印の地（brandContainer）に乗せた本文は 4.5:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    @Test("選択中の印の地（brandContainer）に乗せた本文は 4.5:1 以上（ライトとダーク）", arguments: [AppTheme.shipping], [false, true])
     func textOnBrandContainer(theme: AppTheme, isDark: Bool) {
         // ホームの絞り込みの札は、選択中でも本文の色（onSurface）で書く
         let palette = theme.palette
         #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: palette.brandContainer.resolved(isDark: isDark)) >= 4.5)
     }
 
-    @Test("数字の光のいちばん濃いところと数字の差は、大きな文字の 3:1 以上（すべてのテーマ・ライトとダーク）", arguments: AppTheme.all, [false, true])
+    @Test("数字の光のいちばん濃いところと数字の差は、大きな文字の 3:1 以上（ライトとダーク）", arguments: [AppTheme.shipping], [false, true])
     func numeralGlowKeepsNumeralsReadable(theme: AppTheme, isDark: Bool) {
         let effect = theme.decoration.numeralEffect
         for color in OshiColor.allCases {
@@ -105,19 +105,12 @@ struct PaletteContrastTests {
         }
     }
 
-    @Test("推し色を薄く敷いた地に乗せた本文は 4.5:1 以上（すべてのテーマ）", arguments: AppTheme.all, [false, true])
+    @Test("推し色を薄く敷いた地に乗せた本文は 4.5:1 以上", arguments: [AppTheme.shipping], [false, true])
     func textOnOshiContainer(theme: AppTheme, isDark: Bool) {
         let text = theme.palette.onSurface.resolved(isDark: isDark)
         for color in OshiColor.allCases {
             #expect(text.contrastRatio(with: color.container(in: theme).resolved(isDark: isDark)) >= 4.5, "\(color)")
         }
-    }
-
-    @Test("標準のテーマのライトの入力欄の地は、推し色の文字が 4.5:1 を保てない色がある（推し色の文字を置かない）")
-    func oshiTextIsNotForLightSurfaceContainer() {
-        let ground = AppTheme.standard.palette.surfaceContainer.light
-        let ratios = OshiColor.allCases.map { $0.text(in: .standard).light.contrastRatio(with: ground) }
-        #expect(ratios.contains { $0 < 4.5 })
     }
 
     @Test("コントラスト比の計算は WCAG の値と合う")
