@@ -30,7 +30,6 @@ struct ThemePreviewCanvas: View {
     @State private var router = AppRouter()
 
     init(_ theme: AppTheme, _ screen: ThemePreviewScreen, _ colorScheme: ColorScheme) {
-        PreviewFonts.registerIfNeeded()
         self.theme = theme
         self.screen = screen
         self.colorScheme = colorScheme
