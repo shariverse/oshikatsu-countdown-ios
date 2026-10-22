@@ -81,7 +81,6 @@ struct EventDetailCard: View {
                             .font(theme.typography.countdownHero)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
-                            .themeNumeralEffect(detail.color)
                             .countdownNumberTransition(detail.countdown.remainingParts.days)
                         if !days.suffix.isEmpty {
                             Text(days.suffix)

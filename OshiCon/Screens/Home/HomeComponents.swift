@@ -91,9 +91,7 @@ struct FeaturedEventCard: View {
                 // 横向きの iPhone（縦が狭い）では、カードで画面が埋まらないよう数字を小さくする
                 numberFont: verticalSizeClass == .compact ? theme.typography.countdownClock : theme.typography.countdownLarge,
                 unitFont: theme.typography.text(.title3, weight: .bold),
-                showsPrefix: true,
-                oshiColor: item.color,
-                numeralGround: .oshiFill
+                showsPrefix: true
             )
             HStack(spacing: 12) {
                 Text(EventText.dateBadge(item.scheduled.occurrenceDay, locale: item.locale))
@@ -143,8 +141,7 @@ struct HomeEventRow: View {
                 mutedColor: theme.palette.onSurfaceVariant.color,
                 numberFont: theme.typography.countdownSmall,
                 unitFont: theme.typography.text(.caption, weight: .bold),
-                showsPrefix: false,
-                oshiColor: item.color
+                showsPrefix: false
             )
         }
         .padding(.horizontal, 12)
@@ -162,10 +159,6 @@ struct DaysCountdownView: View {
     let numberFont: Font
     let unitFont: Font
     let showsPrefix: Bool
-    /// 数字の効果（テーマの装飾）に使う推し色。
-    let oshiColor: OshiColor
-    /// 数字が乗る地（数字の効果を地で分けるため）。
-    var numeralGround: AppTheme.NumeralGround = .ground
 
     @Environment(\.appTheme) private var theme
 
@@ -191,7 +184,6 @@ struct DaysCountdownView: View {
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                    .themeNumeralEffect(oshiColor, on: numeralGround)
                     .countdownNumberTransition(scheduled.daysUntil)
                 if !parts.suffix.isEmpty {
                     Text(parts.suffix)

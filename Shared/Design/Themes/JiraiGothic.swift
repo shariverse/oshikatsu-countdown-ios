@@ -45,7 +45,6 @@ extension AppTheme {
             screenBackground: .crossesAndHearts(ornament: AdaptiveColor(light: 0xF2B6CF, dark: 0x4A2A3C)),
             cardBorder: .doubleLine(color: AdaptiveColor(light: 0x1A0F16, dark: 0xFF7EB3)),
             headingOrnament: .symbol(name: "heart.fill", color: AdaptiveColor(light: 0xC2185B, dark: 0xFF7EB3)),
-            numeralEffect: .none,
             photoPlaceholder: .crosses
         )
     )

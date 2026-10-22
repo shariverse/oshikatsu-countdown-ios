@@ -45,49 +45,6 @@ struct AppThemeTests {
         #expect(AppTheme.ScreenBackground.none.textGrounds(background: background) == [background])
     }
 
-    @Test("星とハートの地の色はグラデーションの色で、文字が乗るのはその色と、模様の色を不透明度の分だけ重ねた色")
-    func textGroundsWithSparkles() {
-        let top = AdaptiveColor(light: 0xFFFFFF, dark: 0x000000)
-        let bottom = AdaptiveColor(light: 0xEEEEEE, dark: 0x111111)
-        let ornament = AdaptiveColor(light: 0xFF0000, dark: 0x0000FF)
-        let opacity = AppTheme.ScreenBackground.ornamentOpacity
-        let sparkles = AppTheme.ScreenBackground.sparkles(gradient: [top, bottom], ornament: ornament)
-        let background = AdaptiveColor(light: 0x123456, dark: 0x123456)
-        #expect(sparkles.grounds(background: background) == [top, bottom])
-        let grounds = sparkles.textGrounds(background: background)
-        #expect(grounds.count == 4)
-        #expect(Array(grounds.prefix(2)) == [top, bottom])
-        #expect(grounds[2].light == top.light.mixed(with: ornament.light, fraction: opacity))
-        #expect(grounds[3].dark == bottom.dark.mixed(with: ornament.dark, fraction: opacity))
-    }
-
-    @Test("照明の地の色はグラデーションの色で、文字が乗るのはその色と、光の筋の色を不透明度の分だけ重ねた色")
-    func textGroundsWithStage() {
-        let top = AdaptiveColor(light: 0xFFFFFF, dark: 0x000000)
-        let beam = AdaptiveColor(light: 0xFF0000, dark: 0x0000FF)
-        let stage = AppTheme.ScreenBackground.stage(gradient: [top], beam: beam)
-        let background = AdaptiveColor(light: 0x123456, dark: 0x123456)
-        #expect(stage.grounds(background: background) == [top])
-        let grounds = stage.textGrounds(background: background)
-        #expect(grounds.count == 2)
-        #expect(grounds[1].light == top.light.mixed(with: beam.light, fraction: AppTheme.ScreenBackground.beamOpacity))
-        #expect(grounds[1].dark == top.dark.mixed(with: beam.dark, fraction: AppTheme.ScreenBackground.beamOpacity))
-    }
-
-    @Test("数字の効果が無ければ光は無い。光は推し色の塗りの上では白、地の上では推し色から作る", arguments: OshiColor.allCases)
-    func numeralGlow(color: OshiColor) {
-        #expect(AppTheme.NumeralEffect.none.glow(for: color, on: .oshiFill) == nil)
-        #expect(AppTheme.NumeralEffect.none.glow(for: color, on: .ground) == nil)
-        let onFill = AppTheme.NumeralEffect.glow.glow(for: color, on: .oshiFill)
-        #expect(onFill?.color == AdaptiveColor(light: .white, dark: .white))
-        #expect(onFill?.opacity == AppTheme.NumeralEffect.fillGlowOpacity)
-        let onGround = AppTheme.NumeralEffect.glow.glow(for: color, on: .ground)
-        #expect(onGround?.color == AdaptiveColor(light: color.rgb, dark: color.rgb))
-        #expect(onGround?.opacity == AppTheme.NumeralEffect.groundGlowOpacity)
-        let peak = onGround?.peak(over: .white, isDark: false)
-        #expect(peak == RGBColor.white.mixed(with: color.rgb, fraction: AppTheme.NumeralEffect.groundGlowOpacity))
-    }
-
     @Test("地雷系・ゴシックは Kaisei Decol・太い数字・十字とハートの装飾で、推し色の値は変えない")
     func jiraiGothic() {
         let theme = AppTheme.jiraiGothic
@@ -102,7 +59,6 @@ struct AppThemeTests {
         #expect(theme.decoration.screenBackground == .crossesAndHearts(ornament: AdaptiveColor(light: 0xF2B6CF, dark: 0x4A2A3C)))
         #expect(theme.decoration.cardBorder == .doubleLine(color: AdaptiveColor(light: 0x1A0F16, dark: 0xFF7EB3)))
         #expect(theme.decoration.headingOrnament == .symbol(name: "heart.fill", color: theme.palette.brand))
-        #expect(theme.decoration.numeralEffect == .none)
         #expect(theme.decoration.photoPlaceholder == .crosses)
         for color in OshiColor.allCases {
             #expect(color.text(in: theme).light == color.rgb.mixed(with: .black, fraction: 0.08))
