@@ -15,12 +15,13 @@
 <head>
 <meta charset="utf-8">
 <style>
+  /* 配色は出荷するテーマ（地雷系・ゴシック。Shared/Design/Themes/JiraiGothic.swift）のライト */
   :root {
-    --background: #fcf8fa;
-    --brand: #c8326a;
-    --brand-container: #f4d6e1;
-    --on-surface: #1d1b20;
-    --on-surface-variant: #49454f;
+    --background: #fff0f5;
+    --brand: #c2185b;
+    --brand-container: #f8c8dc;
+    --on-surface: #1a0f16;
+    --on-surface-variant: #5a3a4c;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -38,7 +39,7 @@
 
   .canvas { position: relative; width: 100vw; height: 100vh; overflow: hidden;
     background:
-      radial-gradient(ellipse 70% 80% at 50% 110%, rgba(200, 50, 106, 0.28), transparent 70%),
+      radial-gradient(ellipse 70% 80% at 50% 110%, rgba(194, 24, 91, 0.28), transparent 70%),
       radial-gradient(ellipse 90% 90% at 50% -10%, #ffffff, var(--background) 60%, var(--brand-container)); }
 
   /* 推し色の紙吹雪（アプリの推し色のパレットから） */
@@ -58,11 +59,11 @@
   .chips { display: flex; flex-direction: column; gap: 0.55em; }
   .chip { display: inline-flex; align-items: center; gap: 0.6em; align-self: flex-start;
     padding: 0.45em 0.95em 0.5em 0.7em; border-radius: 999px; font-weight: 700; color: var(--on-surface);
-    background: #ffffff; box-shadow: inset 0 0 0 4px var(--brand-container), 0 16px 40px rgba(200, 50, 106, 0.12); }
+    background: #ffffff; box-shadow: inset 0 0 0 4px var(--brand-container), 0 16px 40px rgba(194, 24, 91, 0.12); }
   .chip i { font-style: normal; display: grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%;
     background: var(--brand); color: #fff; font-size: 0.8em; }
   .brand { position: absolute; display: flex; align-items: center; gap: 0.6em; font-weight: 800; color: var(--brand); }
-  .brand img { height: 1.9em; border-radius: 22%; box-shadow: 0 10px 30px rgba(200, 50, 106, 0.25); }
+  .brand img { height: 1.9em; border-radius: 22%; box-shadow: 0 10px 30px rgba(194, 24, 91, 0.25); }
 </style>
 </head>
 <body>
