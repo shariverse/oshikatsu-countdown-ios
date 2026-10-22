@@ -45,17 +45,19 @@ struct OnboardingStep {
 struct OnboardingHeading: View {
     let step: OnboardingStep
 
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         Section {
             VStack(alignment: .leading, spacing: 8) {
                 Text(step.heading)
-                    .font(AppFont.text(.title2, weight: .bold))
-                    .foregroundStyle(AppPalette.onSurface.color)
+                    .font(theme.typography.text(.title2, weight: .bold))
+                    .foregroundStyle(theme.palette.onSurface.color)
                     .accessibilityAddTraits(.isHeader)
                 if let message = step.message {
                     Text(message)
-                        .font(AppFont.text(.subheadline))
-                        .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                        .font(theme.typography.text(.subheadline))
+                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -71,10 +73,12 @@ struct OnboardingPrimaryButton: View {
     let isEnabled: Bool
     let action: () -> Void
 
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(AppFont.text(.headline, weight: .bold))
+                .font(theme.typography.text(.headline, weight: .bold))
                 .frame(maxWidth: .infinity, minHeight: 32)
         }
         .buttonStyle(.borderedProminent)
@@ -83,6 +87,6 @@ struct OnboardingPrimaryButton: View {
         .padding(.vertical, 12)
         .frame(maxWidth: 720)
         .frame(maxWidth: .infinity)
-        .background(AppPalette.background.color)
+        .background(theme.palette.background.color)
     }
 }

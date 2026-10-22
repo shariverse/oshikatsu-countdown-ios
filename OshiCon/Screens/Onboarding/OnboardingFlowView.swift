@@ -12,6 +12,7 @@ struct OnboardingFlowView: View {
     let onFinish: () -> Void
 
     @State private var step = Step.oshi
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private enum Step: Equatable {
         case oshi
@@ -39,10 +40,15 @@ struct OnboardingFlowView: View {
                     onboarding: .firstEvent(onSkip: onFinish),
                     onSaved: { _ in onFinish() }
                 )
-                .transition(.move(edge: .trailing))
+                .transition(AppMotion.transition(for: stepMotion))
             }
         }
-        .animation(.default, value: step)
+        .animation(AppMotion.animation(for: stepMotion), value: step)
+    }
+
+    /// 歩の切り替え。「視差効果を減らす」では横に滑らせずフェードにする。
+    private var stepMotion: AppMotion.Style {
+        AppMotion.style(for: .onboardingStep, reduceMotion: reduceMotion)
     }
 }
 

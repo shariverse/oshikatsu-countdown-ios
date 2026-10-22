@@ -13,6 +13,8 @@ struct OshiAvatar: View {
     var photo: Image?
     var size: CGFloat = 40
 
+    @Environment(\.appTheme) private var theme
+
     var body: some View {
         ZStack {
             Circle()
@@ -24,7 +26,7 @@ struct OshiAvatar: View {
             } else {
                 Text(InputText.firstCharacter(of: name))
                     // 丸の大きさに合わせる。文字の大きさの設定で丸からはみ出さないよう、ダイナミックタイプで変えない
-                    .font(.custom(AppFont.TextFace.bold.rawValue, fixedSize: size * 0.4))
+                    .font(.custom(theme.typography.textFaces.bold, fixedSize: size * 0.4))
                     .foregroundStyle(color.onFill)
             }
         }

@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SwiftData
 
 /// App Store 用スクリーンショットの見本の推しと予定。起動引数 `-seedSampleData` を付け、メモリ上のストアで起動したときだけ入れる。
 /// 実在の人物・作品名・ロゴは使わない。日付は今日から数えて決めるので、いつ撮っても同じ残り日数になる。
@@ -404,4 +405,19 @@ nonisolated private extension SampleData.Strings {
         .thai: thai,
         .indonesian: indonesian
     ]
+}
+
+extension SampleData {
+    /// 見本の推しと予定をストアに入れる（起動引数 `-seedSampleData` と Preview で使う）。保存に失敗したものは飛ばす。
+    @MainActor
+    static func insert(_ content: Content, into context: ModelContext, now: Date) {
+        let store = OshiConStore(context: context)
+        for (index, oshi) in content.oshis.enumerated() {
+            // 登録した順に並ぶよう、1 秒ずつずらす
+            try? store.save(oshi, now: now.addingTimeInterval(Double(index - content.oshis.count)))
+        }
+        for event in content.events {
+            try? store.save(event)
+        }
+    }
 }

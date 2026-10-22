@@ -13,9 +13,20 @@ struct OshiCon: App {
     @State private var router = AppRouter()
     /// SwiftData のストア。開けなかったときはその旨の画面を出す。
     private let container: Result<ModelContainer, any Error>
+    #if DEBUG
+    /// テーマ案の見本（`-previewTheme`）。引数が無ければ出荷するテーマ。
+    private let previewTheme: AppTheme
+    #endif
 
     init() {
         LaunchOptions.applyDefaultEnvironment()
+        #if DEBUG
+        let previewTheme = LaunchOptions.previewTheme()
+        if previewTheme != nil {
+            PreviewFonts.registerIfNeeded()
+        }
+        self.previewTheme = previewTheme ?? .shipping
+        #endif
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
         if LaunchOptions.seedsSampleData, case let .success(container) = container {
@@ -28,14 +39,7 @@ struct OshiCon: App {
     private static func seedSampleData(into container: ModelContainer) {
         let now = Date.now
         let sample = SampleData.make(today: CalendarDay(now, calendar: .autoupdatingCurrent), now: now, locale: .app)
-        let store = OshiConStore(context: container.mainContext)
-        for (index, oshi) in sample.oshis.enumerated() {
-            // 登録した順に並ぶよう、1 秒ずつずらす
-            try? store.save(oshi, now: now.addingTimeInterval(Double(index - sample.oshis.count)))
-        }
-        for event in sample.events {
-            try? store.save(event)
-        }
+        SampleData.insert(sample, into: container.mainContext, now: now)
     }
 
     var body: some Scene {
@@ -46,6 +50,9 @@ struct OshiCon: App {
                     .environment(router)
                     .modelContainer(container)
                     .refreshesWidgets()
+                    #if DEBUG
+                    .environment(\.appTheme, previewTheme)
+                    #endif
             case .failure:
                 StoreUnavailableView()
             }

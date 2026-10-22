@@ -24,6 +24,20 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(sampleDataArgument)
     }
 
+    #if DEBUG
+    /// テーマ案の見本で起動する（`-previewTheme yumekawaPastel` のように id を続ける）。DEBUG のビルドだけで効く。
+    static let previewThemeArgument = "-previewTheme"
+
+    /// 起動引数で選んだテーマ。引数が無ければ nil、知らない id なら出荷するテーマ。
+    static func previewTheme(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppTheme? {
+        guard let index = arguments.firstIndex(of: previewThemeArgument) else {
+            return nil
+        }
+        let id = arguments.indices.contains(index + 1) ? arguments[index + 1] : ""
+        return AppTheme.theme(id: id)
+    }
+    #endif
+
     /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
     static let defaultEnvironmentPrefix = "OSHICON_DEFAULT_"
 

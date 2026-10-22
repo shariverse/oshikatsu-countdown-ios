@@ -1,0 +1,44 @@
+//
+//  ThemeWidgetScreenshotTests.swift
+//  OshiConTests
+//
+
+@testable import OshiCon
+import SwiftUI
+import UIKit
+import XCTest
+
+/// テーマ案の見本のウィジェット 2 種を、ウィジェットの大きさの枠に入れて PNG に撮る（README の「テーマの見本」）。
+///
+/// ふだんのテストでは流さない。環境変数 `THEME_SCREENSHOTS=1`（xcodebuild には `TEST_RUNNER_THEME_SCREENSHOTS=1`）のときだけ流れ、
+/// テーマは `THEME_ID`（`AppTheme` の id。無ければ標準のテーマ）、外観は `THEME_APPEARANCE`（`light` / `dark`。無ければライト）で選ぶ。
+/// 文言はアプリの言語で出るので、日本語の書体を見るときは日本語で流す（`scripts/theme-screenshots.sh` は `-testLanguage ja` を付ける）。
+nonisolated final class ThemeWidgetScreenshotTests: XCTestCase {
+    override func setUpWithError() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["THEME_SCREENSHOTS"] == "1",
+            "テーマの見本は README の「テーマの見本」の手順で撮る"
+        )
+    }
+
+    @MainActor
+    func testCaptureWidgets() throws {
+        PreviewFonts.registerIfNeeded()
+        let environment = ProcessInfo.processInfo.environment
+        let theme = AppTheme.theme(id: environment["THEME_ID"] ?? AppTheme.standard.id)
+        let colorScheme: ColorScheme = environment["THEME_APPEARANCE"] == "dark" ? .dark : .light
+        try capture("05-ウィジェット-カウントダウン", WidgetPreview.countdown(.sample, theme: theme), colorScheme: colorScheme)
+        try capture("06-ウィジェット-推しカウント", WidgetPreview.upcoming(.sample, theme: theme), colorScheme: colorScheme)
+    }
+
+    @MainActor
+    private func capture(_ name: String, _ view: some View, colorScheme: ColorScheme) throws {
+        let renderer = ImageRenderer(content: view.environment(\.colorScheme, colorScheme))
+        renderer.scale = 3
+        let image = try XCTUnwrap(renderer.uiImage)
+        let attachment = XCTAttachment(data: try XCTUnwrap(image.pngData()), uniformTypeIdentifier: "public.png")
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+}

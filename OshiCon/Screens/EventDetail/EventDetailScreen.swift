@@ -6,7 +6,7 @@
 import SwiftData
 import SwiftUI
 
-/// 予定の詳細。推しの写真（無ければ推し色の斜めの縞）の上に中身のカードを重ね、秒単位のカウントダウンと進み具合を出す。
+/// 予定の詳細。推しの写真（無ければテーマの模様。出荷するテーマは推し色を黒に寄せた地に十字とハート）の上に中身のカードを重ね、秒単位のカウントダウンと進み具合を出す。
 /// 上のボタンでピン留めの切り替え・編集・削除（確認を出す）をする。予定が消えたら（削除・推しの削除など）前の画面に戻る。
 struct EventDetailScreen: View {
     let eventID: OshiEvent.ID
@@ -15,10 +15,13 @@ struct EventDetailScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.appTheme) private var theme
     @Query private var storedEvents: [StoredEvent]
     @State private var isEditing = false
     @State private var isConfirmingDelete = false
     @State private var failureMessage: String?
+    /// ピン留めを切り替えたときの触覚。
+    @Environment(\.haptic) private var haptic
 
     private static let photoHeight: CGFloat = 300
     /// 横向きの iPhone（縦が狭い）では、写真で画面が埋まらないよう低くする。
@@ -43,7 +46,7 @@ struct EventDetailScreen: View {
             if let current {
                 content(event: current.event, oshi: current.oshi)
             } else {
-                AppPalette.background.color
+                ThemeScreenBackground()
                     .ignoresSafeArea()
             }
         }
@@ -80,7 +83,7 @@ struct EventDetailScreen: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .background(AppPalette.surface.color.ignoresSafeArea())
+        .background(theme.palette.surface.color.ignoresSafeArea())
         .toolbar { toolbar(event: event) }
         // ウィジェットのリンクで画面を切り替えるときは、編集のシートと削除の確認を閉じる
         .onChange(of: router.sheetDismissal) {
@@ -142,6 +145,7 @@ struct EventDetailScreen: View {
     private func setPinned(_ isPinned: Bool, event: OshiEvent) {
         do {
             try OshiConStore(context: modelContext).setPinned(isPinned, eventID: event.id)
+            haptic(.pinChanged(isPinned: isPinned))
         } catch {
             failureMessage = String(localized: "保存できませんでした")
         }
@@ -171,7 +175,7 @@ private struct DetailNavigationBarBackground: ViewModifier {
     }
 }
 
-/// 詳細の上に敷く推しの写真。写真が無い・読めないときは推し色の斜めの縞。
+/// 詳細の上に敷く推しの写真。写真が無い・読めないときはテーマの模様（出荷するテーマは推し色を黒に寄せた地に十字とハート）。
 private struct EventDetailHeader: View {
     let oshi: Oshi?
     let color: OshiColor
@@ -183,7 +187,7 @@ private struct EventDetailHeader: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                StripedBackground(color: color)
+                ThemePhotoPlaceholder(color: color)
                 if let photo {
                     photo
                         .resizable()

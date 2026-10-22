@@ -18,6 +18,8 @@ struct HomeScreen: View {
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @State private var selectedOshiID: Oshi.ID?
     @Environment(AppRouter.self) private var router
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.appTheme) private var theme
     @State private var isAddingEvent = false
     /// 予定の追加のシートが実際に出ている（開こうとしても出せなかったときと分ける）。
     @State private var isAddEventSheetVisible = false
@@ -26,7 +28,7 @@ struct HomeScreen: View {
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
-        .background(AppPalette.background.color.ignoresSafeArea())
+        .background(ThemeScreenBackground().ignoresSafeArea())
         .navigationTitle("推し活カウントダウン")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -104,7 +106,7 @@ struct HomeScreen: View {
             } actions: {
                 Button("予定を追加", action: presentAddEvent)
                 .buttonStyle(.borderedProminent)
-                .font(AppFont.text(.headline, weight: .bold))
+                .font(theme.typography.text(.headline, weight: .bold))
             }
         } else {
             ScrollView {
@@ -114,7 +116,7 @@ struct HomeScreen: View {
                     }
                     if content.emptyState == .noEventsForOshi {
                         Text("この推しの予定はまだありません")
-                            .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                            .foregroundStyle(theme.palette.onSurfaceVariant.color)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 40)
                     } else {
@@ -123,6 +125,8 @@ struct HomeScreen: View {
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
+                // 予定が増える・消える・絞り込みやピン留めで入れ替わるときに、カードと行を短く出入りさせる
+                .animation(AppMotion.animation(for: cardMotion), value: content)
                 // 広い画面でも読みやすい幅に収める
                 .frame(maxWidth: 720)
                 .frame(maxWidth: .infinity)
@@ -140,11 +144,14 @@ struct HomeScreen: View {
             .accessibilityLabel(featured.featuredAccessibilityLabel)
             // UI テスト（App Store 用スクリーンショット）は言語によらずこの ID で探す
             .accessibilityIdentifier("home.featuredEvent")
+            // 先頭の予定が別の予定に替わったら、入れ替わりとして出入りさせる
+            .id(featured.id)
+            .transition(AppMotion.transition(for: cardMotion))
         }
         HomeSection(title: "これからの予定") {
             if content.upcoming.isEmpty {
                 Text("これからの予定はありません")
-                    .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
@@ -169,25 +176,34 @@ struct HomeScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(item.accessibilityLabel)
+            .transition(AppMotion.transition(for: cardMotion))
         }
+    }
+
+    private var cardMotion: AppMotion.Style {
+        AppMotion.style(for: .homeCards, reduceMotion: reduceMotion)
     }
 }
 
 /// ホームの見出しつきのまとまり。中身はカードの地に並べる。
-private struct HomeSection<Content: View>: View {
+struct HomeSection<Content: View>: View {
     let title: LocalizedStringKey
     @ViewBuilder var content: () -> Content
+
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(AppFont.text(.headline, weight: .bold))
-                .foregroundStyle(AppPalette.onSurface.color)
+                .font(theme.typography.text(.headline, weight: .bold))
+                .foregroundStyle(theme.palette.onSurface.color)
                 .accessibilityAddTraits(.isHeader)
+                .themeHeadingOrnament()
             VStack(spacing: 0) {
                 content()
             }
-            .background(AppPalette.surface.color, in: RoundedRectangle(cornerRadius: 20))
+            .background(theme.palette.surface.color, in: RoundedRectangle(cornerRadius: theme.shape.section))
+            .themeCardBorder(RoundedRectangle(cornerRadius: theme.shape.section))
         }
     }
 }
