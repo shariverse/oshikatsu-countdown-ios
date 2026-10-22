@@ -13,11 +13,11 @@ nonisolated enum AppFont {
     /// Outfit の family 名。可変フォントで、既定のインスタンスは Thin なので、必ず太さを付けて使う。
     static let numeralFamily = "Outfit"
 
-    /// 本文の書体の PostScript 名。
-    enum TextFace: String, CaseIterable {
-        case regular = "ZenKakuGothicNew-Regular"
-        case medium = "ZenKakuGothicNew-Medium"
-        case bold = "ZenKakuGothicNew-Bold"
+    /// 本文の書体の太さの段階。テーマの書体はこの 3 つの太さのフェイスを持つ（`AppTheme.TextFaces`）。
+    enum TextFace: CaseIterable {
+        case regular
+        case medium
+        case bold
     }
 
     /// 本文にテーマの書体（同梱）を使うか。日本語のときだけ使う。

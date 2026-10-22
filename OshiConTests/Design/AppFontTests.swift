@@ -10,11 +10,6 @@ import Testing
 import UIKit
 
 struct AppFontTests {
-    @Test("同梱した本文の書体が登録されている", arguments: AppFont.TextFace.allCases)
-    func textFaceIsRegistered(face: AppFont.TextFace) {
-        #expect(UIFont(name: face.rawValue, size: 17) != nil)
-    }
-
     @Test("出荷するテーマの本文の書体を、アプリと Widget Extension の両方に同梱して UIAppFonts で登録する")
     func shippingTextFacesAreBundled() throws {
         let faces = AppTheme.shipping.typography.textFaces
