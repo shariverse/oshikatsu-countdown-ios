@@ -64,14 +64,23 @@ jobs:
           echo "project=$project scheme=$project"
 
       - name: Archive
+        # アップロードするときは、ビルド番号（CURRENT_PROJECT_VERSION）を呼び出し元の実行番号（github.run_number）にする。
+        # 実行番号は実行ごとに増えるので、続けてマージした develop の 2 回や、develop と release/** で同時に走っても重複しない。
+        # Re-run では同じ番号になるが、アップロードに失敗した番号は App Store Connect に残らないので重複しない
+        env:
+          BUILD_NUMBER: ${{ inputs.upload && github.run_number || '' }}
         run: |
+          build_settings=(CODE_SIGNING_ALLOWED=NO)
+          if [[ -n "$BUILD_NUMBER" ]]; then
+            build_settings+=("CURRENT_PROJECT_VERSION=$BUILD_NUMBER")
+          fi
           xcodebuild archive \
             -project "$PROJECT_NAME.xcodeproj" \
             -scheme "$SCHEME" \
             -sdk iphoneos \
             -configuration Release \
             -archivePath "$RUNNER_TEMP/build.xcarchive" \
-            CODE_SIGNING_ALLOWED=NO
+            "${build_settings[@]}"
 
       - name: Embed entitlements
         # 署名しない Archive には Entitlements（App Group）が入らず、Export の署名でも抜け落ちる。
@@ -165,8 +174,9 @@ jobs:
             ruby .github/scripts/check-app-store-app.rb
 
       - name: Upload to App Store Connect
-        # ビルド番号は Xcode に採番させる（manageAppVersionAndBuildNumber）。App Store Connect 上の最新ビルド番号を見て
-        # 自動で増やすので、xcconfig の CURRENT_PROJECT_VERSION を手で上げる必要はない。
+        # ビルド番号は Archive で決めた実行番号のまま上げ、Xcode には採番させない（manageAppVersionAndBuildNumber = NO）。
+        # Xcode の採番は App Store Connect の最新ビルドを見るが、上げたばかりのビルドは処理中でしばらく出てこないため、
+        # 続けて走った Upload が同じ番号を選んで "Redundant Binary Upload" で失敗する（#120）。
         # org 共有の EXPORT_OPTIONS Secret は他リポジトリでも使うため書き換えず、ランナー上のコピーだけを上書きする
         if: ${{ inputs.upload }}
         env:
@@ -174,7 +184,7 @@ jobs:
           APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
           plutil -replace destination -string upload "$EXPORT_OPTIONS_PATH"
-          plutil -replace manageAppVersionAndBuildNumber -bool YES "$EXPORT_OPTIONS_PATH"
+          plutil -replace manageAppVersionAndBuildNumber -bool NO "$EXPORT_OPTIONS_PATH"
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/build.xcarchive" \
             -exportOptionsPlist "$EXPORT_OPTIONS_PATH" \
