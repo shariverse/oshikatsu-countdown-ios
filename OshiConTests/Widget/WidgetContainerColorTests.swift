@@ -8,7 +8,7 @@ import Foundation
 import Testing
 
 struct WidgetContainerColorTests {
-    @Test("カウントダウンの地は、予定のときは推し色の塗り、ほかはテーマのカードの地", arguments: AppTheme.all)
+    @Test("カウントダウンの地は、予定のときは推し色の塗り、ほかはテーマのカードの地", arguments: [AppTheme.shipping])
     func countdownContainerColor(theme: AppTheme) throws {
         guard case let .event(event) = CountdownWidgetContent.sample else {
             Issue.record("見本は予定")
@@ -20,7 +20,7 @@ struct WidgetContainerColorTests {
         }
     }
 
-    @Test("推しカウントの地は、テーマの入力欄の地", arguments: AppTheme.all)
+    @Test("推しカウントの地は、テーマの入力欄の地", arguments: [AppTheme.shipping])
     func upcomingContainerColor(theme: AppTheme) {
         #expect(UpcomingWidgetView.containerColor(in: theme) == theme.palette.surfaceContainer)
     }

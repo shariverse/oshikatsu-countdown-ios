@@ -50,7 +50,7 @@ struct WidgetPreviewFrame<Content: View>: View {
 /// ウィジェット 2 種を、枠に入れてテーマを当てて描く。
 enum WidgetPreview {
     /// カウントダウンウィジェット（2×2）。
-    static func countdown(_ content: CountdownWidgetContent, theme: AppTheme = .standard) -> some View {
+    static func countdown(_ content: CountdownWidgetContent, theme: AppTheme = .shipping) -> some View {
         WidgetPreviewFrame(family: .systemSmall, background: CountdownWidgetView.containerColor(for: content, in: theme).color) {
             CountdownWidgetView(content: content)
         }
@@ -58,7 +58,7 @@ enum WidgetPreview {
     }
 
     /// 推しカウントウィジェット（4×2）。
-    static func upcoming(_ content: UpcomingWidgetContent, theme: AppTheme = .standard) -> some View {
+    static func upcoming(_ content: UpcomingWidgetContent, theme: AppTheme = .shipping) -> some View {
         WidgetPreviewFrame(family: .systemMedium, background: UpcomingWidgetView.containerColor(in: theme).color) {
             UpcomingWidgetView(content: content)
         }

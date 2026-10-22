@@ -6,9 +6,6 @@
 import SwiftUI
 
 extension OshiColor {
-    /// ダークの地で推し色を文字に使うとき、白に寄せる割合。どの推し色もダークの地に 4.5:1 以上になる値。
-    nonisolated static let darkTextLightenFraction = 0.45
-
     /// 塗りの色。どの色も、上に置く白い文字に対して 4.5:1 以上になる濃さ（Android 版と同じ値）。
     nonisolated var rgb: RGBColor {
         switch self {
@@ -80,12 +77,7 @@ extension OshiColor {
     }
 
     /// 推し色を地（画面の地・カード）の上の文字や細い線に使うときの色。ダークでは暗い推し色が沈まないよう白に寄せる。
-    /// 4.5:1 を保てるのは画面の地（background）とカードの地（surface）の上だけで、ライトの surfaceContainer の上には置かない。
-    nonisolated var text: AdaptiveColor {
-        text(in: .standard)
-    }
-
-    /// `text` のテーマを受ける版。ライトで黒に寄せる割合・ダークで白に寄せる割合はテーマが持つ。
+    /// ライトで黒に寄せる割合・ダークで白に寄せる割合はテーマが持つ。surfaceContainer の上の文字は `textOnSurfaceContainer(in:)` を使う。
     nonisolated func text(in theme: AppTheme) -> AdaptiveColor {
         AdaptiveColor(
             light: rgb.mixed(with: .black, fraction: theme.oshiText.lightTextDarkenFraction),
@@ -93,17 +85,8 @@ extension OshiColor {
         )
     }
 
-    /// ライトの surfaceContainer（推しカウントウィジェットの地 `#F3EDF1`）の上で推し色を文字に使うとき、黒に寄せる割合。
-    /// どの推し色も 4.5:1 以上になる値（最小は 0.06。余裕を見て 0.1）。
-    nonisolated static let surfaceContainerTextDarkenFraction = 0.1
-
-    /// 推し色を surfaceContainer（推しカウントウィジェットの地）の上の文字に使うときの色。
-    /// ライトでは少し黒に寄せて 4.5:1 を保つ。ダークは `text` と同じ。
-    nonisolated var textOnSurfaceContainer: AdaptiveColor {
-        textOnSurfaceContainer(in: .standard)
-    }
-
-    /// `textOnSurfaceContainer` のテーマを受ける版。黒に寄せる割合はテーマが持つ。
+    /// 推し色を surfaceContainer（入力欄・推しカウントウィジェットの地）の上の文字に使うときの色。
+    /// ライトでは少し黒に寄せて 4.5:1 を保つ（割合はテーマが持つ）。ダークは `text(in:)` と同じ。
     nonisolated func textOnSurfaceContainer(in theme: AppTheme) -> AdaptiveColor {
         AdaptiveColor(
             light: rgb.mixed(with: .black, fraction: theme.oshiText.surfaceContainerTextDarkenFraction),
@@ -111,12 +94,7 @@ extension OshiColor {
         )
     }
 
-    /// 推し色を薄く敷いた地（選択中の印など）。文字は `AppPalette.onSurface`。
-    nonisolated var container: AdaptiveColor {
-        container(in: .standard)
-    }
-
-    /// `container` のテーマを受ける版。テーマのカードの地に、テーマが持つ割合だけ推し色を混ぜる。
+    /// 推し色を薄く敷いた地（選択中の印など）。文字はテーマの `onSurface`。テーマのカードの地に、テーマが持つ割合だけ推し色を混ぜる。
     nonisolated func container(in theme: AppTheme) -> AdaptiveColor {
         AdaptiveColor(
             light: theme.palette.surface.light.mixed(with: rgb, fraction: theme.oshiText.containerLightFraction),
@@ -132,10 +110,5 @@ extension OshiColor {
     /// 塗りの上の文字。
     var onFill: Color {
         .white
-    }
-
-    /// 地の上の文字や細い線に使う色。
-    var textColor: Color {
-        text.color
     }
 }

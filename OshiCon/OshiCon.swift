@@ -13,20 +13,9 @@ struct OshiCon: App {
     @State private var router = AppRouter()
     /// SwiftData のストア。開けなかったときはその旨の画面を出す。
     private let container: Result<ModelContainer, any Error>
-    #if DEBUG
-    /// テーマ案の見本（`-previewTheme`）。引数が無ければ出荷するテーマ。
-    private let previewTheme: AppTheme
-    #endif
 
     init() {
         LaunchOptions.applyDefaultEnvironment()
-        #if DEBUG
-        let previewTheme = LaunchOptions.previewTheme()
-        if previewTheme != nil {
-            PreviewFonts.registerIfNeeded()
-        }
-        self.previewTheme = previewTheme ?? .shipping
-        #endif
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
         if LaunchOptions.seedsSampleData, case let .success(container) = container {
@@ -50,9 +39,6 @@ struct OshiCon: App {
                     .environment(router)
                     .modelContainer(container)
                     .refreshesWidgets()
-                    #if DEBUG
-                    .environment(\.appTheme, previewTheme)
-                    #endif
             case .failure:
                 StoreUnavailableView()
             }

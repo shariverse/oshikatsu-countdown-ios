@@ -10,11 +10,6 @@ import Testing
 import UIKit
 
 struct AppFontTests {
-    @Test("同梱した本文の書体が登録されている", arguments: AppFont.TextFace.allCases)
-    func textFaceIsRegistered(face: AppFont.TextFace) {
-        #expect(UIFont(name: face.rawValue, size: 17) != nil)
-    }
-
     @Test("出荷するテーマの本文の書体を、アプリと Widget Extension の両方に同梱して UIAppFonts で登録する")
     func shippingTextFacesAreBundled() throws {
         let faces = AppTheme.shipping.typography.textFaces
@@ -30,6 +25,83 @@ struct AppFontTests {
         }
         for name in [faces.regular, faces.medium, faces.bold] {
             #expect(UIFont(name: name, size: 17) != nil, "\(name)")
+        }
+    }
+
+    @Test("アプリの日本語の文言と日本語の見本の文字が、出荷するテーマの本文の書体に字形としてある", arguments: Self.textFaceNames)
+    func fontCoversJapaneseText(name: String) throws {
+        let font = CTFontCreateWithName(name as CFString, 17, nil)
+        #expect(CTFontCopyPostScriptName(font) as String == name)
+        let characters = try Self.japaneseCharacters()
+        #expect(characters.count > 100)
+        let missing = characters.filter { character in
+            var utf16 = Array(String(character).utf16)
+            var glyphs = [CGGlyph](repeating: 0, count: utf16.count)
+            return !CTFontGetGlyphsForCharacters(font, &utf16, &glyphs, utf16.count)
+        }
+        #expect(missing.isEmpty, "\(name) に字形が無い: \(String(missing))")
+    }
+
+    /// 出荷するテーマの本文の書体の PostScript 名。
+    nonisolated private static let textFaceNames: [String] = {
+        let faces = AppTheme.shipping.typography.textFaces
+        return Array(Set([faces.regular, faces.medium, faces.bold])).sorted()
+    }()
+
+    /// 文言（日本語の訳。キーも日本語の文言）と、日本語の見本の推し・予定の文字。空白・制御文字と絵文字は除く（システムの書体に任せる）。
+    private static func japaneseCharacters() throws -> [Character] {
+        var texts: [String] = []
+        let bundle = Bundle.main
+        let strings = try #require(bundle.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: "ja"))
+        let dictionary = try #require(NSDictionary(contentsOf: strings) as? [String: String])
+        texts += Array(dictionary.keys) + Array(dictionary.values)
+        let plurals = try #require(
+            bundle.url(forResource: "Localizable", withExtension: "stringsdict", subdirectory: nil, localization: "ja")
+        )
+        texts += Self.strings(in: try #require(NSDictionary(contentsOf: plurals)))
+        texts += Self.japaneseDates()
+        let sample = SampleData.make(
+            today: DomainFixtures.day(2026, 10, 18),
+            now: DomainFixtures.date(2026, 10, 18, 9, 41),
+            language: .japanese
+        )
+        texts += sample.oshis.map(\.name)
+        texts += sample.events.flatMap { [$0.title, $0.venue] }
+        let characters = Set(texts.joined()).filter { character in
+            !character.isWhitespace && !character.unicodeScalars.contains {
+                $0.properties.isEmojiPresentation || $0.properties.generalCategory == .control
+            }
+        }
+        return characters.sorted()
+    }
+
+    /// 画面に出る日本語の日付と時刻（12 か月と 7 つの曜日）。
+    private static func japaneseDates() -> [String] {
+        let locale = DomainFixtures.japanese
+        let days = (1...12).flatMap { month in (1...7).map { DomainFixtures.day(2026, month, $0) } }
+        let dates = days.flatMap { day in
+            [
+                EventText.monthDayWeekday(day, locale: locale),
+                EventText.spokenMonthDayWeekday(day, locale: locale),
+                EventText.fullDate(day, locale: locale),
+                EventText.shortDate(day, locale: locale),
+                EventText.dateBadge(day, locale: locale)
+            ]
+        }
+        let times = [TimeOfDay(hour: 9, minute: 5), TimeOfDay(hour: 18, minute: 30)].map { EventText.time($0, locale: locale) }
+        return dates + times
+    }
+
+    private static func strings(in value: Any) -> [String] {
+        switch value {
+        case let string as String:
+            [string]
+        case let dictionary as NSDictionary:
+            dictionary.allKeys.flatMap { strings(in: $0) } + dictionary.allValues.flatMap { strings(in: $0) }
+        case let array as NSArray:
+            array.flatMap { strings(in: $0) }
+        default:
+            []
         }
     }
 
@@ -55,8 +127,9 @@ struct AppFontTests {
         for identifier in ["en_US", "zh-Hans_CN", "zh-Hant_TW", "ko_KR", "th_TH", "fr_FR"] {
             #expect(!AppFont.usesBundledTextFace(locale: Locale(identifier: identifier)))
         }
-        #expect(AppFont.text(.body, locale: DomainFixtures.english) == .system(.body, weight: .regular))
-        #expect(AppFont.text(.body, locale: DomainFixtures.japanese) != .system(.body, weight: .regular))
+        let typography = AppTheme.shipping.typography
+        #expect(typography.text(.body, locale: DomainFixtures.english) == .system(.body, weight: .regular))
+        #expect(typography.text(.body, locale: DomainFixtures.japanese) != .system(.body, weight: .regular))
     }
 
     @Test("太さは regular・medium・bold に丸める")

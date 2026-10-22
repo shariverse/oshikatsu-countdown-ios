@@ -7,12 +7,12 @@ import SwiftUI
 
 /// アプリのテーマ。地の配色・角の丸み・書体・装飾をまとめて持つ。アプリとウィジェットの両方で使う。
 /// 推し色（`OshiColor`）の役割は置き換えない。テーマが変えるのは、推し色の文字を地に合わせて調整する割合だけ。
-/// 出荷するアプリは採用したテーマ（`shipping`。Discussion #80 の「地雷系・ゴシック」）だけを使う。
-/// ほかの案（採用前のデザインの `standard` を含む）は Preview・DEBUG の見本・テストの中だけで使う。
+/// 出荷するアプリは Discussion #80 の 5 案から採用したテーマ（`shipping`。「地雷系・ゴシック」）だけを使う。
+/// 採用しなかった案（採用前のデザインを含む）は片付け、アイデアは shilokuma-inc/design-knowledge に残した（`docs/design/themes.md`）。
 nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
-    /// 英字の安定した値（DEBUG の見本の起動引数・テストで使う）。
+    /// 英字の安定した値（テストの表示で使う）。
     let id: String
-    /// 表示名。Preview・ドキュメント・DEBUG の見本だけで使う（出荷する画面には出さないので訳さない）。
+    /// 表示名。Preview とドキュメントだけで使う（出荷する画面には出さないので訳さない）。
     let displayName: String
     let palette: Palette
     let oshiText: OshiTextAdjustment
@@ -20,68 +20,16 @@ nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     let typography: Typography
     let decoration: Decoration
 
-    /// テストと見本で使う、すべてのテーマ。先頭は採用前のデザイン（`standard`。見本で比べる基準）。
-    static let all: [Self] = [.standard, .yumekawaPastel, .ryosangataGirly, .koreanMinimal, .jiraiGothic, .idolPenlight]
-
-    /// 出荷するアプリとウィジェットのテーマ。Discussion #80 の 5 案から「地雷系・ゴシック」を採用し、`standard` を置き換えた。
+    /// 出荷するアプリとウィジェットのテーマ。Discussion #80 の 5 案から「地雷系・ゴシック」を採用し、採用前のデザインを置き換えた。
     static var shipping: Self {
         .jiraiGothic
     }
-
-    /// id のテーマ。知らない id なら出荷するテーマ。
-    static func theme(id: String) -> Self {
-        all.first { $0.id == id } ?? .shipping
-    }
-
-    /// 採用前のデザイン（デザインキャンバス「推し活カウントダウン 画面デザイン」）。`AppPalette`・`AppFont`・角の丸み・縞と同じ値。
-    static let standard = Self(
-        id: "standard",
-        displayName: "標準",
-        palette: Palette(
-            background: AppPalette.background,
-            surface: AppPalette.surface,
-            surfaceContainer: AppPalette.surfaceContainer,
-            surfaceContainerHigh: AppPalette.surfaceContainerHigh,
-            onSurface: AppPalette.onSurface,
-            onSurfaceVariant: AppPalette.onSurfaceVariant,
-            outlineVariant: AppPalette.outlineVariant,
-            brand: AppPalette.brand,
-            onBrand: AppPalette.onBrand,
-            brandContainer: AppPalette.brandContainer,
-            onBrandContainer: AppPalette.onBrandContainer,
-            destructive: AppPalette.destructive
-        ),
-        oshiText: OshiTextAdjustment(
-            lightTextDarkenFraction: 0,
-            darkTextLightenFraction: OshiColor.darkTextLightenFraction,
-            surfaceContainerTextDarkenFraction: OshiColor.surfaceContainerTextDarkenFraction,
-            containerLightFraction: 0.18,
-            containerDarkFraction: 0.35
-        ),
-        shape: CornerRadii(heroCard: 28, section: 20, detailCard: 28, tag: 8),
-        typography: Typography(
-            textFaces: TextFaces(
-                regular: AppFont.TextFace.regular.rawValue,
-                medium: AppFont.TextFace.medium.rawValue,
-                bold: AppFont.TextFace.bold.rawValue
-            ),
-            numeralFamily: AppFont.numeralFamily,
-            numeralWeight: .bold
-        ),
-        decoration: Decoration(
-            screenBackground: .none,
-            cardBorder: .none,
-            headingOrnament: .none,
-            numeralEffect: .none,
-            photoPlaceholder: .stripes
-        )
-    )
 }
 
 // MARK: - 配色
 
 extension AppTheme {
-    /// 地・文字・線とアプリのアクセントの配色。役割は `AppPalette` と同じ。推し色を置き換える役割は持たない。
+    /// 地・文字・線とアプリのアクセントの配色。推し色を置き換える役割は持たない。
     nonisolated struct Palette: Hashable, Sendable {
         /// 画面の地。
         let background: AdaptiveColor
@@ -111,7 +59,7 @@ extension AppTheme {
 
     /// 推し色を地の上の文字や薄い地に使うときの調整の割合。テーマの地で 4.5:1 を保てるよう、テーマごとに持つ。
     nonisolated struct OshiTextAdjustment: Hashable, Sendable {
-        /// ライトの地で推し色を文字に使うとき、黒に寄せる割合。地が色付きで 4.5:1 を保てないテーマだけが持つ（標準のテーマは 0 で推し色のまま）。
+        /// ライトの地で推し色を文字に使うとき、黒に寄せる割合。地が色付きで、推し色のままでは 4.5:1 を保てない色があるときに持つ（0 なら推し色のまま）。
         let lightTextDarkenFraction: Double
         /// ダークの地で推し色を文字に使うとき、白に寄せる割合。
         let darkTextLightenFraction: Double
@@ -228,40 +176,21 @@ extension AppTheme {
         let cardBorder: CardBorder
         /// 見出しの飾り。
         let headingOrnament: HeadingOrnament
-        /// 残り日数の数字の効果。
-        let numeralEffect: NumeralEffect
         /// 写真が無いときに写真の場所を埋める模様。
         let photoPlaceholder: PhotoPlaceholder
     }
 
     nonisolated enum ScreenBackground: Hashable, Sendable {
         case none
-        /// 上から下へ淡い色を移し（`gradient` は上から順の色）、星とハートを小さく散らす（`ornament` を `ornamentOpacity` で薄めて描く）。
-        case sparkles(gradient: [AdaptiveColor], ornament: AdaptiveColor)
         /// 地の色に、十字とハートを小さく散らす（`ornament` を `markOpacity` で薄めて描く）。
         case crossesAndHearts(ornament: AdaptiveColor)
-        /// 上から下へ色を移し（`gradient` は上から順の色）、上からライブ会場の照明の光の筋を差す（`beam` を `beamOpacity` で薄めて描く）。
-        case stage(gradient: [AdaptiveColor], beam: AdaptiveColor)
 
-        /// 星とハートの不透明度。
-        static let ornamentOpacity = 0.4
         /// 十字とハートの不透明度。
         static let markOpacity = 0.35
-        /// 照明の光の筋の不透明度（いちばん濃いところ）。
-        static let beamOpacity = 0.18
 
         /// 画面の地の色（模様を除く）。`background` はテーマの画面の地の色。
         func grounds(background: AdaptiveColor) -> [AdaptiveColor] {
-            switch self {
-            case .none:
-                [background]
-            case let .sparkles(gradient, _):
-                gradient
-            case .crossesAndHearts:
-                [background]
-            case let .stage(gradient, _):
-                gradient
-            }
+            [background]
         }
 
         /// 画面の地の上の文字（見出しなど）が乗りうる色。地の色に、模様の色を重ねたところも含める。
@@ -271,25 +200,11 @@ extension AppTheme {
             switch self {
             case .none:
                 return grounds
-            case let .sparkles(_, ornament):
-                return grounds + grounds.map { ground in
-                    AdaptiveColor(
-                        light: ground.light.mixed(with: ornament.light, fraction: Self.ornamentOpacity),
-                        dark: ground.dark.mixed(with: ornament.dark, fraction: Self.ornamentOpacity)
-                    )
-                }
             case let .crossesAndHearts(ornament):
                 return grounds + grounds.map { ground in
                     AdaptiveColor(
                         light: ground.light.mixed(with: ornament.light, fraction: Self.markOpacity),
                         dark: ground.dark.mixed(with: ornament.dark, fraction: Self.markOpacity)
-                    )
-                }
-            case let .stage(_, beam):
-                return grounds + grounds.map { ground in
-                    AdaptiveColor(
-                        light: ground.light.mixed(with: beam.light, fraction: Self.beamOpacity),
-                        dark: ground.dark.mixed(with: beam.dark, fraction: Self.beamOpacity)
                     )
                 }
             }
@@ -298,91 +213,25 @@ extension AppTheme {
 
     nonisolated enum CardBorder: Hashable, Sendable {
         case none
-        /// カードの内側に沿う線。
-        case outline(color: AdaptiveColor, width: CGFloat)
-        /// レース風の縁取り（縁の細い線と、その内側に並べた小さな玉）。
-        case lace(color: AdaptiveColor)
         /// カードの内側に沿う 2 本の線（外は太く、内は細く薄く）。
         case doubleLine(color: AdaptiveColor)
-        /// ネオン管のような縁（細い線と、カードの外側に広がる光）。
-        case neon(color: AdaptiveColor)
     }
 
     nonisolated enum HeadingOrnament: Hashable, Sendable {
         case none
         /// 見出しの前に置く SF Symbols（`name` はシンボルの名前）。
         case symbol(name: String, color: AdaptiveColor)
-        /// 見出しの後ろに、残りの幅いっぱいの細い線を引く。
-        case trailingRule(color: AdaptiveColor)
-        /// 見出しの前に置くリボン（`RibbonOrnament`）。
-        case ribbon(color: AdaptiveColor)
-    }
-
-    nonisolated enum NumeralEffect: Hashable, Sendable {
-        case none
-        /// 数字の下に、推し色から作った光を敷く（ペンライト）。数字の色は変えない。
-        case glow
-
-        /// 先頭のカード（推し色の塗りの上の白い数字）の光の不透明度。白い光で、白い数字と塗りの縁の差を 3:1 以上に保つ。
-        static let fillGlowOpacity = 0.25
-        /// 地の上の推し色の数字の光の不透明度。
-        static let groundGlowOpacity = 0.3
-
-        /// 推し色 `color` の数字が `ground` に乗るときの光。効果が無ければ nil。
-        func glow(for color: OshiColor, on ground: NumeralGround) -> NumeralGlow? {
-            switch self {
-            case .none:
-                return nil
-            case .glow:
-                switch ground {
-                case .oshiFill:
-                    return NumeralGlow(color: AdaptiveColor(light: .white, dark: .white), opacity: Self.fillGlowOpacity, radius: 14)
-                case .ground:
-                    return NumeralGlow(color: AdaptiveColor(light: color.rgb, dark: color.rgb), opacity: Self.groundGlowOpacity, radius: 10)
-                }
-            }
-        }
-    }
-
-    /// 残り日数の数字が乗る地。
-    nonisolated enum NumeralGround: Hashable, Sendable {
-        /// 推し色の塗り（先頭のカード）。数字は白。
-        case oshiFill
-        /// 画面の地・カードの地（一覧の行・予定の詳細）。数字は推し色の文字の色（`OshiColor.text(in:)`）。
-        case ground
-    }
-
-    /// 数字の下に敷く光。`opacity` は光のいちばん濃いところ（数字の縁）の不透明度。
-    nonisolated struct NumeralGlow: Hashable, Sendable {
-        let color: AdaptiveColor
-        let opacity: Double
-        let radius: CGFloat
-
-        /// 光のいちばん濃いところの色（`base` は数字の下の地の色）。数字の色とのコントラストを確かめるのに使う。
-        func peak(over base: RGBColor, isDark: Bool) -> RGBColor {
-            base.mixed(with: color.resolved(isDark: isDark), fraction: opacity)
-        }
     }
 
     nonisolated enum PhotoPlaceholder: Hashable, Sendable {
-        /// 推し色の斜めの縞（`StripedBackground`）。
-        case stripes
-        /// 推し色の地に、白いハートを散らす（`HeartPatternBackground`）。
-        case hearts
-        /// 推し色の地を、上から下へわずかに濃くする（`TonalBackground`）。
-        case tonal
-        /// 推し色の地に、白い帯を縦横に重ねたギンガムチェック（`GinghamBackground`）。
-        case gingham
         /// 推し色を黒に寄せた地に、白い十字とハートを散らす（`CrossPatternBackground`）。
         case crosses
-        /// 推し色の地に、ぼけたペンライトの光の玉を散らす（`PenlightBokehBackground`）。
-        case penlights
     }
 }
 
 // MARK: - 配り方
 
 extension EnvironmentValues {
-    /// 画面とウィジェットが使うテーマ。出荷するアプリは `AppTheme.shipping` のまま（DEBUG の見本だけがほかの案を入れる）。
+    /// 画面とウィジェットが使うテーマ。出荷するアプリは `AppTheme.shipping` のまま（Preview だけがテーマを入れる）。
     @Entry var appTheme: AppTheme = .shipping
 }

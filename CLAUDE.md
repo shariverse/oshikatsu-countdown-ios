@@ -42,23 +42,21 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - `OshiCon/`: アプリだけのコード（画面・写真の取り込み）
   - `Shared/`: アプリと Widget Extension の両方に入るコード（規則・ストア・配色・書体）。ウィジェットからも使う型は `nonisolated` にする
   - `OshiConWidget/`: Widget Extension（`OshiConWidgetExtension`、Bundle ID は `$(APP_BUNDLE_IDENTIFIER).Widget`）。Info.plist に `AppGroupIdentifier` と `UIAppFonts` を持つ
-  - ウィジェットの View（`CountdownWidgetView`・`UpcomingWidgetView`）と見本は `Shared/Widget/` に置き、アプリの Preview・見本の撮影からも描く。`Widget`・`TimelineProvider`・`AppIntent` は `OshiConWidget/` に置く
+  - ウィジェットの View（`CountdownWidgetView`・`UpcomingWidgetView`）と見本は `Shared/Widget/` に置き、アプリの Preview からも描く。`Widget`・`TimelineProvider`・`AppIntent` は `OshiConWidget/` に置く
   - `OshiConTests/`・`OshiConUITests/`: テスト。`Shared/` の型も `@testable import OshiCon` で使える
   - 新しいターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION` などをプロジェクトの階層から受け継ぐ。ターゲット側で上書きしていないか確かめる
 - テーマ（`Shared/Design/AppTheme.swift`）: 地の配色・推し色の文字の調整の割合・角の丸み・書体・装飾をまとめた型。画面とウィジェットは `@Environment(\.appTheme)` から引く
   - **出荷するアプリとウィジェットは、Discussion #80 で採用した地雷系・ゴシック `AppTheme.shipping`（= `AppTheme.jiraiGothic`）だけを使う**（Environment の既定値）。
-    採用前のデザインは標準のテーマ `AppTheme.standard`（`AppPalette`・`AppFont`・角の丸み・縞と同じ値）で、ほかの案と同じく Preview・DEBUG の見本・テストの中だけで使う。テーマの選択は保存しない
+    採用しなかった案（採用前のデザインの標準のテーマと 4 案）は片付け、アイデアは shilokuma-inc/design-knowledge に残した（Issue #117）。テーマを選ぶ仕組みは無い
   - 推し色の役割（先頭のカードの塗り・写真が無いときの模様の色・残り日数の文字・印）はテーマで置き換えない。テーマが変えるのは地・形・装飾・書体と、推し色の文字を地に合わせる割合（`OshiColor.text(in:)` など）だけ。
-    写真が無いときの模様（出荷するテーマは十字とハート、標準のテーマは縞）は、推し色で塗ることを変えずに形だけテーマで変えられる（`ThemePhotoPlaceholder`）
-    どの案も推し色の文字が地とカードの上で 4.5:1 以上（`PaletteContrastTests` が `AppTheme.all` で回る）
-  - 日本語の本文だけテーマの書体にし、ほかの言語はどのテーマでもシステムの書体（`AppFont.usesBundledTextFace(locale:)`）
-  - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`themeNumeralEffect(_:)`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
+    写真が無いときの模様（出荷するテーマは十字とハート）は、推し色で塗ることを変えずに形だけテーマで変えられる（`ThemePhotoPlaceholder`）
+    推し色の文字が地とカードの上で 4.5:1 以上（`PaletteContrastTests` が出荷するテーマで回る）
+  - 日本語の本文だけテーマの書体にし、ほかの言語はシステムの書体（`AppFont.usesBundledTextFace(locale:)`）
+  - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
     画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
-  - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。
-    採用しなかった案の日本語の書体は `OshiCon/Preview Content/Fonts/` に置き、`PreviewFonts.registerIfNeeded()` で登録する。
-    Archive から外すのは `Configs/Release.xcconfig` の `EXCLUDED_SOURCE_FILE_NAMES`（フォルダ同期グループのリソースは `DEVELOPMENT_ASSET_PATHS` では外れない）。書体を足したら除外の名前にも足す。`OshiCon/Preview Content/` のものをリリースのコードから参照しない。見方と撮り方は README の「テーマの見本」
+  - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。書体を足したらオープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。見方は README の「テーマ」
   - Form・List の行の地は `themeRowBackground()` でテーマのカードの地（`surface`）にする（システムの既定の地のままにしない）
-  - テーマ案の一覧（狙い・配色・書体・コントラスト）と、採用でしたこと・残っていること（デザインキャンバス・Android 版 SPEC への記載・不採用の案の片付けなど）は `docs/design/themes.md`
+  - 出荷するテーマの狙い・配色・書体・コントラストと、採用でしたこと・残っていること（デザインキャンバス・Android 版 SPEC への記載など）は `docs/design/themes.md`
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない

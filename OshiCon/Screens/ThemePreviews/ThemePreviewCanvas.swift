@@ -6,7 +6,7 @@
 import SwiftData
 import SwiftUI
 
-/// テーマ案の Preview に描く画面。
+/// テーマの Preview に描く画面。
 enum ThemePreviewScreen {
     /// ホーム（先頭のピン留めのライブと、これからの予定）。
     case home
@@ -18,8 +18,8 @@ enum ThemePreviewScreen {
     case widgets
 }
 
-/// テーマ案の Preview（5 案で共通）。日本語の見本の推しと予定をメモリ上のストアに入れ、テーマと外観を当てて画面を描く。
-/// テーマ案の日本語の書体は、アプリの言語が日本語のときだけ使われる（Xcode の Scheme の Run の Options の App Language を日本語にする）。
+/// テーマの Preview。日本語の見本の推しと予定をメモリ上のストアに入れ、テーマと外観を当てて画面を描く。
+/// テーマの日本語の書体は、アプリの言語が日本語のときだけ使われる（Xcode の Scheme の Run の Options の App Language を日本語にする）。
 struct ThemePreviewCanvas: View {
     let theme: AppTheme
     let screen: ThemePreviewScreen
@@ -30,7 +30,6 @@ struct ThemePreviewCanvas: View {
     @State private var router = AppRouter()
 
     init(_ theme: AppTheme, _ screen: ThemePreviewScreen, _ colorScheme: ColorScheme) {
-        PreviewFonts.registerIfNeeded()
         self.theme = theme
         self.screen = screen
         self.colorScheme = colorScheme
@@ -74,7 +73,7 @@ struct ThemePreviewCanvas: View {
     }
 }
 
-/// テーマ案の Preview の見本のストア。日本語の見本の推しと予定（`SampleData`）をメモリ上のストアに入れる。
+/// テーマの Preview の見本のストア。日本語の見本の推しと予定（`SampleData`）をメモリ上のストアに入れる。
 private struct ThemePreviewStore {
     let container: ModelContainer?
     /// ホームの先頭に出る、ピン留めした予定。

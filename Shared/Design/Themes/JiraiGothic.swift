@@ -6,7 +6,7 @@
 import SwiftUI
 
 extension AppTheme {
-    /// テーマ案 4「地雷系・ゴシック」。黒 × ピンク、ダークが主役。十字とハートの小さな装飾と、カードの二重の線。
+    /// 「地雷系・ゴシック」（Discussion #80 のテーマ案 4 から採用した、出荷するテーマ）。黒 × ピンク、ダークが主役。十字とハートの小さな装飾と、カードの二重の線。
     /// ライトも黒 × ピンクで、薄いピンクの地に黒の文字・黒の縁取り。日本語の本文は装飾的な明朝の Kaisei Decol。
     nonisolated static let jiraiGothic = Self(
         id: "jiraiGothic",
@@ -45,7 +45,6 @@ extension AppTheme {
             screenBackground: .crossesAndHearts(ornament: AdaptiveColor(light: 0xF2B6CF, dark: 0x4A2A3C)),
             cardBorder: .doubleLine(color: AdaptiveColor(light: 0x1A0F16, dark: 0xFF7EB3)),
             headingOrnament: .symbol(name: "heart.fill", color: AdaptiveColor(light: 0xC2185B, dark: 0xFF7EB3)),
-            numeralEffect: .none,
             photoPlaceholder: .crosses
         )
     )
