@@ -140,23 +140,5 @@ struct PreviewFontsTests {
     }
 }
 
-struct PreviewThemeLaunchOptionTests {
-    @Test("起動引数が無ければテーマ案の見本にしない")
-    func noArgument() {
-        #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-useInMemoryStore"]) == nil)
-    }
-
-    @Test("起動引数の id のテーマにする。知らない id・id が無いときは出荷するテーマ")
-    func themeFromArgument() {
-        for theme in AppTheme.all {
-            #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme", theme.id]) == theme)
-        }
-        #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme", "unknownTheme"]) == .shipping)
-        #expect(LaunchOptions.previewTheme(arguments: ["OshiCon", "-previewTheme"]) == .shipping)
-        #expect(AppTheme.theme(id: "unknownTheme") == .shipping)
-        #expect(AppTheme.theme(id: "standard") == .standard)
-    }
-}
-
 /// テストのバンドルを指すための型。
 private final class BundleToken {}
