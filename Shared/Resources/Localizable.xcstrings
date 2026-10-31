@@ -7954,7 +7954,7 @@
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "เสร็จ"
+            "value" : "เสร็จสิ้น"
           }
         },
         "id" : {
@@ -8272,12 +8272,12 @@
       }
     },
     "拡大 %@ 倍、回転 %lld 度" : {
-      "comment" : "写真の調整画面の読み上げの値。1 つ目が拡大率（小数）、2 つ目が回転の角度",
+      "comment" : "写真の調整画面の読み上げの値（読み上げ専用なので記号を使わない）。1 つ目が拡大率（小数）、2 つ目が回転の角度",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom %1$@×, rotation %2$lld°"
+            "value" : "Zoom %1$@ times, rotation %2$lld degrees"
           }
         },
         "ja" : {
@@ -8307,31 +8307,31 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom %1$@×, rotation %2$lld°"
+            "value" : "Zoom %1$@ fois, rotation de %2$lld degrés"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom %1$@×, Drehung %2$lld°"
+            "value" : "Zoom %1$@-fach, Drehung %2$lld Grad"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom %1$@×, giro %2$lld°"
+            "value" : "Zoom de %1$@ veces, giro de %2$lld grados"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom %1$@×, rotação %2$lld°"
+            "value" : "Zoom de %1$@ vezes, rotação de %2$lld graus"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom %1$@×, rotazione %2$lld°"
+            "value" : "Zoom %1$@ volte, rotazione di %2$lld gradi"
           }
         },
         "th" : {
@@ -8343,7 +8343,7 @@
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Perbesar %1$@×, putar %2$lld°"
+            "value" : "Perbesar %1$@ kali, putar %2$lld derajat"
           }
         }
       }
@@ -10405,6 +10405,7 @@
       }
     },
     "移動と拡大・縮小" : {
+      "comment" : "写真の調整画面の見出し（連絡先の写真の調整の言い方）",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -11352,7 +11353,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Photo en cours d’ajustement"
+            "value" : "Photo en cours d'ajustement"
           }
         },
         "de" : {
