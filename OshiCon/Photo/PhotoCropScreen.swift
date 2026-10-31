@@ -8,8 +8,12 @@ import SwiftUI
 /// 写真の調整画面。選んだ写真を拡大・縮小・移動・回転して、丸の枠に写す範囲を決める（iOS の連絡先の写真の調整に寄せる）。
 ///
 /// 黒い地に写真を置き、丸の枠の外を暗くする。上に「やめる」「完了」を置く。
-/// ピンチ・ドラッグ・2 本指のひねりを同時に効かせ、指を離したら枠の隅が空かないよう `PhotoCrop.clamped()` に寄せる。
+/// ピンチ・ドラッグ・2 本指のひねりを同時に効かせる。操作の途中は枠の隅が一時的に空いてもよく、
+/// 指を離したとき（ジェスチャーが中断されたときも）に、枠の隅が空かないよう `PhotoCrop.clamped()` に寄せる。
 /// VoiceOver などジェスチャーを使えない人向けに、上下のスワイプ（adjustable）で拡大・縮小、カスタムアクションで回転と元に戻す操作を置く。
+///
+/// 範囲は表示したときの `initialCrop` から始める（`@State`）。別の写真を調整するときは `.id(_:)` を変えるなどして作り直す。
+/// シートで出すときは `.interactiveDismissDisabled()` を付け、「やめる」「完了」でだけ閉じる。
 struct PhotoCropScreen: View {
     /// 表示用に縮めた写真（向きを反映した後の画像）。
     let image: CGImage
@@ -21,10 +25,10 @@ struct PhotoCropScreen: View {
     let onDone: (PhotoCrop) -> Void
 
     @State private var crop: PhotoCrop
-    /// 進行中のジェスチャーで、前回までに反映した量。
-    @State private var lastTranslation: CGSize = .zero
-    @State private var lastMagnification: CGFloat = 1
-    @State private var lastRotation: Angle = .zero
+    /// 進行中のジェスチャーを始めたときの範囲。ジェスチャーをしていなければ nil。
+    @State private var gestureBase: PhotoCrop?
+    /// ジェスチャーの最中か。中断されたときも false に戻る（`onEnded` は中断では呼ばれない）。
+    @GestureState private var isGesturing = false
     @Environment(\.appTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -61,13 +65,13 @@ struct PhotoCropScreen: View {
                 }
             }
             .accessibilityAction(named: Text("左に回す")) {
-                adjust(PhotoCropAccessibility.rotated(crop, clockwise: false))
+                adjust(PhotoCropAccessibility.rotated(crop, clockwise: false), announces: true)
             }
             .accessibilityAction(named: Text("右に回す")) {
-                adjust(PhotoCropAccessibility.rotated(crop, clockwise: true))
+                adjust(PhotoCropAccessibility.rotated(crop, clockwise: true), announces: true)
             }
             .accessibilityAction(named: Text("元に戻す")) {
-                adjust(initialCrop.clamped())
+                adjust(initialCrop.clamped(), announces: true)
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -77,6 +81,13 @@ struct PhotoCropScreen: View {
         // 写真が見やすいよう、地は外観によらず黒。文字はテーマのダークの色で書く
         .environment(\.colorScheme, .dark)
         .statusBarHidden()
+        .onChange(of: isGesturing) { _, gesturing in
+            // 指を離したときと、ジェスチャーが中断されたときの両方で補正する
+            if !gesturing {
+                gestureBase = nil
+                settle()
+            }
+        }
     }
 
     // MARK: - 写真と枠
@@ -120,19 +131,30 @@ struct PhotoCropScreen: View {
 
     private var topBar: some View {
         ViewThatFits(in: .horizontal) {
+            // 見出しを画面の中央に置くため、両側のボタンに同じ幅を割り当てる
             HStack(spacing: 12) {
-                cancelButton
-                Spacer(minLength: 8)
+                cancelButton(wraps: false)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 title
-                Spacer(minLength: 8)
-                doneButton
+                doneButton(wraps: false)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            // 文字が大きくて 1 行に収まらないときは、見出しをボタンの下に置く
+            // 1 行に収まらないときは、見出しをボタンの下に置く
             VStack(spacing: 8) {
                 HStack {
-                    cancelButton
+                    cancelButton(wraps: false)
                     Spacer(minLength: 8)
-                    doneButton
+                    doneButton(wraps: false)
+                }
+                title
+            }
+            // それでも収まらない（アクセシビリティサイズの文字など）ときは、ボタンの文字を折り返す
+            VStack(spacing: 8) {
+                HStack(alignment: .top) {
+                    cancelButton(wraps: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    doneButton(wraps: true)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 title
             }
@@ -150,77 +172,88 @@ struct PhotoCropScreen: View {
             .accessibilityAddTraits(.isHeader)
     }
 
-    private var cancelButton: some View {
+    private func cancelButton(wraps: Bool) -> some View {
         Button("やめる", action: onCancel)
             .font(theme.typography.text(.body))
             .foregroundStyle(theme.palette.onSurface.color)
-            .fixedSize()
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: !wraps, vertical: true)
     }
 
-    private var doneButton: some View {
+    private func doneButton(wraps: Bool) -> some View {
         Button("完了") {
             onDone(crop.clamped())
         }
         .font(theme.typography.text(.body, weight: .bold))
         .foregroundStyle(theme.palette.brand.color)
-        .fixedSize()
+        .multilineTextAlignment(.trailing)
+        .fixedSize(horizontal: !wraps, vertical: true)
     }
 
     // MARK: - 操作
 
+    /// 移動・拡大・回転を同時に効かせる。値は始めたときからの量なので、始めたときの範囲（`gestureBase`）に当てて求める。
     private func gestures(frameSide: CGFloat) -> some Gesture {
-        let drag = DragGesture(minimumDistance: 0)
+        DragGesture(minimumDistance: 0)
+            .simultaneously(with: MagnifyGesture())
+            .simultaneously(with: RotateGesture())
+            .updating($isGesturing) { _, state, _ in
+                state = true
+            }
             .onChanged { value in
-                guard frameSide > 0 else {
-                    return
-                }
-                let delta = CGSize(
-                    width: value.translation.width - lastTranslation.width,
-                    height: value.translation.height - lastTranslation.height
+                let base = gestureBase ?? crop
+                gestureBase = base
+                crop = PhotoCropGesture.apply(
+                    to: base,
+                    translation: value.first?.first?.translation ?? .zero,
+                    magnification: value.first?.second?.magnification ?? 1,
+                    rotation: value.second?.rotation ?? .zero,
+                    frameSide: frameSide
                 )
-                lastTranslation = value.translation
-                crop = crop.dragged(by: delta, frameSide: frameSide)
             }
-            .onEnded { _ in
-                lastTranslation = .zero
-                settle()
-            }
-        let magnify = MagnifyGesture()
-            .onChanged { value in
-                let factor = value.magnification / max(lastMagnification, .leastNonzeroMagnitude)
-                lastMagnification = value.magnification
-                crop = PhotoCropLayout.limitedWhileGesturing(crop.zoomed(by: factor))
-            }
-            .onEnded { _ in
-                lastMagnification = 1
-                settle()
-            }
-        let rotate = RotateGesture()
-            .onChanged { value in
-                let delta = value.rotation - lastRotation
-                lastRotation = value.rotation
-                crop = crop.rotated(by: delta)
-            }
-            .onEnded { _ in
-                lastRotation = .zero
-                settle()
-            }
-        return drag.simultaneously(with: magnify).simultaneously(with: rotate)
     }
 
-    /// 指を離したら、枠の隅が空かない範囲に寄せる（「視差効果を減らす」ではアニメーションなし）。
+    /// 枠の隅が空かない範囲に寄せる（「視差効果を減らす」ではアニメーションなし）。
     private func settle() {
-        adjust(crop.clamped())
+        // ジェスチャーで貯まった回転角（400° など）を、見た目を変えずにそろえてから動かす（何周も回って戻らないように）
+        var normalized = crop
+        normalized.rotation = PhotoCrop.normalized(crop.rotation)
+        crop = normalized
+        adjust(normalized.clamped())
     }
 
-    private func adjust(_ newCrop: PhotoCrop) {
+    /// 範囲を変える。読み上げの操作では、変えた後の状態を読み上げる（カスタムアクションでは値が読み直されないことがあるため）。
+    private func adjust(_ newCrop: PhotoCrop, announces: Bool = false) {
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
             crop = newCrop
+        }
+        if announces {
+            AccessibilityNotification.Announcement(PhotoCropAccessibility.value(of: newCrop)).post()
         }
     }
 }
 
 // MARK: - 画面から切り離した決まり
+
+/// ジェスチャーの量を範囲に当てる。
+nonisolated enum PhotoCropGesture {
+    /// 始めたときの範囲 `base` に、始めたときからの拡大・回転（枠の中心を軸）と移動を当てた範囲。補正はしない。
+    /// 拡大率はジェスチャーの途中の制限（`PhotoCropLayout.limitedWhileGesturing`）に収める。枠の大きさが 0 なら移動しない。
+    static func apply(
+        to base: PhotoCrop,
+        translation: CGSize,
+        magnification: CGFloat,
+        rotation: Angle,
+        frameSide: CGFloat
+    ) -> PhotoCrop {
+        let factor = magnification.isFinite && magnification > 0 ? magnification : 1
+        var result = PhotoCropLayout.limitedWhileGesturing(base.zoomed(by: factor)).rotated(by: rotation)
+        if frameSide > 0 {
+            result = result.dragged(by: translation, frameSide: frameSide)
+        }
+        return result
+    }
+}
 
 /// 調整画面の枠の大きさと、ジェスチャーの途中の制限。
 nonisolated enum PhotoCropLayout {
