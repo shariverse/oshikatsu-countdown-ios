@@ -83,9 +83,14 @@ nonisolated enum PhotoResizer {
     }
 
     /// 一辺 `side` の正方形の描き先。色空間は写真のもの（RGB なら。広色域の写真の色を保つ）、使えなければ sRGB。
+    /// HDR（ITU-R 2100）や extended range の色空間は 8 bit の JPEG に向かないので、Display P3 に落とす。
     private static func squareContext(side: Int, colorSpace: CGColorSpace?) -> CGContext? {
         let srgb = CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB()
-        let spaces = [colorSpace, srgb].compactMap { $0 }.filter { $0.model == .rgb }
+        let displayP3 = CGColorSpace(name: CGColorSpace.displayP3)
+        let photoSpace = colorSpace.flatMap { space in
+            CGColorSpaceUsesITUR_2100TF(space) || CGColorSpaceUsesExtendedRange(space) ? displayP3 : space
+        }
+        let spaces = [photoSpace, srgb].compactMap { $0 }.filter { $0.model == .rgb }
         for space in spaces {
             if let context = CGContext(
                 data: nil,
