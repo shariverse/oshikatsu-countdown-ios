@@ -138,7 +138,9 @@ struct PhotoCropScreen: View {
             HStack(spacing: 12) {
                 cancelButton(wraps: false)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                // 見出しは折り返さない（収まらなければ次の案に回す）
                 title
+                    .fixedSize()
                 doneButton(wraps: false)
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
