@@ -57,6 +57,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。書体を足したらオープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。見方は README の「テーマ」
   - Form・List の行の地は `themeRowBackground()` でテーマのカードの地（`surface`）にする（システムの既定の地のままにしない）
   - 出荷するテーマの狙い・配色・書体・コントラストと、採用でしたこと・残っていること（デザインキャンバス・Android 版 SPEC への記載など）は `docs/design/themes.md`
+- 推しの写真は、選んだら調整画面（拡大・縮小・移動・回転）で丸の範囲を決め、正方形に切り抜いた画像だけを保存する（スキーマは変えない）。仕様・コードの場所・テストの口（`-useTestPhoto`）は `docs/photo-crop.md`。
+  Android 版の SPEC には未記載（Discussion #128 の Q4。後で合わせる）
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない

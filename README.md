@@ -198,6 +198,16 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
   ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます
 - **書体**: Kaisei Decol（SIL OFL 1.1）は google/fonts から取得したものを改変せずに `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に載せています
 
+### 11. 推しの写真の調整
+
+推しの登録・編集で写真を選ぶと、調整画面（拡大・縮小・移動・回転）で丸の枠に写す範囲を決めてから取り込みます（Discussion #128）。仕様とコードの場所は [docs/photo-crop.md](docs/photo-crop.md) にまとめています。
+
+- 正方形に切り抜いた画像（一辺 1440px まで）だけを保存します。予定の詳細の横長の写真は、その正方形の中央の帯を出します
+- 拡大は、切り抜く範囲の一辺が元の写真の 360px を下回らないところまで。回転しても枠の隅が空かないよう補正します
+- この機能より前に登録した写真はそのまま残します。保存してある写真は「位置を調整」で、さらに狭める調整だけができます
+- **Android 版の SPEC（`docs/SPEC.md`）にはまだ書かれていません。** iOS だけ先に作り、Android の SPEC は後で合わせます（Discussion #128 の Q4）
+- UI テストでは、起動引数 `-useTestPhoto`（`-useInMemoryStore` のときだけ効く）で「写真を選ぶ」を生成した画像を選ぶボタンに替えます（`PhotosPicker` は UI テストから操作できないため）
+
 ## 多言語対応
 
 アプリと Widget Extension は 12 言語に対応しています（英語が既定。対応していない言語の端末では英語で出ます）。
@@ -225,7 +235,7 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 ├── OshiConTests/     # Unit テスト（Swift Testing）
 ├── OshiConUITests/   # UI テスト（XCTest）
 ├── OshiCon.xcodeproj # 共有スキーム OshiCon を含む
-├── docs/                    # ExportOptions.plist のサンプル
+├── docs/                    # ExportOptions.plist のサンプル・App Store の掲載文・テーマ（design/themes.md）・写真の調整の仕様（photo-crop.md）
 ├── scripts/                 # rename.sh・app-store-screenshots.sh（App Store 用スクリーンショット）・render-creative-assets.sh（クリエイティブアセット）
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/
