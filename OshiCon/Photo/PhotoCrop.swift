@@ -21,7 +21,8 @@ nonisolated struct PhotoCrop: Equatable, Sendable {
     /// 切り抜く範囲の一辺の下限（画素）。これより狭く切り抜く拡大はさせない（粗くなりすぎないため）。
     static let minimumCropPixelLength: CGFloat = 360
 
-    /// 向きを反映した後の画像の大きさ（画素）。
+    /// 向きを反映した後の画像の大きさ（画素）。取り込む写真の元の大きさ（表示用に縮める前）を渡す。
+    /// 拡大の上限（`minimumCropPixelLength`）はこの画素で数える。
     let imageSize: CGSize
     /// 拡大率。1 で、回転なしのときに画像の短い辺が枠の一辺にぴったり収まる。
     var zoom: CGFloat
@@ -87,7 +88,8 @@ nonisolated struct PhotoCrop: Equatable, Sendable {
         let center: CGPoint
         /// 正方形の一辺（画素）。
         let side: CGFloat
-        /// 正方形の傾き（−180° より大きく 180° 以下に正規化）。画像の座標で、枠を画像に重ねると −`rotation` だけ回って見える。
+        /// 画像を回す角度（−180° より大きく 180° 以下に正規化）。y が下向きの座標で正は時計回り。
+        /// 画像を中心の周りにこの角度だけ回して描くと、切り抜く正方形が軸に平行になる（画像の上では、正方形は逆向きに −`rotation` 傾いている）。
         let rotation: Angle
 
         /// 正方形の 4 つの隅（画像の座標）。枠の左上・右上・右下・左下の順。
