@@ -19,10 +19,15 @@ nonisolated struct OshiPhotoLibrary: Sendable {
     }
 
     /// 写真のデータを長辺 1440px 以下の JPEG に縮めて取り込み、ファイル名を返す。読めなければ nil。
-    /// 縮めるのは重いので、メインアクターの外で行う。
+    /// `crop` があれば、その範囲で一辺 1440px 以下の正方形に切り抜く。縮めるのは重いので、メインアクターの外で行う。
     @concurrent
-    func importPhoto(_ data: Data) async throws -> String? {
-        guard let jpeg = PhotoResizer.jpegData(from: data) else {
+    func importPhoto(_ data: Data, crop: PhotoCrop? = nil) async throws -> String? {
+        let jpeg = if let crop {
+            PhotoResizer.croppedJPEGData(from: data, crop: crop)
+        } else {
+            PhotoResizer.jpegData(from: data)
+        }
+        guard let jpeg else {
             return nil
         }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
