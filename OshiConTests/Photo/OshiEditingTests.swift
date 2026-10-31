@@ -54,6 +54,23 @@ struct OshiEditingTests {
         return try FileManager.default.contentsOfDirectory(atPath: path)
     }
 
+    @Test("範囲つきで写真を選んで登録すると、その範囲の正方形に切り抜いて取り込む")
+    func registerWithCroppedPhoto() async throws {
+        let crop = PhotoCrop(
+            imageSize: CGSize(width: 2_000, height: 1_500),
+            zoom: 2,
+            rotation: .degrees(15),
+            center: CGPoint(x: 900, y: 700)
+        )
+        let change = PhotoChange.replace(photo, crop: crop)
+        let oshi = try #require(try await editing.save(current: nil, name: "ミナト", color: .navy, photoChange: change, now: now))
+        let fileName = try #require(oshi.photoFileName)
+        let properties = try #require(PhotoFixtures.properties(of: Data(contentsOf: photos.url(for: fileName))))
+        // 切り抜く範囲の一辺は 1500 ÷ 2 = 750px
+        #expect(properties.width == 750)
+        #expect(properties.height == 750)
+    }
+
     @Test("写真を選んで登録すると、縮めた写真を取り込んで推しに結び付ける")
     func registerWithPhoto() async throws {
         let oshi = try #require(try await editing.save(current: nil, name: " ミナト ", color: .navy, photoChange: .replace(photo), now: now))
