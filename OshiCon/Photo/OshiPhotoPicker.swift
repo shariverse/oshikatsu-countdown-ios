@@ -61,7 +61,17 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                     }
                 }
             HStack(spacing: 16) {
-                PhotosPicker(hasPhoto ? "写真を変える" : "写真を選ぶ", selection: $selectedItem, matching: .images)
+                if LaunchOptions.usesTestPhoto {
+                    // UI テストでは、写真ライブラリの代わりに生成した画像を選ぶ
+                    Button(hasPhoto ? "写真を変える" : "写真を選ぶ") {
+                        isLoading = true
+                        Task {
+                            await load(data: PhotoCropPreviewImage.pngData())
+                        }
+                    }
+                } else {
+                    PhotosPicker(hasPhoto ? "写真を変える" : "写真を選ぶ", selection: $selectedItem, matching: .images)
+                }
                 if hasPhoto {
                     Button("写真を外す", role: .destructive) {
                         selectedItem = nil
@@ -156,6 +166,20 @@ struct OshiPhotoPicker<Placeholder: View>: View {
             isLoading = false
         }
         guard let data = try? await item.loadTransferable(type: Data.self) else {
+            loadFailed = true
+            return
+        }
+        await openCropScreen(data: data, initialCrop: nil)
+    }
+
+    /// 写真のデータ（UI テストで生成した画像）を読み、調整画面を出す。
+    private func load(data: Data?) async {
+        isLoading = true
+        loadFailed = false
+        defer {
+            isLoading = false
+        }
+        guard let data else {
             loadFailed = true
             return
         }

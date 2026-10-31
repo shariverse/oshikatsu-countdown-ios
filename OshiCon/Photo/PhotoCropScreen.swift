@@ -3,7 +3,9 @@
 //  OshiCon
 //
 
+import ImageIO
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// 写真の調整画面。選んだ写真を拡大・縮小・移動・回転して、丸の枠に写す範囲を決める（iOS の連絡先の写真の調整に寄せる）。
 ///
@@ -418,5 +420,15 @@ nonisolated enum PhotoCropPreviewImage {
             preconditionFailure("画像を作れない")
         }
         return image
+    }
+
+    /// `make()` の画像を PNG で書き出したデータ（UI テストで、写真ライブラリから選んだ写真の代わりに使う）。書き出せなければ nil。
+    static func pngData() -> Data? {
+        let output = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(output, UTType.png.identifier as CFString, 1, nil) else {
+            return nil
+        }
+        CGImageDestinationAddImage(destination, make(), nil)
+        return CGImageDestinationFinalize(destination) ? output as Data : nil
     }
 }
