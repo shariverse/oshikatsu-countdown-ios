@@ -201,7 +201,7 @@ struct PhotoResizerCropTests {
     func cropSourceKeepsOriginalSize() async throws {
         let photos = OshiPhotoLibrary(directory: PhotoFixtures.temporaryDirectory())
         let data = PhotoFixtures.quadrantImageData(width: 2_000, height: 1_000, type: .jpeg, orientation: 6)
-        let source = try #require(await photos.cropSource(data: data, maxPixelLength: 500))
+        let source = try #require(await photos.cropSource(data: data, shortSidePixels: 250, maxLongSidePixels: 4_096))
         #expect(source.pixelSize == CGSize(width: 1_000, height: 2_000))
         #expect(source.image.width == 250)
         #expect(source.image.height == 500)
@@ -209,6 +209,31 @@ struct PhotoResizerCropTests {
         let preview = try #require(await photos.croppedPreviewImage(data: data, crop: source.initialCrop, maxPixelLength: 288))
         #expect(preview.width == 288)
         #expect(preview.height == 288)
+    }
+
+    @Test("調整画面で描く写真は、短い辺が足りる大きさで読み、長辺と元の大きさで抑える")
+    func cropSourceDecodeLength() {
+        func length(_ width: CGFloat, _ height: CGFloat) -> Int {
+            PhotoCropSource.decodeLength(pixelSize: CGSize(width: width, height: height), shortSidePixels: 1_680, maxLongSidePixels: 4_096)
+        }
+        // 4:3 の写真で短い辺 1680px なら長辺 2240px
+        #expect(length(4_032, 3_024) == 2_240)
+        // 4:1 のパノラマは長辺の上限で止める
+        #expect(length(16_000, 4_000) == 4_096)
+        // 小さい写真は元の大きさ
+        #expect(length(800, 600) == 800)
+    }
+
+    @Test("取り込んだ写真のデータを読める。取り込み先の外を指す名前は読まない")
+    func readsImportedPhotoData() async throws {
+        let directory = PhotoFixtures.temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let photos = OshiPhotoLibrary(directory: directory)
+        let fileName = try #require(try await photos.importPhoto(Self.landscape))
+        let data = try #require(await photos.photoData(fileName: fileName))
+        #expect(PhotoResizer.orientedPixelSize(of: data) == CGSize(width: 400, height: 300))
+        #expect(await photos.photoData(fileName: "../secret.jpg") == nil)
+        #expect(await photos.photoData(fileName: "\(UUID().uuidString).jpg") == nil)
     }
 
     @Test("画像でないデータは読めない")
