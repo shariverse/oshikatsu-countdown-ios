@@ -78,6 +78,31 @@ struct PhotoCropScreenTests {
         #expect(moved == base)
     }
 
+    @Test("先に終わったジェスチャー（片方の指を離した拡大・回転）は、最後の量を保つ")
+    func amountKeepsLastValues() {
+        var amount = PhotoCropGesture.Amount()
+        amount.update(translation: CGSize(width: 10, height: 0), magnification: 1.5, rotation: .degrees(20))
+        amount.update(translation: CGSize(width: 40, height: 5), magnification: nil, rotation: nil)
+        #expect(amount.translation == CGSize(width: 40, height: 5))
+        #expect(amount.magnification == 1.5)
+        #expect(amount.rotation == .degrees(20))
+    }
+
+    @Test("元に戻すときは、今の角度に最も近い同じ見た目の角度に戻す（何周も回らない）")
+    func resetUsesNearestTurn() {
+        let initial = PhotoCrop(imageSize: size)
+        var current = initial
+        current.rotation = .degrees(400)
+        current.zoom = 2
+        let reset = PhotoCropGesture.reset(current, to: initial)
+        #expect(abs(reset.rotation.degrees - 360) < 1e-9)
+        #expect(reset.zoom == 1)
+        current.rotation = .degrees(-170)
+        #expect(abs(PhotoCropGesture.reset(current, to: initial).rotation.degrees) < 1e-9)
+        current.rotation = .degrees(-200)
+        #expect(abs(PhotoCropGesture.reset(current, to: initial).rotation.degrees + 360) < 1e-9)
+    }
+
     // MARK: - 読み上げの操作
 
     @Test("拡大・縮小は 1.25 倍ずつで、上限・下限で止まる")

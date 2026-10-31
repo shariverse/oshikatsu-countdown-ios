@@ -158,6 +158,59 @@ struct PhotoResizerCropTests {
         #expect(pixels.matches(x: 2, y: 297, .bottomLeft))
     }
 
+    @Test("拡大・回転した大きな写真も、一辺 1440px までにする")
+    func capsRotatedCropOfLargePhoto() throws {
+        let data = PhotoFixtures.quadrantImageData(width: 4_000, height: 3_000)
+        let crop = PhotoCrop(
+            imageSize: CGSize(width: 4_000, height: 3_000),
+            zoom: 1.5,
+            rotation: .degrees(30),
+            center: CGPoint(x: 2_000, y: 1_500)
+        )
+        let pixels = try Self.crop(data, crop)
+        #expect(pixels.width == 1_440)
+        #expect(pixels.height == 1_440)
+        for (x, y) in [(0, 0), (1_439, 0), (0, 1_439), (1_439, 1_439)] {
+            #expect(!pixels.isDark(x: x, y: y), "(\(x), \(y)) が空いている")
+        }
+    }
+
+    @Test("切り抜く範囲が 1440px より広ければ、足りる大きさまで縮めて読む（広くなければ元の大きさで読む）")
+    func decodesOnlyWhatIsNeeded() {
+        let size = CGSize(width: 8_064, height: 6_048)
+        // 写真全体（一辺 6048px）を 1440px に切り抜くなら、長辺 1920px で読めば足りる
+        #expect(PhotoResizer.decodePixelLength(orientedSize: size, cropSide: 6_048, outputSide: 1_440) == 1_920)
+        // 一辺 1000px の範囲は縮めずに読む
+        #expect(PhotoResizer.decodePixelLength(orientedSize: size, cropSide: 1_000, outputSide: 1_000) == 8_064)
+    }
+
+    @Test("範囲の縦横比が写真と違えば（向きの取り違え）切り抜かない")
+    func rejectsMismatchedAspectRatio() {
+        // 写真は 400×300 の横長なのに、範囲は縦長の 300×400 の座標
+        #expect(PhotoResizer.croppedImage(from: Self.landscape, crop: PhotoCrop(imageSize: CGSize(width: 300, height: 400))) == nil)
+    }
+
+    @Test("広い色域（Display P3）の写真は、その色空間のまま切り抜く")
+    func keepsWideColorSpace() throws {
+        let data = PhotoFixtures.quadrantImageData(width: 400, height: 300, colorSpace: CGColorSpace(name: CGColorSpace.displayP3))
+        let image = try #require(PhotoResizer.croppedImage(from: data, crop: PhotoCrop(imageSize: CGSize(width: 400, height: 300))))
+        #expect(image.colorSpace?.name == CGColorSpace.displayP3)
+    }
+
+    @Test("調整画面に渡す写真は、縮めた画像と、向きを反映した元の大きさ")
+    func cropSourceKeepsOriginalSize() async throws {
+        let photos = OshiPhotoLibrary(directory: PhotoFixtures.temporaryDirectory())
+        let data = PhotoFixtures.quadrantImageData(width: 2_000, height: 1_000, type: .jpeg, orientation: 6)
+        let source = try #require(await photos.cropSource(data: data, maxPixelLength: 500))
+        #expect(source.pixelSize == CGSize(width: 1_000, height: 2_000))
+        #expect(source.image.width == 250)
+        #expect(source.image.height == 500)
+        #expect(source.initialCrop == PhotoCrop(imageSize: CGSize(width: 1_000, height: 2_000)))
+        let preview = try #require(await photos.croppedPreviewImage(data: data, crop: source.initialCrop, maxPixelLength: 288))
+        #expect(preview.width == 288)
+        #expect(preview.height == 288)
+    }
+
     @Test("画像でないデータは読めない")
     func rejectsNonImage() {
         #expect(PhotoResizer.croppedJPEGData(from: Data("broken".utf8), crop: PhotoCrop(imageSize: CGSize(width: 10, height: 10))) == nil)
