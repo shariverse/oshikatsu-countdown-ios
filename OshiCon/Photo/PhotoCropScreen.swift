@@ -184,6 +184,7 @@ struct PhotoCropScreen: View {
             Text("やめる")
                 .multilineTextAlignment(.leading)
         }
+        .accessibilityIdentifier("photoCrop.cancel")
         .font(theme.typography.text(.body))
         .foregroundStyle(theme.palette.onSurface.color)
         .fixedSize(horizontal: !wraps, vertical: true)
@@ -198,6 +199,7 @@ struct PhotoCropScreen: View {
             Text("完了")
                 .multilineTextAlignment(.trailing)
         }
+        .accessibilityIdentifier("photoCrop.done")
         .font(theme.typography.text(.body, weight: .bold))
         .foregroundStyle(theme.palette.brand.color)
         .fixedSize(horizontal: !wraps, vertical: true)

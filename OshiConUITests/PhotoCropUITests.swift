@@ -26,6 +26,17 @@ final class PhotoCropUITests: XCTestCase {
         return app
     }
 
+    /// 調整画面の「完了」「やめる」（名前の欄のキーボードの確定キーと取り違えないよう識別子で探す）。
+    @MainActor
+    private func cropDone(in app: XCUIApplication) -> XCUIElement {
+        app.buttons["photoCrop.done"]
+    }
+
+    @MainActor
+    private func cropCancel(in app: XCUIApplication) -> XCUIElement {
+        app.buttons["photoCrop.cancel"]
+    }
+
     /// 調整画面の見出し。
     @MainActor
     private func cropTitle(in app: XCUIApplication) -> XCUIElement {
@@ -39,10 +50,10 @@ final class PhotoCropUITests: XCTestCase {
 
         app.buttons["写真を選ぶ"].tap()
         XCTAssertTrue(cropTitle(in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["完了"].exists)
+        XCTAssertTrue(cropDone(in: app).exists)
 
         // 「やめる」で、写真を選ぶ前（写真なし）に戻る
-        app.buttons["やめる"].tap()
+        cropCancel(in: app).tap()
         XCTAssertTrue(app.navigationBars["ステップ 1 / 2"].waitForExistence(timeout: 5))
         XCTAssertFalse(cropTitle(in: app).exists)
         XCTAssertTrue(app.buttons["写真を選ぶ"].exists)
@@ -56,10 +67,11 @@ final class PhotoCropUITests: XCTestCase {
         XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
         tabBar.buttons["推し"].tap()
         app.navigationBars["推し"].buttons["推しを登録"].tap()
-        XCTAssertTrue(app.navigationBars["推しを登録"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.navigationBars["推しを登録"].waitForExistence(timeout: 5))
         let name = app.textFields["推しの名前"]
         name.tap()
-        name.typeText("ミナト")
+        // 入れたらキーボードを閉じる（確定キーの「完了」と調整画面の「完了」を取り違えないため）
+        name.typeText("ミナト\n")
 
         // 写真を選ぶと調整画面が出る。ピンチで拡大してから「完了」
         app.buttons["写真を選ぶ"].tap()
@@ -74,31 +86,32 @@ final class PhotoCropUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
         }
         XCTAssertNotEqual(photo.value as? String, before)
-        app.buttons["完了"].tap()
+        cropDone(in: app).tap()
 
         // 調整した写真がプレビューに入り、「写真を変える」「写真を外す」になる
         XCTAssertTrue(app.buttons["写真を外す"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["写真を変える"].exists)
         app.navigationBars["推しを登録"].buttons["保存"].tap()
 
-        // 保存した推しを開き直すと、保存した写真がある
+        // 推しの一覧の行のアバターに写真が出る。開き直すと、保存した写真がある
         let row = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "ミナト")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 5))
+        XCTAssertTrue(row.images["oshiAvatar.photo"].waitForExistence(timeout: 5))
         row.tap()
-        XCTAssertTrue(app.navigationBars["推しを編集"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.navigationBars["推しを編集"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["写真を外す"].waitForExistence(timeout: 5))
 
         // 写真を選び直して「やめる」と、前の写真のまま
         app.buttons["写真を変える"].tap()
         XCTAssertTrue(cropTitle(in: app).waitForExistence(timeout: 5))
-        app.buttons["やめる"].tap()
+        cropCancel(in: app).tap()
         XCTAssertTrue(app.navigationBars["推しを編集"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["写真を外す"].waitForExistence(timeout: 5))
 
         // 保存してある写真から「位置を調整」で開き直し、何も変えずに「完了」しても写真はそのまま
         app.buttons["位置を調整"].tap()
         XCTAssertTrue(cropTitle(in: app).waitForExistence(timeout: 5))
-        app.buttons["完了"].tap()
+        cropDone(in: app).tap()
         XCTAssertTrue(app.navigationBars["推しを編集"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["写真を外す"].waitForExistence(timeout: 5))
 
@@ -107,7 +120,7 @@ final class PhotoCropUITests: XCTestCase {
         XCTAssertTrue(app.buttons["写真を選ぶ"].waitForExistence(timeout: 2))
         app.buttons["写真を選ぶ"].tap()
         XCTAssertTrue(cropTitle(in: app).waitForExistence(timeout: 5))
-        app.buttons["やめる"].tap()
+        cropCancel(in: app).tap()
         XCTAssertTrue(app.buttons["写真を選ぶ"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["写真を外す"].exists)
     }

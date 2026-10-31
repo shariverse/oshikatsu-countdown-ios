@@ -185,6 +185,30 @@ struct PhotoCropTests {
         #expect(abs(topLeft.y - 1_500) < 1e-6)
     }
 
+    // MARK: - 変わっていないか
+
+    @Test("開いたときから動かしていなければ変わっていない（正方形・横長、元に戻して何周か回したあとも）", arguments: [
+        CGSize(width: 1_440, height: 1_440), CGSize(width: 4_032, height: 3_024)
+    ])
+    func unchangedCrop(size: CGSize) {
+        let initial = PhotoCrop(imageSize: size)
+        #expect(initial.clamped().isUnchanged(from: initial))
+        var turned = initial.clamped()
+        turned.rotation = .degrees(720)
+        #expect(turned.isUnchanged(from: initial))
+    }
+
+    @Test("拡大・移動・回転したら変わっている。補正で元に戻る移動は変わっていない")
+    func changedCrop() {
+        let initial = PhotoCrop(imageSize: CGSize(width: 1_440, height: 1_440))
+        #expect(!initial.zoomed(by: 1.2).isUnchanged(from: initial))
+        #expect(!initial.rotated(by: .degrees(5)).isUnchanged(from: initial))
+        // 正方形の写真は拡大しないと動かせないので、少しずらしても補正で元に戻る
+        #expect(initial.dragged(by: CGSize(width: 10, height: 0), frameSide: 300).isUnchanged(from: initial))
+        let landscape = PhotoCrop(imageSize: CGSize(width: 4_032, height: 3_024))
+        #expect(!landscape.dragged(by: CGSize(width: 10, height: 0), frameSide: 300).isUnchanged(from: landscape))
+    }
+
     // MARK: - 画面の枠への配置
 
     @Test("配置: 拡大率は 拡大率 × 枠の一辺 ÷ 画像の短い辺、中央なら移動なし")
