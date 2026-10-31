@@ -44,6 +44,40 @@ struct PhotoCropScreenTests {
         #expect(PhotoCropLayout.limitedWhileGesturing(crop).zoom == 2)
     }
 
+    // MARK: - ジェスチャーの量
+
+    @Test("始めたときの範囲に、始めたときからの量を当てる（何度呼んでも同じ量なら同じ結果）")
+    func gestureIsAppliedToBase() {
+        let base = PhotoCrop(imageSize: size, zoom: 1.5, rotation: .zero, center: CGPoint(x: 1_500, y: 2_000))
+        let move = CGSize(width: 30, height: 0)
+        let first = PhotoCropGesture.apply(to: base, translation: move, magnification: 1.2, rotation: .degrees(10), frameSide: 300)
+        let again = PhotoCropGesture.apply(to: base, translation: move, magnification: 1.2, rotation: .degrees(10), frameSide: 300)
+        #expect(first == again)
+        #expect(abs(first.zoom - 1.8) < 1e-9)
+        #expect(abs(first.rotation.degrees - 10) < 1e-9)
+        // 拡大・回転したあとの見た目で、写真が指と同じだけ動く
+        let before = base.zoomed(by: 1.2).rotated(by: .degrees(10)).layout(frameSide: 300).offset
+        let after = first.layout(frameSide: 300).offset
+        #expect(abs(after.width - before.width - 30) < 1e-6)
+        #expect(abs(after.height - before.height) < 1e-6)
+    }
+
+    @Test("量が無ければ始めたときの範囲のまま（中断した後に前回の量が残らない）")
+    func noGestureKeepsBase() {
+        let base = PhotoCrop(imageSize: size, zoom: 2, rotation: .degrees(30), center: CGPoint(x: 1_200, y: 1_800))
+        #expect(PhotoCropGesture.apply(to: base, translation: .zero, magnification: 1, rotation: .zero, frameSide: 300) == base)
+    }
+
+    @Test("ジェスチャーの途中の拡大率は制限に収め、おかしな倍率や大きさ 0 の枠では動かさない")
+    func gestureGuards() {
+        let base = PhotoCrop(imageSize: size)
+        #expect(PhotoCropGesture.apply(to: base, translation: .zero, magnification: 0.01, rotation: .zero, frameSide: 300).zoom == 0.5)
+        #expect(PhotoCropGesture.apply(to: base, translation: .zero, magnification: .nan, rotation: .zero, frameSide: 300) == base)
+        let move = CGSize(width: 50, height: 50)
+        let moved = PhotoCropGesture.apply(to: base, translation: move, magnification: 1, rotation: .zero, frameSide: 0)
+        #expect(moved == base)
+    }
+
     // MARK: - 読み上げの操作
 
     @Test("拡大・縮小は 1.25 倍ずつで、上限・下限で止まる")
@@ -79,7 +113,7 @@ struct PhotoCropScreenTests {
         crop.zoom = 1.5
         crop.rotation = .degrees(-372)
         #expect(PhotoCropAccessibility.value(of: crop, locale: DomainFixtures.japanese) == "拡大 1.5 倍、回転 -12 度")
-        #expect(PhotoCropAccessibility.value(of: crop, locale: DomainFixtures.english) == "Zoom 1.5×, rotation -12°")
+        #expect(PhotoCropAccessibility.value(of: crop, locale: DomainFixtures.english) == "Zoom 1.5 times, rotation -12 degrees")
     }
 
     // MARK: - 配色
