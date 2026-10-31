@@ -24,6 +24,14 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(sampleDataArgument)
     }
 
+    /// 推しの写真を選ぶボタンで、写真ライブラリ（`PhotosPicker`）の代わりにテスト用に生成した画像を選ぶ（UI テスト）。
+    /// `PhotosPicker` は別プロセスの画面で UI テストから操作できないため。メモリ上のストアのときだけ効く。
+    static let testPhotoArgument = "-useTestPhoto"
+
+    static var usesTestPhoto: Bool {
+        usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(testPhotoArgument)
+    }
+
     /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
     static let defaultEnvironmentPrefix = "OSHICON_DEFAULT_"
 

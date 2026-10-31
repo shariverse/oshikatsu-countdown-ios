@@ -23,6 +23,8 @@ struct OshiAvatar: View {
                 photo
                     .resizable()
                     .scaledToFill()
+                    // UI テストで写真を描いたことを確かめる（読み上げは変えない。丸ごと accessibilityHidden）
+                    .accessibilityIdentifier("oshiAvatar.photo")
             } else {
                 Text(InputText.firstCharacter(of: name))
                     // 丸の大きさに合わせる。文字の大きさの設定で丸からはみ出さないよう、ダイナミックタイプで変えない

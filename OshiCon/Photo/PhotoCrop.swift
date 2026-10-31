@@ -153,6 +153,21 @@ nonisolated struct PhotoCrop: Equatable, Sendable {
         max(zoom, .leastNonzeroMagnitude) * frameSide / shortSide
     }
 
+    /// 調整画面の「完了」で返った範囲が、開いたときの範囲（`initial` を補正したもの）から変わっていないか。
+    /// 回転は同じ見た目なら同じとみなす（「元に戻す」で何周か回したあとも）。
+    func isUnchanged(from initial: Self) -> Bool {
+        var current = clamped()
+        current.rotation = Self.normalized(current.rotation)
+        var original = initial.clamped()
+        original.rotation = Self.normalized(original.rotation)
+        let tolerance: CGFloat = 1e-6
+        return imageSize == original.imageSize
+            && abs(current.zoom - original.zoom) < tolerance
+            && abs(current.rotation.radians - original.rotation.radians) < tolerance
+            && abs(current.center.x - original.center.x) < tolerance
+            && abs(current.center.y - original.center.y) < tolerance
+    }
+
     // MARK: - 計算の部品
 
     /// |cos θ| + |sin θ|。回転した正方形の外接矩形の一辺の、元の一辺に対する倍率（1 以上 √2 以下）。

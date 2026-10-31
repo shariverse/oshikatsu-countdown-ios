@@ -12,6 +12,7 @@ import SwiftUI
 /// 選んだ写真を読んでいる間は `isLoading` を true にする（読み終わる前に保存させないため）。
 /// 写真を読めたら調整画面（`PhotoCropScreen`）を全画面で出し、「完了」で切り抜いた見た目のプレビューと範囲つきの差し替えにする。
 /// 「やめる」では何も変えない（前の写真・プレビュー・`photoChange` のまま）。
+/// UI テストでは、起動引数 `-useTestPhoto`（`LaunchOptions.usesTestPhoto`）で `PhotosPicker` の代わりに生成した画像を選ぶボタンにする。
 /// 写真があるときは「位置を調整」で今の写真から調整画面を開き直せる。保存してある写真はその JPEG を元に切り抜き直し（狭める調整だけになる）、
 /// 選んだばかりの写真は、元の選んだ写真と前の範囲から開き直す。
 struct OshiPhotoPicker<Placeholder: View>: View {
@@ -61,7 +62,17 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                     }
                 }
             HStack(spacing: 16) {
-                PhotosPicker(hasPhoto ? "写真を変える" : "写真を選ぶ", selection: $selectedItem, matching: .images)
+                if LaunchOptions.usesTestPhoto {
+                    // UI テストでは、写真ライブラリの代わりに生成した画像を選ぶ
+                    Button(hasPhoto ? "写真を変える" : "写真を選ぶ") {
+                        isLoading = true
+                        Task {
+                            await load(data: PhotoCropPreviewImage.pngData())
+                        }
+                    }
+                } else {
+                    PhotosPicker(hasPhoto ? "写真を変える" : "写真を選ぶ", selection: $selectedItem, matching: .images)
+                }
                 if hasPhoto {
                     Button("写真を外す", role: .destructive) {
                         selectedItem = nil
@@ -74,6 +85,8 @@ struct OshiPhotoPicker<Placeholder: View>: View {
             .disabled(isLoading)
             if hasPhoto {
                 Button("位置を調整") {
+                    // Task が動き出す前に立て、続けて押しても 1 回だけ開く
+                    isLoading = true
                     Task {
                         await readjust()
                     }
@@ -87,6 +100,8 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                     .foregroundStyle(theme.palette.destructive.color)
             }
         }
+        // Form・List の行の中で、行のどこを押しても全部のボタンが動かないよう、ボタンを押せる範囲をそれぞれの文字に限る
+        .buttonStyle(.borderless)
         .task(id: currentPhotoFileName) {
             await loadCurrentPhoto()
         }
@@ -107,6 +122,10 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                 },
                 onDone: { crop in
                     cropping = nil
+                    // 保存してある写真から開いて何も変えずに「完了」したら、書き直さない（JPEG の画質を落とさない）
+                    if pending.isSavedPhoto, crop.isUnchanged(from: pending.source.initialCrop) {
+                        return
+                    }
                     // Task が動き出す前に立て、閉じるアニメーションの間に保存させない
                     isLoading = true
                     Task {
@@ -143,11 +162,20 @@ struct OshiPhotoPicker<Placeholder: View>: View {
     /// 選んだ写真を読み、調整画面を出す。プレビューと `photoChange` は「完了」まで変えない。
     private func load(_ item: PhotosPickerItem) async {
         isLoading = true
+        defer {
+            isLoading = false
+        }
+        await load(data: try? await item.loadTransferable(type: Data.self))
+    }
+
+    /// 写真のデータ（選んだ写真、または UI テストで生成した画像）を読み、調整画面を出す。
+    private func load(data: Data?) async {
+        isLoading = true
         loadFailed = false
         defer {
             isLoading = false
         }
-        guard let data = try? await item.loadTransferable(type: Data.self) else {
+        guard let data else {
             loadFailed = true
             return
         }
@@ -169,16 +197,17 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                 loadFailed = true
                 return
             }
-            await openCropScreen(data: data, initialCrop: nil)
+            await openCropScreen(data: data, initialCrop: nil, isSavedPhoto: true)
         case .remove:
             return
         }
     }
 
     /// 写真を調整画面で描ける大きさに読み、調整画面を出す。`initialCrop` が無ければ写真全体から始める。
-    private func openCropScreen(data: Data, initialCrop: PhotoCrop?) async {
+    private func openCropScreen(data: Data, initialCrop: PhotoCrop?, isSavedPhoto: Bool = false) async {
         let source = await photos.cropSource(data: data, shortSidePixels: cropDisplayShortSide, maxLongSidePixels: cropDisplayMaxLongSide)
-        // 読んでいる間に画面を離れた（task が取り消された）ら出さない
+        // 読んでいる間に画面を離れて `.task(id: selectedItem)` が取り消されたら出さない（「位置を調整」の Task は取り消されないので効かない。
+        // 画面が消えていれば調整画面は出ない）
         guard !Task.isCancelled else {
             return
         }
@@ -186,7 +215,7 @@ struct OshiPhotoPicker<Placeholder: View>: View {
             loadFailed = true
             return
         }
-        cropping = PendingCrop(data: data, source: source, initialCrop: initialCrop)
+        cropping = PendingCrop(data: data, source: source, initialCrop: initialCrop, isSavedPhoto: isSavedPhoto)
     }
 
     /// 調整画面の「完了」。切り抜いた見た目のプレビューを出し、範囲つきの差し替えにする。
@@ -211,6 +240,8 @@ private struct PendingCrop: Identifiable {
     let source: PhotoCropSource
     /// 開いたときの範囲。nil なら写真全体（`source.initialCrop`）。
     let initialCrop: PhotoCrop?
+    /// 保存してある写真から開いたか（何も変えずに「完了」したら書き直さない）。
+    let isSavedPhoto: Bool
 }
 
 #Preview {

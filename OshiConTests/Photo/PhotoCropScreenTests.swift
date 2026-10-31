@@ -159,4 +159,15 @@ struct PhotoCropScreenTests {
         #expect(image.width == 1_600)
         #expect(image.height == 1_200)
     }
+
+    @Test("UI テストで選ぶ画像（PNG）は、写真として 1600×1200 で読める")
+    func previewImagePNGData() throws {
+        let data = try #require(PhotoCropPreviewImage.pngData())
+        #expect(PhotoResizer.orientedPixelSize(of: data) == CGSize(width: 1_600, height: 1_200))
+    }
+
+    @Test("テスト用の画像を選ぶ口は、UI テストの起動引数が無ければ効かない")
+    func testPhotoIsOffByDefault() {
+        #expect(!LaunchOptions.usesTestPhoto)
+    }
 }
