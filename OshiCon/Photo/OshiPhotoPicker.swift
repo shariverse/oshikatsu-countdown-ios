@@ -10,6 +10,8 @@ import SwiftUI
 /// `PhotosPicker` は写真ライブラリへのアクセスの許可が要らない（選んだ写真だけを受け取る）。
 /// 写真が無いときの見た目（推し色の丸と頭文字）は `placeholder` で渡す（推しの登録・編集の画面でアバターを渡す）。
 /// 選んだ写真を読んでいる間は `isLoading` を true にする（読み終わる前に保存させないため）。
+/// 写真を読めたら調整画面（`PhotoCropScreen`）を全画面で出し、「完了」で切り抜いた見た目のプレビューと範囲つきの差し替えにする。
+/// 「やめる」では何も変えない（前の写真・プレビュー・`photoChange` のまま）。
 struct OshiPhotoPicker<Placeholder: View>: View {
     /// 保存してある写真のファイル名。
     let currentPhotoFileName: String?
@@ -21,9 +23,14 @@ struct OshiPhotoPicker<Placeholder: View>: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var preview: Image?
     @State private var loadFailed = false
+    /// 調整画面で調整中の写真。nil なら調整画面を出していない。
+    @State private var cropping: PendingCrop?
+    @Environment(\.displayScale) private var displayScale
     @Environment(\.appTheme) private var theme
 
     private let avatarSize: CGFloat = 96
+    /// 調整画面で描く写真の長辺（pt）。枠の上限（560pt）の写真を、横長・縦長でも粗くならずに描ける大きさ。
+    private let cropDisplayLength: CGFloat = 800
 
     private var hasPhoto: Bool {
         switch photoChange {
@@ -76,6 +83,21 @@ struct OshiPhotoPicker<Placeholder: View>: View {
             // 選んだ写真を戻し、読み込めなかった同じ写真をもう一度選んでも読み直せるようにする
             self.selectedItem = nil
         }
+        .fullScreenCover(item: $cropping) { pending in
+            PhotoCropScreen(
+                image: pending.source.image,
+                initialCrop: pending.source.initialCrop,
+                onCancel: {
+                    cropping = nil
+                },
+                onDone: { crop in
+                    cropping = nil
+                    Task {
+                        await apply(pending.data, crop: crop)
+                    }
+                }
+            )
+        }
     }
 
     @ViewBuilder private var photoView: some View {
@@ -101,20 +123,43 @@ struct OshiPhotoPicker<Placeholder: View>: View {
         preview = Image(decorative: image, scale: 1)
     }
 
+    /// 選んだ写真を読み、調整画面を出す。プレビューと `photoChange` は「完了」まで変えない。
     private func load(_ item: PhotosPickerItem) async {
         isLoading = true
         loadFailed = false
         defer {
             isLoading = false
         }
+        let pixels = Int(cropDisplayLength * displayScale)
         guard let data = try? await item.loadTransferable(type: Data.self),
-              let image = await photos.previewImage(data: data, maxPixelLength: Int(avatarSize * 3)) else {
+              let source = await photos.cropSource(data: data, maxPixelLength: pixels) else {
+            loadFailed = true
+            return
+        }
+        cropping = PendingCrop(data: data, source: source)
+    }
+
+    /// 調整画面の「完了」。切り抜いた見た目のプレビューを出し、範囲つきの差し替えにする。
+    private func apply(_ data: Data, crop: PhotoCrop) async {
+        isLoading = true
+        loadFailed = false
+        defer {
+            isLoading = false
+        }
+        guard let image = await photos.croppedPreviewImage(data: data, crop: crop, maxPixelLength: Int(avatarSize * 3)) else {
             loadFailed = true
             return
         }
         preview = Image(decorative: image, scale: 1)
-        photoChange = .replace(data)
+        photoChange = .replace(data, crop: crop)
     }
+}
+
+/// 調整画面で調整中の写真。写真ごとに id を変え、調整画面を作り直す（前の写真の範囲を引き継がない）。
+private struct PendingCrop: Identifiable {
+    let id = UUID()
+    let data: Data
+    let source: PhotoCropSource
 }
 
 #Preview {
