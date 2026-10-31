@@ -27,6 +27,8 @@ struct PhotoCropScreen: View {
     @State private var crop: PhotoCrop
     /// 進行中のジェスチャーを始めたときの範囲。ジェスチャーをしていなければ nil。
     @State private var gestureBase: PhotoCrop?
+    /// 進行中のジェスチャーで最後に受け取った量。片方の指を先に離して拡大・回転の値が来なくなっても、最後の量を保つ。
+    @State private var gestureAmount = PhotoCropGesture.Amount()
     /// ジェスチャーの最中か。中断されたときも false に戻る（`onEnded` は中断では呼ばれない）。
     @GestureState private var isGesturing = false
     @Environment(\.appTheme) private var theme
@@ -71,7 +73,7 @@ struct PhotoCropScreen: View {
                 adjust(PhotoCropAccessibility.rotated(crop, clockwise: true), announces: true)
             }
             .accessibilityAction(named: Text("元に戻す")) {
-                adjust(initialCrop.clamped(), announces: true)
+                adjust(PhotoCropGesture.reset(crop, to: initialCrop), announces: true)
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -85,6 +87,7 @@ struct PhotoCropScreen: View {
             // 指を離したときと、ジェスチャーが中断されたときの両方で補正する
             if !gesturing {
                 gestureBase = nil
+                gestureAmount = PhotoCropGesture.Amount()
                 settle()
             }
         }
@@ -135,7 +138,9 @@ struct PhotoCropScreen: View {
             HStack(spacing: 12) {
                 cancelButton(wraps: false)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                // 見出しは折り返さない（収まらなければ次の案に回す）
                 title
+                    .fixedSize()
                 doneButton(wraps: false)
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
@@ -173,20 +178,26 @@ struct PhotoCropScreen: View {
     }
 
     private func cancelButton(wraps: Bool) -> some View {
-        Button("やめる", action: onCancel)
-            .font(theme.typography.text(.body))
-            .foregroundStyle(theme.palette.onSurface.color)
-            .multilineTextAlignment(.leading)
-            .fixedSize(horizontal: !wraps, vertical: true)
+        Button(action: onCancel) {
+            Text("やめる")
+                .multilineTextAlignment(.leading)
+        }
+        .font(theme.typography.text(.body))
+        .foregroundStyle(theme.palette.onSurface.color)
+        .fixedSize(horizontal: !wraps, vertical: true)
     }
 
     private func doneButton(wraps: Bool) -> some View {
-        Button("完了") {
-            onDone(crop.clamped())
+        Button {
+            var result = crop.clamped()
+            result.rotation = PhotoCrop.normalized(result.rotation)
+            onDone(result)
+        } label: {
+            Text("完了")
+                .multilineTextAlignment(.trailing)
         }
         .font(theme.typography.text(.body, weight: .bold))
         .foregroundStyle(theme.palette.brand.color)
-        .multilineTextAlignment(.trailing)
         .fixedSize(horizontal: !wraps, vertical: true)
     }
 
@@ -203,23 +214,25 @@ struct PhotoCropScreen: View {
             .onChanged { value in
                 let base = gestureBase ?? crop
                 gestureBase = base
+                gestureAmount.update(
+                    translation: value.first?.first?.translation,
+                    magnification: value.first?.second?.magnification,
+                    rotation: value.second?.rotation
+                )
                 crop = PhotoCropGesture.apply(
                     to: base,
-                    translation: value.first?.first?.translation ?? .zero,
-                    magnification: value.first?.second?.magnification ?? 1,
-                    rotation: value.second?.rotation ?? .zero,
+                    translation: gestureAmount.translation,
+                    magnification: gestureAmount.magnification,
+                    rotation: gestureAmount.rotation,
                     frameSide: frameSide
                 )
             }
     }
 
     /// 枠の隅が空かない範囲に寄せる（「視差効果を減らす」ではアニメーションなし）。
+    /// 回転角はそろえない（そろえると 180° をまたいだときに補正のアニメーションで 1 周回るため）。そろえるのは「完了」で返すときと「元に戻す」。
     private func settle() {
-        // ジェスチャーで貯まった回転角（400° など）を、見た目を変えずにそろえてから動かす（何周も回って戻らないように）
-        var normalized = crop
-        normalized.rotation = PhotoCrop.normalized(crop.rotation)
-        crop = normalized
-        adjust(normalized.clamped())
+        adjust(crop.clamped())
     }
 
     /// 範囲を変える。読み上げの操作では、変えた後の状態を読み上げる（カスタムアクションでは値が読み直されないことがあるため）。
@@ -237,6 +250,33 @@ struct PhotoCropScreen: View {
 
 /// ジェスチャーの量を範囲に当てる。
 nonisolated enum PhotoCropGesture {
+    /// 進行中のジェスチャーの、始めたときからの量。来なくなった値（先に終わったジェスチャー）は最後の値を保つ。
+    struct Amount: Equatable {
+        var translation: CGSize = .zero
+        var magnification: CGFloat = 1
+        var rotation: Angle = .zero
+
+        mutating func update(translation: CGSize?, magnification: CGFloat?, rotation: Angle?) {
+            if let translation {
+                self.translation = translation
+            }
+            if let magnification {
+                self.magnification = magnification
+            }
+            if let rotation {
+                self.rotation = rotation
+            }
+        }
+    }
+
+    /// 「元に戻す」の行き先。回転角は今の角度に最も近い同じ見た目の角度にし、戻すアニメーションで何周も回らないようにする。
+    static func reset(_ current: PhotoCrop, to initial: PhotoCrop) -> PhotoCrop {
+        var result = initial.clamped()
+        let turns = ((current.rotation.radians - result.rotation.radians) / (2 * .pi)).rounded()
+        result.rotation = .radians(result.rotation.radians + turns * 2 * .pi)
+        return result
+    }
+
     /// 始めたときの範囲 `base` に、始めたときからの拡大・回転（枠の中心を軸）と移動を当てた範囲。補正はしない。
     /// 拡大率はジェスチャーの途中の制限（`PhotoCropLayout.limitedWhileGesturing`）に収める。枠の大きさが 0 なら移動しない。
     static func apply(

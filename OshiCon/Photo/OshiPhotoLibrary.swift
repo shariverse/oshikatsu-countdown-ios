@@ -64,11 +64,38 @@ nonisolated struct OshiPhotoLibrary: Sendable {
         PhotoResizer.image(data: data, maxPixelLength: maxPixelLength)
     }
 
+    /// 選んだばかりの写真のデータを、調整画面で描くために縮めて読む。範囲の計算に使う元の大きさ（向きを反映した後）も返す。読めなければ nil。
+    @concurrent
+    func cropSource(data: Data, maxPixelLength: Int) async -> PhotoCropSource? {
+        guard let size = PhotoResizer.orientedPixelSize(of: data),
+              let image = PhotoResizer.image(data: data, maxPixelLength: maxPixelLength) else {
+            return nil
+        }
+        return PhotoCropSource(image: image, pixelSize: size)
+    }
+
+    /// 選んだばかりの写真を、調整した範囲で切り抜いたプレビュー（一辺 `maxPixelLength` 以下）。読めなければ nil。
+    @concurrent
+    func croppedPreviewImage(data: Data, crop: PhotoCrop, maxPixelLength: Int) async -> CGImage? {
+        PhotoResizer.croppedImage(from: data, crop: crop, maxPixelLength: maxPixelLength)
+    }
+
     /// 取り込みで付けるファイル名（`<UUID>.jpg`）か。ディレクトリの外を指す名前を弾く。
     static func isValidFileName(_ fileName: String) -> Bool {
         guard fileName.hasSuffix(".jpg") else {
             return false
         }
         return UUID(uuidString: String(fileName.dropLast(4))) != nil
+    }
+}
+
+/// 調整画面に渡す写真。表示用に縮めた画像と、元の写真の大きさ（向きを反映した後の画素）。
+nonisolated struct PhotoCropSource: Sendable {
+    let image: CGImage
+    let pixelSize: CGSize
+
+    /// 写真全体が枠を覆う最小の大きさで、中央・回転なしの範囲（元の写真の画素の座標）。
+    var initialCrop: PhotoCrop {
+        PhotoCrop(imageSize: pixelSize)
     }
 }

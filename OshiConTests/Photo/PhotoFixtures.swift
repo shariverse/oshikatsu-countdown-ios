@@ -66,7 +66,8 @@ nonisolated enum PhotoFixtures {
         height: Int,
         type: UTType = .png,
         orientation: Int? = nil,
-        gps: Bool = false
+        gps: Bool = false,
+        colorSpace: CGColorSpace? = nil
     ) -> Data {
         guard let context = CGContext(
             data: nil,
@@ -74,7 +75,7 @@ nonisolated enum PhotoFixtures {
             height: height,
             bitsPerComponent: 8,
             bytesPerRow: 0,
-            space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+            space: colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
             preconditionFailure("画像を作れない")
@@ -153,11 +154,6 @@ nonisolated enum PhotoFixtures {
             let index = (y * width + x) * 4
             let rgb = quadrant.rgb
             return (0..<3).allSatisfy { abs(Int(bytes[index + $0]) - rgb[$0]) <= tolerance }
-        }
-
-        /// (x, y) の画素が、どの象限の色にも近くない（空いた隅の黒など）か。
-        func matchesNoQuadrant(x: Int, y: Int) -> Bool {
-            !Quadrant.allCases.contains { matches(x: x, y: y, $0) }
         }
     }
 
