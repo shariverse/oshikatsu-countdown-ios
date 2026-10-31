@@ -12,6 +12,7 @@ import SwiftUI
 /// 選んだ写真を読んでいる間は `isLoading` を true にする（読み終わる前に保存させないため）。
 /// 写真を読めたら調整画面（`PhotoCropScreen`）を全画面で出し、「完了」で切り抜いた見た目のプレビューと範囲つきの差し替えにする。
 /// 「やめる」では何も変えない（前の写真・プレビュー・`photoChange` のまま）。
+/// UI テストでは、起動引数 `-useTestPhoto`（`LaunchOptions.usesTestPhoto`）で `PhotosPicker` の代わりに生成した画像を選ぶボタンにする。
 /// 写真があるときは「位置を調整」で今の写真から調整画面を開き直せる。保存してある写真はその JPEG を元に切り抜き直し（狭める調整だけになる）、
 /// 選んだばかりの写真は、元の選んだ写真と前の範囲から開き直す。
 struct OshiPhotoPicker<Placeholder: View>: View {
@@ -122,7 +123,7 @@ struct OshiPhotoPicker<Placeholder: View>: View {
                 onDone: { crop in
                     cropping = nil
                     // 保存してある写真から開いて何も変えずに「完了」したら、書き直さない（JPEG の画質を落とさない）
-                    if pending.isSavedPhoto, crop == pending.source.initialCrop.clamped() {
+                    if pending.isSavedPhoto, crop.isUnchanged(from: pending.source.initialCrop) {
                         return
                     }
                     // Task が動き出す前に立て、閉じるアニメーションの間に保存させない
@@ -161,18 +162,13 @@ struct OshiPhotoPicker<Placeholder: View>: View {
     /// 選んだ写真を読み、調整画面を出す。プレビューと `photoChange` は「完了」まで変えない。
     private func load(_ item: PhotosPickerItem) async {
         isLoading = true
-        loadFailed = false
         defer {
             isLoading = false
         }
-        guard let data = try? await item.loadTransferable(type: Data.self) else {
-            loadFailed = true
-            return
-        }
-        await openCropScreen(data: data, initialCrop: nil)
+        await load(data: try? await item.loadTransferable(type: Data.self))
     }
 
-    /// 写真のデータ（UI テストで生成した画像）を読み、調整画面を出す。
+    /// 写真のデータ（選んだ写真、または UI テストで生成した画像）を読み、調整画面を出す。
     private func load(data: Data?) async {
         isLoading = true
         loadFailed = false
