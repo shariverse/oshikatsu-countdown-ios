@@ -74,7 +74,7 @@ final class OshiConUITests: XCTestCase {
         let app = launch(hasCompletedOnboarding: true)
         let tabBar = app.tabBars.firstMatch
         XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.navigationBars["推し活カウントダウン"].exists)
+        assertShowsHome(app)
 
         tabBar.buttons["推し"].tap()
         XCTAssertTrue(app.navigationBars["推し"].waitForExistence(timeout: 2))
@@ -83,7 +83,16 @@ final class OshiConUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
 
         tabBar.buttons["ホーム"].tap()
-        XCTAssertTrue(app.navigationBars["推し活カウントダウン"].waitForExistence(timeout: 2))
+        assertShowsHome(app)
+    }
+
+    /// ホームが出ていることを確かめる。バーにタイトルの文字は出さず（右上の ＋ だけ）、画面の名前はバーに残す。
+    @MainActor
+    private func assertShowsHome(_ app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(app.buttons["home.addEvent"].waitForExistence(timeout: 2), file: file, line: line)
+        let bar = app.navigationBars["推し活カウントダウン"]
+        XCTAssertTrue(bar.exists, file: file, line: line)
+        XCTAssertFalse(bar.staticTexts["推し活カウントダウン"].exists, file: file, line: line)
     }
 
     @MainActor
@@ -154,7 +163,7 @@ final class OshiConUITests: XCTestCase {
         let app = launch(hasCompletedOnboarding: true)
         XCTAssertTrue(app.staticTexts["まだ予定がありません"].waitForExistence(timeout: 5))
 
-        app.navigationBars["推し活カウントダウン"].buttons["予定を追加"].tap()
+        app.buttons["home.addEvent"].tap()
         XCTAssertTrue(app.navigationBars["予定を追加"].waitForExistence(timeout: 2))
         let save = app.navigationBars["予定を追加"].buttons["保存"]
         XCTAssertFalse(save.isEnabled)
@@ -176,7 +185,7 @@ final class OshiConUITests: XCTestCase {
     func testEventDetailPinsAndDeletes() throws {
         let app = launch(hasCompletedOnboarding: true)
         XCTAssertTrue(app.staticTexts["まだ予定がありません"].waitForExistence(timeout: 5))
-        app.navigationBars["推し活カウントダウン"].buttons["予定を追加"].tap()
+        app.buttons["home.addEvent"].tap()
         let title = app.textFields["タイトル"]
         XCTAssertTrue(title.waitForExistence(timeout: 2))
         title.tap()
@@ -203,5 +212,7 @@ final class OshiConUITests: XCTestCase {
         XCTAssertTrue(alert.staticTexts["「5th LIVE」を削除します。元に戻せません。"].exists)
         alert.buttons["削除"].tap()
         XCTAssertTrue(app.staticTexts["まだ予定がありません"].waitForExistence(timeout: 3))
+        // 詳細から戻っても、バーにタイトルの文字は出ない
+        assertShowsHome(app)
     }
 }
