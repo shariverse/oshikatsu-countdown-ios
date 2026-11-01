@@ -40,6 +40,7 @@ struct HomeScreen: View {
                 ToolbarItem(placement: .principal) {
                     Color.clear
                         .frame(width: 1, height: 1)
+                        .accessibilityHidden(true)
                 }
             }
             ToolbarItem(placement: .primaryAction) {
