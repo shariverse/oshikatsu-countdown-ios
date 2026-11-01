@@ -14,6 +14,12 @@
 - **推し色が主役**（Q4）: 推し色の役割（先頭のカードの塗り・写真が無いときの模様の色・残り日数の文字・印）と値（`OshiColor.rgb`）はテーマで変えません。テーマが変えるのは地・形・装飾・書体と、推し色の文字を地に合わせて寄せる割合だけです
 - **ライトとダーク**: 両方を持ちます（`AdaptiveColor`）
 - **書体**（Q5）: 日本語の本文だけテーマの書体にし、ほかの 11 言語はシステムの書体のまま。数字は Outfit（可変フォント）を太さを変えて使います
+- **ナビゲーションバーのタイトル**（Discussion #148 の Q2〜Q4）: 日本語のときだけテーマの書体の太字（Kaisei Decol Bold）にし、ほかの 11 言語はシステムの書体のまま。
+  バーの外観（`UINavigationBar.appearance()` の `titleTextAttributes`・`largeTitleTextAttributes` の `.font`）で書体だけを替え、アプリの起動時に 1 か所で設定します（`OshiCon/App/NavigationBarAppearance.swift`。書体を決めるのは `Shared/Design/BarTitleFace.swift`）。
+  大きいタイトル（推し・設定）・スクロールで小さくなる動き・戻るボタン・Liquid Glass のバー・地は標準のまま。大きさはダイナミックタイプの文字の大きさに合わせます（起動時の大きさ）。タイトルにハートなどの装飾は付けません。バーのボタン・戻るボタン・タブバーの文字はシステムの書体のままです
+- **ホームの見出し**（Discussion #148 の Q1・Q5）: iOS ではホームのバーにタイトル（「推し活カウントダウン」）の文字を出さず、右上の ＋ だけにします（大きいタイトルの帯も無くし、先頭のカードを上に詰める）。
+  タブバーの「ホーム」で場所は分かるため。VoiceOver の画面の名前・UI テスト・戻り先の名前のために `.navigationTitle` は残し、見た目だけ消しています（iOS 18 以降は `toolbar(removing: .title)`、iOS 17 は `.principal` の見えない要素）。
+  iPad のサイドバーの見出し「推し活カウントダウン」はアプリ名として残します。Android 版の SPEC（「2.3 ホーム」）を合わせるかは Android 側で判断します（[android#3](https://github.com/shariverse/oshikatsu-countdown-android/issues/3)）
 - **装飾**: SwiftUI の図形・`Canvas`・SF Symbols で描き、画像の素材は使いません。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えません。カードの中の文字の上には重ねません
 - **ウィジェット**: 配色と書体はテーマが効きます。装飾（縁取りなど）はアプリの画面だけで、ウィジェットには入れていません
 - **コントラスト**: `PaletteContrastTests` が出荷するテーマのライト / ダークで回ります（推し色 12 色の文字が画面の地・カードの地・入力欄の地で 4.5:1 以上、本文と補助テキストが模様を重ねた地でも 4.5:1 以上、brand の文字・選択中の印の地の本文が 4.5:1 以上 など）
@@ -69,6 +75,7 @@
    容量はアプリと Widget Extension でそれぞれ約 8.8 MB 増える
 3. **デザインキャンバス**（Q8）: 元のキャンバス「推し活カウントダウン 画面デザイン」は変えずに、地雷系・ゴシックのキャンバスを別に足す（人間の作業。未）
 4. **Android 版の SPEC**（Q2）: `shariverse/oshikatsu-countdown-android` の `docs/SPEC.md` に、iOS のテーマ（地雷系・ゴシック）を書く PR を出した（[android#2](https://github.com/shariverse/oshikatsu-countdown-android/pull/2)。Android 側の確認待ち）
-5. **App Store 用スクリーンショット**: 見た目が変わったので撮り直す（Issue #116）
+5. **App Store 用スクリーンショット**: 見た目が変わったので撮り直す（Issue #116）。Discussion #148 でホームのタイトルが無くなり、バーのタイトルの書体も変わった
 6. **不採用の案**: 標準のテーマと残りの 4 案を [shilokuma-inc/design-knowledge](https://github.com/shilokuma-inc/design-knowledge/pull/4) に残し、このリポジトリから片付けた（Issue #117）。
    値・Preview・装飾・案を比べる見本・DEBUG の `-previewTheme`・撮影の仕組み・Preview 用の書体と、出荷するテーマで使っていない Zen Kaku Gothic New を消した
+7. **バーのタイトルの実機での確認**（Discussion #148）: iOS 17〜18 での効き方・ホームのタイトルの隠れ方・実機の VoiceOver・動いている途中に文字の大きさを変えたときの大きさは、Simulator で確かめられず Issue #152 に残している
