@@ -16,7 +16,7 @@
 - **書体**（Q5）: 日本語の本文だけテーマの書体にし、ほかの 11 言語はシステムの書体のまま。数字は Outfit（可変フォント）を太さを変えて使います
 - **ナビゲーションバーのタイトル**（Discussion #148 の Q2〜Q4）: 日本語のときだけテーマの書体の太字（Kaisei Decol Bold）にし、ほかの 11 言語はシステムの書体のまま。
   バーの外観（`UINavigationBar.appearance()` の `titleTextAttributes`・`largeTitleTextAttributes` の `.font`）で書体だけを替え、アプリの起動時に 1 か所で設定します（`OshiCon/App/NavigationBarAppearance.swift`。書体を決めるのは `Shared/Design/BarTitleFace.swift`）。
-  大きいタイトル（推し・設定）・スクロールで小さくなる動き・戻るボタン・Liquid Glass のバー・地は標準のまま。大きさはダイナミックタイプの文字の大きさに合わせます（起動時の大きさ）。タイトルにハートなどの装飾は付けません。バーのボタン・戻るボタン・タブバーの文字はシステムの書体のままです
+  大きいタイトル（推し・設定）・スクロールで小さくなる動き・戻るボタン・Liquid Glass のバー・地は標準のまま。大きさは iOS の標準のタイトルにそろえ、大きいタイトルはダイナミックタイプの文字の大きさに合わせて大きくし（起動時の大きさ）、inline（シート・ライセンスなど）は文字の大きさに関わらず 17pt のままにします（標準の inline タイトルも大きくならず、高さの決まったバーの中で大きくすると切れるため。Issue #158）。タイトルにハートなどの装飾は付けません。バーのボタン・戻るボタン・タブバーの文字はシステムの書体のままです
 - **ホームの見出し**（Discussion #148 の Q1・Q5）: iOS ではホームのバーにタイトル（「推し活カウントダウン」）の文字を出さず、右上の ＋ だけにします（大きいタイトルの帯も無くし、先頭のカードを上に詰める）。
   タブバーの「ホーム」で場所は分かるため。VoiceOver の画面の名前・UI テスト・戻り先の名前のために `.navigationTitle` は残し、見た目だけ消しています（iOS 18 以降は `toolbar(removing: .title)`、iOS 17 は `.principal` の見えない要素）。
   iPad のサイドバーの見出し「推し活カウントダウン」はアプリ名として残します。Android 版の SPEC（「2.3 ホーム」）を合わせるかは Android 側で判断します（[android#3](https://github.com/shariverse/oshikatsu-countdown-android/issues/3)）
@@ -78,4 +78,4 @@
 5. **App Store 用スクリーンショット**: 見た目が変わったので撮り直す（Issue #116）。Discussion #148 でホームのタイトルが無くなり、バーのタイトルの書体も変わった
 6. **不採用の案**: 標準のテーマと残りの 4 案を [shilokuma-inc/design-knowledge](https://github.com/shilokuma-inc/design-knowledge/pull/4) に残し、このリポジトリから片付けた（Issue #117）。
    値・Preview・装飾・案を比べる見本・DEBUG の `-previewTheme`・撮影の仕組み・Preview 用の書体と、出荷するテーマで使っていない Zen Kaku Gothic New を消した
-7. **バーのタイトルの実機での確認**（Discussion #148）: iOS 17〜18 での効き方・ホームのタイトルの隠れ方・実機の VoiceOver・動いている途中に文字の大きさを変えたときの大きさは、Simulator で確かめられず Issue #152 に残している
+7. **バーのタイトルの実機での確認**（Discussion #148）: iOS 17〜18 での効き方・ホームのタイトルの隠れ方・実機の VoiceOver・動いている途中に文字の大きさを変えたときの大きいタイトルの大きさは、Simulator で確かめられず Issue #152 に残している
