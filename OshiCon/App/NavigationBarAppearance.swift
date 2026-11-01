@@ -25,8 +25,10 @@ enum NavigationBarAppearance {
         }
     }
 
-    /// バーのタイトルの書体。ダイナミックタイプの文字の大きさ（`traits`。既定は今の設定）に合わせた大きさにする。
-    /// 日本語以外の言語、または書体を読み込めないときは nil（システムの書体のまま）。
+    /// バーのタイトルの書体。日本語以外の言語、または書体を読み込めないときは nil（システムの書体のまま）。
+    ///
+    /// 大きさは iOS の標準のタイトルにそろえる。大きいタイトルはダイナミックタイプの文字の大きさ（`traits`。既定は今の設定）に合わせて大きくし、
+    /// inline は文字の大きさに関わらず 17pt のままにする（標準の inline タイトルも大きくならず、高さの決まったバーの中で大きくすると切れるため。Issue #158）
     static func titleFont(
         _ title: AppTheme.Typography.BarTitle,
         typography: AppTheme.Typography,
@@ -36,17 +38,11 @@ enum NavigationBarAppearance {
         guard let face = typography.barTitleFace(title, locale: locale), let font = UIFont(name: face.name, size: face.size) else {
             return nil
         }
-        return UIFontMetrics(forTextStyle: title.uiTextStyle).scaledFont(for: font, compatibleWith: traits)
-    }
-}
-
-private extension AppTheme.Typography.BarTitle {
-    var uiTextStyle: UIFont.TextStyle {
-        switch self {
+        switch title {
         case .large:
-            .largeTitle
+            return UIFontMetrics(forTextStyle: .largeTitle).scaledFont(for: font, compatibleWith: traits)
         case .inline:
-            .headline
+            return font
         }
     }
 }

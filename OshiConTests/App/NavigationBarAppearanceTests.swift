@@ -33,17 +33,27 @@ struct NavigationBarAppearanceTests {
         #expect(bar.largeTitleTextAttributes?[.font] == nil)
     }
 
-    @Test("書体の大きさは、ダイナミックタイプの文字の大きさに合わせる（標準では iOS の標準のタイトルと同じ大きさ）")
-    func titleFontScalesWithContentSize() throws {
+    @Test("大きいタイトルはダイナミックタイプの文字の大きさに合わせて大きくする（標準では iOS の標準のタイトルと同じ 34pt）")
+    func largeTitleFontScalesWithContentSize() throws {
         let locale = DomainFixtures.japanese
         let standard = UITraitCollection(preferredContentSizeCategory: .large)
         let larger = UITraitCollection(preferredContentSizeCategory: .accessibilityExtraLarge)
-        for (title, size) in [(AppTheme.Typography.BarTitle.large, 34.0), (.inline, 17.0)] {
-            let font = try #require(NavigationBarAppearance.titleFont(title, typography: typography, locale: locale, traits: standard))
-            let largerFont = try #require(NavigationBarAppearance.titleFont(title, typography: typography, locale: locale, traits: larger))
-            // UIFontMetrics の拡大は浮動小数点で計算されるので、ごくわずかな誤差を許す
-            #expect(abs(font.pointSize - size) < 0.01)
-            #expect(largerFont.pointSize > size)
-        }
+        let font = try #require(NavigationBarAppearance.titleFont(.large, typography: typography, locale: locale, traits: standard))
+        let largerFont = try #require(NavigationBarAppearance.titleFont(.large, typography: typography, locale: locale, traits: larger))
+        // UIFontMetrics の拡大は浮動小数点で計算されるので、ごくわずかな誤差を許す
+        #expect(abs(font.pointSize - 34) < 0.01)
+        #expect(largerFont.pointSize > 34)
+    }
+
+    @Test(
+        "inline のタイトルは、ダイナミックタイプの文字の大きさに関わらず iOS の標準の inline タイトルと同じ 17pt のまま",
+        arguments: [UIContentSizeCategory.extraSmall, .large, .accessibilityExtraLarge, .accessibilityExtraExtraExtraLarge]
+    )
+    func inlineTitleFontKeepsStandardSize(category: UIContentSizeCategory) throws {
+        // 高さの決まったバーの中で大きくすると切れるので、アクセシビリティの大きさでも拡大しない（Issue #158）
+        let traits = UITraitCollection(preferredContentSizeCategory: category)
+        let locale = DomainFixtures.japanese
+        let font = try #require(NavigationBarAppearance.titleFont(.inline, typography: typography, locale: locale, traits: traits))
+        #expect(font.pointSize == 17)
     }
 }
