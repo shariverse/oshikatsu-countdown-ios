@@ -197,6 +197,7 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
   テーマの日本語の書体はアプリの言語が日本語のときだけ使われるので、Scheme の Run の Options の App Language を日本語にして見ます。
   ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます
 - **書体**: Kaisei Decol（SIL OFL 1.1）は google/fonts から取得したものを改変せずに `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に載せています
+- **ナビゲーションバーのタイトル**: 日本語のときだけ Kaisei Decol の太字にし、ほかの言語はシステムの書体のままです（バーの外観で書体だけを替える。`OshiCon/App/NavigationBarAppearance.swift`）。ホームのバーにはタイトルの文字を出しません（Discussion #148。決まりは [docs/design/themes.md](docs/design/themes.md)）
 
 ### 11. 推しの写真の調整
 
