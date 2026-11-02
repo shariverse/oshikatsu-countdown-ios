@@ -29,8 +29,20 @@ struct HomeScreen: View {
             content(makeContent(now: context.date))
         }
         .background(ThemeScreenBackground().ignoresSafeArea())
+        // 画面の名前（VoiceOver・iPad の戻り先）として残し、バーには出さない（Discussion #148 の Q1・Q3）。
+        // 大きいタイトルの帯も無くし、先頭のカードを上に詰める
         .navigationTitle("推し活カウントダウン")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(removing: Self.hiddenToolbarTitle)
         .toolbar {
+            if #unavailable(iOS 18.0) {
+                // iOS 17 は `toolbar(removing: .title)` が無いので、見えない要素でタイトルの文字を置き換える
+                ToolbarItem(placement: .principal) {
+                    Color.clear
+                        .frame(width: 1, height: 1)
+                        .accessibilityHidden(true)
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button("予定を追加", systemImage: "plus", action: presentAddEvent)
                     .accessibilityIdentifier("home.addEvent")
@@ -67,6 +79,14 @@ struct HomeScreen: View {
                     isAddEventSheetVisible = false
                 }
         }
+    }
+
+    /// バーから外すタイトル。iOS 17 には無いので外さない（代わりに `.principal` の見えない要素で置き換える）。
+    private static var hiddenToolbarTitle: ToolbarDefaultItemKind? {
+        if #available(iOS 18.0, *) {
+            return .title
+        }
+        return nil
     }
 
     /// 予定の追加のシートを開く。ほかのシートと重なって開けずに残っていたら、一度戻してから開き直す。

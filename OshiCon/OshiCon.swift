@@ -16,6 +16,7 @@ struct OshiCon: App {
 
     init() {
         LaunchOptions.applyDefaultEnvironment()
+        NavigationBarAppearance.applyTitleFonts()
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
         if LaunchOptions.seedsSampleData, case let .success(container) = container {
