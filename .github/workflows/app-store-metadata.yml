@@ -1,7 +1,7 @@
 name: App Store Metadata
 
-# App Store の掲載文（docs/app-store/metadata/<言語>.md・review-notes.md）とスクリーンショットを、
-# App Store Connect API で App Store バージョンに登録する。手動実行のみ。
+# App Store の掲載文（docs/app-store/metadata/<言語>.md・review-notes.md）・このバージョンの新機能（docs/app-store/whats-new/<バージョン>.md）と
+# スクリーンショットを、App Store Connect API で App Store バージョンに登録する。手動実行のみ。
 #
 # 表示サイズと機種は docs/app-store/screenshots.json、言語は docs/app-store/languages.json で決める。
 # スクリーンショットは表示サイズごとに別のジョブで並行して、scripts/app-store-screenshots.sh で撮る（リポジトリに大きな画像を置かない）。
