@@ -8,7 +8,7 @@
 #      （無ければ、審査前のバージョンの番号を VERSION に変える。それも無ければ作る）
 #   2. 言語（docs/app-store/languages.json）ごとに:
 #      - App 情報のローカリゼーションに、アプリ名・サブタイトルを入れる
-#      - バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキストと、このバージョンの新機能を入れる
+#      - バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキスト・マーケティング URL と、このバージョンの新機能を入れる
 #      - SCREENSHOT_DIR があれば、画像の寸法から表示サイズを決めて（docs/app-store/screenshots.json）、スクリーンショットを差し替える
 #   3. アプリの主要言語を languages.json の先頭の言語にする
 #   4. App Review に関する情報のメモに、審査用メモを入れる
@@ -17,6 +17,8 @@
 # metadata/<language>.md が無い言語は飛ばす（ja だけは、無ければ docs/app-store/listing.md を読む）。
 # このバージョンの新機能は docs/app-store/whats-new/<VERSION>.md の「## <language>」の下のコードブロックから読む。
 # ファイルが無ければ新機能は触らない（最初のバージョンには新機能を入れられない）。ファイルがあるのに登録する言語の見出しが無ければ、何も登録せずに止まる。
+# マーケティング URL は全言語で同じで、docs/app-store/listing.md の「## マーケティング URL」の下のコードブロックから読み、毎回全言語に入れる
+# （App Store Connect は新しいバージョンに前のバージョンの値を写すため、入れないと古い値が残る）。https の URL でなければ止まる。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリ・年齢制限・価格は扱わないので、App Store Connect の画面で入れる。
 # 審査への提出は行わない。
 #
@@ -52,6 +54,7 @@ LIMITS = { name: 30, subtitle: 30, promotionalText: 170, keywords: 100, descript
 LANGUAGES_PATH = 'docs/app-store/languages.json'
 SCREENSHOTS_PATH = 'docs/app-store/screenshots.json'
 METADATA_DIR = 'docs/app-store/metadata'
+LISTING_PATH = 'docs/app-store/listing.md'
 WHATS_NEW_DIR = 'docs/app-store/whats-new'
 
 def env!(name)
@@ -159,7 +162,7 @@ end
 # 言語の掲載文。ファイルが無ければ nil
 def read_listing(language)
   path = File.join(METADATA_DIR, "#{language}.md")
-  path = 'docs/app-store/listing.md' if !File.exist?(path) && language == 'ja'
+  path = LISTING_PATH if !File.exist?(path) && language == 'ja'
   return nil unless File.exist?(path)
 
   listing = File.read(path, encoding: Encoding::UTF_8)
@@ -172,6 +175,19 @@ def read_listing(language)
   }
   check_limits(texts, path)
   texts
+end
+
+# 全言語に入れるマーケティング URL。https で、ホストのある URL だけを通す
+def read_marketing_url
+  url = code_block(File.read(LISTING_PATH, encoding: Encoding::UTF_8), 'マーケティング URL')
+  uri = begin
+    URI.parse(url)
+  rescue URI::InvalidURIError
+    nil
+  end
+  abort "#{LISTING_PATH}: マーケティング URL が https の URL ではありません（#{url.inspect}）" unless uri.is_a?(URI::HTTPS) && !uri.host.to_s.empty?
+
+  url
 end
 
 # バージョンの新機能（言語 → 文面）と、読んだファイル。ファイルが無ければ文面は nil。
@@ -452,6 +468,7 @@ languages = select_languages(ENV.fetch('LANGUAGES', '').split(',').map(&:strip).
 # 文字数の上限は、何かを登録する前に全言語ぶん確かめる
 listings = languages.to_h { |l| [l['language'], read_listing(l['language'])] }
 whats_new_path, whats_new = read_whats_new(version_string, listings.compact.keys)
+marketing_url = read_marketing_url
 notes = code_block(File.read(review_notes_path, encoding: Encoding::UTF_8))
 check_limits({ notes: notes }, review_notes_path)
 client = Client.new(key_path: env!('API_KEY_PATH'), key_id: env!('APPLE_API_KEY_ID'), issuer_id: env!('APPLE_API_ISSUER_ID'))
@@ -474,6 +491,7 @@ begin
   else
     summary("このバージョンの新機能: `#{whats_new_path}` が無いので触っていません\n")
   end
+  summary("マーケティング URL: #{marketing_url}（`#{LISTING_PATH}`）を全言語に入れます\n")
 
   app_info = editable_app_info(client, app['id'])
   abort '::error::編集できる（審査前の）App 情報がありません' unless app_info
@@ -497,7 +515,7 @@ begin
         type: 'appInfoLocalizations', parent_key: :appInfo, parent_type: 'appInfos', parent_id: app_info['id'],
         locale: locale, attributes: texts.slice(:name, :subtitle)
       )
-      version_attributes = texts.slice(:description, :keywords, :promotionalText)
+      version_attributes = texts.slice(:description, :keywords, :promotionalText).merge(marketingUrl: marketing_url)
       version_attributes[:whatsNew] = whats_new.fetch(code) if whats_new
       localization_id, version_done = upsert_localization(
         client,
