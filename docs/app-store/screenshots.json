@@ -3,7 +3,7 @@
     "App Store 用スクリーンショットを撮る表示サイズ。scripts/app-store-screenshots.sh と App Store Metadata のワークフローが読む。",
     "キーは App Store Connect の screenshotDisplayType。devices は上から順に、ランナーにある機種を使う。",
     "sizes は書き出した画像に期待する寸法（縦向き）。登録するスクリプトも、画像の寸法からこの表で表示サイズを決める。",
-    "runsOn / xcodeVersion は撮るジョブの runs-on と Xcode。iPhone Duo には Xcode 27 と iOS 27.1 のランタイムが要るので、xcode-27 のランナーで撮る。",
+    "runsOn / xcodeVersion は撮るジョブの runs-on と Xcode。iPhone Duo には Xcode 27 と iOS 27.1 のランタイムが要るので、GitHub の標準イメージ xcode-27 で撮る（ランタイムは撮影スクリプトが入れる）。",
     "撮る画面は OshiConUITests/AppStoreScreenshotTests の 4 枚（App Store Connect の上限は 1 言語・1 表示サイズにつき 10 枚）。"
   ],
   "screenshotCount": 4,

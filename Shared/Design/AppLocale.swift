@@ -37,7 +37,7 @@ extension Locale {
         return Locale(components: components)
     }
 
-    /// 日本語か。本文の書体（Zen Kaku Gothic New）を使うかを決める。
+    /// 日本語か。本文にテーマの書体を使うかを決める。
     nonisolated var isJapanese: Bool {
         language.languageCode == .japanese
     }

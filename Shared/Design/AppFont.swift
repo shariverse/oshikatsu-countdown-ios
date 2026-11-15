@@ -5,51 +5,22 @@
 
 import SwiftUI
 
-/// アプリの書体。数字は Outfit、本文は日本語のときだけ Zen Kaku Gothic New（どちらも同梱。SIL OFL 1.1）。
-/// ほかの言語の本文はシステムの書体にする（Zen Kaku Gothic New には中国語・韓国語・タイ語などの字形が無いため）。
+/// 書体の共通の決まり。数字は Outfit、日本語の本文はテーマの書体（どちらも同梱。SIL OFL 1.1）。
+/// 画面とウィジェットは、出荷するテーマの書体を `@Environment(\.appTheme)` の `typography` から引く。
+/// ほかの言語の本文はシステムの書体にする（テーマの日本語の書体には中国語・韓国語・タイ語などの字形が無いため）。
 /// どちらもダイナミックタイプの文字の大きさに合わせて大きさが変わる。
 nonisolated enum AppFont {
     /// Outfit の family 名。可変フォントで、既定のインスタンスは Thin なので、必ず太さを付けて使う。
     static let numeralFamily = "Outfit"
 
-    /// 本文の書体の PostScript 名。
-    enum TextFace: String, CaseIterable {
-        case regular = "ZenKakuGothicNew-Regular"
-        case medium = "ZenKakuGothicNew-Medium"
-        case bold = "ZenKakuGothicNew-Bold"
+    /// 本文の書体の太さの段階。テーマの書体はこの 3 つの太さのフェイスを持つ（`AppTheme.TextFaces`）。
+    enum TextFace: CaseIterable {
+        case regular
+        case medium
+        case bold
     }
 
-    // MARK: - 数字（Outfit）。桁の幅をそろえ、秒が進んでも横に揺れない
-
-    /// 詳細の残り日数。
-    static let countdownHero = numeral(size: 88, relativeTo: .largeTitle)
-    /// ホームの先頭の残り日数。
-    static let countdownLarge = numeral(size: 68, relativeTo: .largeTitle)
-    /// 詳細の時・分・秒。
-    static let countdownClock = numeral(size: 32, relativeTo: .title)
-    /// 一覧の行の残り日数。
-    static let countdownSmall = numeral(size: 24, relativeTo: .title2)
-    /// 先頭のカードの日付（`10.18 SUN`）。
-    static let dateBadge = numeral(size: 18, relativeTo: .headline)
-
-    /// Outfit の数字。`size` はダイナミックタイプが標準のときの大きさ。
-    static func numeral(size: CGFloat, weight: Font.Weight = .bold, relativeTo style: Font.TextStyle) -> Font {
-        .custom(numeralFamily, size: size, relativeTo: style)
-            .weight(weight)
-            .monospacedDigit()
-    }
-
-    // MARK: - 本文（日本語は Zen Kaku Gothic New、ほかの言語はシステムの書体）
-
-    /// 本文の書体。日本語では太さを regular・medium・bold の 3 つに丸める。
-    static func text(_ style: Font.TextStyle, weight: Font.Weight = .regular, locale: Locale = .app) -> Font {
-        guard usesBundledTextFace(locale: locale) else {
-            return .system(style, weight: weight)
-        }
-        return .custom(face(for: weight).rawValue, size: defaultSize(of: style), relativeTo: style)
-    }
-
-    /// 本文に同梱の書体（Zen Kaku Gothic New）を使うか。日本語のときだけ使う。
+    /// 本文にテーマの書体（同梱）を使うか。日本語のときだけ使う。
     static func usesBundledTextFace(locale: Locale) -> Bool {
         locale.isJapanese
     }

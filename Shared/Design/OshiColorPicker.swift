@@ -8,6 +8,7 @@ import SwiftUI
 /// 推し色を 12 色から 1 つ選ぶ、色の丸の並び。読み上げでは色の名前と、選んでいるかを伝える（ラジオボタンと同じ扱い）。
 struct OshiColorPicker: View {
     @Binding var selection: OshiColor
+    @Environment(\.appTheme) private var theme
 
     /// 丸の見た目の大きさ。押せる範囲は 44pt 以上にする。
     private let dotSize: CGFloat = 32
@@ -31,6 +32,8 @@ struct OshiColorPicker: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("推し色")
+        // 選んだ色が変わったときだけ返す（選んでいる色を押し直しても鳴らない）
+        .sensoryFeedback(.selection, trigger: selection)
     }
 
     /// 読み上げで何個目かを伝える（iOS にはラジオボタンの trait が無いので、選択中の trait と合わせて伝える）。
@@ -46,7 +49,7 @@ struct OshiColorPicker: View {
                 .frame(width: dotSize, height: dotSize)
             if isSelected {
                 Circle()
-                    .strokeBorder(color.textColor, lineWidth: 2)
+                    .strokeBorder(color.text(in: theme).color, lineWidth: 2)
                     .frame(width: dotSize + 8, height: dotSize + 8)
                 Image(systemName: "checkmark")
                     .font(.system(size: dotSize * 0.45, weight: .bold))

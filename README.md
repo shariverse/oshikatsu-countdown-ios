@@ -86,7 +86,7 @@ scripts/rename.sh MyApp
 |---|---|
 | `DEVELOPMENT_TEAM` | Apple Developer Program の Team ID |
 | `APP_BUNDLE_IDENTIFIER` | アプリ本体の Bundle Identifier。テストターゲットは `.Tests` / `.UITests` を付けて自動で派生します |
-| `MARKETING_VERSION` | アプリのバージョン。ビルド番号（`CURRENT_PROJECT_VERSION`）は Upload のときに App Store Connect の最新ビルドを見て Xcode が自動で増やすため、手で上げる必要はありません |
+| `MARKETING_VERSION` | アプリのバージョン。ビルド番号（`CURRENT_PROJECT_VERSION`）は Upload のときに Upload ワークフローの実行番号（`github.run_number`）で上書きするため、手で上げる必要はありません |
 | `IPHONEOS_DEPLOYMENT_TARGET` | 最低サポート OS |
 
 ### 4. GitHub Secrets を設定する
@@ -115,6 +115,9 @@ SKU は Bundle ID と同じ値にします。SKU はユーザーには見えな�
 
 ### 6. ブランチ運用と CI
 
+- 作業は `develop` から作業ブランチを切ります。AskHub の epic は、ワーカーが作業ブランチ `askhub/<epic の id>` を `develop` から作り、子 PR をそこに集め、最終 PR で `develop` に取り込みます
+- `develop`・`main`・`release/**` は、ルールセットで PR 必須・`build / build` 必須・force push と削除の禁止にしています。管理者にも効くので、直接 push はできません
+
 | ブランチ | Build（ビルド + テスト + SwiftLint） | Archive（IPA Export） | Upload（App Store Connect） |
 |---|:-:|:-:|:-:|
 | `main` | ✅ | ✅ | |
@@ -122,13 +125,15 @@ SKU は Bundle ID と同じ値にします。SKU はユーザーには見えな�
 | `release/**` | ✅ | | ✅ |
 | その他の作業ブランチ | ✅（Unit テストのみ） | | |
 | Pull Request の作成時（opened / reopened / ready_for_review） | ✅ | | |
+| AskHub の子 PR（作業ブランチ `askhub/**` 宛て） | PR では実行しない（push の Unit テストだけ） | | |
+| AskHub の最終 PR（`askhub/**` → `develop`） | ✅（更新のたびに UI テストまで） | | |
 | Fork からの Pull Request | ✅ | | |
 
 - Upload は Archive → IPA Export を含むため、`develop` / `release/**` では Archive を別途実行しません
 - Archive / Upload は Actions タブから手動でも実行できます（Run workflow）。作業ブランチを TestFlight で確認したいときは、Upload を手動実行してそのブランチを選びます
 - リポジトリ変数（Settings → Secrets and variables → Actions → Variables）に `ENABLE_DELIVERY=false` を設定すると Upload をスキップします（Archive は App Store Connect にアプリが無くても通るため止めません）。テンプレートリポジトリ自身はこの設定でアップロードを止めています。テンプレートから作成したリポジトリには引き継がれないため、何もしなければ従来どおり実行されます
-- ドキュメントだけの変更（`**/*.md`、`docs/**`）では Build を実行しません。Upload（`develop` / `release/**` への push）と Archive（`main` への push）は、ドキュメントだけの変更でも実行します
-- 作業ブランチへの push では、時間のかかる UI テスト（`<プロジェクト名>UITests`）を省いて Unit テストだけ実行します。UI テストは Pull Request の作成時と `main` / `develop` / `release/**` への push で実行します。Fork からの Pull Request は push で実行されないため、更新（synchronize）を含むすべてのイベントで UI テストまで実行します
+- Build はドキュメントだけの変更でも実行します。ルールセットで `build / build` を必須にしているため、飛ばすとチェックが出ず、PR をマージできなくなります
+- 作業ブランチへの push では、時間のかかる UI テスト（`<プロジェクト名>UITests`）を省いて Unit テストだけ実行します。UI テストは Pull Request の作成時と `main` / `develop` / `release/**` への push で実行します。AskHub の子 PR（`askhub/**` 宛て）は PR のイベントでは実行せず（ワーカーが手元でテストを流してから出すため）、作業ブランチ → `develop` の最終 PR は更新（synchronize）でも UI テストまで実行します。Fork からの Pull Request は push で実行されないため、更新（synchronize）を含むすべてのイベントで UI テストまで実行します
 - Xcode のバージョンは [.github/workflows/_build.yml](.github/workflows/_build.yml) と [.github/workflows/_archive.yml](.github/workflows/_archive.yml) の `xcode-version` で固定しています。Environment の更新時はあわせて変更してください
 
 ### 7. PR 本文のスクリーンショット
@@ -171,7 +176,7 @@ scripts/app-store-screenshots.sh APP_IPHONE_67 ja,en
 
 ### 9. App Store の掲載文とスクリーンショットの登録
 
-Actions タブの「App Store Metadata」を手動実行すると、言語ごとの掲載文（[docs/app-store/metadata/](docs/app-store/metadata/) の `<言語>.md` のアプリ名・サブタイトル・プロモーションテキスト・説明文・キーワード）と、[docs/app-store/review-notes.md](docs/app-store/review-notes.md) の審査用メモを、App Store Connect API で App Store バージョン（既定は `MARKETING_VERSION`）に登録します。スクリーンショットは表示サイズごとに別のジョブで並行して上の `scripts/app-store-screenshots.sh` で撮り、表示サイズ × 言語ぶんを差し替えます。
+Actions タブの「App Store Metadata」を手動実行すると、言語ごとの掲載文（[docs/app-store/metadata/](docs/app-store/metadata/) の `<言語>.md` のアプリ名・サブタイトル・プロモーションテキスト・説明文・キーワード）と、このバージョンの新機能（[docs/app-store/whats-new/](docs/app-store/whats-new/) の `<バージョン>.md`）、[docs/app-store/review-notes.md](docs/app-store/review-notes.md) の審査用メモを、App Store Connect API で App Store バージョン（既定は `MARKETING_VERSION`）に登録します。スクリーンショットは表示サイズごとに別のジョブで並行して上の `scripts/app-store-screenshots.sh` で撮り、表示サイズ × 言語ぶんを差し替えます。
 
 ```bash
 gh workflow run app-store-metadata.yml --ref develop
@@ -181,11 +186,34 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 
 - 文面は各見出しの下のコードブロックから読みます。文字数の上限を超えていたら何も登録せずに止まります。`metadata/<言語>.md` が無い言語は飛ばします（ja は無ければ `listing.md` を読みます）
 - アプリの主要言語は languages.json の先頭の言語（en-US）にそろえます
+- このバージョンの新機能は、登録するバージョンと同じ名前のファイル（`docs/app-store/whats-new/1.1.0.md` など）の `## <言語>` の下のコードブロックから読みます。アップデートを出すたびに新しいファイルを足します。ファイルが無ければ新機能は触りません（最初のバージョンには入れられないため）。ファイルがあるのに登録する言語の見出しが無いときは、何も登録せずに止まります
 - 6.9 インチを撮ったときは、そのスクリーンショットからクリエイティブアセット（プロダクトページのヘッダー 3840x1646・検索結果 3840x2560）を [docs/app-store/creative/creative.html](docs/app-store/creative/creative.html) と `scripts/render-creative-assets.sh` で言語ごとに書き出し、App Asset Library に上げて各言語のローカリゼーションに配置します（`creative_assets` を外すと飛ばします）。文言は creative.html の `copy` に言語ごとに書きます
-- iPhone Duo は `xcode-27` のランナーで撮ります。このランナーが使えないと、Duo のジョブが待ちになったままになるので、そのときは `display_types` で Duo を外して流します
+- iPhone Duo は GitHub の標準イメージ `xcode-27`（actions/runner-images の xcode-27-arm64。org で用意するものは無い）で撮ります。イメージに iOS 27.1 のランタイムが無いので、撮影の前にダウンロードします（数分かかります）
 - 1 つの表示サイズの撮影が失敗しても、撮れたぶんと掲載文は登録します。撮った画像は Artifact（`screenshots-<表示サイズ>`）にも残ります
 - 指定したバージョンが無ければ、審査前のバージョンの番号を変えます（新規アプリに最初からある「1.0」など）。それも無ければ作ります
 - サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格・App のプライバシー・ビルドの選択は扱いません。App Store Connect の画面で入れてから審査に提出します（提出もこのワークフローでは行いません）
+
+### 10. テーマ
+
+出荷するアプリとウィジェットは、Discussion #80 のテーマ案から採用した「地雷系・ゴシック」（`AppTheme.shipping` = `AppTheme.jiraiGothic`）だけを使います。
+採用しなかった案は片付け、アイデアは shilokuma-inc/design-knowledge に残しました。配色・書体・コントラストと、採用でしたこと・残っていることは [docs/design/themes.md](docs/design/themes.md) にまとめています。
+
+- **Preview**: `OshiCon/Screens/ThemePreviews/JiraiGothicPreviews.swift` にあります（ホーム・予定の詳細・予定の追加・ウィジェット 2 種を、ライトとダーク・大きな文字・横向きで）。
+  どれも `ThemePreviewCanvas(<テーマ>, <画面>, <外観>)` で描き、日本語の見本の推しと予定をメモリ上のストアに入れます。
+  テーマの日本語の書体はアプリの言語が日本語のときだけ使われるので、Scheme の Run の Options の App Language を日本語にして見ます。
+  ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます
+- **書体**: Kaisei Decol（SIL OFL 1.1）は google/fonts から取得したものを改変せずに `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に載せています
+- **ナビゲーションバーのタイトル**: 日本語のときだけ Kaisei Decol の太字にし、ほかの言語はシステムの書体のままです（バーの外観で書体だけを替える。`OshiCon/App/NavigationBarAppearance.swift`）。ホームのバーにはタイトルの文字を出しません（Discussion #148。決まりは [docs/design/themes.md](docs/design/themes.md)）
+
+### 11. 推しの写真の調整
+
+推しの登録・編集で写真を選ぶと、調整画面（拡大・縮小・移動・回転）で丸の枠に写す範囲を決めてから取り込みます（Discussion #128）。仕様とコードの場所は [docs/photo-crop.md](docs/photo-crop.md) にまとめています。
+
+- 正方形に切り抜いた画像（一辺 1440px まで）だけを保存します。予定の詳細の横長の写真は、その正方形の中央の帯を出します
+- 拡大は、切り抜く範囲の一辺が元の写真の 360px を下回らないところまで。回転しても枠の隅が空かないよう補正します
+- この機能より前に登録した写真はそのまま残します。保存してある写真は「位置を調整」で、さらに狭める調整だけができます
+- **Android 版の SPEC（`docs/SPEC.md`）にはまだ書かれていません。** iOS だけ先に作り、Android の SPEC は後で合わせます（Discussion #128 の Q4）
+- UI テストでは、起動引数 `-useTestPhoto`（`-useInMemoryStore` のときだけ効く）で「写真を選ぶ」を生成した画像を選ぶボタンに替えます（`PhotosPicker` は UI テストから操作できないため）
 
 ## 多言語対応
 
@@ -214,7 +242,7 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 ├── OshiConTests/     # Unit テスト（Swift Testing）
 ├── OshiConUITests/   # UI テスト（XCTest）
 ├── OshiCon.xcodeproj # 共有スキーム OshiCon を含む
-├── docs/                    # ExportOptions.plist のサンプル
+├── docs/                    # ExportOptions.plist のサンプル・App Store の掲載文・テーマ（design/themes.md）・写真の調整の仕様（photo-crop.md）
 ├── scripts/                 # rename.sh・app-store-screenshots.sh（App Store 用スクリーンショット）・render-creative-assets.sh（クリエイティブアセット）
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/

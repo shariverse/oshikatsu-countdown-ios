@@ -12,6 +12,9 @@ nonisolated enum UpcomingWidgetContent: Equatable, Sendable {
     /// ストアを読めなかった。しばらくしてから読み直す。
     case unavailable
 
+    /// 4×2 に収まる行の数。
+    static let maxRows = 4
+
     /// 一覧の 1 行。
     struct Row: Identifiable, Equatable, Sendable {
         let id: OshiEvent.ID

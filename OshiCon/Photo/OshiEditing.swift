@@ -11,8 +11,8 @@ nonisolated enum PhotoChange: Sendable {
     case keep
     /// 写真を外す。
     case remove
-    /// 選んだ写真（PhotosPicker で読んだデータ）に差し替える。
-    case replace(Data)
+    /// 選んだ写真（PhotosPicker で読んだデータ）に差し替える。`crop` があればその範囲で正方形に切り抜き、無ければ写真全体を取り込む。
+    case replace(Data, crop: PhotoCrop? = nil)
 }
 
 /// 推しを保存・削除する口。`OshiConStore` が満たす（テストでは失敗させる偽物に差し替える）。
@@ -55,8 +55,8 @@ final class OshiEditing {
         }
         let currentPhoto = current?.photoFileName
         var importedPhoto: String?
-        if case let .replace(data) = photoChange {
-            importedPhoto = try? await photos.importPhoto(data)
+        if case let .replace(data, crop) = photoChange {
+            importedPhoto = try? await photos.importPhoto(data, crop: crop)
         }
         let photoFileName: String? = switch photoChange {
         case .keep:

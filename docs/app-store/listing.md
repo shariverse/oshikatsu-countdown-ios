@@ -36,4 +36,4 @@
 
 `scripts/app-store-screenshots.sh` で撮る（見本のデータで UI テストを流す。6.9 インチの iPhone と 13 インチの iPad）。README の「App Store 用スクリーンショット」を参照。
 
-掲載文（[metadata/](metadata/) の各ファイルの、見出しの下のコードブロック）とスクリーンショットは、ワークフロー「App Store Metadata」で App Store Connect に登録する（README の「App Store の掲載文とスクリーンショットの登録」）。
+掲載文（[metadata/](metadata/) の各ファイルの、見出しの下のコードブロック）・このバージョンの新機能（[whats-new/](whats-new/) の `<バージョン>.md`）とスクリーンショットは、ワークフロー「App Store Metadata」で App Store Connect に登録する（README の「App Store の掲載文とスクリーンショットの登録」）。

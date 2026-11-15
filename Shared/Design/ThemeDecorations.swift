@@ -1,0 +1,96 @@
+//
+//  ThemeDecorations.swift
+//  OshiCon
+//
+
+import SwiftUI
+
+// テーマの装飾の差し込み口。どれも `@Environment(\.appTheme)` の装飾を描き、装飾が「無し」（`.none`）なら何も変えない。
+// 装飾は読み上げ・押せる範囲・並びを変えず（`accessibilityHidden(true)`・`allowsHitTesting(false)`）、文字の上に重ねない。
+
+/// 画面の地。テーマの地の色に、テーマの模様を重ねる（模様が無ければ色だけ）。
+struct ThemeScreenBackground: View {
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        switch theme.decoration.screenBackground {
+        case .none:
+            theme.palette.background.color
+        case let .crossesAndHearts(ornament):
+            CrossesAndHeartsBackground(ground: theme.palette.background, ornament: ornament)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
+        }
+    }
+}
+
+/// 写真が無いときに写真の場所を埋める模様。
+struct ThemePhotoPlaceholder: View {
+    let color: OshiColor
+
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        switch theme.decoration.photoPlaceholder {
+        case .crosses:
+            CrossPatternBackground(color: color)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
+        }
+    }
+}
+
+extension View {
+    /// カード（先頭のカード・見出しつきのまとまり）の縁取り。`shape` はカードの形。
+    func themeCardBorder(_ shape: some InsettableShape) -> some View {
+        modifier(ThemeCardBorderModifier(shape: shape))
+    }
+
+    /// 見出しの飾り。
+    func themeHeadingOrnament() -> some View {
+        modifier(ThemeHeadingOrnamentModifier())
+    }
+}
+
+private struct ThemeCardBorderModifier<CardShape: InsettableShape>: ViewModifier {
+    let shape: CardShape
+
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View {
+        switch theme.decoration.cardBorder {
+        case .none:
+            content
+        case let .doubleLine(color):
+            content.overlay {
+                DoubleLineBorder(shape: shape, color: color)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+}
+
+private struct ThemeHeadingOrnamentModifier: ViewModifier {
+    @Environment(\.appTheme) private var theme
+
+    func body(content: Content) -> some View {
+        switch theme.decoration.headingOrnament {
+        case .none:
+            content
+        case let .symbol(name, color):
+            // 飾りは見出しの文字の前に並べ、文字には重ねない。大きさは見出しに合わせてダイナミックタイプで変わる
+            // 2 行になっても 1 行目にそろえる。大きな文字では見出しの幅を削りすぎないよう、飾りの大きさに上限を付ける
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Image(systemName: name)
+                    .font(.headline)
+                    .imageScale(.small)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                    .foregroundStyle(color.color)
+                    .accessibilityHidden(true)
+                    .allowsHitTesting(false)
+                content
+            }
+        }
+    }
+}

@@ -10,6 +10,7 @@
 | [privacy-policy.md](privacy-policy.md) | プライバシーポリシー | 公開した URL を「App 情報」のプライバシーポリシー URL に入れる |
 | [support.md](support.md) | サポートページ（よくある質問・お問い合わせ） | 公開した URL を「App Store」タブのサポート URL に入れる |
 | [app-privacy.md](app-privacy.md) | 「App のプライバシー」の回答案と、輸出コンプライアンス | App Store Connect の「App のプライバシー」 |
+| [whats-new/](whats-new/) | バージョンごと（`<バージョン>.md`）の、12 言語の「このバージョンの新機能」 | App Store Connect の「App Store」タブ（言語ごと）の「このバージョンの新機能」 |
 | [review-notes.md](review-notes.md) | 審査用メモ（審査員への説明。日本語版と英語版） | App Store Connect の「App Review に関する情報」のメモ |
 
 ## 決まっていないこと（人間が決める）

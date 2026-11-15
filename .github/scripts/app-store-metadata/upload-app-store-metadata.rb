@@ -8,13 +8,15 @@
 #      （無ければ、審査前のバージョンの番号を VERSION に変える。それも無ければ作る）
 #   2. 言語（docs/app-store/languages.json）ごとに:
 #      - App 情報のローカリゼーションに、アプリ名・サブタイトルを入れる
-#      - バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキストを入れる
+#      - バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキストと、このバージョンの新機能を入れる
 #      - SCREENSHOT_DIR があれば、画像の寸法から表示サイズを決めて（docs/app-store/screenshots.json）、スクリーンショットを差し替える
 #   3. アプリの主要言語を languages.json の先頭の言語にする
 #   4. App Review に関する情報のメモに、審査用メモを入れる
 #
 # 文面は docs/app-store/metadata/<language>.md と review-notes.md の、見出しの下のコードブロックから読む（文面の正はこれら）。
 # metadata/<language>.md が無い言語は飛ばす（ja だけは、無ければ docs/app-store/listing.md を読む）。
+# このバージョンの新機能は docs/app-store/whats-new/<VERSION>.md の「## <language>」の下のコードブロックから読む。
+# ファイルが無ければ新機能は触らない（最初のバージョンには新機能を入れられない）。ファイルがあるのに登録する言語の見出しが無ければ、何も登録せずに止まる。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリ・年齢制限・価格は扱わないので、App Store Connect の画面で入れる。
 # 審査への提出は行わない。
 #
@@ -45,11 +47,12 @@ EDITABLE_STATES = %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA
 PROCESSING_TIMEOUT = 15 * 60
 
 # App Store Connect の文字数の上限
-LIMITS = { name: 30, subtitle: 30, promotionalText: 170, keywords: 100, description: 4000, notes: 4000 }.freeze
+LIMITS = { name: 30, subtitle: 30, promotionalText: 170, keywords: 100, description: 4000, whatsNew: 4000, notes: 4000 }.freeze
 
 LANGUAGES_PATH = 'docs/app-store/languages.json'
 SCREENSHOTS_PATH = 'docs/app-store/screenshots.json'
 METADATA_DIR = 'docs/app-store/metadata'
+WHATS_NEW_DIR = 'docs/app-store/whats-new'
 
 def env!(name)
   value = ENV.fetch(name, '')
@@ -169,6 +172,25 @@ def read_listing(language)
   }
   check_limits(texts, path)
   texts
+end
+
+# バージョンの新機能（言語 → 文面）と、読んだファイル。ファイルが無ければ文面は nil。
+# 見出しは「## <language>」と完全に一致するものを探す（zh-Hans と zh-Hant のように前方が同じ言語を取り違えないため）
+def read_whats_new(version_string, codes)
+  path = File.join(WHATS_NEW_DIR, "#{version_string}.md")
+  return [path, nil] unless File.exist?(path)
+
+  lines = File.read(path, encoding: Encoding::UTF_8).lines
+  texts = codes.to_h do |code|
+    start = lines.index { |l| l.strip == "## #{code}" }
+    abort "#{path}: 見出し「## #{code}」が見つかりません（登録する言語はすべて要ります）" unless start
+    finish = (start + 1...lines.size).find { |i| lines[i].start_with?('## ') } || lines.size
+    text = code_block(lines[start...finish].join, code)
+    abort "#{path}: 「## #{code}」の文面が空です" if text.empty?
+    check_limits({ whatsNew: text }, "#{path} の #{code}")
+    [code, text]
+  end
+  [path, texts]
 end
 
 # languages.json の言語のうち、LANGUAGES で指定したもの（空なら全部）
@@ -429,6 +451,7 @@ languages = select_languages(ENV.fetch('LANGUAGES', '').split(',').map(&:strip).
 
 # 文字数の上限は、何かを登録する前に全言語ぶん確かめる
 listings = languages.to_h { |l| [l['language'], read_listing(l['language'])] }
+whats_new_path, whats_new = read_whats_new(version_string, listings.compact.keys)
 notes = code_block(File.read(review_notes_path, encoding: Encoding::UTF_8))
 check_limits({ notes: notes }, review_notes_path)
 client = Client.new(key_path: env!('API_KEY_PATH'), key_id: env!('APPLE_API_KEY_ID'), issuer_id: env!('APPLE_API_ISSUER_ID'))
@@ -446,6 +469,11 @@ begin
 
   version, how = prepare_version(client, app['id'], version_string)
   summary("バージョン #{version_string}: #{how}（ID: `#{version['id']}`）\n")
+  if whats_new
+    summary("このバージョンの新機能: `#{whats_new_path}` から入れます\n")
+  else
+    summary("このバージョンの新機能: `#{whats_new_path}` が無いので触っていません\n")
+  end
 
   app_info = editable_app_info(client, app['id'])
   abort '::error::編集できる（審査前の）App 情報がありません' unless app_info
@@ -469,12 +497,15 @@ begin
         type: 'appInfoLocalizations', parent_key: :appInfo, parent_type: 'appInfos', parent_id: app_info['id'],
         locale: locale, attributes: texts.slice(:name, :subtitle)
       )
+      version_attributes = texts.slice(:description, :keywords, :promotionalText)
+      version_attributes[:whatsNew] = whats_new.fetch(code) if whats_new
       localization_id, version_done = upsert_localization(
         client,
         list_path: "/v1/appStoreVersions/#{version['id']}/appStoreVersionLocalizations",
         type: 'appStoreVersionLocalizations', parent_key: :appStoreVersion, parent_type: 'appStoreVersions', parent_id: version['id'],
-        locale: locale, attributes: texts.slice(:description, :keywords, :promotionalText)
+        locale: locale, attributes: version_attributes
       )
+      version_done += '（新機能を含む）' if whats_new
       rows << "| #{locale} | #{texts[:name]} | App 情報: #{info_done} / バージョン: #{version_done} |"
 
       next if screenshot_dir.empty?

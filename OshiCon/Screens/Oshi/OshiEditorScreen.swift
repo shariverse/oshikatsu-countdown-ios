@@ -18,6 +18,7 @@ struct OshiEditorScreen: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appTheme) private var theme
     @State private var form: OshiForm
     /// 新しく登録するときの id。保存に失敗してやり直しても同じ推しとして保存する。
     @State private var newOshiID = UUID()
@@ -25,6 +26,8 @@ struct OshiEditorScreen: View {
     @State private var isLoadingPhoto = false
     @State private var isBusy = false
     @State private var failureMessage: String?
+    /// 保存が成功したときの触覚。
+    @Environment(\.haptic) private var haptic
     @State private var deleteRequest: DeleteRequest?
 
     /// 削除の確認に出す中身。
@@ -56,15 +59,17 @@ struct OshiEditorScreen: View {
                 } footer: {
                     Text("写真と推し色はこの端末の中だけに保存されます")
                 }
+                .themeRowBackground()
                 if oshi != nil {
                     Section {
                         Button("推しを削除", role: .destructive, action: requestDelete)
                             .frame(maxWidth: .infinity)
                     }
+                    .themeRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(AppPalette.background.color)
+            .background(theme.palette.background.color)
             .disabled(isBusy)
             .navigationTitle(onboarding?.title ?? (oshi == nil ? String(localized: "推しを登録") : String(localized: "推しを編集")))
             .navigationBarTitleDisplayMode(.inline)
@@ -79,8 +84,8 @@ struct OshiEditorScreen: View {
                 }
             }
         }
-        .font(AppFont.text(.body))
-        .tint(AppPalette.brand.color)
+        .font(theme.typography.text(.body))
+        .tint(theme.palette.brand.color)
         .interactiveDismissDisabled(isBusy)
         .alert(
             failureMessage ?? "",
@@ -126,6 +131,7 @@ struct OshiEditorScreen: View {
         } footer: {
             InputLengthFooter(field: .oshiName, text: form.name)
         }
+        .themeRowBackground()
     }
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
@@ -177,6 +183,7 @@ struct OshiEditorScreen: View {
             ) else {
                 return
             }
+            haptic(.saved)
             onSaved(saved)
             if onboarding == nil {
                 dismiss()

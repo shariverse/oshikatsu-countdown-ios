@@ -11,6 +11,8 @@ struct InputLengthFooter: View {
     let field: InputField
     let text: String
 
+    @Environment(\.appTheme) private var theme
+
     private var length: Int {
         field.length(of: text)
     }
@@ -33,7 +35,7 @@ struct InputLengthFooter: View {
                 count
             }
         }
-        .foregroundStyle(exceedsLimit ? AppPalette.destructive.color : AppPalette.onSurfaceVariant.color)
+        .foregroundStyle(exceedsLimit ? theme.palette.destructive.color : theme.palette.onSurfaceVariant.color)
     }
 
     @ViewBuilder private var limitMessage: some View {

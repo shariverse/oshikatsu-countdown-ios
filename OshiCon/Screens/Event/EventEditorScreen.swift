@@ -21,6 +21,7 @@ struct EventEditorScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.calendar) private var calendar
+    @Environment(\.appTheme) private var theme
     @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
     private var storedOshis: [StoredOshi]
     /// 入力。開いたときの推しの一覧と今日から作る。
@@ -28,6 +29,8 @@ struct EventEditorScreen: View {
     /// 新しく追加するときの id。保存に失敗してやり直しても同じ予定として保存する。
     @State private var newEventID = UUID()
     @State private var failureMessage: String?
+    /// 保存が成功したときの触覚。
+    @Environment(\.haptic) private var haptic
 
     var body: some View {
         NavigationStack {
@@ -45,8 +48,8 @@ struct EventEditorScreen: View {
                 }
             }
         }
-        .font(AppFont.text(.body))
-        .tint(AppPalette.brand.color)
+        .font(theme.typography.text(.body))
+        .tint(theme.palette.brand.color)
         .task {
             guard form == nil else {
                 return
@@ -92,6 +95,7 @@ struct EventEditorScreen: View {
         }
         do {
             try OshiConStore(context: modelContext).save(saved)
+            haptic(.saved)
             onSaved(saved)
             if onboarding == nil {
                 dismiss()
@@ -111,6 +115,7 @@ private struct EventFormFields: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @Environment(\.calendar) private var calendar
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         Form {
@@ -127,6 +132,7 @@ private struct EventFormFields: View {
                     }
                 }
             }
+            .themeRowBackground()
             Section("種類") {
                 if dynamicTypeSize.isAccessibilitySize {
                     // 大きな文字では 5 つのセグメントに収まらないので、メニューで選ぶ
@@ -138,6 +144,7 @@ private struct EventFormFields: View {
                         .labelsHidden()
                 }
             }
+            .themeRowBackground()
             Section {
                 TextField("例：5th LIVE 東京公演", text: $form.title)
                     .accessibilityLabel("タイトル")
@@ -147,10 +154,12 @@ private struct EventFormFields: View {
             } footer: {
                 InputLengthFooter(field: .eventTitle, text: form.title)
             }
+            .themeRowBackground()
             Section {
                 DatePicker("日付", selection: day, displayedComponents: .date)
                 startTimeRow
             }
+            .themeRowBackground()
             Section {
                 TextField("会場・場所（任意）", text: $form.venue)
                     .accessibilityLabel("会場・場所（任意）")
@@ -159,19 +168,21 @@ private struct EventFormFields: View {
             } footer: {
                 InputLengthFooter(field: .eventVenue, text: form.venue)
             }
+            .themeRowBackground()
             Section {
                 Toggle(isOn: $form.repeatsYearly) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("毎年くり返す")
                         Text("誕生日や記念日は、過ぎたら翌年の同じ日を数えます")
-                            .font(AppFont.text(.footnote))
-                            .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                            .font(theme.typography.text(.footnote))
+                            .foregroundStyle(theme.palette.onSurfaceVariant.color)
                     }
                 }
             }
+            .themeRowBackground()
         }
         .scrollContentBackground(.hidden)
-        .background(AppPalette.background.color)
+        .background(theme.palette.background.color)
     }
 
     /// 開始時刻。決まっていなければ「未定」で、押すと 18:00 から選べるようにする。消すボタンで時刻なしに戻す。
@@ -184,7 +195,7 @@ private struct EventFormFields: View {
                     form.startTime = nil
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(AppPalette.onSurfaceVariant.color)
+                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 }
                 .buttonStyle(.borderless)
                 .accessibilityLabel("開始時刻を消す")
