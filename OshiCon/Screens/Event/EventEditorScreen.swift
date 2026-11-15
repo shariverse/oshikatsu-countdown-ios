@@ -31,6 +31,7 @@ struct EventEditorScreen: View {
     @State private var failureMessage: String?
     /// 保存が成功したときの触覚。
     @Environment(\.haptic) private var haptic
+    @Environment(ReminderScheduler.self) private var reminders: ReminderScheduler?
 
     var body: some View {
         NavigationStack {
@@ -96,6 +97,8 @@ struct EventEditorScreen: View {
         do {
             try OshiConStore(context: modelContext).save(saved)
             haptic(.saved)
+            // まだ聞いていなければ、通知の意味が伝わるこの時に許可を聞く（予約し直すのは保存の通知を受けた側）
+            reminders?.requestAuthorizationIfNeeded()
             onSaved(saved)
             if onboarding == nil {
                 dismiss()
