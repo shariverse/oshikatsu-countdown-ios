@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// 設定。終わった予定の表示、データの保存先の説明、バージョンとオープンソースライセンス。
+/// 設定。終わった予定の表示、通知、データの保存先の説明、バージョンとオープンソースライセンス。
 struct SettingsScreen: View {
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @Environment(\.appTheme) private var theme
@@ -23,6 +23,7 @@ struct SettingsScreen: View {
                 }
             }
             .themeRowBackground()
+            ReminderSettingsSection()
             Section("データ") {
                 VStack(alignment: .leading, spacing: 4) {
                     // iPad では iPad の絵にする

@@ -22,7 +22,9 @@ final class OshiConUITests: XCTestCase {
         app.launchArguments = ["-useInMemoryStore", "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"]
         app.launchEnvironment = [
             "OSHICON_DEFAULT_hasCompletedOnboarding": hasCompletedOnboarding ? "YES" : "NO",
-            "OSHICON_DEFAULT_showsPastEvents": "NO"
+            "OSHICON_DEFAULT_showsPastEvents": "NO",
+            // 前のテストで切り替えた値を残さない（メモリ上のストアでは予約も許可も求めない）
+            "OSHICON_DEFAULT_remindersEnabled": "YES"
         ]
         app.launch()
         return app
@@ -149,13 +151,44 @@ final class OshiConUITests: XCTestCase {
         let showsPast = app.switches.matching(NSPredicate(format: "label CONTAINS %@", "終わった予定も表示する")).firstMatch
         XCTAssertTrue(showsPast.exists)
         XCTAssertEqual(showsPast.value as? String, "0")
-        XCTAssertTrue(app.staticTexts["バージョン"].exists)
+        // 通知の欄の下にあるので、画面の外なら下まで送る
+        let version = app.staticTexts["バージョン"]
+        if !version.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(version.waitForExistence(timeout: 2))
 
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "オープンソースライセンス")).firstMatch.tap()
         XCTAssertTrue(app.navigationBars["オープンソースライセンス"].waitForExistence(timeout: 2))
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Outfit")).firstMatch.tap()
         XCTAssertTrue(app.navigationBars["Outfit"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "SIL OPEN FONT LICENSE")).firstMatch.exists)
+    }
+
+    @MainActor
+    func testSettingsReminderTimings() throws {
+        let app = launch(hasCompletedOnboarding: true)
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+        tabBar.buttons["設定"].tap()
+        XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
+
+        // 既定は通知を ON にし、5 つのタイミングをすべて出す
+        let reminders = app.switches["settings.reminders"]
+        XCTAssertTrue(reminders.waitForExistence(timeout: 2))
+        XCTAssertEqual(reminders.value as? String, "1")
+        for timing in ["thirtyDaysBefore", "sevenDaysBefore", "dayBefore", "onTheDay", "hourBeforeStart"] {
+            let toggle = app.switches["settings.reminderTiming.\(timing)"]
+            XCTAssertTrue(toggle.exists, timing)
+            XCTAssertEqual(toggle.value as? String, "1", timing)
+        }
+        XCTAssertTrue(app.datePickers.firstMatch.exists)
+
+        // OFF にすると、タイミングと時刻の項目を隠す
+        reminders.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        XCTAssertEqual(reminders.value as? String, "0")
+        XCTAssertTrue(app.switches["settings.reminderTiming.thirtyDaysBefore"].waitForNonExistence(timeout: 2))
+        XCTAssertFalse(app.datePickers.firstMatch.exists)
     }
 
     @MainActor
