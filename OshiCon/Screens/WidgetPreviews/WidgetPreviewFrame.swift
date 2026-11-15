@@ -64,6 +64,37 @@ enum WidgetPreview {
         }
         .environment(\.appTheme, theme)
     }
+
+    /// カウントダウンウィジェットのロック画面の形。端末が単色で描く見た目に寄せて、暗い壁紙の上に白で描く。
+    /// 丸の地（`AccessoryWidgetBackground`）はアプリでは描かれないので、半透明の丸で代わりに描く。
+    static func countdownLockScreen(
+        _ content: CountdownWidgetContent,
+        family: CountdownAccessoryView.Family,
+        theme: AppTheme = .shipping
+    ) -> some View {
+        CountdownAccessoryView(content: content, family: family)
+            .frame(width: lockScreenSize(family).width, height: lockScreenSize(family).height)
+            .background {
+                if family == .circular {
+                    Circle().fill(.white.opacity(0.18))
+                }
+            }
+            .foregroundStyle(.white)
+            .environment(\.appTheme, theme)
+            .environment(\.colorScheme, .dark)
+    }
+
+    /// ロック画面の形の大きさ。HIG の Widgets のサイズの表の、幅 430pt の iPhone の値。
+    private static func lockScreenSize(_ family: CountdownAccessoryView.Family) -> CGSize {
+        switch family {
+        case .circular:
+            CGSize(width: 76, height: 76)
+        case .rectangular:
+            CGSize(width: 172, height: 76)
+        case .inline:
+            CGSize(width: 257, height: 26)
+        }
+    }
 }
 
 #Preview("カウントダウン") {
@@ -87,4 +118,18 @@ enum WidgetPreview {
         WidgetPreview.upcoming(.unavailable)
     }
     .padding()
+}
+
+#Preview("ロック画面") {
+    VStack(spacing: 20) {
+        ForEach(Array([CountdownWidgetContent.sample, .notSelected].enumerated()), id: \.offset) { _, content in
+            HStack(spacing: 16) {
+                WidgetPreview.countdownLockScreen(content, family: .circular)
+                WidgetPreview.countdownLockScreen(content, family: .rectangular)
+            }
+            WidgetPreview.countdownLockScreen(content, family: .inline)
+        }
+    }
+    .padding(24)
+    .background(LinearGradient(colors: [.indigo, .black], startPoint: .top, endPoint: .bottom))
 }
