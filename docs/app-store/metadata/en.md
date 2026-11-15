@@ -52,6 +52,12 @@ Set birthdays and anniversaries to repeat every year, and once the day has passe
 • Oshi Count: your upcoming events, nearest first
 Tap a widget to open an event's details or add a new event.
 
+◆ Reminders before your events
+Get notified 30 days, 7 days and 1 day before, on the day, and 1 hour before the start time. You can change the timings and the time of day in Settings.
+
+◆ Countdowns on your Lock Screen
+Add the Countdown widget to your Lock Screen (circular, rectangular or inline) to check the days left at any time. On the day of an event with a start time, a Live Activity on the Lock Screen and in the Dynamic Island counts down to the start.
+
 ◆ Made for iPhone and iPad
 Works on the large iPad screen and in landscape, and supports Dark Mode.
 
@@ -62,7 +68,7 @@ Your oshi, photos and events are stored only on your device and are never sent a
 Event types: Live, Birthday, Release, Stream, Other
 ```
 
-（1551 文字）
+（2014 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 
