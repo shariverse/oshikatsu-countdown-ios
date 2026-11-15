@@ -16,10 +16,10 @@ final class OshiConUITests: XCTestCase {
     /// 端末に残ったデータに左右されないよう、メモリ上のストアで起動し、設定（UserDefaults）の初期値も決める。
     /// 起動引数で渡すとアプリの中で書き換えられなくなる（導線を終えてもタブに切り替わらない）ので、環境変数で渡す。
     @MainActor
-    private func launch(hasCompletedOnboarding: Bool) -> XCUIApplication {
+    private func launch(hasCompletedOnboarding: Bool, arguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         // 文言で要素を探すので、Simulator の言語にかかわらず日本語で起動する
-        app.launchArguments = ["-useInMemoryStore", "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"]
+        app.launchArguments = ["-useInMemoryStore", "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP"] + arguments
         app.launchEnvironment = [
             "OSHICON_DEFAULT_hasCompletedOnboarding": hasCompletedOnboarding ? "YES" : "NO",
             "OSHICON_DEFAULT_showsPastEvents": "NO",
@@ -189,6 +189,38 @@ final class OshiConUITests: XCTestCase {
         XCTAssertEqual(reminders.value as? String, "0")
         XCTAssertTrue(app.switches["settings.reminderTiming.thirtyDaysBefore"].waitForNonExistence(timeout: 2))
         XCTAssertFalse(app.datePickers.firstMatch.exists)
+    }
+
+    /// 通知を押すと、その予定の詳細が開く（落ちない。#186）。
+    /// メモリ上のストアでは予約しないので、裏に回ったらテスト用の通知を出す口（`-scheduleTestReminder`）を使う。
+    @MainActor
+    func testTappingReminderOpensEventDetail() throws {
+        let app = launch(hasCompletedOnboarding: true, arguments: ["-scheduleTestReminder"])
+        XCTAssertTrue(app.buttons["home.addEvent"].waitForExistence(timeout: 5))
+        app.buttons["home.addEvent"].tap()
+        let title = app.textFields["タイトル"]
+        XCTAssertTrue(title.waitForExistence(timeout: 2))
+        title.tap()
+        title.typeText("通知の予定")
+        app.navigationBars["予定を追加"].buttons["保存"].tap()
+
+        // まだ聞いていなければ、保存の直後に通知の許可を求められる
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let allow = springboard.alerts.buttons.matching(NSPredicate(format: "label IN %@", ["許可", "Allow"])).firstMatch
+        if allow.waitForExistence(timeout: 5) {
+            allow.tap()
+        }
+        XCTAssertTrue(app.staticTexts["通知の予定"].waitForExistence(timeout: 2))
+
+        // 裏に回ると 2 秒後に通知が出るので、バナーを押す
+        XCUIDevice.shared.press(.home)
+        let banner = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "通知の予定")).firstMatch
+        XCTAssertTrue(banner.waitForExistence(timeout: 15))
+        banner.tap()
+
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
+        XCTAssertTrue(app.staticTexts["今日は当日！"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.state, .runningForeground)
     }
 
     @MainActor
