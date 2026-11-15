@@ -66,10 +66,11 @@
   .sub { position: absolute; left: 0; right: 0; text-align: center; color: var(--on-surface-variant); font-weight: 600; }
 
   .copy { position: absolute; }
-  .copy .title { font-weight: 800; line-height: 1.18; letter-spacing: -0.01em; }
+  /* 見出しとチップは折り返さず、収まらなければ文字を縮める（fitCopy） */
+  .copy .title { font-weight: 800; line-height: 1.18; letter-spacing: -0.01em; white-space: nowrap; }
   .chips { display: flex; flex-direction: column; gap: 0.55em; }
   .chip { display: inline-flex; align-items: center; gap: 0.6em; align-self: flex-start;
-    padding: 0.45em 0.95em 0.5em 0.7em; border-radius: 999px; font-weight: 700; color: var(--on-surface);
+    padding: 0.45em 0.95em 0.5em 0.7em; border-radius: 999px; font-weight: 700; color: var(--on-surface); white-space: nowrap;
     background: #ffffff; box-shadow: inset 0 0 0 4px var(--brand-container), 0 16px 40px rgba(194, 24, 91, 0.12); }
   .chip i { font-style: normal; display: grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%;
     background: var(--brand); color: #fff; font-size: 0.8em; }
@@ -211,15 +212,33 @@
     phone("04", W / 2 + 720, 700, 560, 7, 1);
     phone("01", W / 2, 560, 640, 0, 2);
   } else {
-    // 3:2。左に何のアプリかと主な機能、右に実際の画面
-    add(`<div class="brand" style="left:250px;top:220px;font-size:86px"><img src="icon.png" onerror="this.remove()">${appName}</div>`);
-    add(`<div class="copy" style="left:250px;top:520px;width:1800px;font-size:${long ? 128 : 150}px">` +
+    // 3:2。左に何のアプリかと主な機能、右に実際の画面。
+    // 端末を先に置き、左の端末の左端の手前までを文言の欄にする（長い言語でも、端末の下に文字が入らないように）
+    const back = phone("02", W - 1540, 520, 860, -6, 1);
+    phone("01", W - 760, 360, 980, 4, 2);
+    const copyLeft = 250;
+    const copyRight = back.getBoundingClientRect().left - 120;
+    add(`<div class="brand" style="left:${copyLeft}px;top:220px;font-size:86px"><img src="icon.png" onerror="this.remove()">${appName}</div>`);
+    const box = add(`<div class="copy" style="left:${copyLeft}px;top:520px;width:${copyRight - copyLeft}px;font-size:${long ? 128 : 150}px">` +
         `<div class="title">${copy.search.title}</div>` +
         `<div class="chips" style="font-size:76px;margin-top:110px">` +
         copy.search.chips.map((c, i) => `<div class="chip"><i>${i + 1}</i>${c}</div>`).join("") +
         `</div></div>`);
-    phone("02", W - 1700, 520, 860, -6, 1);
-    phone("01", W - 900, 360, 980, 4, 2);
+    fitCopy(box);
+  }
+
+  // 見出しとチップのいちばん長い行が欄に収まるまで、見出しとチップの文字を同じ割合で縮める（折り返さない）
+  function fitCopy(box) {
+    const chips = box.querySelector(".chips");
+    const titleSize = parseFloat(box.style.fontSize);
+    const chipSize = parseFloat(chips.style.fontSize);
+    const right = box.getBoundingClientRect().right;
+    const overflows = () => [...box.querySelectorAll(".title, .chip")].some((item) =>
+      item.getBoundingClientRect().left + item.scrollWidth > right + 0.5);
+    for (let scale = 1; overflows() && scale > 0.5; scale -= 0.02) {
+      box.style.fontSize = `${titleSize * scale}px`;
+      chips.style.fontSize = `${chipSize * scale}px`;
+    }
   }
 </script>
 </body>
