@@ -40,3 +40,21 @@ extension UpcomingWidgetContent {
         return Self(events: events, oshis: [lumina, minato, sora], today: today, maxRows: maxRows)
     }
 }
+
+extension EventActivityAttributes {
+    /// ライブアクティビティの Preview に出す見本（開演まであと 1 時間 30 分）。
+    nonisolated static var sample: Self {
+        let start = Date.now.addingTimeInterval(90 * 60)
+        return Self(
+            eventID: UUID(),
+            heading: "LUMINA",
+            title: String(localized: "5th LIVE 東京公演", comment: "ウィジェットの一覧に出す見本の予定名"),
+            colorRawValue: OshiColor.pink.rawValue,
+            startDate: start,
+            countdownBegin: start.addingTimeInterval(-3 * 3_600),
+            untilText: EventText.untilLabel(kind: .live, hasStartTime: true),
+            startText: EventText.startTime(TimeOfDay(hour: 18, minute: 0), kind: .live),
+            startedText: String(localized: "今日は当日！")
+        )
+    }
+}

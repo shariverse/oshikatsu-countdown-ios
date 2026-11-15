@@ -3,7 +3,6 @@
 //  OshiCon
 //
 
-import Combine
 import Observation
 import os
 import SwiftData
@@ -157,7 +156,7 @@ struct ReminderRefresher: ViewModifier {
     func body(content: Content) -> some View {
         content
             .environment(scheduler)
-            .onReceive(Self.triggers) { _ in
+            .onReceive(WidgetRefreshTrigger.publisher) { _ in
                 scheduler?.reschedule()
             }
             .onChange(of: scenePhase, initial: true) { _, phase in
@@ -165,13 +164,6 @@ struct ReminderRefresher: ViewModifier {
                     scheduler?.reschedule()
                 }
             }
-    }
-
-    /// どのきっかけの通知も、メインで受け取る（通知を出すスレッドは決まっていないため）。
-    private static var triggers: AnyPublisher<Notification, Never> {
-        Publishers.MergeMany(WidgetRefreshTrigger.allCases.map { NotificationCenter.default.publisher(for: $0.notificationName) })
-            .receive(on: DispatchQueue.main)
-            .eraseToAnyPublisher()
     }
 }
 
