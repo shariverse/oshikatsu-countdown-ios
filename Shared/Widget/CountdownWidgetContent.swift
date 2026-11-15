@@ -25,10 +25,13 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
         let color: OshiColor
         let status: CountdownStatus
         let daysUntil: Int
+        /// 登録した日（毎年くり返す予定は前の回のほうが後ならその日）から開始までの進み具合（0〜1）。
+        /// ロック画面の丸の輪に使う。時刻を渡さずに作ったときと、求められないときは nil。
+        let progress: Double?
         /// 文言の言語。
         let locale: Locale
 
-        init(event: OshiEvent, oshi: Oshi?, today: CalendarDay, locale: Locale = .app) {
+        init(event: OshiEvent, oshi: Oshi?, today: CalendarDay, progress: Double? = nil, locale: Locale = .app) {
             let scheduled = ScheduledEvent(event: event, today: today)
             self.locale = locale
             eventID = event.id
@@ -37,6 +40,7 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
             color = oshi?.color ?? .black
             status = scheduled.status
             daysUntil = scheduled.daysUntil
+            self.progress = progress
         }
 
         /// 読み上げ・1 行の表示（`あと 3 日`・`今日！`・`2 日前`）。
@@ -47,6 +51,16 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
         /// 「あと N 日」を数字と前後の文言に分けたもの。
         var countdownParts: EventText.CountdownParts {
             EventText.countdownParts(days: daysUntil, withPrefix: true, locale: locale)
+        }
+
+        /// 「N 日」を数字と後の文言に分けたもの（ロック画面の丸。ja `3`・`日`、en `3`・`days`）。
+        var dayCountParts: EventText.CountdownParts {
+            EventText.countdownParts(days: daysUntil, withPrefix: false, locale: locale)
+        }
+
+        /// ロック画面の 1 行（`あと 3 日 · 5th LIVE`）。端末が後ろを切り詰めるので、残り日数を先に出す。
+        var inlineText: String {
+            "\(countdownText) · \(title)"
         }
 
         /// 読み上げ（`ミナト、5th LIVE、あと 3 日`）。
@@ -67,6 +81,18 @@ nonisolated enum CountdownWidgetContent: Equatable, Sendable {
         }
         let oshi = event.oshiID.flatMap { id in oshis.first { $0.id == id } }
         self = .event(Event(event: event, oshi: oshi, today: today, locale: locale))
+    }
+
+    /// `now` の時点の中身を `calendar` のタイムゾーンで作る。進み具合（`Event.progress`）も求める。
+    init(eventID: OshiEvent.ID?, events: [OshiEvent], oshis: [Oshi], now: Date, calendar: Calendar, locale: Locale = .app) {
+        let today = CalendarDay(now, calendar: calendar)
+        guard let eventID, let event = events.first(where: { $0.id == eventID }) else {
+            self.init(eventID: eventID, events: events, oshis: oshis, today: today, locale: locale)
+            return
+        }
+        let oshi = event.oshiID.flatMap { id in oshis.first { $0.id == id } }
+        let progress = EventCountdown(event: event, now: now, calendar: calendar).progress
+        self = .event(Event(event: event, oshi: oshi, today: today, progress: progress, locale: locale))
     }
 
     /// ウィジェットで選べる予定（当日とこれからの予定を近い順）。

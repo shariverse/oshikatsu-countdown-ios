@@ -17,7 +17,8 @@ extension CountdownWidgetContent {
             day: CalendarDay(Date.now.addingTimeInterval(86_400 * 11), calendar: .autoupdatingCurrent),
             createdAt: .now
         )
-        return .event(.init(event: event, oshi: oshi, today: today))
+        // ロック画面の丸の輪の見本（登録してから開始までの 3 分の 2 ほど）
+        return .event(.init(event: event, oshi: oshi, today: today, progress: 0.65))
     }
 }
 
