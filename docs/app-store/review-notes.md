@@ -15,7 +15,7 @@ App Store Connect の「App Review に関する情報」→「メモ」に貼る
 2. ホームの「予定を追加」から予定を登録すると、ホームに「あと N 日」が表示されます。予定を押すと、秒単位のカウントダウンの画面が開きます。
 3. 「推し」タブで推しの登録・編集・削除ができます。写真は iOS の写真の選択画面で選んだものだけを読み込みます（写真ライブラリへのアクセスの許可は求めません）。
    写真を選ぶと調整画面が開き、拡大・縮小・移動・回転で丸い枠に写す範囲を決めます。保存するのは切り抜いた画像だけで、端末の外には送りません。
-4. ホーム画面のウィジェット（「カウントダウン」「推しカウント」）を追加できます。カウントダウンはウィジェットを編集して表示する予定を選びます。
+4. ホーム画面のウィジェット（「カウントダウン」「推しカウント」）を追加できます。カウントダウンはウィジェットを編集して表示する予定を選びます。カウントダウンはロック画面（丸・長方形・1 行）にも置けます。
 5. 通知を押すと、その予定のカウントダウンの画面が開きます。
 
 iPhone と iPad の両方に対応しています。
@@ -38,7 +38,7 @@ This app lets fans add upcoming events for their "oshi" (a favorite idol, artist
 2. Add an event from "Add Event" on the Home tab, and "N days left" appears on Home. Tap an event to open a countdown screen that counts down to the second.
 3. On the "Oshi" tab you can add, edit and delete oshi. Photos are loaded only when the user picks them in the iOS photo picker (the app does not ask for photo library access).
    After a photo is picked, an adjustment screen opens where the user can zoom, move and rotate it to frame it in the circle. Only the cropped image is saved, and it never leaves the device.
-4. You can add the Home Screen widgets "Countdown" and "Oshi Count". For the Countdown widget, edit the widget to choose which event to show.
+4. You can add the Home Screen widgets "Countdown" and "Oshi Count". For the Countdown widget, edit the widget to choose which event to show. The Countdown widget can also be added to the Lock Screen (circular, rectangular and inline).
 5. Tapping a notification opens the countdown screen for that event.
 
 The app supports both iPhone and iPad.

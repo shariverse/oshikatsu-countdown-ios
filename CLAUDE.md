@@ -73,10 +73,12 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   ただし Material 3・`FilterChip`・Snackbar・48dp など Android 固有の部分は移さず、SwiftUI の標準とデザインに従う
 - 画面デザインの正はデザインキャンバス「推し活カウントダウン 画面デザイン」。デザインの無い画面は主要画面の雰囲気に合わせる。
   ただし配色・書体・角の丸み・装飾は、採用した地雷系・ゴシック（`AppTheme.jiraiGothic` と `docs/design/themes.md`）に従う（採用案のキャンバスは別に足す。Discussion #80 の Q8）
-- **作らないもの**: 広告・シェア・検索・カレンダー・丸いウィジェット・ロック画面ウィジェット・iCloud 同期。予定の入力欄に通知の項目や広告の枠を置かない（通知は設定画面でアプリ全体に対して切り替える）。**通信しない**（データは端末の中だけ）
+- **作らないもの**: 広告・シェア・検索・カレンダー・iCloud 同期。予定の入力欄に通知の項目や広告の枠を置かない（通知は設定画面でアプリ全体に対して切り替える）。**通信しない**（データは端末の中だけ）
 - 1.2.0 で足す機能（通知・当日のライブアクティビティ・ロック画面ウィジェット）は、Android 版にも入れる前提。iOS で作ったら、Android 版の `docs/SPEC.md` を更新する PR を出す
 - 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents / Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
 - ホーム画面ウィジェットは 2 種: カウントダウン（予定 1 件。`AppIntentConfiguration` で予定を選ぶ）と推しカウント（これからの予定の一覧）
+  - カウントダウンはロック画面にも置ける（丸・長方形・1 行。描くのは `Shared/Widget/CountdownAccessoryView.swift`）。ロック画面は端末が単色で描くので、推し色の塗りとテーマの装飾は使わない。
+    丸の輪は登録した日から開始までの進み具合（詳細画面と同じ `EventCountdown.progress`）。`widgetFamily` は Environment に入れられないので、形は引数で渡す（アプリの Preview は `WidgetPreview.countdownLockScreen`）
 - データ（SwiftData のストアと推しの写真）は**最初から App Group のコンテナに置く**（ウィジェットと共有するため。後から移すとデータの移し替えが要る）
 - SwiftData のスキーマを最初の TestFlight 配信の後に変えると移行が要る。モデルの形を変えるときは移行を用意する
 - 文言は 12 言語（en 既定・ja・zh-Hans・zh-Hant・ko・fr・de・es・pt-BR・it・th・id）。`DEVELOPMENT_LANGUAGE = en` で、対応していない言語の端末では英語で出す

@@ -6,18 +6,39 @@
 import SwiftUI
 import WidgetKit
 
-/// カウントダウンウィジェット（2×2）。選んだ予定 1 件を、推し色の塗りに白い文字で「あと N 日」と出す。
+/// カウントダウンウィジェット。選んだ予定 1 件の「あと N 日」を出す。
+/// ホーム画面（2×2）は推し色の塗りに白い文字、ロック画面（丸・長方形・1 行）は端末が単色で描く。
 /// 押すとアプリで予定の詳細を開く。0:00 ごとのエントリで、日付が変わったら数え直す。
 struct CountdownWidget: Widget {
     static let kind = "jp.shilokuma.OshiCon.Countdown"
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: Self.kind, intent: SelectEventIntent.self, provider: CountdownProvider()) { entry in
-            CountdownWidgetView(content: entry.content)
+            CountdownWidgetEntryView(content: entry.content)
         }
         .configurationDisplayName("カウントダウン")
         .description("選んだ予定まであと何日かを推し色で表示します")
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular, .accessoryInline])
+    }
+}
+
+/// ホーム画面の 2×2 とロック画面の形で、中身の描き方を分ける。
+private struct CountdownWidgetEntryView: View {
+    let content: CountdownWidgetContent
+
+    @Environment(\.widgetFamily) private var family
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular:
+            CountdownAccessoryView(content: content, family: .circular)
+        case .accessoryRectangular:
+            CountdownAccessoryView(content: content, family: .rectangular)
+        case .accessoryInline:
+            CountdownAccessoryView(content: content, family: .inline)
+        default:
+            CountdownWidgetView(content: content)
+        }
     }
 }
 
@@ -74,7 +95,8 @@ nonisolated struct CountdownProvider: AppIntentTimelineProvider {
                 eventID: configuration.event?.id,
                 events: data.events,
                 oshis: data.oshis,
-                today: CalendarDay(date, calendar: calendar)
+                now: date,
+                calendar: calendar
             )
         )
     }
@@ -87,4 +109,25 @@ nonisolated struct CountdownProvider: AppIntentTimelineProvider {
     CountdownEntry(date: .now, content: .notSelected)
     CountdownEntry(date: .now, content: .missing)
     CountdownEntry(date: .now, content: .unavailable)
+}
+
+#Preview("ロック画面・丸", as: .accessoryCircular) {
+    CountdownWidget()
+} timeline: {
+    CountdownEntry.sample
+    CountdownEntry(date: .now, content: .notSelected)
+}
+
+#Preview("ロック画面・長方形", as: .accessoryRectangular) {
+    CountdownWidget()
+} timeline: {
+    CountdownEntry.sample
+    CountdownEntry(date: .now, content: .missing)
+}
+
+#Preview("ロック画面・1 行", as: .accessoryInline) {
+    CountdownWidget()
+} timeline: {
+    CountdownEntry.sample
+    CountdownEntry(date: .now, content: .notSelected)
 }
