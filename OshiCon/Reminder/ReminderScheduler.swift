@@ -38,7 +38,8 @@ final class ReminderScheduler: NSObject {
         }
     }
 
-    /// 計画を作り直し、予約を置き換える。続けて呼ばれたら、前の置き換えは取りやめる。
+    /// 計画を作り直し、予約を置き換える。続けて呼ばれたら、前の置き換えを取りやめ、それが止まってから置き換える
+    /// （前の置き換えが予約を足している途中に次の置き換えが今の予約を読むと、消した予定の予約が残るため）。
     func reschedule() {
         guard isActive else {
             return
@@ -54,8 +55,10 @@ final class ReminderScheduler: NSObject {
             return
         }
         let settings = ReminderSettings(defaults: .standard)
-        rescheduling?.cancel()
+        let previous = rescheduling
+        previous?.cancel()
         rescheduling = Task {
+            await previous?.value
             await replaceRequests(events: events, oshiNames: oshiNames, settings: settings)
         }
     }
@@ -112,8 +115,8 @@ final class ReminderScheduler: NSObject {
         }
         let planned = Set(requests.map(\.identifier))
         center.removePendingNotificationRequests(withIdentifiers: pending.filter { !planned.contains($0) })
-        // 同じ識別子で足すと、文面と日時が置き換わる
-        for request in requests {
+        // 同じ識別子で足すと、文面と日時が置き換わる。取りやめたら、残りは次の置き換えに任せる
+        for request in requests where !Task.isCancelled {
             do {
                 try await center.add(request)
             } catch {
