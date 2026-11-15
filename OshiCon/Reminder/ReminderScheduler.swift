@@ -125,9 +125,12 @@ final class ReminderScheduler: NSObject {
     }
 }
 
-extension ReminderScheduler: UNUserNotificationCenterDelegate {
+/// delegate のメソッドは MainActor で動かす。iOS は完了ハンドラ付きのメソッドとして呼び、Swift が作る橋渡しが、
+/// async のメソッドが終わったスレッドで iOS の完了ハンドラを呼ぶ。`nonisolated` にするとメインではないスレッドで呼ばれ、
+/// 完了ハンドラの中の UIKit の処理（画面のスナップショットの更新）が assertion で落ちる（#186）。
+extension ReminderScheduler: @MainActor UNUserNotificationCenterDelegate {
     /// アプリを開いている間に出た通知も、バナーで出す。
-    nonisolated func userNotificationCenter(
+    func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
@@ -135,13 +138,11 @@ extension ReminderScheduler: UNUserNotificationCenterDelegate {
     }
 
     /// 押された通知の画面を開く（開くのは `RootView`。初回の導線の途中なら開かない）。
-    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         guard let link = ReminderRequest.link(from: response.notification.request.content.userInfo) else {
             return
         }
-        await MainActor.run {
-            openedLink = link
-        }
+        openedLink = link
     }
 }
 
