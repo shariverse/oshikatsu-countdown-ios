@@ -52,6 +52,12 @@ Atur ulang tahun dan hari jadi agar "Berulang setiap tahun": setelah harinya lew
 • Oshi Count: daftar jadwal mendatang, dari yang terdekat
 Ketuk widget untuk membuka detail jadwal atau menambah jadwal baru.
 
+◆ Pengingat sebelum jadwal
+Dapatkan notifikasi 30 hari, 7 hari, dan 1 hari sebelumnya, pada hari H, serta 1 jam sebelum mulai. Waktu dan jam pengingat bisa diubah di Pengaturan.
+
+◆ Hitung mundur di Layar Terkunci
+Pasang widget Hitung Mundur di Layar Terkunci (bulat, persegi panjang, atau satu baris) untuk melihat sisa hari kapan saja. Pada hari jadwal yang punya waktu mulai, Aktivitas Langsung di Layar Terkunci dan Dynamic Island menghitung waktu sampai mulai.
+
 ◆ Untuk iPhone dan iPad
 Bisa dipakai di layar besar iPad dan dalam posisi lanskap, serta mendukung Mode Gelap.
 
@@ -62,7 +68,7 @@ Oshi, foto, dan jadwal hanya disimpan di perangkatmu dan tidak pernah dikirim ke
 Jenis jadwal: konser, ulang tahun, rilis, live streaming, lainnya
 ```
 
-（1624 文字）
+（2090 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 
