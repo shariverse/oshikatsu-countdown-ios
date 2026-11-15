@@ -25,13 +25,20 @@ final class ReminderScheduler: NSObject {
 
     @ObservationIgnored private let container: ModelContainer
     @ObservationIgnored private let isActive: Bool
+    /// UI テストで、通知を押したときの動きを確かめる（`LaunchOptions.schedulesTestReminder`）。予約はしないが、許可と delegate は動かす。
+    @ObservationIgnored private let handlesTestReminder: Bool
     @ObservationIgnored private var rescheduling: Task<Void, Never>?
 
-    init(container: ModelContainer, isActive: Bool = !LaunchOptions.usesInMemoryStore) {
+    init(
+        container: ModelContainer,
+        isActive: Bool = !LaunchOptions.usesInMemoryStore,
+        handlesTestReminder: Bool = LaunchOptions.schedulesTestReminder
+    ) {
         self.container = container
         self.isActive = isActive
+        self.handlesTestReminder = handlesTestReminder
         super.init()
-        if isActive {
+        if isActive || handlesTestReminder {
             // 押して起動したときの通知を受け取れるよう、起動の途中で delegate にする
             UNUserNotificationCenter.current().delegate = self
         }
@@ -64,7 +71,7 @@ final class ReminderScheduler: NSObject {
 
     /// まだ許可を聞いていなければ聞く（予定を保存した直後と、設定で通知を ON にしたとき）。通知が OFF なら聞かない。
     func requestAuthorizationIfNeeded() {
-        guard isActive, ReminderSettings(defaults: .standard).isEnabled else {
+        guard isActive || handlesTestReminder, ReminderSettings(defaults: .standard).isEnabled else {
             return
         }
         Task {
@@ -88,6 +95,27 @@ final class ReminderScheduler: NSObject {
             return
         }
         authorizationStatus = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+    }
+
+    /// UI テスト用: いちばん新しく登録した予定の通知を 2 秒後に出す（`LaunchOptions.schedulesTestReminder` のときだけ）。
+    func scheduleTestReminder() {
+        guard handlesTestReminder,
+              let event = try? OshiConStore(context: container.mainContext).events().max(by: { $0.createdAt < $1.createdAt }) else {
+            return
+        }
+        let content = UNMutableNotificationContent()
+        content.title = event.title
+        content.body = EventText.today()
+        content.userInfo = [ReminderRequest.linkKey: WidgetLink.eventDetail(event.id).url.absoluteString]
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let request = UNNotificationRequest(identifier: ReminderRequest.identifierPrefix + "test", content: content, trigger: trigger)
+        Task {
+            do {
+                try await UNUserNotificationCenter.current().add(request)
+            } catch {
+                Self.logger.error("テスト用の通知を予約できなかった: \(error.localizedDescription, privacy: .public)")
+            }
+        }
     }
 
     private func replaceRequests(events: [OshiEvent], oshiNames: [Oshi.ID: String], settings: ReminderSettings) async {
@@ -161,8 +189,13 @@ struct ReminderRefresher: ViewModifier {
                 scheduler?.reschedule()
             }
             .onChange(of: scenePhase, initial: true) { _, phase in
-                if phase == .active {
+                switch phase {
+                case .active:
                     scheduler?.reschedule()
+                case .background:
+                    scheduler?.scheduleTestReminder()
+                default:
+                    break
                 }
             }
     }

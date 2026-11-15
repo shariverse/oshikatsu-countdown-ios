@@ -32,6 +32,14 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(testPhotoArgument)
     }
 
+    /// アプリが裏に回ったら、いちばん新しく登録した予定の通知を 2 秒後に出す（UI テストで、通知を押したときの動きを確かめる）。
+    /// メモリ上のストアでは予定の通知を予約しないため。メモリ上のストアのときだけ効く。
+    static let testReminderArgument = "-scheduleTestReminder"
+
+    static var schedulesTestReminder: Bool {
+        usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(testReminderArgument)
+    }
+
     /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
     static let defaultEnvironmentPrefix = "OSHICON_DEFAULT_"
 
