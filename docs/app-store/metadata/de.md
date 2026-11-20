@@ -52,6 +52,12 @@ Stell Geburtstage und Jahrestage auf „Jährlich wiederholen“: Ist der Tag vo
 • Oshi Count: deine kommenden Termine, die nächsten zuerst
 Tippe auf ein Widget, um die Details eines Termins zu öffnen oder einen neuen Termin hinzuzufügen.
 
+◆ Erinnerungen vor deinen Terminen
+Lass dich 30 Tage, 7 Tage und 1 Tag vorher, am Tag selbst und 1 Stunde vor Beginn benachrichtigen. Zeitpunkte und Uhrzeit der Erinnerungen kannst du in den Einstellungen ändern.
+
+◆ Countdown auf dem Sperrbildschirm
+Lege das Countdown-Widget auf den Sperrbildschirm (rund, rechteckig oder einzeilig) und sieh die verbleibenden Tage jederzeit. Am Tag eines Termins mit Startzeit zählt eine Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island bis zum Beginn herunter.
+
 ◆ Für iPhone und iPad
 Funktioniert auf dem großen iPad-Bildschirm und im Querformat und unterstützt den dunklen Modus.
 
@@ -62,7 +68,7 @@ Oshis, Fotos und Termine werden nur auf deinem Gerät gespeichert und nirgendwoh
 Terminarten: Live, Geburtstag, Release, Stream, Sonstiges
 ```
 
-（1722 文字）
+（2236 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

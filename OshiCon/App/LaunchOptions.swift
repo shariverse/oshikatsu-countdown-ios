@@ -32,6 +32,14 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(testPhotoArgument)
     }
 
+    /// アプリが裏に回ったら、いちばん新しく登録した予定の通知を 2 秒後に出す（UI テストで、通知を押したときの動きを確かめる）。
+    /// メモリ上のストアでは予定の通知を予約しないため。メモリ上のストアのときだけ効く。
+    static let testReminderArgument = "-scheduleTestReminder"
+
+    static var schedulesTestReminder: Bool {
+        usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(testReminderArgument)
+    }
+
     /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
     static let defaultEnvironmentPrefix = "OSHICON_DEFAULT_"
 
@@ -60,7 +68,16 @@ nonisolated enum AppStorageKey {
     static let hasCompletedOnboarding = "hasCompletedOnboarding"
     /// 終わった予定もホームに表示する（既定は OFF）。
     static let showsPastEvents = "showsPastEvents"
+    /// 予定を通知する（既定は ON）。
+    static let remindersEnabled = "remindersEnabled"
+    /// 日付で決まる通知（N 日前・前日・当日）を出す時刻。0:00 からの分（既定は 9:00）。
+    static let reminderMinutes = "reminderMinutes"
+
+    /// そのタイミングの通知を出す（既定は ON）。
+    static func reminderTiming(_ timing: ReminderTiming) -> String {
+        "reminderTiming.\(timing.rawValue)"
+    }
 
     /// UI テストが初期値を渡せるキー。どれも Bool（`LaunchOptions.applyDefaultEnvironment()`）
-    static let all = [hasCompletedOnboarding, showsPastEvents]
+    static let all = [hasCompletedOnboarding, showsPastEvents, remindersEnabled]
 }

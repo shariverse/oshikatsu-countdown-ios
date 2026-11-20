@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 import WidgetKit
 
-/// ホーム画面ウィジェットを描き直すきっかけ。
+/// ホーム画面ウィジェットを描き直すきっかけ。予定の通知とライブアクティビティを置き直すきっかけも同じ。
 nonisolated enum WidgetRefreshTrigger: CaseIterable, Sendable {
     /// 推し・予定の保存・削除（SwiftData の保存）。
     case save
@@ -29,6 +29,13 @@ nonisolated enum WidgetRefreshTrigger: CaseIterable, Sendable {
             .NSSystemTimeZoneDidChange
         }
     }
+
+    /// どのきっかけの通知も、メインで受け取る（通知を出すスレッドは決まっていないため）。
+    static var publisher: AnyPublisher<Notification, Never> {
+        Publishers.MergeMany(allCases.map { NotificationCenter.default.publisher(for: $0.notificationName) })
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
 }
 
 /// ホーム画面ウィジェットを描き直す。アプリで推し・予定を保存・削除したとき、端末の時刻・タイムゾーンが変わったとき、
@@ -39,7 +46,7 @@ struct WidgetRefresher: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .onReceive(Self.triggers) { _ in
+            .onReceive(WidgetRefreshTrigger.publisher) { _ in
                 reload()
             }
             .onChange(of: scenePhase) { _, phase in
@@ -47,13 +54,6 @@ struct WidgetRefresher: ViewModifier {
                     reload()
                 }
             }
-    }
-
-    /// どのきっかけの通知も、メインで受け取る（通知を出すスレッドは決まっていないため）。
-    private static var triggers: AnyPublisher<Notification, Never> {
-        Publishers.MergeMany(WidgetRefreshTrigger.allCases.map { NotificationCenter.default.publisher(for: $0.notificationName) })
-            .receive(on: DispatchQueue.main)
-            .eraseToAnyPublisher()
     }
 
     private func reload() {

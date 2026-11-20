@@ -176,7 +176,7 @@ scripts/app-store-screenshots.sh APP_IPHONE_67 ja,en
 
 ### 9. App Store の掲載文とスクリーンショットの登録
 
-Actions タブの「App Store Metadata」を手動実行すると、言語ごとの掲載文（[docs/app-store/metadata/](docs/app-store/metadata/) の `<言語>.md` のアプリ名・サブタイトル・プロモーションテキスト・説明文・キーワード）と、このバージョンの新機能（[docs/app-store/whats-new/](docs/app-store/whats-new/) の `<バージョン>.md`）、[docs/app-store/review-notes.md](docs/app-store/review-notes.md) の審査用メモを、App Store Connect API で App Store バージョン（既定は `MARKETING_VERSION`）に登録します。スクリーンショットは表示サイズごとに別のジョブで並行して上の `scripts/app-store-screenshots.sh` で撮り、表示サイズ × 言語ぶんを差し替えます。
+Actions タブの「App Store Metadata」を手動実行すると、言語ごとの掲載文（[docs/app-store/metadata/](docs/app-store/metadata/) の `<言語>.md` のアプリ名・サブタイトル・プロモーションテキスト・説明文・キーワード）・マーケティング URL と、このバージョンの新機能（[docs/app-store/whats-new/](docs/app-store/whats-new/) の `<バージョン>.md`）、[docs/app-store/review-notes.md](docs/app-store/review-notes.md) の審査用メモを、App Store Connect API で App Store バージョン（既定は `MARKETING_VERSION`）に登録します。スクリーンショットは表示サイズごとに別のジョブで並行して上の `scripts/app-store-screenshots.sh` で撮り、表示サイズ × 言語ぶんを差し替えます。
 
 ```bash
 gh workflow run app-store-metadata.yml --ref develop
@@ -186,6 +186,7 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 
 - 文面は各見出しの下のコードブロックから読みます。文字数の上限を超えていたら何も登録せずに止まります。`metadata/<言語>.md` が無い言語は飛ばします（ja は無ければ `listing.md` を読みます）
 - アプリの主要言語は languages.json の先頭の言語（en-US）にそろえます
+- マーケティング URL は全言語で同じで、[docs/app-store/listing.md](docs/app-store/listing.md) の「マーケティング URL」のコードブロックから読み、登録するたびに全言語に入れます。App Store Connect は新しいバージョンに前のバージョンの値を写すので、URL を変えたら画面ではなくこのファイルを直して登録し直します。https の URL でなければ、何も登録せずに止まります
 - このバージョンの新機能は、登録するバージョンと同じ名前のファイル（`docs/app-store/whats-new/1.1.0.md` など）の `## <言語>` の下のコードブロックから読みます。アップデートを出すたびに新しいファイルを足します。ファイルが無ければ新機能は触りません（最初のバージョンには入れられないため）。ファイルがあるのに登録する言語の見出しが無いときは、何も登録せずに止まります
 - 6.9 インチを撮ったときは、そのスクリーンショットからクリエイティブアセット（プロダクトページのヘッダー 3840x1646・検索結果 3840x2560）を [docs/app-store/creative/creative.html](docs/app-store/creative/creative.html) と `scripts/render-creative-assets.sh` で言語ごとに書き出し、App Asset Library に上げて各言語のローカリゼーションに配置します（`creative_assets` を外すと飛ばします）。文言は creative.html の `copy` に言語ごとに書きます
 - iPhone Duo は GitHub の標準イメージ `xcode-27`（actions/runner-images の xcode-27-arm64。org で用意するものは無い）で撮ります。イメージに iOS 27.1 のランタイムが無いので、撮影の前にダウンロードします（数分かかります）

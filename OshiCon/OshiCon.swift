@@ -13,6 +13,10 @@ struct OshiCon: App {
     @State private var router = AppRouter()
     /// SwiftData のストア。開けなかったときはその旨の画面を出す。
     private let container: Result<ModelContainer, any Error>
+    /// 予定の通知。押して起動したときの通知を受け取れるよう、起動の途中で作って delegate にする。ストアを開けなかったときは nil。
+    private let reminders: ReminderScheduler?
+    /// 当日の開演までのライブアクティビティ。ストアを開けなかったときは nil。
+    private let liveActivities: LiveActivityScheduler?
 
     init() {
         LaunchOptions.applyDefaultEnvironment()
@@ -22,6 +26,8 @@ struct OshiCon: App {
         if LaunchOptions.seedsSampleData, case let .success(container) = container {
             Self.seedSampleData(into: container)
         }
+        reminders = (try? container.get()).map { ReminderScheduler(container: $0) }
+        liveActivities = (try? container.get()).map { LiveActivityScheduler(container: $0) }
     }
 
     /// 見本の推しと予定を入れる（メモリ上のストアのときだけ呼ぶ）。名前と予定名は画面の言語（`-AppleLanguages` で変えられる）で選ぶ。
@@ -40,6 +46,8 @@ struct OshiCon: App {
                     .environment(router)
                     .modelContainer(container)
                     .refreshesWidgets()
+                    .refreshesReminders(reminders)
+                    .refreshesLiveActivities(liveActivities)
             case .failure:
                 StoreUnavailableView()
             }

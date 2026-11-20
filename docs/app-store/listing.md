@@ -23,6 +23,15 @@
 文字数の上限は App Store Connect の制限（アプリ名 30 文字、サブタイトル 30 文字、プロモーションテキスト 170 文字、キーワード 100 文字、説明文 4,000 文字）。
 キーワードはカンマ区切りで空白を入れず、アプリ名とサブタイトルに入っている語は外す（入れなくても検索の対象になる）。
 
+## マーケティング URL
+
+全言語で同じ URL を使う。ワークフロー「App Store Metadata」が、登録するたびに下のコードブロックの URL を全言語のマーケティング URL に入れる（https の URL でなければ止まる）。
+App Store Connect は新しいバージョンを作るとき、前のバージョンのマーケティング URL を写す。URL を変えたらここを直し、ワークフローで登録し直す（画面だけで直すと、次に登録したときにここの値に戻る）。
+
+```
+https://shilokuma.jp/
+```
+
 ## カテゴリ（案）
 
 - プライマリ: ライフスタイル
@@ -36,4 +45,4 @@
 
 `scripts/app-store-screenshots.sh` で撮る（見本のデータで UI テストを流す。6.9 インチの iPhone と 13 インチの iPad）。README の「App Store 用スクリーンショット」を参照。
 
-掲載文（[metadata/](metadata/) の各ファイルの、見出しの下のコードブロック）・このバージョンの新機能（[whats-new/](whats-new/) の `<バージョン>.md`）とスクリーンショットは、ワークフロー「App Store Metadata」で App Store Connect に登録する（README の「App Store の掲載文とスクリーンショットの登録」）。
+掲載文（[metadata/](metadata/) の各ファイルの、見出しの下のコードブロック）・マーケティング URL（このファイルの「マーケティング URL」）・このバージョンの新機能（[whats-new/](whats-new/) の `<バージョン>.md`）とスクリーンショットは、ワークフロー「App Store Metadata」で App Store Connect に登録する（README の「App Store の掲載文とスクリーンショットの登録」）。

@@ -52,6 +52,12 @@ Defina aniversários e datas comemorativas para repetir todo ano: depois que o d
 • Oshi Count: seus próximos eventos, do mais próximo ao mais distante
 Toque em um widget para abrir os detalhes de um evento ou adicionar um novo.
 
+◆ Lembretes antes dos seus eventos
+Receba uma notificação 30 dias, 7 dias e 1 dia antes, no dia e 1 hora antes do início. Você pode mudar os momentos e o horário dos lembretes nos Ajustes.
+
+◆ A contagem regressiva na Tela Bloqueada
+Adicione o widget Contagem regressiva à Tela Bloqueada (circular, retangular ou em uma linha) para ver os dias que faltam quando quiser. No dia de um evento com horário de início, uma Atividade ao Vivo na Tela Bloqueada e na Dynamic Island faz a contagem até o início.
+
 ◆ Para iPhone e iPad
 Funciona na tela grande do iPad e na horizontal, com suporte ao modo escuro.
 
@@ -62,7 +68,7 @@ Oshis, fotos e eventos são salvos apenas no seu aparelho e nunca são enviados 
 Tipos de evento: show, aniversário, lançamento, live, outro
 ```
 
-（1668 文字）
+（2170 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

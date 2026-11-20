@@ -107,6 +107,76 @@ struct CountdownWidgetContentTests {
         #expect(WidgetTimeline.nextMidnights(after: now, count: 0, calendar: DomainFixtures.tokyo).isEmpty)
     }
 
+    @Test("時刻を渡すと、登録した日から開始までの進み具合も求める（ロック画面の丸の輪）")
+    func progressWithTime() throws {
+        // 9/1 0:00 に登録し、10/21 0:00 まで。10/18 12:00 は 50 日のうち 47.5 日が過ぎたところ
+        let live = event("5th LIVE", oshi: minato, day: DomainFixtures.day(2026, 10, 21))
+        let content = CountdownWidgetContent(
+            eventID: live.id,
+            events: [live],
+            oshis: [minato],
+            now: DomainFixtures.date(2026, 10, 18, 12, 0),
+            calendar: DomainFixtures.tokyo,
+            locale: DomainFixtures.japanese
+        )
+        guard case let .event(shown) = content else {
+            Issue.record("予定の中身になっていない: \(content)")
+            return
+        }
+        let progress = try #require(shown.progress)
+        #expect(abs(progress - 47.5 / 50) < 0.000_1)
+        #expect(shown.daysUntil == 3)
+        #expect(shown.heading == "ミナト")
+    }
+
+    @Test("当日の進み具合は 100%。日付だけで作ったときは進み具合を持たない")
+    func progressOnTheDayAndWithoutTime() {
+        let todayEvent = event("当日", oshi: nil, day: today)
+        let withTime = CountdownWidgetContent(
+            eventID: todayEvent.id,
+            events: [todayEvent],
+            oshis: [],
+            now: DomainFixtures.date(2026, 10, 18, 9, 0),
+            calendar: DomainFixtures.tokyo
+        )
+        let withoutTime = CountdownWidgetContent(eventID: todayEvent.id, events: [todayEvent], oshis: [], today: today)
+        if case let .event(shown) = withTime {
+            #expect(shown.progress == 1)
+        } else {
+            Issue.record("予定の中身になっていない")
+        }
+        if case let .event(shown) = withoutTime {
+            #expect(shown.progress == nil)
+        } else {
+            Issue.record("予定の中身になっていない")
+        }
+    }
+
+    @Test("時刻を渡しても、選んでいない・見つからないは同じ")
+    func notSelectedAndMissingWithTime() {
+        let now = DomainFixtures.date(2026, 10, 18, 9, 0)
+        #expect(CountdownWidgetContent(eventID: nil, events: [], oshis: [], now: now, calendar: DomainFixtures.tokyo) == .notSelected)
+        #expect(CountdownWidgetContent(eventID: UUID(), events: [], oshis: [], now: now, calendar: DomainFixtures.tokyo) == .missing)
+    }
+
+    @Test("ロック画面の丸は「N 日」を数字と後の文言に分け、1 行は残り日数を先に出す")
+    func lockScreenTexts() {
+        let live = event("5th LIVE", oshi: minato, day: DomainFixtures.day(2026, 10, 21))
+        for (locale, suffix, inline) in [
+            (DomainFixtures.japanese, "日", "あと 3 日 · 5th LIVE"),
+            (DomainFixtures.english, "days", "3 days left · 5th LIVE")
+        ] {
+            guard case let .event(shown) = CountdownWidgetContent(
+                eventID: live.id, events: [live], oshis: [minato], today: today, locale: locale
+            ) else {
+                Issue.record("予定の中身になっていない")
+                continue
+            }
+            #expect(shown.dayCountParts == EventText.CountdownParts(prefix: "", number: "3", suffix: suffix))
+            #expect(shown.inlineText == inline)
+        }
+    }
+
     @Test("押したときのリンクを作って読み直せる。知らないリンクは読まない")
     func links() throws {
         let id = UUID()

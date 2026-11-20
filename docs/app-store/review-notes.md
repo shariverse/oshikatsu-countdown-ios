@@ -7,14 +7,17 @@ App Store Connect の「App Review に関する情報」→「メモ」に貼る
 
 ・アカウントの登録・ログインはありません（デモ用アカウントは不要です）。
 ・インターネットを通じた通信は行いません。データはすべて端末の中に保存します。
-・課金・広告・通知はありません。
+・課金・広告はありません。
+・通知は、登録した予定の前（30 日前・7 日前・前日・当日・開始の 1 時間前）に端末の中で予約するローカル通知だけです。許可は最初の予定を保存したときに求めます。設定タブの「通知」で切り替えられます。
 
 【確認の手順】
 1. 初めて起動すると、推しの登録（ステップ 1 / 2）と最初の予定の登録（ステップ 2 / 2）の画面が出ます。「あとで」で飛ばすこともできます。
 2. ホームの「予定を追加」から予定を登録すると、ホームに「あと N 日」が表示されます。予定を押すと、秒単位のカウントダウンの画面が開きます。
 3. 「推し」タブで推しの登録・編集・削除ができます。写真は iOS の写真の選択画面で選んだものだけを読み込みます（写真ライブラリへのアクセスの許可は求めません）。
    写真を選ぶと調整画面が開き、拡大・縮小・移動・回転で丸い枠に写す範囲を決めます。保存するのは切り抜いた画像だけで、端末の外には送りません。
-4. ホーム画面のウィジェット（「カウントダウン」「推しカウント」）を追加できます。カウントダウンはウィジェットを編集して表示する予定を選びます。
+4. ホーム画面のウィジェット（「カウントダウン」「推しカウント」）を追加できます。カウントダウンはウィジェットを編集して表示する予定を選びます。カウントダウンはロック画面（丸・長方形・1 行）にも置けます。
+5. 通知を押すと、その予定のカウントダウンの画面が開きます。
+6. 開始の時刻がある予定の当日は、開始の 3 時間前から 1 時間後まで、ロック画面と Dynamic Island のライブアクティビティで開始までの残り時間を表示します（端末の中だけで動き、プッシュ通知は使いません）。
 
 iPhone と iPad の両方に対応しています。
 ```
@@ -28,14 +31,17 @@ This app lets fans add upcoming events for their "oshi" (a favorite idol, artist
 
 - There is no account registration or sign-in (no demo account is needed).
 - The app does not communicate over the internet. All data is stored on the device.
-- There are no in-app purchases, ads or notifications.
+- There are no in-app purchases or ads.
+- The only notifications are local notifications scheduled on the device before each event (30 days, 7 days and 1 day before, on the day, and 1 hour before the start time). Permission is requested when the user saves an event, and they can be turned off in the Settings tab under "Notifications".
 
 [How to review]
 1. On first launch, the app shows a screen to add an oshi (Step 1 of 2) and then a screen to add the first event (Step 2 of 2). Both can be skipped.
 2. Add an event from "Add Event" on the Home tab, and "N days left" appears on Home. Tap an event to open a countdown screen that counts down to the second.
 3. On the "Oshi" tab you can add, edit and delete oshi. Photos are loaded only when the user picks them in the iOS photo picker (the app does not ask for photo library access).
    After a photo is picked, an adjustment screen opens where the user can zoom, move and rotate it to frame it in the circle. Only the cropped image is saved, and it never leaves the device.
-4. You can add the Home Screen widgets "Countdown" and "Oshi Count". For the Countdown widget, edit the widget to choose which event to show.
+4. You can add the Home Screen widgets "Countdown" and "Oshi Count". For the Countdown widget, edit the widget to choose which event to show. The Countdown widget can also be added to the Lock Screen (circular, rectangular and inline).
+5. Tapping a notification opens the countdown screen for that event.
+6. On the day of an event with a start time, a Live Activity on the Lock Screen and in the Dynamic Island shows the time left from 3 hours before until 1 hour after the start. It runs entirely on the device and does not use push notifications.
 
 The app supports both iPhone and iPad.
 ```

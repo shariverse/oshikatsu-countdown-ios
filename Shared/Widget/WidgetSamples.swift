@@ -17,7 +17,8 @@ extension CountdownWidgetContent {
             day: CalendarDay(Date.now.addingTimeInterval(86_400 * 11), calendar: .autoupdatingCurrent),
             createdAt: .now
         )
-        return .event(.init(event: event, oshi: oshi, today: today))
+        // ロック画面の丸の輪の見本（登録してから開始までの 3 分の 2 ほど）
+        return .event(.init(event: event, oshi: oshi, today: today, progress: 0.65))
     }
 }
 
@@ -37,5 +38,23 @@ extension UpcomingWidgetContent {
             OshiEvent(oshiID: sora.id, kind: .release, title: String(localized: "2nd シングル発売"), day: day(25), createdAt: .now)
         ]
         return Self(events: events, oshis: [lumina, minato, sora], today: today, maxRows: maxRows)
+    }
+}
+
+extension EventActivityAttributes {
+    /// ライブアクティビティの Preview に出す見本（開演まであと 1 時間 30 分）。
+    nonisolated static var sample: Self {
+        let start = Date.now.addingTimeInterval(90 * 60)
+        return Self(
+            eventID: UUID(),
+            heading: "LUMINA",
+            title: String(localized: "5th LIVE 東京公演", comment: "ウィジェットの一覧に出す見本の予定名"),
+            colorRawValue: OshiColor.pink.rawValue,
+            startDate: start,
+            countdownBegin: start.addingTimeInterval(-3 * 3_600),
+            untilText: EventText.untilLabel(kind: .live, hasStartTime: true),
+            startText: EventText.startTime(TimeOfDay(hour: 18, minute: 0), kind: .live),
+            startedText: String(localized: "今日は当日！")
+        )
     }
 }

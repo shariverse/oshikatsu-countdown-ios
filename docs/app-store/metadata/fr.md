@@ -52,6 +52,12 @@ Réglez les anniversaires sur « Chaque année » : une fois le jour passé, l'a
 • Oshi Count : vos prochains événements, du plus proche au plus lointain
 Touchez un widget pour ouvrir le détail d'un événement ou en ajouter un.
 
+◆ Des rappels avant vos événements
+Recevez une notification 30 jours, 7 jours et 1 jour avant, le jour J et 1 heure avant le début. Vous pouvez modifier les moments et l'heure des rappels dans les Réglages.
+
+◆ Le compte à rebours sur l'écran verrouillé
+Ajoutez le widget Compte à rebours à l'écran verrouillé (rond, rectangulaire ou sur une ligne) pour voir les jours restants à tout moment. Le jour d'un événement avec une heure de début, une Activité en direct sur l'écran verrouillé et dans la Dynamic Island décompte le temps jusqu'au début.
+
 ◆ Pour iPhone et iPad
 Fonctionne sur le grand écran de l'iPad et en mode paysage, avec prise en charge du mode sombre.
 
@@ -62,7 +68,7 @@ Vos oshis, photos et événements sont enregistrés uniquement sur votre apparei
 Types d'événements : live, anniversaire, sortie, stream, autre
 ```
 
-（1879 文字）
+（2426 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

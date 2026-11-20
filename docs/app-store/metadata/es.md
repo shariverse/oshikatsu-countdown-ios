@@ -52,6 +52,12 @@ Configura cumpleaños y aniversarios para que se repitan cada año: cuando pase 
 • Oshi Count: tus próximos eventos, del más cercano al más lejano
 Toca un widget para abrir los detalles de un evento o añadir uno nuevo.
 
+◆ Recordatorios antes de tus eventos
+Recibe una notificación 30 días, 7 días y 1 día antes, el mismo día y 1 hora antes del inicio. Puedes cambiar los momentos y la hora de los recordatorios en Ajustes.
+
+◆ La cuenta regresiva en la pantalla bloqueada
+Añade el widget Cuenta regresiva a la pantalla bloqueada (circular, rectangular o en una línea) para ver los días que faltan cuando quieras. El día de un evento con hora de inicio, una Actividad en directo en la pantalla bloqueada y en la Dynamic Island cuenta el tiempo hasta el inicio.
+
 ◆ Para iPhone y iPad
 Funciona en la pantalla grande del iPad y en horizontal, y es compatible con el modo oscuro.
 
@@ -62,7 +68,7 @@ Tus oshis, fotos y eventos se guardan solo en tu dispositivo y nunca se envían 
 Tipos de evento: live, cumpleaños, lanzamiento, stream, otro
 ```
 
-（1740 文字）
+（2280 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

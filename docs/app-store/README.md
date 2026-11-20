@@ -6,7 +6,7 @@
 | ファイル | 中身 | 使う場所 |
 | --- | --- | --- |
 | [metadata/](metadata/) | 言語ごと（12 言語）のアプリ名・サブタイトル・プロモーションテキスト・説明文・キーワード | App Store Connect の「App 情報」「App Store」タブ（言語ごと） |
-| [listing.md](listing.md) | 掲載文のファイルの一覧と書き方・カテゴリ・年齢制限・スクリーンショット | App Store Connect の「App 情報」「App Store」タブ |
+| [listing.md](listing.md) | 掲載文のファイルの一覧と書き方・マーケティング URL（全言語で共通）・カテゴリ・年齢制限・スクリーンショット | App Store Connect の「App 情報」「App Store」タブ |
 | [privacy-policy.md](privacy-policy.md) | プライバシーポリシー | 公開した URL を「App 情報」のプライバシーポリシー URL に入れる |
 | [support.md](support.md) | サポートページ（よくある質問・お問い合わせ） | 公開した URL を「App Store」タブのサポート URL に入れる |
 | [app-privacy.md](app-privacy.md) | 「App のプライバシー」の回答案と、輸出コンプライアンス | App Store Connect の「App のプライバシー」 |
