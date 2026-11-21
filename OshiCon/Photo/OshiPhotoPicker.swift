@@ -8,20 +8,20 @@ import SwiftUI
 
 /// 推しの登録・編集で写真を選ぶ部品。今の写真を丸く出し、「写真を選ぶ / 写真を変える」と「写真を外す」を置く。
 /// `PhotosPicker` は写真ライブラリへのアクセスの許可が要らない（選んだ写真だけを受け取る）。
-/// 写真が無いときの見た目（推し色の丸と頭文字）は `placeholder` で渡す（推しの登録・編集の画面でアバターを渡す）。
+/// 写真を描くアバターは `avatar` で渡す（推しの登録・編集の画面で `OshiAvatar` を渡す）。写真が無ければ nil を渡す（推し色の丸と頭文字）。
 /// 選んだ写真を読んでいる間は `isLoading` を true にする（読み終わる前に保存させないため）。
 /// 写真を読めたら調整画面（`PhotoCropScreen`）を全画面で出し、「完了」で切り抜いた見た目のプレビューと範囲つきの差し替えにする。
 /// 「やめる」では何も変えない（前の写真・プレビュー・`photoChange` のまま）。
 /// UI テストでは、起動引数 `-useTestPhoto`（`LaunchOptions.usesTestPhoto`）で `PhotosPicker` の代わりに生成した画像を選ぶボタンにする。
 /// 写真があるときは「位置を調整」で今の写真から調整画面を開き直せる。保存してある写真はその JPEG を元に切り抜き直し（狭める調整だけになる）、
 /// 選んだばかりの写真は、元の選んだ写真と前の範囲から開き直す。
-struct OshiPhotoPicker<Placeholder: View>: View {
+struct OshiPhotoPicker<Avatar: View>: View {
     /// 保存してある写真のファイル名。
     let currentPhotoFileName: String?
     @Binding var photoChange: PhotoChange
     @Binding var isLoading: Bool
     var photos = OshiPhotoLibrary.shared
-    @ViewBuilder var placeholder: () -> Placeholder
+    @ViewBuilder var avatar: (Image?) -> Avatar
 
     @State private var selectedItem: PhotosPickerItem?
     @State private var preview: Image?
@@ -136,14 +136,8 @@ struct OshiPhotoPicker<Placeholder: View>: View {
         }
     }
 
-    @ViewBuilder private var photoView: some View {
-        if hasPhoto, let preview {
-            preview
-                .resizable()
-                .scaledToFill()
-        } else {
-            placeholder()
-        }
+    private var photoView: some View {
+        avatar(hasPhoto ? preview : nil)
     }
 
     private func loadCurrentPhoto() async {
@@ -247,8 +241,8 @@ private struct PendingCrop: Identifiable {
 #Preview {
     @Previewable @State var change = PhotoChange.keep
     @Previewable @State var isLoading = false
-    OshiPhotoPicker(currentPhotoFileName: nil, photoChange: $change, isLoading: $isLoading) {
-        OshiAvatar(name: "ミナト", color: .pink, size: 96)
+    OshiPhotoPicker(currentPhotoFileName: nil, photoChange: $change, isLoading: $isLoading) { photo in
+        OshiAvatar(name: "ミナト", color: .pink, photo: photo, size: 96)
     }
     .padding()
 }

@@ -113,8 +113,8 @@ struct OshiEditorScreen: View {
                 currentPhotoFileName: oshi?.photoFileName,
                 photoChange: $photoChange,
                 isLoading: $isLoadingPhoto
-            ) {
-                OshiAvatar(name: form.name, color: form.color, size: 96)
+            ) { photo in
+                OshiAvatar(name: form.name, color: form.color, photo: photo, size: 96)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
