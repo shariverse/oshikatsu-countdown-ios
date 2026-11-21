@@ -54,6 +54,7 @@ final class AppStoreScreenshotTests: XCTestCase {
     }
 
     /// 見本のデータで起動し直す（動いていれば終わらせてから起動する）。システムの文言もその言語になるよう、言語と地域も渡す。
+    /// 無料の機能の画面を撮るので、Plus は使えない状態に固定する（`-plusLocked`。StoreKit に問い合わせない）。
     @MainActor
     private func launch() -> XCUIApplication {
         let environment = ProcessInfo.processInfo.environment
@@ -63,6 +64,7 @@ final class AppStoreScreenshotTests: XCTestCase {
         app.launchArguments = [
             "-useInMemoryStore",
             "-seedSampleData",
+            "-plusLocked",
             "-hasCompletedOnboarding", "YES",
             "-showsPastEvents", "NO",
             "-AppleLanguages", "(\(language))",
