@@ -86,6 +86,94 @@ struct AppThemeTests {
         #expect(AppTheme.shipping == .jiraiGothic)
         #expect(EnvironmentValues().appTheme == .shipping)
     }
+
+    // MARK: - テーマカラー（1 位の推しの推し色）
+
+    @Test("推しがいなければ、出荷するテーマのまま")
+    func shippingWithoutThemeColor() {
+        #expect(AppTheme.shipping(themeColor: nil) == .shipping)
+    }
+
+    @Test("基準のピンクで染めても、配色と装飾は元のまま")
+    func tintedWithReferenceKeepsColors() {
+        let tinted = AppTheme.shipping(themeColor: AppTheme.themeColorReference)
+        #expect(tinted.palette == AppTheme.shipping.palette)
+        #expect(tinted.decoration == AppTheme.shipping.decoration)
+    }
+
+    @Test("染めても、削除の文字・推し色の文字の調整・角の丸み・書体・装飾の形は変えない", arguments: OshiColor.allCases)
+    func tintedKeepsNonColorParts(color: OshiColor) {
+        let base = AppTheme.shipping
+        let tinted = AppTheme.shipping(themeColor: color)
+        #expect(tinted.id == "jiraiGothic.\(color.rawValue)")
+        #expect(tinted.palette.destructive == base.palette.destructive)
+        #expect(tinted.oshiText == base.oshiText)
+        #expect(tinted.shape == base.shape)
+        #expect(tinted.typography == base.typography)
+        #expect(tinted.decoration.photoPlaceholder == base.decoration.photoPlaceholder)
+        guard case let .symbol(name, _) = tinted.decoration.headingOrnament else {
+            Issue.record("見出しの飾りが SF Symbols でない")
+            return
+        }
+        #expect(name == "heart.fill")
+        // カードの地（ライト）は白のまま
+        #expect(tinted.palette.surface.light == .white)
+    }
+
+    @Test("ネイビーで染めると、アクセント・地・装飾のピンクが青みに変わる")
+    func tintedWithNavy() {
+        let tinted = AppTheme.shipping(themeColor: .navy)
+        let palette = tinted.palette
+        for color in [palette.brand, palette.background, palette.brandContainer, palette.surfaceContainerHigh] {
+            #expect(color.light.blue > color.light.red)
+            #expect(color.dark.blue > color.dark.red)
+        }
+        guard case let .crossesAndHearts(ornament) = tinted.decoration.screenBackground,
+              case let .doubleLine(border) = tinted.decoration.cardBorder else {
+            Issue.record("装飾の形が変わった")
+            return
+        }
+        #expect(ornament.light.blue > ornament.light.red)
+        #expect(border.dark.blue > border.dark.red)
+        // アクセントは推し色の文字と同じ濃さの役割（ライトはほぼ推し色、ダークは明るい推し色）
+        #expect(palette.brand.light.contrastRatio(with: OshiColor.navy.rgb) < 1.5)
+    }
+
+    @Test("色の置き換え: 白・黒・灰色は変えず、基準の色はそのまま置き換え先の色になる")
+    func retintedNeutralAndReference() {
+        let reference = OshiColor.pink.rgb
+        let navy = OshiColor.navy.rgb
+        #expect(RGBColor.white.retinted(from: reference, to: navy) == .white)
+        #expect(RGBColor.black.retinted(from: reference, to: navy) == .black)
+        let gray = RGBColor(hex: 0x808080)
+        #expect(gray.retinted(from: reference, to: navy) == gray)
+        let replaced = reference.retinted(from: reference, to: navy)
+        #expect(abs(replaced.red - navy.red) < 1e-9)
+        #expect(abs(replaced.green - navy.green) < 1e-9)
+        #expect(abs(replaced.blue - navy.blue) < 1e-9)
+    }
+
+    @Test("色の置き換え: 基準を薄めた色は、置き換え先を同じだけ薄めた色に近く、0〜1 に収まる")
+    func retintedTint() {
+        let reference = OshiColor.pink.rgb
+        for color in OshiColor.allCases.map(\.rgb) {
+            let lightPink = RGBColor.white.mixed(with: reference, fraction: 0.2)
+            let replaced = lightPink.retinted(from: reference, to: color)
+            let expected = RGBColor.white.mixed(with: color, fraction: 0.2)
+            #expect(abs(replaced.red - expected.red) < 0.02)
+            #expect(abs(replaced.green - expected.green) < 0.02)
+            #expect(abs(replaced.blue - expected.blue) < 0.02)
+            for channel in [replaced.red, replaced.green, replaced.blue] {
+                #expect((0...1).contains(channel))
+            }
+        }
+    }
+
+    @Test("色の置き換え: 基準が灰色なら、含む割合を決められないので変えない")
+    func retintedGrayReference() {
+        let color = RGBColor(hex: 0xC8326A)
+        #expect(color.retinted(from: RGBColor(hex: 0x808080), to: OshiColor.navy.rgb) == color)
+    }
 }
 
 extension AppTheme: @retroactive CustomTestStringConvertible {
