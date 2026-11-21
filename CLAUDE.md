@@ -81,6 +81,9 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
     いちばん下に購入の復元・利用規約・プライバシーポリシー。購入の結果の振り分け（購入・保留・取り消し・失敗）と、利用規約・プライバシーポリシーの URL の定数は `OshiCon/Purchase/PlusPurchaseOutcome.swift`（`PlusLegalLink`）
   - サブスクリプション中に買い切りを買う人への案内（買い切りのそばの注記と、購入後のアラートからの `manageSubscriptionsSheet`）を出すかの規則は `OshiCon/Purchase/PlusLifetimeGuidance.swift`。
     数えるのは自動で更新される（`willAutoRenew`）、今使えるサブスクリプションだけ。`PlusStore.hasRenewingSubscription` に入る
+  - 課金画面はどの画面からでも `@Environment(\.openPlusPaywall)` で開く（`OshiCon/Screens/Plus/PlusPaywallPresentation.swift`。`RootView` の `presentsPlusPaywall()` がシートで出す）。
+    入口の設定画面の Plus の行は、開発版（DEBUG）と TestFlight だけに出す。出すかの切り替えは `OshiCon/Purchase/PlusEntryPolicy.swift` の `PlusEntryPolicy.showsEntry(in:)` の 1 か所で、
+    配り方は `AppDistributionDetector`（`@Environment(\.appDistributionDetector)`。`AppTransaction` の環境で見分け、差し替えられる）。起動引数 `-simulateAppStoreDistribution` で App Store 版として動かす
 
 ## アプリ固有の前提
 

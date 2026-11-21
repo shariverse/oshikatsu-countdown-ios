@@ -13589,6 +13589,23 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Plus sudah aktif" } }
       }
     },
+    "推しの写真ウィジェットと、背景と飾りの着せ替え" : {
+      "comment" : "設定画面の Plus の行の説明（Plus がまだ使えないとき）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi photo widget and custom backgrounds & decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真ウィジェットと、背景と飾りの着せ替え" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本命照片小组件，以及背景与装饰换装" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "我推照片小工具，以及背景與裝飾換裝" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진 위젯과 배경·장식 꾸미기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Widget photo de votre oshi, fonds et décorations personnalisés" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Foto-Widget sowie eigene Hintergründe und Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Widget con la foto de tu oshi, y fondos y adornos personalizados" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Widget com a foto do seu oshi, e fundos e enfeites personalizados" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Widget con la foto del tuo oshi, sfondi e decorazioni personalizzati" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "วิดเจ็ตรูปโอชิ และการเปลี่ยนพื้นหลังและของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Widget foto oshi serta ganti latar dan hiasan" } }
+      }
+    },
     "推しの写真ウィジェット" : {
       "comment" : "課金画面の Plus の機能の名前",
       "localizations" : {

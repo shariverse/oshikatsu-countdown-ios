@@ -214,6 +214,8 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
   ストアフロントは日本です。共有スキーム OshiCon の Run（Options の StoreKit Configuration）と Test（テストプラン [OshiCon.xctestplan](OshiCon.xctestplan) の StoreKit Configuration）に設定してあり、Simulator では App Store Connect に繋がずに購入・復元・期限切れを試せます（Xcode の Debug → StoreKit → Manage Transactions）
 - 商品を変えたら `in-app-purchases.json` と `.storekit` の両方を直します（`StoreKitConfigurationTests` が食い違いを見つけます）
 - UI テストとスクリーンショット（`-useInMemoryStore` のとき）は StoreKit に問い合わせず、Plus は使えない状態に固定します。起動引数 `-plusUnlocked` で使える状態に、`-plusLocked` で使えない状態にします（`LaunchOptions.unlocksPlus`。両方渡したときは `-plusLocked` を優先します）
+- 課金画面の入口（設定の Plus の行）は、開発版（DEBUG のビルド）と TestFlight だけに出し、App Store 版では出しません（`PlusEntryPolicy`。TestFlight かは `AppTransaction` の環境で端末の中で見分けます）。
+  起動引数 `-simulateAppStoreDistribution`（`-useInMemoryStore` のときだけ効く）で App Store 版として動かし、行を隠します。App Store 用スクリーンショットはこれを渡します
 
 ### 11. テーマ
 
