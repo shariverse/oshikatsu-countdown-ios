@@ -66,9 +66,11 @@ Vos oshis, photos et événements sont enregistrés uniquement sur votre apparei
 (Vos données sont incluses dans les sauvegardes de l'appareil, sur iCloud ou un ordinateur, et sont effacées quand vous supprimez l'app.)
 
 Types d'événements : live, anniversaire, sortie, stream, autre
+
+Conditions d'utilisation (EULA) : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（2426 文字）
+（2527 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 
