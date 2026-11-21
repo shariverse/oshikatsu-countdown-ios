@@ -92,6 +92,9 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
     丸の輪は登録した日から開始までの進み具合（詳細画面と同じ `EventCountdown.progress`）。`widgetFamily` は Environment に入れられないので、形は引数で渡す（アプリの Preview は `WidgetPreview.countdownLockScreen`）
 - データ（SwiftData のストアと推しの写真）は**最初から App Group のコンテナに置く**（ウィジェットと共有するため。後から移すとデータの移し替えが要る）
 - SwiftData のスキーマを最初の TestFlight 配信の後に変えると移行が要る。モデルの形を変えるときは移行を用意する
+  - 今は V2（`OshiConSchemaV2`。推しの並び順 `sortOrder` を足した。#208）。配信済みの版（`OshiConSchemaV1`）は形を変えずに残し、`OshiConMigrationPlan` に段を足す。移行は `OshiConStoreFileTests` で V1 のストアから確かめる
+  - ウィジェットは移行を走らせない（アプリと同時に移行しない）。移行が要るストアは開かず、読めないものとして扱う（`OshiConStore.needsMigration(storeAt:)`）
+- 推しの並びは `OshiConStore.oshiOrder`（並び順 → 登録した時刻 → 名前）。推しの一覧で並べ替えられ（#208）、ホームの絞り込み・予定の入力の推しの選択肢も同じ並び。いちばん上が 1 位の推し。追加した推しは末尾に足す
 - 文言は 12 言語（en 既定・ja・zh-Hans・zh-Hant・ko・fr・de・es・pt-BR・it・th・id）。`DEVELOPMENT_LANGUAGE = en` で、対応していない言語の端末では英語で出す
   - 文言は `Shared/Resources/Localizable.xcstrings`（アプリと Widget Extension の両方に入る）に置き、キーは日本語の文言そのもの。文言を足したら 12 言語ぶん訳を入れる。
     ホーム画面の表示名は `OshiCon/InfoPlist.xcstrings`・`OshiConWidget/InfoPlist.xcstrings`（ja は「推し活カウント」）
