@@ -7,6 +7,7 @@ import Foundation
 import os
 
 /// アプリとウィジェットで共有する App Group のコンテナ。SwiftData のストアと推しの写真を置く。
+/// Plus が使えるかの判定の結果は、App Group の UserDefaults（`sharedDefaults`）に置く。
 nonisolated enum AppGroupContainer {
     private static let logger = Logger(subsystem: "jp.shilokuma.OshiCon", category: "AppGroupContainer")
 
@@ -29,5 +30,15 @@ nonisolated enum AppGroupContainer {
     /// SwiftData のストアのファイル。
     static var storeURL: URL {
         dataDirectory.appending(path: "OshiCon.store", directoryHint: .notDirectory)
+    }
+
+    /// アプリとウィジェットで共有する UserDefaults（`PrivacyInfo.xcprivacy` の 1C8F.1）。
+    /// App Group が使えないときは、アプリだけの UserDefaults を使う。
+    static var sharedDefaults: UserDefaults {
+        if let identifier, let defaults = UserDefaults(suiteName: identifier) {
+            return defaults
+        }
+        logger.error("App Group の UserDefaults を開けないため、アプリの UserDefaults を使う")
+        return .standard
     }
 }

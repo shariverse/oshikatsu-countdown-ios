@@ -17,10 +17,13 @@ struct OshiCon: App {
     private let reminders: ReminderScheduler?
     /// 当日の開演までのライブアクティビティ。ストアを開けなかったときは nil。
     private let liveActivities: LiveActivityScheduler?
+    /// Plus の購入の状態。取引の変化（`Transaction.updates`）を取りこぼさないよう、起動の途中で作って監視を始める。
+    private let plus: PlusStore
 
     init() {
         LaunchOptions.applyDefaultEnvironment()
         NavigationBarAppearance.applyTitleFonts()
+        plus = PlusStore()
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
         if LaunchOptions.seedsSampleData, case let .success(container) = container {
@@ -48,6 +51,7 @@ struct OshiCon: App {
                     .refreshesWidgets()
                     .refreshesReminders(reminders)
                     .refreshesLiveActivities(liveActivities)
+                    .providesPlusStatus(plus)
             case .failure:
                 StoreUnavailableView()
             }
