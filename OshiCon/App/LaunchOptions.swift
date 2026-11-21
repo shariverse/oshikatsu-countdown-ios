@@ -60,6 +60,14 @@ nonisolated enum LaunchOptions {
             && !arguments.contains(plusLockedArgument)
     }
 
+    /// App Store 版として動かす（課金画面の入口を出さない。App Store 用スクリーンショットと UI テスト）。
+    /// DEBUG のビルドでは入口を出すので、配るアプリと同じ画面にするときに渡す（`AppDistributionDetector.live`）。メモリ上のストアのときだけ効く。
+    static let appStoreDistributionArgument = "-simulateAppStoreDistribution"
+
+    static var simulatesAppStoreDistribution: Bool {
+        usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(appStoreDistributionArgument)
+    }
+
     /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
     static let defaultEnvironmentPrefix = "OSHICON_DEFAULT_"
 

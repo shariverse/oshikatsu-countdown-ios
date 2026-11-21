@@ -5,13 +5,19 @@
 
 import SwiftUI
 
-/// 設定。終わった予定の表示、通知、データの保存先の説明、バージョンとオープンソースライセンス。
+/// 設定。Plus（入口を出すときだけ）、終わった予定の表示、通知、データの保存先の説明、バージョンとオープンソースライセンス。
 struct SettingsScreen: View {
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @Environment(\.appTheme) private var theme
+    @Environment(\.appDistributionDetector) private var distributionDetector
+    /// Plus の行を出すか（`PlusEntryPolicy`）。見分け終わるまでは出さない。
+    @State private var showsPlusEntry = false
 
     var body: some View {
         Form {
+            if showsPlusEntry {
+                PlusSettingsSection()
+            }
             Section("表示") {
                 Toggle(isOn: $showsPastEvents) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -54,6 +60,53 @@ struct SettingsScreen: View {
         .scrollContentBackground(.hidden)
         .background(theme.palette.background.color)
         .navigationTitle("設定")
+        .task {
+            showsPlusEntry = PlusEntryPolicy.showsEntry(in: await distributionDetector())
+        }
+    }
+}
+
+/// Plus の行。押すと課金画面を開く（`\.openPlusPaywall`）。
+private struct PlusSettingsSection: View {
+    @Environment(\.appTheme) private var theme
+    @Environment(\.isPlusUnlocked) private var isPlusUnlocked
+    @Environment(\.openPlusPaywall) private var openPlusPaywall
+
+    var body: some View {
+        Section {
+            Button {
+                openPlusPaywall()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "sparkles")
+                        .font(.title3)
+                        .foregroundStyle(theme.palette.brand.color)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("推し活カウントダウン Plus")
+                            .foregroundStyle(theme.palette.onSurface.color)
+                        Group {
+                            if isPlusUnlocked {
+                                Text("Plus をお使いいただけます")
+                            } else {
+                                Text("推しの写真ウィジェットと、背景と飾りの着せ替え")
+                            }
+                        }
+                        .font(theme.typography.text(.footnote))
+                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.forward")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
+                        .accessibilityHidden(true)
+                }
+                .padding(.vertical, 2)
+                .contentShape(Rectangle())
+            }
+            .accessibilityIdentifier("settings.plus")
+        }
+        .themeRowBackground()
     }
 }
 
@@ -113,4 +166,11 @@ struct OpenSourceLicenseScreen: View {
     NavigationStack {
         SettingsScreen()
     }
+}
+
+#Preview("App Store 版（Plus の行なし）") {
+    NavigationStack {
+        SettingsScreen()
+    }
+    .environment(\.appDistributionDetector, .fixed(.appStore))
 }
