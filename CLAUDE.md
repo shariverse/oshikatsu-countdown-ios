@@ -32,7 +32,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - PR の作成時（opened / reopened / ready_for_review）は UI テストまで流す。ただし **AskHub の作業ブランチ（`askhub/**`）宛ての PR（子 PR）では PR のイベントで動かず、push の Unit テストだけ**になる。
     子 PR の UI テストは、作業ブランチ → `develop` の最終 PR（更新でも UI テストまで流す）で確かめる
   - ドキュメントだけの変更でも Build を動かす（ルールセットで `build / build` を必須にしているため）
-- `develop` / `release/**` への push で Upload（`upload.yml`。TestFlight）、`main` への push で Archive（`archive.yml`）が動く
+- `develop` / `release/**` への push で Upload（`upload.yml`。TestFlight）、`main` への push では Build だけが動く（Archive の `archive.yml` は手動実行のみ）
 - Simulator 名は OS 更新で改名されることがある。解決できない場合は `xcrun simctl list devices available` で確かめる
 
 ## 構成
