@@ -67,6 +67,11 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   始める・予約する・終えるのは `LiveActivityScheduler`、中身は `Shared/LiveActivity/EventActivityAttributes.swift`、描くのは `Shared/LiveActivity/EventLiveActivityView.swift` と `OshiConWidget/EventLiveActivity.swift`。
   開演の時刻がある予定だけ、開演の 3 時間前から 1 時間後まで。iOS 26 以降は始まる時刻に予約し（`Activity.request(…, start:)`）、iOS 17・18 はアプリが前面に来たときに始める。
   通信・プッシュは使わず、残りは `Text(timerInterval:)`、開演を過ぎたことは `staleDate` で描き分ける。メモリ上のストアでは何もしない。Info.plist の `NSSupportsLiveActivities` が要る
+- 画像でシェアは `OshiCon/Share/`。入口は予定の詳細のツールバーだけ（`EventDetailScreen` からシートで `ShareCardPreviewScreen`）。カードの中身の規則は `ShareCardContent`（nonisolated。推しの名前は持たない）、
+  見た目の差し替え口は `ShareCardStyle`（既定は `.shipping`。Plus の着せ替えは `background: .photo(fileName:)` で地を替える）、描くのは `ShareCardView`、1080 px 四方の PNG に書き出すのは `ShareCardRenderer`（`ImageRenderer`。メインアクター）。
+  共有シートには画像だけを渡す（`ShareCardImage` が Transferable）。会場は既定で載せず、写真は既定で載せる。透かしは catalog のキー「推し活カウントダウン」（App Store の名前のコロンより前）。
+  共有シートの「画像を保存」のため Info.plist に `NSPhotoLibraryAddUsageDescription` を置く（`NSPhotoLibraryUsageDescription` は置かない）。
+  仕様・テストの口（`OshiConTests/Share/`・`ShareCardUITests`・`eventDetail.share`・`shareCard.*`）は `docs/share-card.md`
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない

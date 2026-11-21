@@ -18,6 +18,8 @@ App Store Connect の「App Review に関する情報」→「メモ」に貼る
 4. ホーム画面のウィジェット（「カウントダウン」「推しカウント」）を追加できます。カウントダウンはウィジェットを編集して表示する予定を選びます。カウントダウンはロック画面（丸・長方形・1 行）にも置けます。
 5. 通知を押すと、その予定のカウントダウンの画面が開きます。
 6. 開始の時刻がある予定の当日は、開始の 3 時間前から 1 時間後まで、ロック画面と Dynamic Island のライブアクティビティで開始までの残り時間を表示します（端末の中だけで動き、プッシュ通知は使いません）。
+7. 予定のカウントダウンの画面の右上の共有のボタンから、「あと N 日」を正方形のカードの画像にしてシェアできます。画像は端末の中で作り、共有シートで利用者が選んだ先にだけ渡します（アプリからは送信しません）。
+   写真への追加の許可は、共有シートの「画像を保存」を選んだときにだけ iOS が求めます（写真ライブラリの読み取りの許可は求めません）。
 
 iPhone と iPad の両方に対応しています。
 ```
@@ -42,6 +44,8 @@ This app lets fans add upcoming events for their "oshi" (a favorite idol, artist
 4. You can add the Home Screen widgets "Countdown" and "Oshi Count". For the Countdown widget, edit the widget to choose which event to show. The Countdown widget can also be added to the Lock Screen (circular, rectangular and inline).
 5. Tapping a notification opens the countdown screen for that event.
 6. On the day of an event with a start time, a Live Activity on the Lock Screen and in the Dynamic Island shows the time left from 3 hours before until 1 hour after the start. It runs entirely on the device and does not use push notifications.
+7. From the share button at the top right of an event's countdown screen, the user can share "N days left" as a square card image. The image is created on the device and is handed only to the destination the user picks in the share sheet (the app itself sends nothing).
+   Permission to add photos is requested by iOS only when the user chooses "Save Image" in the share sheet (the app does not ask for photo library read access).
 
 The app supports both iPhone and iPad.
 ```
