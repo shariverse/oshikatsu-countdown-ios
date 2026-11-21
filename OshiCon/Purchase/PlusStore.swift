@@ -24,6 +24,9 @@ final class PlusStore {
 
     /// Plus が使えるか。画面は `\.isPlusUnlocked` から引く。
     private(set) var isUnlocked: Bool
+    /// 自動で更新されるサブスクリプションがあるか（`PlusLifetimeGuidance`）。課金画面の買い切りの注記と購入後の案内に使う。
+    /// App Group には書かない。
+    private(set) var hasRenewingSubscription: Bool
 
     @ObservationIgnored private let isActive: Bool
     @ObservationIgnored private let storage: PlusStatusStorage
@@ -35,19 +38,24 @@ final class PlusStore {
     /// - Parameters:
     ///   - isActive: StoreKit から決めるか。false（メモリ上のストア）のときは `unlocksWhenInactive` に固定する
     ///   - unlocksWhenInactive: StoreKit に触れないときの Plus の状態（起動引数 `-plusUnlocked`）
+    ///   - subscribesWhenInactive: StoreKit に触れないときに、自動で更新されるサブスクリプションがあるとするか（Preview 用）。
+    ///     true にすると Plus も使える状態にする
     init(
         isActive: Bool = !LaunchOptions.usesInMemoryStore,
         unlocksWhenInactive: Bool = LaunchOptions.unlocksPlus,
+        subscribesWhenInactive: Bool = false,
         storage: PlusStatusStorage = .appGroup
     ) {
         self.isActive = isActive
         self.storage = storage
         guard isActive else {
-            isUnlocked = unlocksWhenInactive
+            isUnlocked = unlocksWhenInactive || subscribesWhenInactive
+            hasRenewingSubscription = subscribesWhenInactive
             return
         }
         // StoreKit から読み終わるまでは、前に決めた結果を使う（起動の直後に見た目が切り替わらないように）
         isUnlocked = storage.isUnlocked
+        hasRenewingSubscription = false
         updates = Task { [weak self] in
             for await result in StoreKit.Transaction.updates {
                 await self?.process(result)
@@ -86,7 +94,9 @@ final class PlusStore {
         guard current == generation else {
             return
         }
-        apply(PlusEntitlement.isUnlocked(purchases: purchases, now: .now))
+        let now = Date.now
+        hasRenewingSubscription = PlusLifetimeGuidance.hasRenewingSubscription(purchases: purchases, now: now)
+        apply(PlusEntitlement.isUnlocked(purchases: purchases, now: now))
     }
 
     private func apply(_ unlocked: Bool) {
@@ -113,17 +123,21 @@ final class PlusStore {
 
     private static func purchase(from transaction: StoreKit.Transaction) async -> PlusPurchase {
         var gracePeriodExpirationDate: Date?
+        // 更新の情報が読めないときは、解約の案内を出すほうに倒す
+        var willAutoRenew = true
         // 猶予期間中は取引の期限を過ぎているので、更新の情報から猶予期間の終わりを読む
         if transaction.productType == .autoRenewable,
            let status = await transaction.subscriptionStatus,
            case let .verified(renewalInfo) = status.renewalInfo {
             gracePeriodExpirationDate = renewalInfo.gracePeriodExpirationDate
+            willAutoRenew = renewalInfo.willAutoRenew
         }
         return PlusPurchase(
             productID: transaction.productID,
             expirationDate: transaction.expirationDate,
             revocationDate: transaction.revocationDate,
-            gracePeriodExpirationDate: gracePeriodExpirationDate
+            gracePeriodExpirationDate: gracePeriodExpirationDate,
+            willAutoRenew: willAutoRenew
         )
     }
 }
