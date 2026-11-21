@@ -16,7 +16,8 @@ import WidgetKit
 /// - `Transaction.updates`（ほかの端末での購入・更新・返金・Ask to Buy の承認など）を受けたら、finish してから決め直す
 /// - 検証済みの取引だけを数える。通信はせず、確かめるのは StoreKit が端末の中でする検証だけ
 ///
-/// UI テスト・スクリーンショット（メモリ上のストア）では StoreKit に触れず、App Group にも書かない（使えない状態のまま）。
+/// UI テスト・スクリーンショット（メモリ上のストア）では StoreKit に触れず、App Group にも書かない。
+/// Plus の状態は起動引数で固定する（既定と `-plusLocked` は使えない、`-plusUnlocked` は使える。`LaunchOptions.unlocksPlus`）。
 @Observable
 final class PlusStore {
     private static let logger = Logger(subsystem: "jp.shilokuma.OshiCon", category: "PlusStore")
@@ -31,14 +32,22 @@ final class PlusStore {
     /// 決め直しの番号。続けて決め直したとき、先に始めたほうの結果で後のほうの結果を上書きしない。
     @ObservationIgnored private var generation = 0
 
-    init(isActive: Bool = !LaunchOptions.usesInMemoryStore, storage: PlusStatusStorage = .appGroup) {
+    /// - Parameters:
+    ///   - isActive: StoreKit から決めるか。false（メモリ上のストア）のときは `unlocksWhenInactive` に固定する
+    ///   - unlocksWhenInactive: StoreKit に触れないときの Plus の状態（起動引数 `-plusUnlocked`）
+    init(
+        isActive: Bool = !LaunchOptions.usesInMemoryStore,
+        unlocksWhenInactive: Bool = LaunchOptions.unlocksPlus,
+        storage: PlusStatusStorage = .appGroup
+    ) {
         self.isActive = isActive
         self.storage = storage
-        // StoreKit から読み終わるまでは、前に決めた結果を使う（起動の直後に見た目が切り替わらないように）
-        isUnlocked = isActive && storage.isUnlocked
         guard isActive else {
+            isUnlocked = unlocksWhenInactive
             return
         }
+        // StoreKit から読み終わるまでは、前に決めた結果を使う（起動の直後に見た目が切り替わらないように）
+        isUnlocked = storage.isUnlocked
         updates = Task { [weak self] in
             for await result in StoreKit.Transaction.updates {
                 await self?.process(result)

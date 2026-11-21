@@ -74,7 +74,9 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - Plus の購入の状態: 商品の productId と「Plus が使えるか」の規則は `Shared/Purchase/PlusEntitlement.swift`（`PlusProduct`・`PlusEntitlement`。猶予期間を含む・返金は数えない）、
   App Group の UserDefaults への読み書きは `Shared/Purchase/PlusStatusStorage.swift`（Widget Extension は `PlusStatusStorage.appGroup.isUnlocked` で読む）。
   StoreKit 2 の取引（`Transaction.currentEntitlements`・`Transaction.updates`）を受け持つのはアプリの `OshiCon/Purchase/PlusStore.swift`。画面は `@Environment(\.isPlusUnlocked)` で Plus が使えるかを引く。
-  メモリ上のストアでは StoreKit に触れず、App Group にも書かない
+  メモリ上のストアでは StoreKit に触れず、App Group にも書かない。Plus の状態は起動引数で固定する（既定と `-plusLocked` は使えない、`-plusUnlocked` は使える。`LaunchOptions.unlocksPlus`）
+  - StoreKit Configuration ファイルは `Configs/OshiCon.storekit`（`in-app-purchases.json` と同じ商品。食い違いは `StoreKitConfigurationTests` が見つける）。
+    共有スキームの Run と、テストプラン `OshiCon.xctestplan`（スキームの Test が使う）に設定してある。商品を変えたら両方のファイルを直す
 
 ## アプリ固有の前提
 

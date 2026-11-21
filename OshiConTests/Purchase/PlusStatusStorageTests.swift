@@ -42,10 +42,40 @@ struct PlusStatusStorageTests {
     func inactiveStore() async throws {
         let storage = try Self.makeStorage()
         storage.isUnlocked = true
-        let store = PlusStore(isActive: false, storage: storage)
+        let store = PlusStore(isActive: false, unlocksWhenInactive: false, storage: storage)
         #expect(!store.isUnlocked)
         await store.refresh()
         #expect(!store.isUnlocked)
         #expect(storage.isUnlocked)
+    }
+
+    @Test("メモリ上のストアで -plusUnlocked のときは、書いた結果が無くても使えるままで、書き換えない")
+    @MainActor
+    func inactiveStoreUnlockedByArgument() async throws {
+        let storage = try Self.makeStorage()
+        let store = PlusStore(isActive: false, unlocksWhenInactive: true, storage: storage)
+        #expect(store.isUnlocked)
+        await store.refresh()
+        #expect(store.isUnlocked)
+        #expect(!storage.isUnlocked)
+    }
+
+    @Test(
+        "起動引数で Plus の状態を固定する。メモリ上のストアのときだけ効き、-plusLocked を優先する",
+        arguments: [
+            (["-useInMemoryStore", "-plusUnlocked"], true),
+            (["-useInMemoryStore", "-plusLocked"], false),
+            (["-useInMemoryStore"], false),
+            (["-useInMemoryStore", "-plusUnlocked", "-plusLocked"], false),
+            (["-plusUnlocked"], false)
+        ]
+    )
+    func unlocksPlusArgument(arguments: [String], expected: Bool) {
+        #expect(LaunchOptions.unlocksPlus(arguments: arguments) == expected)
+    }
+
+    @Test("テストのホストのアプリ（起動引数なし）は Plus を固定しない")
+    func hostAppDoesNotUnlockPlus() {
+        #expect(!LaunchOptions.unlocksPlus)
     }
 }
