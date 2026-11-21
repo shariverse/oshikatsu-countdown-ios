@@ -48,14 +48,17 @@ struct ShareCardSharingTests {
 
     @Test("写真への追加の説明は 12 言語に訳す", arguments: languages)
     func photoLibraryAddUsageDescriptionIsLocalized(language: String) throws {
-        let path = try #require(Bundle.main.path(forResource: "InfoPlist", ofType: "strings", inDirectory: nil, forLocalization: language))
-        let strings = try #require(NSDictionary(contentsOfFile: path))
-        let description = try #require(strings["NSPhotoLibraryAddUsageDescription"] as? String)
+        let description = try #require(infoPlistStrings(language: language)["NSPhotoLibraryAddUsageDescription"] as? String)
         #expect(!description.isEmpty)
         if language != "en" {
-            let englishPath = try #require(Bundle.main.path(forResource: "InfoPlist", ofType: "strings", inDirectory: nil, forLocalization: "en"))
-            let english = try #require(NSDictionary(contentsOfFile: englishPath))
+            let english = try infoPlistStrings(language: "en")
             #expect(description != english["NSPhotoLibraryAddUsageDescription"] as? String)
         }
+    }
+
+    /// 言語ごとの InfoPlist.strings。
+    private func infoPlistStrings(language: String) throws -> NSDictionary {
+        let path = try #require(Bundle.main.path(forResource: "InfoPlist", ofType: "strings", inDirectory: nil, forLocalization: language))
+        return try #require(NSDictionary(contentsOfFile: path))
     }
 }
