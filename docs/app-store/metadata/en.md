@@ -66,9 +66,11 @@ Your oshi, photos and events are stored only on your device and are never sent a
 (Your data is included in device backups to iCloud or a computer, and is erased when you delete the app.)
 
 Event types: Live, Birthday, Release, Stream, Other
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（2014 文字）
+（2102 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

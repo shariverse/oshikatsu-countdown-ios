@@ -68,8 +68,22 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   開演の時刻がある予定だけ、開演の 3 時間前から 1 時間後まで。iOS 26 以降は始まる時刻に予約し（`Activity.request(…, start:)`）、iOS 17・18 はアプリが前面に来たときに始める。
   通信・プッシュは使わず、残りは `Text(timerInterval:)`、開演を過ぎたことは `staleDate` で描き分ける。メモリ上のストアでは何もしない。Info.plist の `NSSupportsLiveActivities` が要る
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
-- `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）だけを申告し、Widget Extension は何も申告していない（`PrivacyManifestTests` で確かめる）。
-  申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。App Group の `UserDefaults(suiteName:)` をウィジェットと共有するなら、両方のマニフェストに `1C8F.1` が要る。データの収集・トラッキングはしない
+- `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）と `1C8F.1`（App Group で Widget Extension と共有）を、
+  Widget Extension が UserDefaults の `1C8F.1` だけを申告している（`PrivacyManifestTests` で確かめる）。App Group の UserDefaults に置くのは Plus が使えるかの判定の結果だけ（`PlusStatusStorage`）。
+  申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。データの収集・トラッキングはしない
+- Plus の購入の状態: 商品の productId と「Plus が使えるか」の規則は `Shared/Purchase/PlusEntitlement.swift`（`PlusProduct`・`PlusEntitlement`。猶予期間を含む・返金は数えない）、
+  App Group の UserDefaults への読み書きは `Shared/Purchase/PlusStatusStorage.swift`（Widget Extension は `PlusStatusStorage.appGroup.isUnlocked` で読む）。
+  StoreKit 2 の取引（`Transaction.currentEntitlements`・`Transaction.updates`）を受け持つのはアプリの `OshiCon/Purchase/PlusStore.swift`。画面は `@Environment(\.isPlusUnlocked)` で Plus が使えるかを引く。
+  メモリ上のストアでは StoreKit に触れず、App Group にも書かない。Plus の状態は起動引数で固定する（既定と `-plusLocked` は使えない、`-plusUnlocked` は使える。`LaunchOptions.unlocksPlus`）
+  - StoreKit Configuration ファイルは `Configs/OshiCon.storekit`（`in-app-purchases.json` と同じ商品。食い違いは `StoreKitConfigurationTests` が見つける）。
+    共有スキームの Run と、テストプラン `OshiCon.xctestplan`（スキームの Test が使う）に設定してある。商品を変えたら両方のファイルを直す
+  - 課金画面は `OshiCon/Screens/Plus/PlusPaywallScreen.swift`（`NavigationStack` は開く側が置く）。見出し（文と SF Symbols の一覧）とサブスクリプション（`SubscriptionStoreView(productIDs:)`）の下に買い切り（`ProductView`）、
+    いちばん下に購入の復元・利用規約・プライバシーポリシー。購入の結果の振り分け（購入・保留・取り消し・失敗）と、利用規約・プライバシーポリシーの URL の定数は `OshiCon/Purchase/PlusPurchaseOutcome.swift`（`PlusLegalLink`）
+  - サブスクリプション中に買い切りを買う人への案内（買い切りのそばの注記と、購入後のアラートからの `manageSubscriptionsSheet`）を出すかの規則は `OshiCon/Purchase/PlusLifetimeGuidance.swift`。
+    数えるのは自動で更新される（`willAutoRenew`）、今使えるサブスクリプションだけ。`PlusStore.hasRenewingSubscription` に入る
+  - 課金画面はどの画面からでも `@Environment(\.openPlusPaywall)` で開く（`OshiCon/Screens/Plus/PlusPaywallPresentation.swift`。`RootView` の `presentsPlusPaywall()` がシートで出す）。
+    入口の設定画面の Plus の行は、開発版（DEBUG）と TestFlight だけに出す。出すかの切り替えは `OshiCon/Purchase/PlusEntryPolicy.swift` の `PlusEntryPolicy.showsEntry(in:)` の 1 か所で、
+    配り方は `AppDistributionDetector`（`@Environment(\.appDistributionDetector)`。`AppTransaction` の環境で見分け、差し替えられる）。起動引数 `-simulateAppStoreDistribution` で App Store 版として動かす
 
 ## アプリ固有の前提
 

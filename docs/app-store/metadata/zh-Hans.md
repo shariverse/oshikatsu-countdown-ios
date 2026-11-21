@@ -66,9 +66,11 @@
 （数据会包含在设备的备份（iCloud、电脑）中。删除 App 后数据会被清除。）
 
 日程类型：演唱会/Live、生日、发售日、直播、其他
+
+使用条款（EULA）：https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（684 文字）
+（762 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 
