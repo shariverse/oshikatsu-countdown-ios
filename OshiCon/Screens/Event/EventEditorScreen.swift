@@ -22,7 +22,7 @@ struct EventEditorScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.calendar) private var calendar
     @Environment(\.appTheme) private var theme
-    @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
+    @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
     /// 入力。開いたときの推しの一覧と今日から作る。
     @State private var form: EventForm?
