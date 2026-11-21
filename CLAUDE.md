@@ -77,6 +77,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   メモリ上のストアでは StoreKit に触れず、App Group にも書かない。Plus の状態は起動引数で固定する（既定と `-plusLocked` は使えない、`-plusUnlocked` は使える。`LaunchOptions.unlocksPlus`）
   - StoreKit Configuration ファイルは `Configs/OshiCon.storekit`（`in-app-purchases.json` と同じ商品。食い違いは `StoreKitConfigurationTests` が見つける）。
     共有スキームの Run と、テストプラン `OshiCon.xctestplan`（スキームの Test が使う）に設定してある。商品を変えたら両方のファイルを直す
+  - 課金画面は `OshiCon/Screens/Plus/PlusPaywallScreen.swift`（`NavigationStack` は開く側が置く）。見出し（文と SF Symbols の一覧）とサブスクリプション（`SubscriptionStoreView(productIDs:)`）の下に買い切り（`ProductView`）、
+    いちばん下に購入の復元・利用規約・プライバシーポリシー。購入の結果の振り分け（購入・保留・取り消し・失敗）と、利用規約・プライバシーポリシーの URL の定数は `OshiCon/Purchase/PlusPurchaseOutcome.swift`（`PlusLegalLink`）
 
 ## アプリ固有の前提
 
