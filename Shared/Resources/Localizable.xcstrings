@@ -13827,6 +13827,74 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Gagal Memulihkan Pembelian" } }
       }
     },
+    "サブスクリプション中に買い切りを購入しても、サブスクリプションは自動で止まりません。購入後に、ご自身で解約してください。" : {
+      "comment" : "課金画面。自動で更新されるサブスクリプションがある間、買い切りのそばに出す注記",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Buying the one-time purchase won't cancel your subscription automatically. Please cancel it yourself after you buy." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "サブスクリプション中に買い切りを購入しても、サブスクリプションは自動で止まりません。購入後に、ご自身で解約してください。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "订阅期间购买一次性购买项目，订阅不会自动停止。购买后请自行取消订阅。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "訂閱期間購買一次性購買項目，訂閱不會自動停止。購買後請自行取消訂閱。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구독 중에 한 번 구매를 해도 구독은 자동으로 해지되지 않아요. 구매 후 직접 구독을 해지해 주세요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "L'achat unique n'annule pas automatiquement votre abonnement. Pensez à le résilier vous-même après l'achat." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Einmalkauf beendet dein Abo nicht automatisch. Bitte kündige es nach dem Kauf selbst." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El pago único no cancela tu suscripción automáticamente. Cancélala tú mismo después de comprar." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A compra única não cancela sua assinatura automaticamente. Cancele-a você mesmo depois da compra." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "L'acquisto singolo non annulla automaticamente l'abbonamento. Annullalo tu dopo l'acquisto." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "การซื้อครั้งเดียวระหว่างที่สมัครสมาชิกอยู่จะไม่ยกเลิกการสมัครสมาชิกให้อัตโนมัติ โปรดยกเลิกด้วยตนเองหลังซื้อ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sekali Beli tidak otomatis menghentikan langgananmu. Batalkan langganan sendiri setelah membeli." } }
+      }
+    },
+    "サブスクリプションの解約をお忘れなく" : {
+      "comment" : "課金画面のアラートの題。サブスクリプション中に買い切りを買い終えたとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remember to Cancel Your Subscription" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "サブスクリプションの解約をお忘れなく" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "别忘了取消订阅" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "別忘了取消訂閱" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구독 해지를 잊지 마세요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pensez à résilier votre abonnement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abo kündigen nicht vergessen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No olvides cancelar tu suscripción" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não se esqueça de cancelar a assinatura" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ricordati di annullare l'abbonamento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "อย่าลืมยกเลิกการสมัครสมาชิก" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jangan Lupa Batalkan Langganan" } }
+      }
+    },
+    "買い切りを購入しても、サブスクリプションは自動で止まりません。続けて請求されないよう、ご自身で解約してください。" : {
+      "comment" : "課金画面のアラートの本文。サブスクリプション中に買い切りを買い終えたとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your subscription doesn't stop automatically when you buy the one-time purchase. Cancel it yourself so you won't be charged again." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "買い切りを購入しても、サブスクリプションは自動で止まりません。続けて請求されないよう、ご自身で解約してください。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "购买一次性购买项目后，订阅不会自动停止。为避免继续扣费，请自行取消订阅。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "購買一次性購買項目後，訂閱不會自動停止。為避免繼續扣款，請自行取消訂閱。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "한 번 구매를 해도 구독은 자동으로 해지되지 않아요. 계속 결제되지 않도록 직접 해지해 주세요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre abonnement ne s'arrête pas automatiquement après l'achat unique. Résiliez-le vous-même pour ne plus être facturé." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dein Abo endet durch den Einmalkauf nicht automatisch. Kündige es selbst, damit dir nichts mehr berechnet wird." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu suscripción no se detiene automáticamente con el pago único. Cancélala tú mismo para que no se te vuelva a cobrar." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sua assinatura não para automaticamente com a compra única. Cancele-a você mesmo para não ser cobrado novamente." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "L'abbonamento non si interrompe automaticamente con l'acquisto singolo. Annullalo tu per non ricevere altri addebiti." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "การซื้อครั้งเดียวจะไม่หยุดการสมัครสมาชิกให้อัตโนมัติ โปรดยกเลิกด้วยตนเองเพื่อไม่ให้ถูกเรียกเก็บเงินต่อ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Langganan tidak berhenti otomatis setelah Sekali Beli. Batalkan sendiri agar tidak ditagih lagi." } }
+      }
+    },
+    "サブスクリプションを管理" : {
+      "comment" : "課金画面のアラートのボタン。サブスクリプションの管理（App Store のシート）を開く",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Manage Subscription" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "サブスクリプションを管理" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "管理订阅" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "管理訂閱" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구독 관리" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Gérer l'abonnement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abo verwalten" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Gestionar suscripción" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Gerenciar assinatura" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Gestisci abbonamento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "จัดการการสมัครสมาชิก" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kelola Langganan" } }
+      }
+    },
     "時間をおいて、もう一度お試しください。" : {
       "comment" : "課金画面のアラートの本文。購入・復元に失敗したとき",
       "localizations" : {

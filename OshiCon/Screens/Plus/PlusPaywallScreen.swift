@@ -12,6 +12,8 @@ import SwiftUI
 /// - その下に買い切りを並べ、いちばん下に購入の復元・利用規約・プライバシーポリシーを置く。
 ///   復元とリンクはサブスクリプションと買い切りの両方に効くので、`SubscriptionStoreView` の中ではなく画面の下にまとめる
 /// - 購入の結果は `PlusStore.process(_:)` に渡す。保留（Ask to Buy）と失敗はアラートで知らせ、取り消しは何も出さない
+/// - 自動で更新されるサブスクリプションがある間は、買い切りのそばに「自分で解約が要る」注記を出し、
+///   買い切りを買い終えたら同じ旨の案内からサブスクリプションの管理を開ける（`PlusLifetimeGuidance`）
 ///
 /// `NavigationStack` は持たない（開く側が置く）。
 struct PlusPaywallScreen: View {
@@ -20,6 +22,9 @@ struct PlusPaywallScreen: View {
     @Environment(\.appTheme) private var theme
     @State private var notice: PlusPaywallNotice?
     @State private var isRestoring = false
+    /// サブスクリプション中に買い切りを買い終えたときの案内（`PlusLifetimeGuidance`）。
+    @State private var showsLifetimeGuide = false
+    @State private var isManagingSubscriptions = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,7 +36,10 @@ struct PlusPaywallScreen: View {
             .containerBackground(for: .subscriptionStoreFullHeight) {
                 ThemeScreenBackground()
             }
-            PlusPaywallFooter(isRestoring: isRestoring) {
+            PlusPaywallFooter(
+                isRestoring: isRestoring,
+                showsLifetimeCaution: plus?.hasRenewingSubscription ?? false
+            ) {
                 Task {
                     await restore()
                 }
@@ -42,8 +50,8 @@ struct PlusPaywallScreen: View {
         .tint(theme.palette.brand.color)
         .navigationTitle("推し活カウントダウン Plus")
         .navigationBarTitleDisplayMode(.inline)
-        .onInAppPurchaseCompletion { _, result in
-            await handle(PlusPurchaseOutcome(result))
+        .onInAppPurchaseCompletion { product, result in
+            await handle(PlusPurchaseOutcome(result), productID: product.id)
         }
         .alert(
             notice?.title ?? "",
@@ -54,12 +62,31 @@ struct PlusPaywallScreen: View {
         } message: { notice in
             Text(notice.message)
         }
+        // サブスクリプション中に買い切りを買ったときの案内。サブスクリプションは自動で止まらないので、管理を開けるようにする
+        .alert("サブスクリプションの解約をお忘れなく", isPresented: $showsLifetimeGuide) {
+            Button("サブスクリプションを管理") {
+                isManagingSubscriptions = true
+            }
+            Button("閉じる", role: .cancel) {}
+        } message: {
+            Text("買い切りを購入しても、サブスクリプションは自動で止まりません。続けて請求されないよう、ご自身で解約してください。")
+        }
+        .manageSubscriptionsSheet(isPresented: $isManagingSubscriptions)
     }
 
-    private func handle(_ outcome: PlusPurchaseOutcome) async {
+    private func handle(_ outcome: PlusPurchaseOutcome, productID: String) async {
         switch outcome {
         case let .purchased(verification):
             await plus?.process(verification)
+            var isVerified = false
+            if case .verified = verification {
+                isVerified = true
+            }
+            showsLifetimeGuide = PlusLifetimeGuidance.showsGuideAfterPurchase(
+                productID: productID,
+                isVerified: isVerified,
+                hasRenewingSubscription: plus?.hasRenewingSubscription ?? false
+            )
         case .pending:
             notice = .pending
         case .cancelled:
@@ -201,6 +228,8 @@ private struct PlusFeatureRow: View {
 /// サブスクリプションの下。買い切りと、購入の復元・利用規約・プライバシーポリシー。
 private struct PlusPaywallFooter: View {
     let isRestoring: Bool
+    /// 自動で更新されるサブスクリプションがある間、買い切りのそばに解約が自分で要る旨を出す。
+    let showsLifetimeCaution: Bool
     let restore: () -> Void
 
     @Environment(\.appTheme) private var theme
@@ -222,6 +251,20 @@ private struct PlusPaywallFooter: View {
             Text("一度の購入で、今後足す Plus の機能もずっと使えます")
                 .font(theme.typography.text(.footnote))
                 .foregroundStyle(theme.palette.onSurfaceVariant.color)
+            if showsLifetimeCaution {
+                Label {
+                    Text("サブスクリプション中に買い切りを購入しても、サブスクリプションは自動で止まりません。購入後に、ご自身で解約してください。")
+                        .fixedSize(horizontal: false, vertical: true)
+                } icon: {
+                    Image(systemName: "exclamationmark.circle")
+                        .foregroundStyle(theme.palette.brand.color)
+                        .accessibilityHidden(true)
+                }
+                .font(theme.typography.text(.footnote, weight: .bold))
+                .foregroundStyle(theme.palette.onSurface.color)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("plusPaywall.lifetimeCaution")
+            }
             Divider()
             // 大きな文字で横に並ばないときは縦に並べる
             ViewThatFits(in: .horizontal) {
@@ -271,4 +314,11 @@ private enum PlusPaywallLayout {
         PlusPaywallScreen()
     }
     .providesPlusStatus(PlusStore(isActive: false, unlocksWhenInactive: true))
+}
+
+#Preview("サブスクリプション中") {
+    NavigationStack {
+        PlusPaywallScreen()
+    }
+    .providesPlusStatus(PlusStore(isActive: false, unlocksWhenInactive: true, subscribesWhenInactive: true))
 }

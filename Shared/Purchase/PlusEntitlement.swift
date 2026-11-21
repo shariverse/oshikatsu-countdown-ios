@@ -44,12 +44,22 @@ nonisolated struct PlusPurchase: Hashable, Sendable {
     let revocationDate: Date?
     /// 請求に失敗したときの猶予期間（Billing Grace Period）の終わり。猶予期間中でなければ nil。
     let gracePeriodExpirationDate: Date?
+    /// サブスクリプションが次の期限で自動で更新されるか（解約していないか）。分からないときは true（解約の案内を出すほうに倒す）。
+    /// 買い切りでは使わない。
+    let willAutoRenew: Bool
 
-    init(productID: String, expirationDate: Date? = nil, revocationDate: Date? = nil, gracePeriodExpirationDate: Date? = nil) {
+    init(
+        productID: String,
+        expirationDate: Date? = nil,
+        revocationDate: Date? = nil,
+        gracePeriodExpirationDate: Date? = nil,
+        willAutoRenew: Bool = true
+    ) {
         self.productID = productID
         self.expirationDate = expirationDate
         self.revocationDate = revocationDate
         self.gracePeriodExpirationDate = gracePeriodExpirationDate
+        self.willAutoRenew = willAutoRenew
     }
 }
 
