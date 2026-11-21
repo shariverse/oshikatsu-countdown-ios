@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// 推しのアバター。写真があれば丸く切り抜き、無ければ推し色の丸に頭文字を置く。
+/// 推しのアバター。写真があれば丸く切り抜いて推し色で縁取り、無ければ推し色の丸に頭文字を置く。
 /// 名前は横に並べて出す前提なので、読み上げの対象にしない。
 struct OshiAvatar: View {
     let name: String
@@ -14,6 +14,11 @@ struct OshiAvatar: View {
     var size: CGFloat = 40
 
     @Environment(\.appTheme) private var theme
+
+    /// 写真の縁取りの太さ。アバターの大きさに合わせる（44pt で約 2.8pt、96pt で 6pt）。
+    private var photoRingWidth: CGFloat {
+        max(2, size / 16)
+    }
 
     var body: some View {
         ZStack {
@@ -25,6 +30,9 @@ struct OshiAvatar: View {
                     .scaledToFill()
                     // UI テストで写真を描いたことを確かめる（読み上げは変えない。丸ごと accessibilityHidden）
                     .accessibilityIdentifier("oshiAvatar.photo")
+                // 写真だけでは推し色が分からないので、推し色で縁取る。地の上の線なので、ダークでも沈まない文字の色にする
+                Circle()
+                    .strokeBorder(color.text(in: theme).color, lineWidth: photoRingWidth)
             } else {
                 Text(InputText.firstCharacter(of: name))
                     // 丸の大きさに合わせる。文字の大きさの設定で丸からはみ出さないよう、ダイナミックタイプで変えない
@@ -57,6 +65,12 @@ struct OshiColorDot: View {
             OshiAvatar(name: "LUMINA", color: .pink, size: 48)
             OshiAvatar(name: "ミナト", color: .navy, size: 48)
             OshiAvatar(name: "👨‍👩‍👧", color: .mint, size: 48)
+        }
+        HStack {
+            // 写真の代わりに灰色の画像で、縁取りを見る
+            OshiAvatar(name: "LUMINA", color: .pink, photo: Image(systemName: "person.crop.square.fill"), size: 48)
+            OshiAvatar(name: "ミナト", color: .navy, photo: Image(systemName: "person.crop.square.fill"), size: 48)
+            OshiAvatar(name: "ソラ", color: .yellow, photo: Image(systemName: "person.crop.square.fill"), size: 96)
         }
         HStack {
             ForEach(OshiColor.allCases, id: \.self) { color in
