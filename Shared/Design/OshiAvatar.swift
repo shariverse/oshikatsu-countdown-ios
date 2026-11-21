@@ -67,7 +67,7 @@ struct OshiColorDot: View {
             OshiAvatar(name: "👨‍👩‍👧", color: .mint, size: 48)
         }
         HStack {
-            // 写真の代わりに灰色の画像で、縁取りを見る
+            // 写真の代わりに SF Symbols の画像を入れて、縁取りを見る
             OshiAvatar(name: "LUMINA", color: .pink, photo: Image(systemName: "person.crop.square.fill"), size: 48)
             OshiAvatar(name: "ミナト", color: .navy, photo: Image(systemName: "person.crop.square.fill"), size: 48)
             OshiAvatar(name: "ソラ", color: .yellow, photo: Image(systemName: "person.crop.square.fill"), size: 96)
