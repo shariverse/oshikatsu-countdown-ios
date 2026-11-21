@@ -3,6 +3,7 @@
 //  OshiCon
 //
 
+import CoreData
 import Foundation
 import os
 import SwiftData
@@ -30,9 +31,19 @@ final class OshiConStore {
         self.context = context
     }
 
+    /// 今のスキーマの版。
+    static var currentSchema: any VersionedSchema.Type {
+        OshiConSchemaV2.self
+    }
+
+    /// 推しの並び（推しの一覧・ホームの絞り込み・予定の入力の選択肢）。並び順が同じ推し（V1 から移行した推し）は登録した順。
+    static var oshiOrder: [SortDescriptor<StoredOshi>] {
+        [SortDescriptor(\.sortOrder), SortDescriptor(\.createdAt), SortDescriptor(\.name)]
+    }
+
     /// ストアを開く。iCloud には同期しない（端末の外に送らない）。`allowsSave` はテストで保存を失敗させるために使う。
     static func makeContainer(_ location: Location = .appGroup, allowsSave: Bool = true) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: OshiConSchemaV1.self)
+        let schema = Schema(versionedSchema: currentSchema)
         let configuration: ModelConfiguration
         switch location {
         case .inMemory:
@@ -52,12 +63,30 @@ final class OshiConStore {
         return try ModelContainer(for: schema, migrationPlan: OshiConMigrationPlan.self, configurations: configuration)
     }
 
+    /// `url` のストアが古い版で、開くと移行が走るか。ストアがまだ無ければ false（今の版で作る）。
+    /// ウィジェットは移行を走らせない（アプリと同時に移行しない）よう、移行が要るストアは開かずに読めないものとして扱う。
+    /// 版を読めないときも、開かない側（true）に倒す。
+    static func needsMigration(storeAt url: URL) -> Bool {
+        guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else {
+            return false
+        }
+        do {
+            let metadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(type: .sqlite, at: url)
+            guard let model = NSManagedObjectModel.makeManagedObjectModel(for: currentSchema.models) else {
+                return true
+            }
+            return !model.isConfiguration(withName: nil, compatibleWithStoreMetadata: metadata)
+        } catch {
+            logger.error("ストアの版を読めなかった: \(error.localizedDescription)")
+            return true
+        }
+    }
+
     // MARK: - 読む
 
-    /// 推しを登録した順に。
+    /// 推しを並び順に（先頭が 1 位の推し）。
     func oshis() throws -> [Oshi] {
-        let descriptor = FetchDescriptor<StoredOshi>(sortBy: [SortDescriptor(\.createdAt), SortDescriptor(\.name)])
-        return try context.fetch(descriptor).map(Self.oshi(from:))
+        try storedOshis().map(Self.oshi(from:))
     }
 
     /// すべての予定。並びは `EventSchedule` で決める。
@@ -77,7 +106,7 @@ final class OshiConStore {
 
     // MARK: - 推しの保存・削除
 
-    /// 推しを追加するか、同じ `id` の推しを更新する。`now` は追加するときの登録した時刻。
+    /// 推しを追加するか、同じ `id` の推しを更新する。`now` は追加するときの登録した時刻。追加した推しは末尾に並ぶ。
     func save(_ oshi: Oshi, now: Date) throws {
         try performChanges {
             if let stored = try storedOshi(id: oshi.id) {
@@ -85,15 +114,35 @@ final class OshiConStore {
                 stored.colorRawValue = oshi.color.rawValue
                 stored.photoFileName = oshi.photoFileName
             } else {
+                let lastOrder = try storedOshis().last?.sortOrder
                 context.insert(
                     StoredOshi(
                         id: oshi.id,
                         name: oshi.name,
                         colorRawValue: oshi.color.rawValue,
                         photoFileName: oshi.photoFileName,
-                        createdAt: now
+                        createdAt: now,
+                        sortOrder: lastOrder.map { $0 + 1 } ?? 0
                     )
                 )
+            }
+        }
+    }
+
+    /// 推しを `ids` の順に並べ替える（先頭が 1 位の推し）。`ids` に無い推し（並べ替えの間に増えた推しなど）は、今の並びのまま後ろに置く。
+    /// 知らない `id` は無視する。
+    func reorderOshis(_ ids: [Oshi.ID]) throws {
+        let stored = try storedOshis()
+        let position = Dictionary(ids.enumerated().map { ($1, $0) }) { first, _ in first }
+        // 並べ替える推しを先に、残りを今の並びのまま後ろに（sorted は安定なので、同じ位置の推しは今の並びを保つ）
+        let ordered = stored.enumerated()
+            .sorted { lhs, rhs in
+                (position[lhs.element.id] ?? ids.count, lhs.offset) < (position[rhs.element.id] ?? ids.count, rhs.offset)
+            }
+            .map(\.element)
+        try performChanges {
+            for (index, oshi) in ordered.enumerated() where oshi.sortOrder != index {
+                oshi.sortOrder = index
             }
         }
     }
@@ -222,6 +271,10 @@ final class OshiConStore {
     }
 
     // MARK: - 内部
+
+    private func storedOshis() throws -> [StoredOshi] {
+        try context.fetch(FetchDescriptor<StoredOshi>(sortBy: Self.oshiOrder))
+    }
 
     private func storedOshi(id: Oshi.ID) throws -> StoredOshi? {
         var descriptor = FetchDescriptor<StoredOshi>(predicate: #Predicate { $0.id == id })
