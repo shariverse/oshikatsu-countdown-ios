@@ -1,0 +1,100 @@
+{
+  "_comment": [
+    "App Store Connect に登録する課金の商品（推し活カウントダウン Plus）。ワークフロー「App Store In-App Purchases」が読んで登録する。",
+    "productId は一度作ると変えられず、消しても同じ ID は使えない。作った後は productId・period・type を変えない。",
+    "price は baseTerritory（日本）の税込みの価格。ほかの国は App Store Connect の換算（equalization）に合わせる。",
+    "localizations のキーはこのリポジトリの言語コード（docs/app-store/languages.json の language）。name は 30 文字、description は 45 文字まで。",
+    "用語は App Store の掲載文（docs/app-store/metadata/）にそろえる（推し: zh-Hans 本命・zh-Hant 我推・ko 최애・th โอชิ・ほかは oshi）。"
+  ],
+  "baseTerritory": "JPN",
+  "subscriptionGroup": {
+    "referenceName": "OshiCon Plus",
+    "localizations": {
+      "en": { "name": "Oshi Countdown Plus" },
+      "ja": { "name": "推し活カウントダウン Plus" },
+      "zh-Hans": { "name": "追星倒计时 Plus" },
+      "zh-Hant": { "name": "推活倒數 Plus" },
+      "ko": { "name": "최애 디데이 Plus" },
+      "fr": { "name": "Oshi Countdown Plus" },
+      "de": { "name": "Oshi Countdown Plus" },
+      "es": { "name": "Oshi Countdown Plus" },
+      "pt-BR": { "name": "Oshi Countdown Plus" },
+      "it": { "name": "Oshi Countdown Plus" },
+      "th": { "name": "Oshi Countdown Plus" },
+      "id": { "name": "Oshi Countdown Plus" }
+    }
+  },
+  "subscriptions": [
+    {
+      "productId": "jp.shilokuma.OshiCon.plus.yearly",
+      "referenceName": "Plus Yearly",
+      "period": "ONE_YEAR",
+      "groupLevel": 1,
+      "price": "1980",
+      "familySharable": false,
+      "introductoryOffer": { "offerMode": "FREE_TRIAL", "duration": "ONE_WEEK", "numberOfPeriods": 1 },
+      "reviewNote": "Yearly subscription to Oshi Countdown Plus with a one-week free trial. Plus lets users decorate the app background, decorations and a photo widget with their own oshi photo. Counting, widgets, reminders and Live Activities stay free.",
+      "localizations": {
+        "en": { "name": "Plus (Yearly)", "description": "Your oshi's photo on backgrounds and widgets" },
+        "ja": { "name": "Plus（年額）", "description": "推しの写真で背景・飾り・ウィジェットを着せ替え" },
+        "zh-Hans": { "name": "Plus（年付）", "description": "用本命的照片装扮背景、装饰和小组件" },
+        "zh-Hant": { "name": "Plus（年付）", "description": "用我推的照片裝扮背景、裝飾和小工具" },
+        "ko": { "name": "Plus (연간)", "description": "최애 사진으로 배경·장식·위젯 꾸미기" },
+        "fr": { "name": "Plus (annuel)", "description": "La photo de votre oshi en fond et en widget" },
+        "de": { "name": "Plus (jährlich)", "description": "Oshi-Fotos für Hintergrund und Widgets" },
+        "es": { "name": "Plus (anual)", "description": "Fotos de tu oshi en fondos y widgets" },
+        "pt-BR": { "name": "Plus (anual)", "description": "Fotos do seu oshi no fundo e nos widgets" },
+        "it": { "name": "Plus (annuale)", "description": "Foto del tuo oshi su sfondi e widget" },
+        "th": { "name": "Plus (รายปี)", "description": "แต่งพื้นหลังและวิดเจ็ตด้วยรูปโอชิ" },
+        "id": { "name": "Plus (Tahunan)", "description": "Foto oshi-mu untuk latar dan widget" }
+      }
+    },
+    {
+      "productId": "jp.shilokuma.OshiCon.plus.monthly",
+      "referenceName": "Plus Monthly",
+      "period": "ONE_MONTH",
+      "groupLevel": 1,
+      "price": "280",
+      "familySharable": false,
+      "reviewNote": "Monthly subscription to Oshi Countdown Plus. Plus lets users decorate the app background, decorations and a photo widget with their own oshi photo. Counting, widgets, reminders and Live Activities stay free.",
+      "localizations": {
+        "en": { "name": "Plus (Monthly)", "description": "Your oshi's photo on backgrounds and widgets" },
+        "ja": { "name": "Plus（月額）", "description": "推しの写真で背景・飾り・ウィジェットを着せ替え" },
+        "zh-Hans": { "name": "Plus（月付）", "description": "用本命的照片装扮背景、装饰和小组件" },
+        "zh-Hant": { "name": "Plus（月付）", "description": "用我推的照片裝扮背景、裝飾和小工具" },
+        "ko": { "name": "Plus (월간)", "description": "최애 사진으로 배경·장식·위젯 꾸미기" },
+        "fr": { "name": "Plus (mensuel)", "description": "La photo de votre oshi en fond et en widget" },
+        "de": { "name": "Plus (monatlich)", "description": "Oshi-Fotos für Hintergrund und Widgets" },
+        "es": { "name": "Plus (mensual)", "description": "Fotos de tu oshi en fondos y widgets" },
+        "pt-BR": { "name": "Plus (mensal)", "description": "Fotos do seu oshi no fundo e nos widgets" },
+        "it": { "name": "Plus (mensile)", "description": "Foto del tuo oshi su sfondi e widget" },
+        "th": { "name": "Plus (รายเดือน)", "description": "แต่งพื้นหลังและวิดเจ็ตด้วยรูปโอชิ" },
+        "id": { "name": "Plus (Bulanan)", "description": "Foto oshi-mu untuk latar dan widget" }
+      }
+    }
+  ],
+  "inAppPurchases": [
+    {
+      "productId": "jp.shilokuma.OshiCon.plus.lifetime",
+      "referenceName": "Plus Lifetime",
+      "type": "NON_CONSUMABLE",
+      "price": "4800",
+      "familySharable": false,
+      "reviewNote": "One-time purchase that unlocks Oshi Countdown Plus forever, including Plus features added later. It is an alternative to the Plus subscriptions in the same app.",
+      "localizations": {
+        "en": { "name": "Plus (Lifetime)", "description": "Buy once and keep Plus forever" },
+        "ja": { "name": "Plus（買い切り）", "description": "一度の購入で Plus の機能をずっと使えます" },
+        "zh-Hans": { "name": "Plus（永久）", "description": "一次购买，永久使用 Plus 的所有功能" },
+        "zh-Hant": { "name": "Plus（永久）", "description": "一次購買，永久使用 Plus 的所有功能" },
+        "ko": { "name": "Plus (평생)", "description": "한 번 구매로 Plus 기능을 계속 이용" },
+        "fr": { "name": "Plus (à vie)", "description": "Un seul achat, Plus pour toujours" },
+        "de": { "name": "Plus (dauerhaft)", "description": "Einmal kaufen, Plus für immer nutzen" },
+        "es": { "name": "Plus (de por vida)", "description": "Un solo pago y Plus para siempre" },
+        "pt-BR": { "name": "Plus (vitalício)", "description": "Pague uma vez e use o Plus para sempre" },
+        "it": { "name": "Plus (a vita)", "description": "Un solo acquisto, Plus per sempre" },
+        "th": { "name": "Plus (ตลอดชีพ)", "description": "ซื้อครั้งเดียว ใช้ Plus ได้ตลอดไป" },
+        "id": { "name": "Plus (Seumur Hidup)", "description": "Beli sekali, pakai Plus selamanya" }
+      }
+    }
+  ]
+}

@@ -12,6 +12,7 @@
 | [app-privacy.md](app-privacy.md) | 「App のプライバシー」の回答案と、輸出コンプライアンス | App Store Connect の「App のプライバシー」 |
 | [whats-new/](whats-new/) | バージョンごと（`<バージョン>.md`）の、12 言語の「このバージョンの新機能」 | App Store Connect の「App Store」タブ（言語ごと）の「このバージョンの新機能」 |
 | [review-notes.md](review-notes.md) | 審査用メモ（審査員への説明。日本語版と英語版） | App Store Connect の「App Review に関する情報」のメモ |
+| [in-app-purchases.json](in-app-purchases.json) | 課金の商品（推し活カウントダウン Plus の月額・年額・買い切り）の productId・価格・12 言語の表示名と説明 | ワークフロー「App Store In-App Purchases」で App Store Connect の「サブスクリプション」「App 内課金」に登録する（README の「課金の商品の登録」） |
 
 ## 決まっていないこと（人間が決める）
 
