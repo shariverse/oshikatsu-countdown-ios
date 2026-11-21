@@ -230,6 +230,16 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 - **Android 版の SPEC（`docs/SPEC.md`）にはまだ書かれていません。** iOS だけ先に作り、Android の SPEC は後で合わせます（Discussion #128 の Q4）
 - UI テストでは、起動引数 `-useTestPhoto`（`-useInMemoryStore` のときだけ効く）で「写真を選ぶ」を生成した画像を選ぶボタンに替えます（`PhotosPicker` は UI テストから操作できないため）
 
+### 13. 画像でシェア
+
+予定の詳細のツールバーの「画像でシェア」から、予定の「あと○日」を正方形のカードの画像（1080 × 1080 px の PNG）にして共有シートで渡します（1.3.0 から。無料）。仕様とコードの場所は [docs/share-card.md](docs/share-card.md) にまとめています。
+
+- コードは `OshiCon/Share/` にあります（中身の規則 `ShareCardContent`・見た目の差し替え口 `ShareCardStyle`・カード `ShareCardView`・書き出し `ShareCardRenderer`・プレビュー画面 `ShareCardPreviewScreen`）
+- プレビュー画面で会場（既定で載せない）と推しの写真（既定で載せる）を切り替えてからシェアします。推しの名前は載せず、透かしに言語ごとのブランド名（App Store の名前のコロンより前）を入れます
+- 画像は端末の中で作り、通信しません。共有シートの「画像を保存」のため、Info.plist に `NSPhotoLibraryAddUsageDescription`（写真への追加の説明）を置いています
+- Plus の着せ替えは、`ShareCardStyle` の `background` を `.photo(fileName:)` にしてカードの地を推しの写真に替えます
+- テスト: Unit は `OshiConTests/Share/`（`ShareCardContentTests`・`ShareCardRendererTests`・`ShareCardSharingTests`）、UI は `OshiConUITests/ShareCardUITests`（`-useInMemoryStore -useTestPhoto`。識別子は `eventDetail.share`・`shareCard.preview`・`shareCard.includesVenue`・`shareCard.includesPhoto`・`shareCard.share`）。共有シートそのものは UI テストから開けません
+
 ## 多言語対応
 
 アプリと Widget Extension は 12 言語に対応しています（英語が既定。対応していない言語の端末では英語で出ます）。
@@ -257,7 +267,7 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 ├── OshiConTests/     # Unit テスト（Swift Testing）
 ├── OshiConUITests/   # UI テスト（XCTest）
 ├── OshiCon.xcodeproj # 共有スキーム OshiCon を含む
-├── docs/                    # ExportOptions.plist のサンプル・App Store の掲載文・テーマ（design/themes.md）・写真の調整の仕様（photo-crop.md）
+├── docs/                    # ExportOptions.plist のサンプル・App Store の掲載文・テーマ（design/themes.md）・写真の調整の仕様（photo-crop.md）・画像でシェアの仕様（share-card.md）
 ├── scripts/                 # rename.sh・app-store-screenshots.sh（App Store 用スクリーンショット）・render-creative-assets.sh（クリエイティブアセット）
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/
