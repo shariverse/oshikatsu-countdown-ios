@@ -119,6 +119,13 @@ struct EventTextTests {
         #expect(EventText.countdownParts(days: 3, withPrefix: true, locale: es) == .init(prefix: "Faltan", number: "3", suffix: "días"))
     }
 
+    @Test("終わった予定の日数を、数字と前後の文言に分ける（単位は複数形）")
+    func daysAgoParts() {
+        #expect(EventText.daysAgoParts(days: 12, locale: ja) == .init(prefix: "", number: "12", suffix: "日前"))
+        #expect(EventText.daysAgoParts(days: 12, locale: en) == .init(prefix: "", number: "12", suffix: "days ago"))
+        #expect(EventText.daysAgoParts(days: 1, locale: en) == .init(prefix: "", number: "1", suffix: "day ago"))
+    }
+
     @Test("読み上げの区切りは言語で変わる")
     func speechSeparator() {
         #expect(EventText.joinedForSpeech(["A", "B"], locale: ja) == "A、B")
