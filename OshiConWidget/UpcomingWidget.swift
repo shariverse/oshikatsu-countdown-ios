@@ -14,6 +14,7 @@ struct UpcomingWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: Self.kind, provider: UpcomingProvider()) { entry in
             UpcomingWidgetView(content: entry.content)
+                .environment(\.appTheme, .shipping(themeColor: entry.themeColor))
         }
         .configurationDisplayName("推しカウント")
         .description("これからの予定を近い順に表示します")
@@ -27,6 +28,8 @@ nonisolated struct UpcomingEntry: TimelineEntry {
 
     let date: Date
     let content: UpcomingWidgetContent
+    /// テーマを染める色（1 位の推しの推し色）。見本・読めないときは nil（ピンクのまま）。
+    var themeColor: OshiColor?
 
     /// ウィジェットの一覧に出す見本。
     static var sample: Self {
@@ -83,7 +86,8 @@ nonisolated struct UpcomingProvider: TimelineProvider {
                 oshis: data.oshis,
                 today: CalendarDay(date, calendar: calendar),
                 maxRows: UpcomingEntry.maxRows
-            )
+            ),
+            themeColor: data.themeColor
         )
     }
 }

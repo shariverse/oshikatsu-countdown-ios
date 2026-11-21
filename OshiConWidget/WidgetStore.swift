@@ -10,7 +10,13 @@ import SwiftData
 /// ウィジェットで使う、App Group のストアから読んだ予定と推し。
 nonisolated struct WidgetData: Sendable {
     let events: [OshiEvent]
+    /// 推しの並び順（先頭が 1 位の推し）。
     let oshis: [Oshi]
+
+    /// テーマを染める色（1 位の推しの推し色）。推しがいなければ nil（ピンクのまま）。
+    var themeColor: OshiColor? {
+        oshis.first?.color
+    }
 }
 
 /// ウィジェットから App Group のストア（アプリと共有）を読む。SwiftData のモデルはメインアクターで扱い、
