@@ -194,7 +194,26 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 - 指定したバージョンが無ければ、審査前のバージョンの番号を変えます（新規アプリに最初からある「1.0」など）。それも無ければ作ります
 - サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格・App のプライバシー・ビルドの選択は扱いません。App Store Connect の画面で入れてから審査に提出します（提出もこのワークフローでは行いません）
 
-### 10. テーマ
+### 10. 課金の商品の登録
+
+Actions タブの「App Store In-App Purchases」を手動実行すると、[docs/app-store/in-app-purchases.json](docs/app-store/in-app-purchases.json) の課金の商品（推し活カウントダウン Plus の月額・年額のサブスクリプションと、買い切りの非消耗型）を App Store Connect API で登録します。
+既定は確認だけで、何も作りません。**productId は一度作ると変えられず、消しても同じ ID は使えない**ので、確認の結果（Job Summary）を見てから `apply` を付けて作ります。
+
+```bash
+# 確認だけ（作るもの・入れるものを表示する）
+gh workflow run app-store-purchases.yml --ref develop
+# 作る
+gh workflow run app-store-purchases.yml --ref develop -f apply=true
+```
+
+- サブスクリプショングループは `referenceName`、商品は `productId` で探し、無ければ作ります。何度流しても二重には作りません。途中で失敗したら、直してから流し直すと続きから入れます
+- 表示名と説明は 12 言語（[docs/app-store/languages.json](docs/app-store/languages.json)）ぶん入れます。言語が足りない・文字数（表示名 30 文字・説明 45 文字）を超えるときは、何も登録せずに止まります
+- 価格は `baseTerritory`（日本）の税込みの価格で、ほかの国・地域は App Store Connect の換算に合わせます。その価格が日本の価格の刻みに無ければ、近い価格を出して止まります
+- 販売地域はすべての国・地域と、新しく増える国・地域です。年額には 1 週間の無料のお試しを付けます。ファミリー共有は OFF です（一度 ON にすると戻せません）
+- サブスクリプションの販売地域・価格・お試しは、すでに入っているものを変えません（価格の変更は App Store Connect の画面で行います）。非消耗型の価格は毎回入れ直します（同じ価格なら変わりません）
+- 審査用のスクリーンショット（課金画面）と審査への提出は扱いません。課金画面ができてから App Store Connect の画面で入れます。最初の課金の商品は、アプリの新しいバージョンと一緒に審査に出します
+
+### 11. テーマ
 
 出荷するアプリとウィジェットは、Discussion #80 のテーマ案から採用した「地雷系・ゴシック」（`AppTheme.shipping` = `AppTheme.jiraiGothic`）だけを使います。
 採用しなかった案は片付け、アイデアは shilokuma-inc/design-knowledge に残しました。配色・書体・コントラストと、採用でしたこと・残っていることは [docs/design/themes.md](docs/design/themes.md) にまとめています。
@@ -206,7 +225,7 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 - **書体**: Kaisei Decol（SIL OFL 1.1）は google/fonts から取得したものを改変せずに `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に載せています
 - **ナビゲーションバーのタイトル**: 日本語のときだけ Kaisei Decol の太字にし、ほかの言語はシステムの書体のままです（バーの外観で書体だけを替える。`OshiCon/App/NavigationBarAppearance.swift`）。ホームのバーにはタイトルの文字を出しません（Discussion #148。決まりは [docs/design/themes.md](docs/design/themes.md)）
 
-### 11. 推しの写真の調整
+### 12. 推しの写真の調整
 
 推しの登録・編集で写真を選ぶと、調整画面（拡大・縮小・移動・回転）で丸の枠に写す範囲を決めてから取り込みます（Discussion #128）。仕様とコードの場所は [docs/photo-crop.md](docs/photo-crop.md) にまとめています。
 
@@ -249,14 +268,15 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 └── .github/
     ├── ISSUE_TEMPLATE/      # Issue テンプレート
     ├── pull_request_template.md
-    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）・embed-entitlements.rb（Archive に Entitlements を埋め込む）・app-store-metadata/（掲載文とスクリーンショットの登録）・creative-assets/（クリエイティブアセットの配置）
+    ├── scripts/             # check-app-store-app.rb（App Store Connect のアプリの有無を確認）・embed-entitlements.rb（Archive に Entitlements を埋め込む）・app-store-metadata/（掲載文とスクリーンショットの登録）・creative-assets/（クリエイティブアセットの配置）・app-store-purchases/（課金の商品の登録）
     └── workflows/
         ├── _build.yml       # 共通処理: ビルド + テスト + SwiftLint（workflow_call）
         ├── _archive.yml     # 共通処理: Archive → Export（→ Upload）（workflow_call）
         ├── build.yml        # 全ブランチの push / Fork からの PR
         ├── archive.yml      # main の push
         ├── upload.yml       # develop / release/** の push
-        └── app-store-metadata.yml # 掲載文とスクリーンショットの登録（手動実行）
+        ├── app-store-metadata.yml # 掲載文とスクリーンショットの登録（手動実行）
+        └── app-store-purchases.yml # 課金の商品の登録（手動実行）
 ```
 
 - プロジェクトはフォルダ同期グループ（Xcode 16 以降の形式）で管理しているため、ファイルの追加・削除で pbxproj は変わりません
