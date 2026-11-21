@@ -5,11 +5,18 @@
 
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
-/// 書き出したシェアのカードの画像（正方形の PNG）。
-nonisolated struct ShareCardImage: Sendable {
+/// 書き出したシェアのカードの画像（正方形の PNG）。共有シート（`ShareLink`）には PNG の画像だけを渡す。
+nonisolated struct ShareCardImage: Sendable, Transferable {
     let cgImage: CGImage
     let pngData: Data
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { image in
+            image.pngData
+        }
+    }
 }
 
 /// シェアのカードを、端末の中で決まった大きさ（`ShareCardSize.pixelLength` 四方）の PNG に書き出す。通信しない。
