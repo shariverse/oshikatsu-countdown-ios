@@ -198,7 +198,9 @@ struct OshiEditingTests {
         let background = try #require(appearance.settings.backgroundPhotoFileName)
 
         let first = try #require(try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now))
-        let replaced = try #require(try await editing.save(current: first, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now))
+        let replaced = try #require(
+            try await editing.save(current: first, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now)
+        )
         #expect(exists(background))
         let removed = try #require(try await editing.save(current: replaced, name: "ミナト", color: .pink, photoChange: .remove, now: now))
         #expect(removed.photoFileName == nil)
