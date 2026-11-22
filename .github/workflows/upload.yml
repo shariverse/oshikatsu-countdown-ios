@@ -8,6 +8,11 @@ on:
     branches:
       - develop
       - 'release/**'
+    # docs/spec/ は仕様リポジトリ app-specs から生成した仕様で、Bot の spec-sync の PR で届く（届いたらすぐマージする）。
+    # 仕様だけの変更ではアプリは変わらないので、アップロードしない（24 時間あたりのアップロード上限と macOS の実行枠を使わないため）。
+    # ほかのファイルも一緒に変わった push では、今までどおりアップロードする
+    paths-ignore:
+      - 'docs/spec/**'
   workflow_dispatch:
 
 permissions:
