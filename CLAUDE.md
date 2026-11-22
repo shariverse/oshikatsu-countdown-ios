@@ -118,7 +118,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
       タイムライン `PhotoWidgetTimeline`・写真の読み込み `WidgetPhotoLoader` は `Shared/Widget/`。アプリの Preview は `WidgetPreview.photo`
     - 写真は `WidgetPhotoLoader` が App Group の写真を ImageIO のサムネイルでウィジェットの枠の大きさに縮めて読む（一辺 720 px まで）。エントリごとではなく 1 回だけ読む
     - 写真は地（`containerBackground`）ではなく中身に置く（1 色の描き方では地が外されるため）。そのため `.contentMarginsDisabled()` を付け、余白は View が `widgetContentMargins` から付ける
-    - tinted などフルカラーでない描き方では、暗幕を敷かず、写真を `widgetAccentedRenderingMode(.desaturated)`（iOS 18 から）と `grayscale` で白黒にして薄く描き、色合いを乗せる
+    - tinted などフルカラーでない描き方では、暗幕を敷かず、写真を `widgetAccentedRenderingMode(.accentedDesaturated)`（iOS 18 から）と `grayscale` で白黒にして薄く描き、色合いを乗せる
     - Plus の判定: Widget Extension は `Shared/Purchase/PlusWidgetStatus.swift` で、App Group の結果と期限と現在時刻から決める。使えない・期限の前・買い切りはそのまま、期限ちょうどか過ぎていたら
       Widget Extension の中で StoreKit 2（`Transaction.currentEntitlements` を `PlusEntitlement` の規則で判定。通信しない）で確かめ直す。App Group には書き戻さない（書くのはアプリの `PlusStore` だけ）
     - タイムライン: 今と 0:00 にエントリを置き、Plus の期限がその範囲の中にあれば期限の時刻にもエントリを置いて、そこから Plus でない表示にし、期限の時刻に作り直す（`.after`）

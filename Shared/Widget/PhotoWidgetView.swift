@@ -278,9 +278,10 @@ struct PhotoWidgetView: View {
 
 private extension Image {
     /// tinted などの 1 色の描き方で、写真を白黒にして色合いを乗せる（iOS 18 から。iOS 17 には 1 色の描き方が無い）。
+    /// `.desaturated` は白黒にするだけで色合いが乗らないので、`.accentedDesaturated` にする（Discussion #219 の q5）。
     @ViewBuilder func desaturatedWhenAccented() -> some View {
         if #available(iOS 18.0, *) {
-            widgetAccentedRenderingMode(.desaturated)
+            widgetAccentedRenderingMode(.accentedDesaturated)
         } else {
             self
         }
