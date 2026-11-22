@@ -57,8 +57,9 @@ struct OshiListScreen: View {
             // 2 人以上いるときだけ並べ替えられる
             if storedOshis.count > 1 || editMode.isEditing {
                 ToolbarItem(placement: .topBarLeading) {
-                    // 三項演算子の文字列は String になって訳されないので、キーとして渡す
-                    Button(editMode.isEditing ? LocalizedStringKey("完了") : LocalizedStringKey("並べ替え")) {
+                    // 三項演算子の文字列は String になって訳されないので、キーとして渡す。
+                    // 並べ替えを終えるボタンは、「完了」だと何が終わるのか分かりづらいので「この順番で確定」にする
+                    Button(editMode.isEditing ? LocalizedStringKey("この順番で確定") : LocalizedStringKey("並べ替え")) {
                         withAnimation {
                             editMode = editMode.isEditing ? .inactive : .active
                         }
