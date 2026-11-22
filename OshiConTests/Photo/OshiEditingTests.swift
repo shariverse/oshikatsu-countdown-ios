@@ -188,4 +188,27 @@ struct OshiEditingTests {
         #expect(!exists(oshi.photoFileName))
         #expect(exists(other.photoFileName))
     }
+
+    @Test("推しの写真の差し替え・外す・推しの削除では、同じ置き場所にある着せ替えの背景の写真を消さない")
+    @MainActor
+    func backgroundPhotoSurvivesOshiEditing() async throws {
+        let appearance = AppearanceStore(defaults: try AppearanceFixtures.makeDefaults(), photos: photos)
+        let crop = PhotoCrop(imageSize: CGSize(width: 2_000, height: 1_500), aspectRatio: PhotoCrop.backgroundAspectRatio)
+        try await appearance.replaceBackgroundPhoto(photo, crop: crop)
+        let background = try #require(appearance.settings.backgroundPhotoFileName)
+
+        let first = try #require(try await editing.save(current: nil, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now))
+        let replaced = try #require(
+            try await editing.save(current: first, name: "ミナト", color: .pink, photoChange: .replace(photo), now: now)
+        )
+        #expect(exists(background))
+        let removed = try #require(try await editing.save(current: replaced, name: "ミナト", color: .pink, photoChange: .remove, now: now))
+        #expect(removed.photoFileName == nil)
+        #expect(exists(background))
+        let other = try #require(try await editing.save(current: nil, name: "ルミナ", color: .mint, photoChange: .replace(photo), now: now))
+        try editing.delete(oshiID: other.id)
+        try editing.delete(oshiID: first.id)
+        #expect(try photoFiles() == [background])
+        #expect(appearance.settings.backgroundPhotoFileName == background)
+    }
 }

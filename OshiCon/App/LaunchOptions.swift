@@ -100,6 +100,14 @@ nonisolated enum AppStorageKey {
     static let remindersEnabled = "remindersEnabled"
     /// 日付で決まる通知（N 日前・前日・当日）を出す時刻。0:00 からの分（既定は 9:00）。
     static let reminderMinutes = "reminderMinutes"
+    /// 着せ替え: 背景の写真を地に敷く（既定は ON。`AppearanceSettings`）。
+    static let appearanceBackgroundEnabled = "appearanceBackgroundEnabled"
+    /// 着せ替え: 地の飾りを推しの丸い写真に替える（既定は OFF）。
+    static let appearanceDecorationEnabled = "appearanceDecorationEnabled"
+    /// 着せ替え: 背景の写真に掛ける暗幕とぼかしの強さ（`AppearanceIntensity` の rawValue。既定は medium）。
+    static let appearanceIntensity = "appearanceIntensity"
+    /// 着せ替え: 背景の写真のファイル名（`OshiPhotoLibrary` の中。選んでいなければ無い）。
+    static let appearanceBackgroundPhoto = "appearanceBackgroundPhoto"
 
     /// そのタイミングの通知を出す（既定は ON）。
     static func reminderTiming(_ timing: ReminderTiming) -> String {
