@@ -178,18 +178,36 @@ final class OshiConUITests: XCTestCase {
         let reminders = app.switches["settings.reminders"]
         XCTAssertTrue(reminders.waitForExistence(timeout: 2))
         XCTAssertEqual(reminders.value as? String, "1")
+        // 上に Plus と着せ替えの行があり、通知の欄の下のほうは画面の外になる（Form は画面の外の行を作らない）ので、見えるところまで送る
         for timing in ["thirtyDaysBefore", "sevenDaysBefore", "dayBefore", "onTheDay", "hourBeforeStart"] {
             let toggle = app.switches["settings.reminderTiming.\(timing)"]
+            scrollIntoView(toggle, in: app, upward: true)
             XCTAssertTrue(toggle.exists, timing)
             XCTAssertEqual(toggle.value as? String, "1", timing)
         }
+        scrollIntoView(app.datePickers.firstMatch, in: app, upward: true)
         XCTAssertTrue(app.datePickers.firstMatch.exists)
 
         // OFF にすると、タイミングと時刻の項目を隠す
+        scrollIntoView(reminders, in: app, upward: false)
         reminders.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         XCTAssertEqual(reminders.value as? String, "0")
         XCTAssertTrue(app.switches["settings.reminderTiming.thirtyDaysBefore"].waitForNonExistence(timeout: 2))
         XCTAssertFalse(app.datePickers.firstMatch.exists)
+    }
+
+    /// `element` が画面の中で押せるところに来るまで、ゆっくり送る（`upward` が true なら下の行へ、false なら上の行へ）。何度か送っても来なければそのまま返す。
+    @MainActor
+    private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication, upward: Bool, maxSwipes: Int = 5) {
+        var swipes = 0
+        while !(element.exists && element.isHittable), swipes < maxSwipes {
+            if upward {
+                app.swipeUp(velocity: .slow)
+            } else {
+                app.swipeDown(velocity: .slow)
+            }
+            swipes += 1
+        }
     }
 
     /// 通知を押すと、その予定の詳細が開く（落ちない。#186）。
