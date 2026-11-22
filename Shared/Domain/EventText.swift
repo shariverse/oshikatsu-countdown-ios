@@ -110,6 +110,16 @@ nonisolated enum EventText {
         } else {
             String(localized: LocalizedStringResource("\(days) 日", locale: locale))
         }
+        return parts(of: text, number: days)
+    }
+
+    /// 終わった予定の「N 日前」を数字と前後の文言に分ける（ja ``・`3`・`日前`、en ``・`3`・`days ago`）。`days` は経った日数（正）。
+    static func daysAgoParts(days: Int, locale: Locale = .app) -> CountdownParts {
+        parts(of: String(localized: LocalizedStringResource("\(days) 日前", locale: locale)), number: days)
+    }
+
+    /// `text` を、その中の `number` の数字と前後の文言に分ける。数字が見つからなければ全体を後ろの文言にする。
+    private static func parts(of text: String, number days: Int) -> CountdownParts {
         let number = String(days)
         guard let range = text.range(of: number) else {
             return CountdownParts(prefix: "", number: number, suffix: text)

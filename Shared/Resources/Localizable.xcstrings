@@ -13158,6 +13158,545 @@
         }
       }
     },
+    "画像でシェア" : {
+      "comment" : "予定の詳細のシェアのボタンと、シェアのプレビュー画面のタイトル",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share as Image"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像でシェア"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以图片分享"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以圖片分享"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미지로 공유"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager en image"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Bild teilen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir como imagen"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar como imagem"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Condividi come immagine"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "แชร์เป็นรูปภาพ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bagikan sebagai Gambar"
+          }
+        }
+      }
+    },
+    "載せる項目" : {
+      "comment" : "シェアのプレビュー画面で、カードに載せる項目の切り替えの見出し",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show on Card"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "載せる項目"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卡片显示内容"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卡片顯示內容"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "카드에 표시할 항목"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher sur la carte"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf der Karte zeigen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar en la tarjeta"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar no cartão"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra sulla scheda"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "แสดงบนการ์ด"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tampilkan di Kartu"
+          }
+        }
+      }
+    },
+    "会場を載せる" : {
+      "comment" : "シェアのプレビュー画面の、カードに会場を載せる切り替え",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Venue"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場を載せる"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示场地"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示場地"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공연장 표시"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher le lieu"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort anzeigen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar el lugar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar o local"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra il luogo"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "แสดงสถานที่"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tampilkan Tempat"
+          }
+        }
+      }
+    },
+    "推しの写真を載せる" : {
+      "comment" : "シェアのプレビュー画面の、カードに推しの写真を載せる切り替え",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Oshi Photo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推しの写真を載せる"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示本命照片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示我推照片"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최애 사진 표시"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher la photo de l'oshi"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oshi-Foto anzeigen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar la foto del oshi"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar a foto do oshi"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra la foto dell'oshi"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "แสดงรูปโอชิ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tampilkan Foto Oshi"
+          }
+        }
+      }
+    },
+    "写真を載せないときは、推し色の模様にします" : {
+      "comment" : "シェアのプレビュー画面の、載せる項目の下の説明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a photo, the card shows a pattern in your oshi color."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写真を載せないときは、推し色の模様にします"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不显示照片时，会使用本命颜色的图案。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不顯示照片時，會使用我推顏色的圖案。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사진을 표시하지 않으면 최애 색 무늬로 보여 줍니다."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans photo, la carte affiche un motif à la couleur de l'oshi."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Foto zeigt die Karte ein Muster in der Oshi-Farbe."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin foto, la tarjeta muestra un diseño con el color del oshi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem foto, o cartão mostra uma estampa na cor do oshi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senza foto, la scheda mostra un motivo nel colore dell'oshi."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "เมื่อไม่แสดงรูป การ์ดจะใช้ลวดลายสีของโอชิ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tanpa foto, kartu menampilkan motif dengan warna oshi."
+          }
+        }
+      }
+    },
+    "シェアする" : {
+      "comment" : "シェアのプレビュー画面の、共有シートを開くボタン",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェアする"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공유하기"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Condividi"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "แชร์"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bagikan"
+          }
+        }
+      }
+    },
+    "画像を作れませんでした" : {
+      "comment" : "シェアのプレビュー画面で、カードの画像を書き出せなかったとき",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't create the image"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を作れませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法生成图片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法產生圖片"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미지를 만들 수 없습니다"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de créer l'image"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild konnte nicht erstellt werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo crear la imagen"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível criar a imagem"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile creare l'immagine"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ไม่สามารถสร้างรูปภาพได้"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tidak dapat membuat gambar"
+          }
+        }
+      }
+    },
     "閉じる" : {
       "localizations" : {
         "en" : {
@@ -13767,6 +14306,448 @@
             "value" : "Menuju pertunjukan"
           }
         }
+      }
+    },
+    "推し活カウントダウン Plus" : {
+      "comment" : "課金画面の題と見出し。App Store Connect のサブスクリプショングループの表示名（in-app-purchases.json）と同じ",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推し活カウントダウン Plus" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "追星倒计时 Plus" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "推活倒數 Plus" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 디데이 Plus" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Countdown Plus" } }
+      }
+    },
+    "推しの写真で、ホーム画面とアプリをもっと自分らしく。" : {
+      "comment" : "課金画面の見出しの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Make your Home Screen and the app your own with your oshi's photos." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真で、ホーム画面とアプリをもっと自分らしく。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "用本命的照片，让主屏幕和 App 更有你的风格。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "用我推的照片，讓主畫面和 App 更有你的風格。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진으로 홈 화면과 앱을 나만의 스타일로." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Personnalisez l'écran d'accueil et l'app avec les photos de votre oshi." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gestalte Home-Bildschirm und App mit Fotos deines Oshi." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Personaliza la pantalla de inicio y la app con fotos de tu oshi." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Deixe a tela de início e o app com a sua cara usando fotos do seu oshi." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Personalizza la schermata Home e l'app con le foto del tuo oshi." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แต่งหน้าจอโฮมและแอปให้เป็นสไตล์ของคุณด้วยรูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jadikan Layar Utama dan aplikasi milikmu dengan foto oshi-mu." } }
+      }
+    },
+    "Plus をお使いいただけます" : {
+      "comment" : "課金画面。Plus がすでに使える状態のときに出す",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Plus is active" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Plus をお使いいただけます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "你已可以使用 Plus" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "你已可以使用 Plus" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Plus를 이용할 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Plus est activé" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Plus ist aktiv" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Plus está activo" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O Plus está ativo" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Plus è attivo" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้ Plus ได้แล้ว" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Plus sudah aktif" } }
+      }
+    },
+    "推しの写真ウィジェットと、背景と飾りの着せ替え" : {
+      "comment" : "設定画面の Plus の行の説明（Plus がまだ使えないとき）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi photo widget and custom backgrounds & decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真ウィジェットと、背景と飾りの着せ替え" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本命照片小组件，以及背景与装饰换装" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "我推照片小工具，以及背景與裝飾換裝" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진 위젯과 배경·장식 꾸미기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Widget photo de votre oshi, fonds et décorations personnalisés" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Foto-Widget sowie eigene Hintergründe und Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Widget con la foto de tu oshi, y fondos y adornos personalizados" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Widget com a foto do seu oshi, e fundos e enfeites personalizados" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Widget con la foto del tuo oshi, sfondi e decorazioni personalizzati" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "วิดเจ็ตรูปโอชิ และการเปลี่ยนพื้นหลังและของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Widget foto oshi serta ganti latar dan hiasan" } }
+      }
+    },
+    "推しの写真ウィジェット" : {
+      "comment" : "課金画面の Plus の機能の名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Photo Widget" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真ウィジェット" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本命照片小组件" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "我推照片小工具" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진 위젯" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Widget photo de votre oshi" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Foto-Widget" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Widget con la foto de tu oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Widget com a foto do seu oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Widget con la foto del tuo oshi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "วิดเจ็ตรูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Widget foto oshi" } }
+      }
+    },
+    "推しの写真" : {
+      "comment" : "ウィジェットの一覧に出す推しの写真ウィジェットの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Photo" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本命照片" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "我推照片" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Photo de l'oshi" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Foto" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto del oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Foto do oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Foto dell'oshi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto oshi" } }
+      }
+    },
+    "推しの写真を背景に、選んだ予定まであと何日かを表示します" : {
+      "comment" : "ウィジェットの一覧に出す推しの写真ウィジェットの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shows how many days are left until the event you choose, over your oshi's photo." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真を背景に、選んだ予定まであと何日かを表示します" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "以本命的照片为背景，显示距离所选日程还有几天。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "以我推的照片為背景，顯示距離所選行程還有幾天。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진을 배경으로, 선택한 일정까지 며칠 남았는지 표시합니다." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Affiche le nombre de jours restants avant l'événement choisi, sur la photo de ton oshi." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Zeigt auf dem Foto deines Oshi, wie viele Tage es noch bis zum gewählten Termin sind." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Muestra cuántos días faltan para el evento elegido, sobre la foto de tu oshi." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Mostra quantos dias faltam para o evento escolhido, sobre a foto do seu oshi." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Mostra quanti giorni mancano all'evento scelto, sulla foto del tuo oshi." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แสดงจำนวนวันที่เหลือจนถึงกิจกรรมที่เลือก โดยมีรูปโอชิเป็นพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Menampilkan berapa hari lagi menuju acara pilihanmu, dengan foto oshi kamu sebagai latar." } }
+      }
+    },
+    "ホーム画面に、推しの写真とカウントダウンを置けます" : {
+      "comment" : "課金画面の Plus の機能の説明（推しの写真ウィジェット）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Put your oshi's photo and countdown on your Home Screen" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ホーム画面に、推しの写真とカウントダウンを置けます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "把本命的照片和倒计时放到主屏幕上" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "把我推的照片和倒數放到主畫面上" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "홈 화면에 최애 사진과 디데이를 놓을 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Affichez la photo de votre oshi et le compte à rebours sur l'écran d'accueil" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Foto deines Oshi und Countdown auf dem Home-Bildschirm" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pon la foto de tu oshi y la cuenta atrás en la pantalla de inicio" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Coloque a foto do seu oshi e a contagem regressiva na tela de início" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Metti la foto del tuo oshi e il conto alla rovescia nella schermata Home" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "วางรูปโอชิและการนับถอยหลังไว้บนหน้าจอโฮม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pasang foto oshi dan hitung mundur di Layar Utama" } }
+      }
+    },
+    "背景と飾りの着せ替え" : {
+      "comment" : "課金画面の Plus の機能の名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Custom Backgrounds & Decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景と飾りの着せ替え" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "背景与装饰换装" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "背景與裝飾換裝" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경과 장식 꾸미기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fonds et décorations personnalisés" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Eigene Hintergründe und Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fondos y adornos personalizados" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Fundos e enfeites personalizados" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Sfondi e decorazioni personalizzati" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เปลี่ยนพื้นหลังและของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ganti latar dan hiasan" } }
+      }
+    },
+    "アプリの背景や飾りを、推しの写真で着せ替えられます" : {
+      "comment" : "課金画面の Plus の機能の説明（背景と飾りの着せ替え）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dress up the app's background and decorations with your oshi's photo" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "アプリの背景や飾りを、推しの写真で着せ替えられます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "用本命的照片装扮 App 的背景和装饰" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "用我推的照片裝扮 App 的背景和裝飾" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "앱의 배경과 장식을 최애 사진으로 꾸밀 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Habillez le fond et les décorations de l'app avec la photo de votre oshi" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gestalte Hintergrund und Deko der App mit Fotos deines Oshi" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Decora el fondo y los adornos de la app con la foto de tu oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Decore o fundo e os enfeites do app com a foto do seu oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Decora lo sfondo e gli ornamenti dell'app con la foto del tuo oshi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แต่งพื้นหลังและของตกแต่งในแอปด้วยรูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Hias latar dan hiasan aplikasi dengan foto oshi-mu" } }
+      }
+    },
+    "数える・ウィジェット・通知などの今ある機能は、これまでどおり無料で使えます" : {
+      "comment" : "課金画面。今ある無料の機能は有料にしないことを伝える",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Countdowns, widgets, reminders and all current features stay free" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "数える・ウィジェット・通知などの今ある機能は、これまでどおり無料で使えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "倒计时、小组件、通知等现有功能仍可免费使用" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "倒數、小工具、通知等現有功能仍可免費使用" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "디데이·위젯·알림 등 지금 있는 기능은 앞으로도 무료로 쓸 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Le compte à rebours, les widgets, les rappels et les autres fonctions actuelles restent gratuits" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Countdown, Widgets, Erinnerungen und alle bisherigen Funktionen bleiben kostenlos" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La cuenta atrás, los widgets, los avisos y las demás funciones actuales siguen siendo gratis" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Contagem regressiva, widgets, lembretes e os demais recursos atuais continuam grátis" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Conto alla rovescia, widget, promemoria e le altre funzioni attuali restano gratuiti" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "การนับถอยหลัง วิดเจ็ต การแจ้งเตือน และฟีเจอร์ที่มีอยู่ยังใช้ได้ฟรีเหมือนเดิม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Hitung mundur, widget, pengingat, dan fitur lain yang sudah ada tetap gratis" } }
+      }
+    },
+    "買い切り" : {
+      "comment" : "課金画面。サブスクリプションの下に並べる買い切りの見出し",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "One-Time Purchase" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "買い切り" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "一次性购买" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "一次性購買" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "한 번 구매" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Achat unique" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einmalkauf" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pago único" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Compra única" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Acquisto singolo" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ซื้อครั้งเดียว" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sekali Beli" } }
+      }
+    },
+    "一度の購入で、今後足す Plus の機能もずっと使えます" : {
+      "comment" : "課金画面。買い切りの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Buy once and keep every Plus feature, including future ones" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "一度の購入で、今後足す Plus の機能もずっと使えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "一次购买，即可永久使用 Plus 的所有功能，包括今后新增的功能" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "一次購買，即可永久使用 Plus 的所有功能，包括日後新增的功能" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "한 번 구매로 앞으로 추가될 Plus 기능까지 계속 이용할 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Un seul achat pour toutes les fonctions Plus, y compris les futures" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einmal kaufen und alle Plus-Funktionen dauerhaft nutzen – auch künftige" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Un solo pago para todas las funciones Plus, también las futuras" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Uma única compra para usar todos os recursos Plus, inclusive os futuros" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Un solo acquisto per tutte le funzioni Plus, anche quelle future" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ซื้อครั้งเดียว ใช้ฟีเจอร์ Plus ได้ตลอด รวมถึงฟีเจอร์ที่จะเพิ่มในอนาคต" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sekali beli, pakai semua fitur Plus selamanya, termasuk yang akan datang" } }
+      }
+    },
+    "購入を復元" : {
+      "comment" : "課金画面のボタン",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restore Purchases" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "購入を復元" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "恢复购买" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "恢復購買" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구매 복원" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Restaurer les achats" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Käufe wiederherstellen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Restaurar compras" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Restaurar compras" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ripristina acquisti" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "กู้คืนการซื้อ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pulihkan Pembelian" } }
+      }
+    },
+    "利用規約" : {
+      "comment" : "課金画面のリンク。Apple の標準の使用許諾契約（EULA）を開く",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Terms of Use" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "利用規約" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "使用条款" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "使用條款" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이용 약관" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Conditions d'utilisation" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nutzungsbedingungen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Condiciones de uso" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Termos de Uso" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Condizioni d'uso" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ข้อกำหนดการใช้งาน" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ketentuan Penggunaan" } }
+      }
+    },
+    "プライバシーポリシー" : {
+      "comment" : "課金画面のリンク",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Privacy Policy" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "プライバシーポリシー" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "隐私政策" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "隱私權政策" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "개인정보 처리방침" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Politique de confidentialité" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Datenschutzerklärung" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Política de privacidad" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Política de Privacidade" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Informativa sulla privacy" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "นโยบายความเป็นส่วนตัว" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kebijakan Privasi" } }
+      }
+    },
+    "購入の承認を待っています" : {
+      "comment" : "課金画面のアラートの題。承認と購入のリクエスト（Ask to Buy）などで購入が保留になったとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Waiting for Approval" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "購入の承認を待っています" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在等待购买批准" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "正在等待購買核准" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구매 승인을 기다리고 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "En attente d'approbation" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Warten auf Bestätigung" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Esperando aprobación" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Aguardando aprovação" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "In attesa di approvazione" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "กำลังรอการอนุมัติการซื้อ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Menunggu Persetujuan" } }
+      }
+    },
+    "承認されると、Plus が使えるようになります。" : {
+      "comment" : "課金画面のアラートの本文。購入が保留になったとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Plus will be available once the purchase is approved." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "承認されると、Plus が使えるようになります。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "获得批准后即可使用 Plus。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "獲得核准後即可使用 Plus。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "승인되면 Plus를 이용할 수 있어요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Plus sera disponible une fois l'achat approuvé." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Plus ist verfügbar, sobald der Kauf bestätigt wurde." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Plus estará disponible cuando se apruebe la compra." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O Plus ficará disponível quando a compra for aprovada." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Plus sarà disponibile quando l'acquisto verrà approvato." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เมื่อได้รับการอนุมัติแล้ว คุณจะใช้ Plus ได้" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Plus bisa dipakai setelah pembelian disetujui." } }
+      }
+    },
+    "購入できませんでした" : {
+      "comment" : "課金画面のアラートの題。購入に失敗したとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't Complete Purchase" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "購入できませんでした" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法完成购买" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "無法完成購買" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구매하지 못했어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Achat impossible" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kauf nicht möglich" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudo completar la compra" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não foi possível concluir a compra" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Impossibile completare l'acquisto" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ซื้อไม่สำเร็จ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pembelian Gagal" } }
+      }
+    },
+    "購入を復元できませんでした" : {
+      "comment" : "課金画面のアラートの題。購入の復元に失敗したとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't Restore Purchases" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "購入を復元できませんでした" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法恢复购买" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "無法恢復購買" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구매를 복원하지 못했어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Impossible de restaurer les achats" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Käufe konnten nicht wiederhergestellt werden" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No se pudieron restaurar las compras" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não foi possível restaurar as compras" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Impossibile ripristinare gli acquisti" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "กู้คืนการซื้อไม่สำเร็จ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Gagal Memulihkan Pembelian" } }
+      }
+    },
+    "サブスクリプション中に買い切りを購入しても、サブスクリプションは自動で止まりません。購入後に、ご自身で解約してください。" : {
+      "comment" : "課金画面。自動で更新されるサブスクリプションがある間、買い切りのそばに出す注記",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Buying the one-time purchase won't cancel your subscription automatically. Please cancel it yourself after you buy." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "サブスクリプション中に買い切りを購入しても、サブスクリプションは自動で止まりません。購入後に、ご自身で解約してください。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "订阅期间购买一次性购买项目，订阅不会自动停止。购买后请自行取消订阅。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "訂閱期間購買一次性購買項目，訂閱不會自動停止。購買後請自行取消訂閱。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구독 중에 한 번 구매를 해도 구독은 자동으로 해지되지 않아요. 구매 후 직접 구독을 해지해 주세요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "L'achat unique n'annule pas automatiquement votre abonnement. Pensez à le résilier vous-même après l'achat." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Einmalkauf beendet dein Abo nicht automatisch. Bitte kündige es nach dem Kauf selbst." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El pago único no cancela tu suscripción automáticamente. Cancélala tú mismo después de comprar." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A compra única não cancela sua assinatura automaticamente. Cancele-a você mesmo depois da compra." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "L'acquisto singolo non annulla automaticamente l'abbonamento. Annullalo tu dopo l'acquisto." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "การซื้อครั้งเดียวระหว่างที่สมัครสมาชิกอยู่จะไม่ยกเลิกการสมัครสมาชิกให้อัตโนมัติ โปรดยกเลิกด้วยตนเองหลังซื้อ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sekali Beli tidak otomatis menghentikan langgananmu. Batalkan langganan sendiri setelah membeli." } }
+      }
+    },
+    "サブスクリプションの解約をお忘れなく" : {
+      "comment" : "課金画面のアラートの題。サブスクリプション中に買い切りを買い終えたとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Remember to Cancel Your Subscription" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "サブスクリプションの解約をお忘れなく" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "别忘了取消订阅" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "別忘了取消訂閱" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구독 해지를 잊지 마세요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pensez à résilier votre abonnement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abo kündigen nicht vergessen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "No olvides cancelar tu suscripción" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não se esqueça de cancelar a assinatura" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ricordati di annullare l'abbonamento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "อย่าลืมยกเลิกการสมัครสมาชิก" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jangan Lupa Batalkan Langganan" } }
+      }
+    },
+    "買い切りを購入しても、サブスクリプションは自動で止まりません。続けて請求されないよう、ご自身で解約してください。" : {
+      "comment" : "課金画面のアラートの本文。サブスクリプション中に買い切りを買い終えたとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your subscription doesn't stop automatically when you buy the one-time purchase. Cancel it yourself so you won't be charged again." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "買い切りを購入しても、サブスクリプションは自動で止まりません。続けて請求されないよう、ご自身で解約してください。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "购买一次性购买项目后，订阅不会自动停止。为避免继续扣费，请自行取消订阅。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "購買一次性購買項目後，訂閱不會自動停止。為避免繼續扣款，請自行取消訂閱。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "한 번 구매를 해도 구독은 자동으로 해지되지 않아요. 계속 결제되지 않도록 직접 해지해 주세요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre abonnement ne s'arrête pas automatiquement après l'achat unique. Résiliez-le vous-même pour ne plus être facturé." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dein Abo endet durch den Einmalkauf nicht automatisch. Kündige es selbst, damit dir nichts mehr berechnet wird." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu suscripción no se detiene automáticamente con el pago único. Cancélala tú mismo para que no se te vuelva a cobrar." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sua assinatura não para automaticamente com a compra única. Cancele-a você mesmo para não ser cobrado novamente." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "L'abbonamento non si interrompe automaticamente con l'acquisto singolo. Annullalo tu per non ricevere altri addebiti." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "การซื้อครั้งเดียวจะไม่หยุดการสมัครสมาชิกให้อัตโนมัติ โปรดยกเลิกด้วยตนเองเพื่อไม่ให้ถูกเรียกเก็บเงินต่อ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Langganan tidak berhenti otomatis setelah Sekali Beli. Batalkan sendiri agar tidak ditagih lagi." } }
+      }
+    },
+    "サブスクリプションを管理" : {
+      "comment" : "課金画面のアラートのボタン。サブスクリプションの管理（App Store のシート）を開く",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Manage Subscription" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "サブスクリプションを管理" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "管理订阅" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "管理訂閱" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "구독 관리" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Gérer l'abonnement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abo verwalten" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Gestionar suscripción" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Gerenciar assinatura" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Gestisci abbonamento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "จัดการการสมัครสมาชิก" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kelola Langganan" } }
+      }
+    },
+    "時間をおいて、もう一度お試しください。" : {
+      "comment" : "課金画面のアラートの本文。購入・復元に失敗したとき",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Please try again later." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "時間をおいて、もう一度お試しください。" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请稍后再试。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "請稍後再試。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "잠시 후 다시 시도해 주세요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Veuillez réessayer plus tard." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Bitte versuche es später erneut." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Inténtalo de nuevo más tarde." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tente novamente mais tarde." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Riprova più tardi." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "โปรดลองอีกครั้งภายหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Silakan coba lagi nanti." } }
+      }
+    },
+    "Plus で使えます" : {
+      "comment" : "推しの写真ウィジェット。Plus が使えないときに、薄くした見本に重ねる（読み上げにも使う）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Available with Plus" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Plus で使えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Plus 专享" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "Plus 專屬" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Plus에서 이용할 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Disponible avec Plus" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit Plus verfügbar" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Disponible con Plus" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Disponível com o Plus" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Disponibile con Plus" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้ได้กับ Plus" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tersedia dengan Plus" } }
       }
     }
   },

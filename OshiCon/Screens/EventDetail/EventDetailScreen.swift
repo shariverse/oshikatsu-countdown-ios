@@ -7,7 +7,7 @@ import SwiftData
 import SwiftUI
 
 /// 予定の詳細。推しの写真（無ければテーマの模様。出荷するテーマは推し色を黒に寄せた地に十字とハート）の上に中身のカードを重ね、秒単位のカウントダウンと進み具合を出す。
-/// 上のボタンでピン留めの切り替え・編集・削除（確認を出す）をする。予定が消えたら（削除・推しの削除など）前の画面に戻る。
+/// 上のボタンでピン留めの切り替え・画像でシェア（プレビューのシート）・編集・削除（確認を出す）をする。予定が消えたら（削除・推しの削除など）前の画面に戻る。
 struct EventDetailScreen: View {
     let eventID: OshiEvent.ID
 
@@ -18,6 +18,7 @@ struct EventDetailScreen: View {
     @Environment(\.appTheme) private var theme
     @Query private var storedEvents: [StoredEvent]
     @State private var isEditing = false
+    @State private var isSharing = false
     @State private var isConfirmingDelete = false
     @State private var failureMessage: String?
     /// ピン留めを切り替えたときの触覚。
@@ -55,6 +56,7 @@ struct EventDetailScreen: View {
         // 予定が消えた・読めないときは前の画面に戻る。作り直しや遷移の途中でも戻れるよう、ホームの積み重ねから外す
         .onChange(of: current == nil, initial: true) { _, isMissing in
             if isMissing {
+                isSharing = false
                 leave()
             }
         }
@@ -85,14 +87,18 @@ struct EventDetailScreen: View {
         .ignoresSafeArea(edges: .top)
         .background(theme.palette.surface.color.ignoresSafeArea())
         .toolbar { toolbar(event: event) }
-        // ウィジェットのリンクで画面を切り替えるときは、編集のシートと削除の確認を閉じる
+        // ウィジェットのリンクで画面を切り替えるときは、編集とシェアのシートと削除の確認を閉じる
         .onChange(of: router.sheetDismissal) {
             isEditing = false
+            isSharing = false
             isConfirmingDelete = false
         }
         .sheet(isPresented: $isEditing) {
             // 開いた時点の最新の予定を渡す（古い値だと、外したピン留めを書き戻してしまう）
             EventEditorScreen(event: event)
+        }
+        .sheet(isPresented: $isSharing) {
+            ShareCardPreviewScreen(event: event, oshi: oshi)
         }
         .alert("この予定を削除しますか？", isPresented: $isConfirmingDelete) {
             Button("削除", role: .destructive) {
@@ -122,6 +128,11 @@ struct EventDetailScreen: View {
                 setPinned(!event.isPinned, event: event)
             }
             .accessibilityIdentifier("eventDetail.pin")
+            // シェアの入口はここだけ（ホームの行・ウィジェットには置かない）
+            Button("画像でシェア", systemImage: "square.and.arrow.up") {
+                isSharing = true
+            }
+            .accessibilityIdentifier("eventDetail.share")
             Button("編集", systemImage: "pencil") {
                 isEditing = true
             }

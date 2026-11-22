@@ -18,7 +18,9 @@
 
 アプリ名は「推し活カウントダウン」に決まった（Discussion #58。ホーム画面の表示名は「推し活カウント」のまま）。App Store Connect で名前が空いているかは、登録するときに人間が確かめる。
 
-- **プライバシーポリシーとサポートページをどこに公開するか・誰が書いた名義にするか**（GitHub Pages など）。下書きの `{{…}}` を埋めてから公開する
+- **サポートページをどこに公開するか**。下書きの `{{…}}` を埋めてから公開する
+  - プライバシーポリシーは https://shilokuma.jp/privacy/oshikatsu-countdown/ に公開している（shilokuma-inc/shilokuma-web の `privacy/oshikatsu-countdown/`）。
+    公開しているページの文面と [privacy-policy.md](privacy-policy.md) の下書きは別に書いてあるので、中身を変えたら公開しているページも直す。課金画面のリンク（`PlusLegalLink.privacyPolicy`）もこの URL
 - 提供者名・お問い合わせ先のメールアドレス（[privacy-policy.md](privacy-policy.md)・[support.md](support.md) の `{{…}}`）
 - 価格と配信国、年齢制限の回答（[listing.md](listing.md) に案を書いた）
 
@@ -26,4 +28,7 @@
 
 - App Store の掲載文（[metadata/](metadata/)）は 12 言語（en を既定に、ja, zh-Hans, zh-Hant, ko, fr, de, es, pt-BR, it, th, id）。直訳せず、その言語の推し活のファンに自然な言い方にする。審査用メモは日本語と英語。それ以外の文面（プライバシーポリシー・サポートページなど）は日本語だけ
 - アプリにない機能（広告・検索・カレンダー・iCloud 同期など。シェアと Plus は 1.3.0 で入るまで）を書かない
+  - 掲載文（説明文・プロモーションテキスト・キーワード）と whats-new には、Plus の機能を 1.3.0 まで書かない。説明文の末尾の利用規約（Apple の標準 EULA）のリンクは機能の紹介ではないので、全言語に先に入れている
+  - 課金の仕組み（StoreKit）はアプリに入っているので、プライバシーポリシー・App のプライバシーには購入の扱いを書く（Plus を買える版より前に公開しても、購入しなければ当てはまらない書き方にする）
+  - 審査用メモの Plus の段落は、Plus の入口を App Store 版で出す版（1.3.0）を審査に出すときのもの。それより前の版で出すときは外す（[review-notes.md](review-notes.md) の冒頭）
 - データは端末の中だけ・通信しない、という実装と食い違うことを書かない。端末のバックアップ（iCloud・パソコン）には含まれることは、設定画面の説明と同じく書く

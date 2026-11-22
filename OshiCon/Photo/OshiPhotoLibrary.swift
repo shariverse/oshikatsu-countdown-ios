@@ -14,7 +14,7 @@ nonisolated struct OshiPhotoLibrary: Sendable {
     /// 写真のファイルを置くディレクトリ。
     let directory: URL
 
-    init(directory: URL = AppGroupContainer.dataDirectory.appending(path: "Photos", directoryHint: .isDirectory)) {
+    init(directory: URL = AppGroupContainer.photosDirectory) {
         self.directory = directory
     }
 
@@ -97,10 +97,7 @@ nonisolated struct OshiPhotoLibrary: Sendable {
 
     /// 取り込みで付けるファイル名（`<UUID>.jpg`）か。ディレクトリの外を指す名前を弾く。
     static func isValidFileName(_ fileName: String) -> Bool {
-        guard fileName.hasSuffix(".jpg") else {
-            return false
-        }
-        return UUID(uuidString: String(fileName.dropLast(4))) != nil
+        AppGroupContainer.isPhotoFileName(fileName)
     }
 }
 

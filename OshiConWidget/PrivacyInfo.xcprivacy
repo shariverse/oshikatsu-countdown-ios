@@ -11,9 +11,21 @@
 	<!-- データを収集しない -->
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array/>
-	<!-- 理由の申告が要る API は使っていない（App Group のコンテナの SwiftData のストアと写真を読むだけ） -->
-	<!-- App Group の UserDefaults(suiteName:) をアプリと共有するなら UserDefaults の 1C8F.1 を、ファイルのタイムスタンプなどを使うならその理由を足す -->
+	<!-- 理由の申告が要る API は、アプリと共有する App Group の UserDefaults(suiteName:)（Plus が使えるかの判定の結果と期限を読む）だけ -->
+	<!-- ほかは App Group のコンテナの SwiftData のストアと、推しの写真を ImageIO で縮めて読むだけ（ファイルの属性は読まない）。 -->
+	<!-- Plus の期限を過ぎたときに StoreKit 2 の Transaction.currentEntitlements で確かめ直すが、端末の中で確かめるだけで申告は要らない -->
+	<!-- ファイルのタイムスタンプなどを使うならその理由を足す -->
 	<key>NSPrivacyAccessedAPITypes</key>
-	<array/>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- 1C8F.1: 同じ App Group のアプリ・拡張とだけ共有する読み書き -->
+				<string>1C8F.1</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

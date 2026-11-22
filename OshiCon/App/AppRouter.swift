@@ -66,13 +66,15 @@ final class AppRouter {
         homePath = [route]
     }
 
-    /// ウィジェットから開いたリンク。予定の詳細はホームのタブに積む。初回の導線の途中なら開かない（何もしない）。
+    /// ウィジェットから開いたリンク。予定の詳細（課金画面のリンクの移り先も）はホームのタブに積む。初回の導線の途中なら開かない（何もしない）。
     func open(_ link: WidgetLink, hasCompletedOnboarding: Bool) {
         guard hasCompletedOnboarding else {
             return
         }
         switch link {
-        case let .eventDetail(id):
+        // 課金画面のリンクで課金画面を開くかは `open(_:hasCompletedOnboarding:showsPlusPaywall:)` で決める。
+        // ここでは課金画面を出さないときの移り先（選んだ予定の詳細。今のカウントダウンのウィジェットと同じ）に移る
+        case let .eventDetail(id), let .plusPaywall(id):
             // 開いているシート（予定の追加の入力中を含む）は閉じる。ウィジェットから別の予定を開くのは利用者の操作なので、確かめない
             pendingAddEvent = false
             sheetDismissal = SheetDismissal(count: sheetDismissal.count + 1, keepsAddEvent: false)
@@ -86,6 +88,24 @@ final class AppRouter {
         case .home:
             selectedTab = .home
         }
+    }
+
+    /// ウィジェットから開いたリンク。課金画面のリンクで、課金画面を出す配り方（`PlusEntryPolicy.showsEntry(in:)`）なら、
+    /// 開いているシートを閉じさせて true を返す（呼ぶ側が課金画面を開く。タブと積んだ画面はそのまま）。
+    /// 課金画面を出さない配り方とほかのリンクは `open(_:hasCompletedOnboarding:)` と同じに移り、false を返す。
+    /// 初回の導線の途中なら何もせず false。
+    func open(_ link: WidgetLink, hasCompletedOnboarding: Bool, showsPlusPaywall: Bool) -> Bool {
+        guard hasCompletedOnboarding else {
+            return false
+        }
+        guard case .plusPaywall = link, showsPlusPaywall else {
+            open(link, hasCompletedOnboarding: hasCompletedOnboarding)
+            return false
+        }
+        // 課金画面はいちばん外のシートなので、ほかのシート（予定の追加の入力中を含む）を閉じてから開く
+        pendingAddEvent = false
+        sheetDismissal = SheetDismissal(count: sheetDismissal.count + 1, keepsAddEvent: false)
+        return true
     }
 }
 

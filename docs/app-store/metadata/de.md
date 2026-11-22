@@ -66,9 +66,11 @@ Oshis, Fotos und Termine werden nur auf deinem Gerät gespeichert und nirgendwoh
 (Die Daten sind in Gerätebackups über iCloud oder einen Computer enthalten und werden gelöscht, wenn du die App löschst.)
 
 Terminarten: Live, Geburtstag, Release, Stream, Sonstiges
+
+Nutzungsbedingungen (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（2236 文字）
+（2331 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 
