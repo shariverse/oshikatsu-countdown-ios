@@ -66,9 +66,11 @@ iPad의 큰 화면과 가로 모드에서도 쓸 수 있어요. 다크 모드도
 (기기 백업(iCloud·컴퓨터)에는 포함돼요. 앱을 삭제하면 지워져요.)
 
 일정 종류: 콘서트·생일·발매일·방송·기타
+
+이용 약관(EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（927 文字）
+（1007 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

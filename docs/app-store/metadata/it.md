@@ -66,9 +66,11 @@ Oshi, foto ed eventi vengono salvati solo sul tuo dispositivo e non vengono mai 
 (I dati sono inclusi nei backup del dispositivo su iCloud o sul computer e vengono cancellati quando elimini l'app.)
 
 Tipi di evento: live, compleanno, uscita, streaming, altro
+
+Condizioni d'uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（2275 文字）
+（2367 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

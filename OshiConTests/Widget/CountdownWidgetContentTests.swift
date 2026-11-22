@@ -180,10 +180,13 @@ struct CountdownWidgetContentTests {
     @Test("押したときのリンクを作って読み直せる。知らないリンクは読まない")
     func links() throws {
         let id = UUID()
-        for link in [WidgetLink.eventDetail(id), .addEvent, .home] {
+        for link in [WidgetLink.eventDetail(id), .addEvent, .home, .plusPaywall(id)] {
             #expect(WidgetLink(url: link.url) == link)
         }
         #expect(WidgetLink.eventDetail(id).url.absoluteString == "oshicon://event/\(id.uuidString)")
+        #expect(WidgetLink.plusPaywall(id).url.absoluteString == "oshicon://plus/\(id.uuidString)")
+        #expect(WidgetLink(url: try #require(URL(string: "oshicon://plus"))) == nil)
+        #expect(WidgetLink(url: try #require(URL(string: "oshicon://plus/not-a-uuid"))) == nil)
         #expect(WidgetLink(url: try #require(URL(string: "https://example.com/event/\(id.uuidString)"))) == nil)
         #expect(WidgetLink(url: try #require(URL(string: "oshicon://event/not-a-uuid"))) == nil)
         #expect(WidgetLink(url: try #require(URL(string: "oshicon://unknown"))) == nil)

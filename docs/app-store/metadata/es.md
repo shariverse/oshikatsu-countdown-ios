@@ -66,9 +66,11 @@ Tus oshis, fotos y eventos se guardan solo en tu dispositivo y nunca se envían 
 (Los datos se incluyen en las copias de seguridad del dispositivo en iCloud o en un ordenador, y se borran al eliminar la app.)
 
 Tipos de evento: live, cumpleaños, lanzamiento, stream, otro
+
+Condiciones de uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（2280 文字）
+（2374 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

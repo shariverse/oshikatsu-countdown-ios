@@ -66,9 +66,11 @@ Oshi, foto, dan jadwal hanya disimpan di perangkatmu dan tidak pernah dikirim ke
 (Data ikut tersimpan di cadangan perangkat melalui iCloud atau komputer, dan terhapus saat aplikasi dihapus.)
 
 Jenis jadwal: konser, ulang tahun, rilis, live streaming, lainnya
+
+Ketentuan Penggunaan (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（2090 文字）
+（2186 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

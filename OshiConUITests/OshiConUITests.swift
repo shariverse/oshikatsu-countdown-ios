@@ -15,6 +15,7 @@ final class OshiConUITests: XCTestCase {
 
     /// 端末に残ったデータに左右されないよう、メモリ上のストアで起動し、設定（UserDefaults）の初期値も決める。
     /// 起動引数で渡すとアプリの中で書き換えられなくなる（導線を終えてもタブに切り替わらない）ので、環境変数で渡す。
+    /// メモリ上のストアでは StoreKit に問い合わせず、Plus は使えない状態になる。使える状態にするときは `arguments` に `-plusUnlocked` を渡す。
     @MainActor
     private func launch(hasCompletedOnboarding: Bool, arguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
