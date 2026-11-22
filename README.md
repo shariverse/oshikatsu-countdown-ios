@@ -225,7 +225,7 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 - **Preview**: `OshiCon/Screens/ThemePreviews/JiraiGothicPreviews.swift` にあります（ホーム・予定の詳細・予定の追加・ウィジェット 2 種を、ライトとダーク・大きな文字・横向きで）。
   どれも `ThemePreviewCanvas(<テーマ>, <画面>, <外観>)` で描き、日本語の見本の推しと予定をメモリ上のストアに入れます。
   テーマの日本語の書体はアプリの言語が日本語のときだけ使われるので、Scheme の Run の Options の App Language を日本語にして見ます。
-  ウィジェット 2 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)` で、ウィジェットの大きさの枠に入れて描けます
+  ウィジェット 3 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)`・`photo(_:family:photo:renderingMode:theme:)` で、ウィジェットの大きさの枠に入れて描けます（推しの写真は tinted の描き方も渡せます）
 - **書体**: Kaisei Decol（SIL OFL 1.1）は google/fonts から取得したものを改変せずに `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に載せています
 - **ナビゲーションバーのタイトル**: 日本語のときだけ Kaisei Decol の太字にし、ほかの言語はシステムの書体のままです（バーの外観で書体だけを替える。`OshiCon/App/NavigationBarAppearance.swift`）。ホームのバーにはタイトルの文字を出しません（Discussion #148。決まりは [docs/design/themes.md](docs/design/themes.md)）
 
@@ -248,6 +248,27 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 - 画像は端末の中で作り、通信しません。共有シートの「画像を保存」のため、Info.plist に `NSPhotoLibraryAddUsageDescription`（写真への追加の説明）を置いています
 - Plus の着せ替えは、`ShareCardStyle` の `background` を `.photo(fileName:)` にしてカードの地を推しの写真に替えます
 - テスト: Unit は `OshiConTests/Share/`（`ShareCardContentTests`・`ShareCardRendererTests`・`ShareCardSharingTests`）、UI は `OshiConUITests/ShareCardUITests`（`-useInMemoryStore -useTestPhoto`。識別子は `eventDetail.share`・`shareCard.preview`・`shareCard.includesVenue`・`shareCard.includesPhoto`・`shareCard.share`）。共有シートそのものは UI テストから開けません
+
+### 14. ウィジェット
+
+ホーム画面のウィジェットは 3 種です。Widget と TimelineProvider は `OshiConWidget/`、中身の規則と View は `Shared/Widget/` にあります（View はアプリの Preview でも描きます）。
+
+| ウィジェット | 大きさ | 中身 | 料金 |
+| --- | --- | --- | --- |
+| カウントダウン | 小・ロック画面（丸・長方形・1 行） | 設定で選んだ予定 1 件のあと何日 | 無料 |
+| 推しカウント | 中 | これからの予定の一覧 | 無料 |
+| 推しの写真 | 小・中 | 設定で選んだ予定の推しの写真を背景に、あと何日 | Plus |
+
+- **推しの写真のコード**: Widget と `PhotoProvider` は `OshiConWidget/PhotoWidget.swift`。中身の型 `PhotoWidgetContent`・View `PhotoWidgetView`・描き分けの規則 `PhotoWidgetAppearance`・タイムライン `PhotoWidgetTimeline`・写真の読み込み `WidgetPhotoLoader` は `Shared/Widget/` にあります
+- **中身**: 予定はカウントダウンと同じ `SelectEventIntent` で選びます。小は写真の全面に日数と予定名、中は左に写真、右に推し名・予定名・日数・日付を出します。写真の上の文字は黒の暗幕の上に白で出し、写真の無い推しは推し色の模様（`ThemePhotoPlaceholder`）にします。予定を選んでいない・削除された・読めないときは、カウントダウンと同じ表示です
+- **写真の読み込み**: App Group の写真を ImageIO のサムネイルでウィジェットの枠の大きさに縮めて読みます（一辺 720 px まで）
+- **tinted の描き方**: フルカラーでない描き方では、暗幕を敷かず、写真を `widgetAccentedRenderingMode(.desaturated)`（iOS 18 から）と `grayscale` で白黒にして薄く描き、色合いを乗せます。写真は地では外されるので中身に置き、`.contentMarginsDisabled()` で余白を View が付けます
+- **Plus の判定**: アプリ（`PlusStore`）が App Group に、Plus が使えるかと期限（サブスクリプションの期限と猶予期間の終わりの遅いほう。買い切りは無し）を書き、変わったらウィジェットを描き直します。
+  Widget Extension は `Shared/Purchase/PlusWidgetStatus.swift` で、期限の前ならそのまま使え、期限を過ぎていたら StoreKit 2 の今の権利（`Transaction.currentEntitlements`）で確かめ直します（通信しません。App Group には書き戻しません）
+- **タイムライン**: 今と 0:00 にエントリを置き、Plus の期限がその範囲にあれば期限の時刻にもエントリを置いて、その時刻に作り直します
+- **Plus でないとき**: 選んだ予定と写真を薄くして「Plus で使えます」を重ねます。押すと、開発版と TestFlight では課金画面を開き、App Store 版（`PlusEntryPolicy`。起動引数 `-simulateAppStoreDistribution`）では課金画面を出さずに予定の詳細に移ります（リンクは `oshicon://plus/<UUID>`）
+- **描き直し**: 予定・推し・写真の保存と削除、時刻・タイムゾーンの変更、アプリが前面に来たときは `WidgetRefresher` が、Plus の状態や期限の変化は `PlusStore` が、すべてのウィジェットを描き直します
+- テスト: Unit は `OshiConTests/Widget/`（`PhotoWidgetContentTests`・`PhotoWidgetAppearanceTests`・`PhotoWidgetTimelineTests`・`WidgetPhotoLoaderTests` など）と `OshiConTests/Purchase/PlusWidgetStatusTests`、UI は `OshiConUITests/PlusPaywallUITests`（課金画面のリンクで開く・開かない）
 
 ## 多言語対応
 
@@ -297,7 +318,7 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 - プロジェクトはフォルダ同期グループ（Xcode 16 以降の形式）で管理しているため、ファイルの追加・削除で pbxproj は変わりません
 - SwiftLint は Build Tool Plugin として全ターゲットに適用され、CI では `swiftlint lint --strict` としても実行されます。ルールは [.swiftlint.yml](.swiftlint.yml) で管理します
 - CI のワークフローは `*.xcodeproj` の名前と同名の共有スキームが存在することを前提にしています
-- [OshiCon/PrivacyInfo.xcprivacy](OshiCon/PrivacyInfo.xcprivacy) と [OshiConWidget/PrivacyInfo.xcprivacy](OshiConWidget/PrivacyInfo.xcprivacy) はプライバシーマニフェストです。アプリは UserDefaults（`@AppStorage`）の利用だけを申告し、Widget Extension は何も申告していません。データの収集・トラッキング・ほかの理由の申告が必要な API を足したら、ここと App Store Connect の「App のプライバシー」を更新してください
+- [OshiCon/PrivacyInfo.xcprivacy](OshiCon/PrivacyInfo.xcprivacy) と [OshiConWidget/PrivacyInfo.xcprivacy](OshiConWidget/PrivacyInfo.xcprivacy) はプライバシーマニフェストです。アプリは UserDefaults の利用（`CA92.1`・`1C8F.1`）を、Widget Extension は App Group の UserDefaults の利用（`1C8F.1`。Plus の判定の結果と期限を読む）を申告しています。データの収集・トラッキング・ほかの理由の申告が必要な API を足したら、ここと App Store Connect の「App のプライバシー」を更新してください
 
 ## License
 
