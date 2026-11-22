@@ -70,11 +70,12 @@ final class PlusPaywallUITests: XCTestCase {
             XCTAssertTrue(link.waitForExistence(timeout: 2), identifier)
             link.tap()
 
-            // Safari の画面（別のプロセスが描く）。閉じるボタンは iOS 26 で「閉じる」、それより前は「完了」
+            // Safari の画面（別のプロセスが描く）。文言はアプリではなく端末の言語で出る（CI の Simulator は英語）。
+            // 閉じるボタンは iOS 26 で「閉じる」（Close）、それより前は「完了」（Done）
             let browser = app.otherElements.matching(NSPredicate(format: "identifier BEGINSWITH %@", "BrowserView")).firstMatch
             XCTAssertTrue(browser.waitForExistence(timeout: 10), identifier)
             XCTAssertEqual(app.state, .runningForeground, identifier)
-            let close = browser.buttons.matching(NSPredicate(format: "label IN %@", ["閉じる", "完了"])).firstMatch
+            let close = browser.buttons.matching(NSPredicate(format: "label IN %@", ["閉じる", "完了", "Close", "Done"])).firstMatch
             XCTAssertTrue(close.waitForExistence(timeout: 5), identifier)
             // Safari の画面の要素は、要素の tap() では押せないことがある（別のプロセスが描くため）。要素の中心を座標で押す
             close.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
