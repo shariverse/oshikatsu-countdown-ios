@@ -16,7 +16,7 @@ import SwiftUI
 /// - 自動で更新されるサブスクリプションがある間は、買い切りのそばに「自分で解約が要る」注記を出し、
 ///   買い切りを買い終えたら同じ旨の案内からサブスクリプションの管理を開ける（`PlusLifetimeGuidance`）
 ///
-/// `NavigationStack` は持たない（開く側が置く）。
+/// `NavigationStack` と閉じるボタンは持たない（開く側が置く。`SubscriptionStoreView` が自動で出す × も隠す）。
 struct PlusPaywallScreen: View {
     @Environment(PlusStore.self) private var plus: PlusStore?
     @Environment(\.isPlusUnlocked) private var isPlusUnlocked
@@ -33,7 +33,8 @@ struct PlusPaywallScreen: View {
                 PlusPaywallHeader(isUnlocked: isPlusUnlocked)
             }
             .subscriptionStoreButtonLabel(.multiline)
-            .storeButton(.hidden, for: .restorePurchases, .policies)
+            // シートの中では右上に × の閉じるボタンが自動で出る。閉じるのは開く側がナビゲーションバーに置く「閉じる」に任せ、2 つ並ばないよう隠す
+            .storeButton(.hidden, for: .cancellation, .restorePurchases, .policies)
             .containerBackground(for: .subscriptionStoreFullHeight) {
                 ThemeScreenBackground()
             }
