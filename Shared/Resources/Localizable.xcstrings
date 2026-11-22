@@ -14467,6 +14467,23 @@
         "th" : { "stringUnit" : { "state" : "translated", "value" : "โปรดลองอีกครั้งภายหลัง" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Silakan coba lagi nanti." } }
       }
+    },
+    "Plus で使えます" : {
+      "comment" : "推しの写真ウィジェット。Plus が使えないときに、薄くした見本に重ねる（読み上げにも使う）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Available with Plus" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Plus で使えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Plus 专享" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "Plus 專屬" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Plus에서 이용할 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Disponible avec Plus" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit Plus verfügbar" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Disponible con Plus" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Disponível com o Plus" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Disponibile con Plus" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้ได้กับ Plus" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tersedia dengan Plus" } }
+      }
     }
   },
   "version" : "1.0"
