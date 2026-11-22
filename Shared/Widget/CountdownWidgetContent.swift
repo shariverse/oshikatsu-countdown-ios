@@ -124,6 +124,9 @@ nonisolated enum WidgetLink: Equatable, Sendable {
     case addEvent
     /// アプリ（ホーム）を開くだけ。
     case home
+    /// Plus の課金画面（Plus でない人が推しの写真ウィジェットを押したとき）。値は選んだ予定で、
+    /// 課金画面の入口を出さない配り方（`PlusEntryPolicy`）では、課金画面の代わりにその予定の詳細に移る。
+    case plusPaywall(OshiEvent.ID)
 
     static let scheme = "oshicon"
 
@@ -138,6 +141,9 @@ nonisolated enum WidgetLink: Equatable, Sendable {
             components.host = "add-event"
         case .home:
             components.host = "home"
+        case let .plusPaywall(id):
+            components.host = "plus"
+            components.path = "/\(id.uuidString)"
         }
         guard let url = components.url else {
             preconditionFailure("ウィジェットのリンクを作れなかった: \(self)")
@@ -150,9 +156,10 @@ nonisolated enum WidgetLink: Equatable, Sendable {
         guard url.scheme == Self.scheme else {
             return nil
         }
+        let id = UUID(uuidString: String(url.path().dropFirst()))
         switch url.host() {
         case "event":
-            guard let id = UUID(uuidString: String(url.path().dropFirst())) else {
+            guard let id else {
                 return nil
             }
             self = .eventDetail(id)
@@ -160,6 +167,11 @@ nonisolated enum WidgetLink: Equatable, Sendable {
             self = .addEvent
         case "home":
             self = .home
+        case "plus":
+            guard let id else {
+                return nil
+            }
+            self = .plusPaywall(id)
         default:
             return nil
         }

@@ -63,13 +63,26 @@ struct AppRouterTests {
         #expect(router.sheetDismissal == SheetDismissal(count: 2, keepsAddEvent: false))
     }
 
+    @Test("課金画面のリンクは、課金画面を出さないときの移り先として、選んだ予定の詳細をホームのタブに積む")
+    func openPlusPaywallLink() {
+        let router = AppRouter()
+        router.selectedTab = .settings
+        router.pendingAddEvent = true
+        let id = UUID()
+        router.open(.plusPaywall(id), hasCompletedOnboarding: true)
+        #expect(router.selectedTab == .home)
+        #expect(router.homePath == [.eventDetail(id)])
+        #expect(!router.pendingAddEvent)
+        #expect(router.sheetDismissal == SheetDismissal(count: 1, keepsAddEvent: false))
+    }
+
     @Test("初回の導線の途中は、ウィジェットのリンクで何も開かない")
     func widgetLinkDuringOnboarding() {
         let router = AppRouter()
         router.selectedTab = .settings
         let shown = HomeRoute.eventDetail(UUID())
         router.homePath = [shown]
-        for link in [WidgetLink.eventDetail(UUID()), .addEvent, .home] {
+        for link in [WidgetLink.eventDetail(UUID()), .addEvent, .home, .plusPaywall(UUID())] {
             router.open(link, hasCompletedOnboarding: false)
         }
         #expect(router.selectedTab == .settings)
