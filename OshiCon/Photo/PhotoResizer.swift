@@ -10,8 +10,11 @@ import UniformTypeIdentifiers
 
 /// 選んだ写真を、取り込む JPEG に縮める。
 nonisolated enum PhotoResizer {
-    /// 取り込む写真の長辺の上限（px）。
+    /// 取り込む写真の長辺の上限（px）。推しの写真（丸の正方形）はこの大きさまで。
     static let maxPixelLength = 1_440
+    /// 背景の写真（縦長の枠で切り抜く）の長い辺の上限（px）。iPhone の画面の高さ（Pro Max で 2868px）に近く、ぼかして敷くので足りる大きさ。
+    /// 9:19.5 の枠で約 1182×2560px。
+    static let maxBackgroundPixelLength = 2_560
     /// JPEG の画質。
     static let compressionQuality = 0.85
 
@@ -26,18 +29,19 @@ nonisolated enum PhotoResizer {
         return jpegData(from: image)
     }
 
-    /// 写真のデータを、調整した範囲（`crop`）で正方形に切り抜き、一辺 `maxPixelLength` 以下の JPEG にする。読めなければ nil。
+    /// 写真のデータを、調整した範囲（`crop`）で切り抜き、長い辺 `maxPixelLength` 以下の JPEG にする。読めなければ nil。
     /// 切り抜き方は `croppedImage(from:crop:maxPixelLength:)`。
     static func croppedJPEGData(from data: Data, crop: PhotoCrop, maxPixelLength: Int = maxPixelLength) -> Data? {
         croppedImage(from: data, crop: crop, maxPixelLength: maxPixelLength).flatMap(jpegData(from:))
     }
 
-    /// 写真のデータを、調整した範囲（`crop`）で正方形に切り抜いた、一辺 `maxPixelLength` 以下の画像。読めなければ nil。
+    /// 写真のデータを、調整した範囲（`crop`）で切り抜いた、長い辺 `maxPixelLength` 以下の画像。読めなければ nil。
+    /// 推しの丸（正方形の枠）なら正方形、背景の写真（縦長の枠）なら枠と同じ縦横比の長方形になる。
     ///
     /// `crop` は向きを反映した後の画像の座標で決めたもの。`crop.imageSize` が写真と違う大きさ（表示用に縮めた画像など）でも、
     /// 縦横比が同じなら同じ割合の範囲を切り抜く（縦横比が違えば、向きの取り違えとみなして nil）。
     /// 枠の隅が空かないよう、範囲は `PhotoCrop.clamped()` で補正してから使う。
-    /// 一辺は切り抜く範囲の画素の一辺と `maxPixelLength` の小さいほう（小さい写真は拡大しない）。
+    /// 長い辺は切り抜く範囲の画素の長い辺と `maxPixelLength` の小さいほう（小さい写真は拡大しない）。短い辺は縦横比に合わせる。
     /// 切り抜く範囲が `maxPixelLength` より広ければ、写真を全部はデコードせず、切り抜いた結果に足りる大きさに縮めて読んでから切り抜く
     /// （`decodePixelLength`）。それより狭く切り抜く（強く拡大した）ときは、粗くしないよう写真を元の大きさで読む。
     static func croppedImage(from data: Data, crop: PhotoCrop, maxPixelLength: Int = maxPixelLength) -> CGImage? {
@@ -52,39 +56,58 @@ nonisolated enum PhotoResizer {
             return nil
         }
         let region = crop.clamped().region
-        let sideInPhoto = region.side * cropToPhoto
+        let sizeInPhoto = CGSize(width: region.size.width * cropToPhoto, height: region.size.height * cropToPhoto)
         let center = CGPoint(x: region.center.x * cropToPhoto, y: region.center.y * cropToPhoto)
-        guard sideInPhoto.isFinite, sideInPhoto > 0, center.x.isFinite, center.y.isFinite else {
+        guard sizeInPhoto.width.isFinite, sizeInPhoto.height.isFinite, sizeInPhoto.width > 0, sizeInPhoto.height > 0,
+              center.x.isFinite, center.y.isFinite else {
             return nil
         }
-        let outputSide = max(Int(min(sideInPhoto, CGFloat(maxPixelLength)).rounded()), 1)
-        let decodeLength = decodePixelLength(orientedSize: orientedSize, cropSide: sideInPhoto, outputSide: outputSide)
+        let outputSize = outputPixelSize(cropSize: sizeInPhoto, maxPixelLength: maxPixelLength)
+        let decodeLength = decodePixelLength(
+            orientedSize: orientedSize,
+            cropSide: max(sizeInPhoto.width, sizeInPhoto.height),
+            outputSide: max(outputSize.width, outputSize.height)
+        )
         guard let image = thumbnail(of: source, maxPixelLength: decodeLength),
-              let context = squareContext(side: outputSide, colorSpace: image.colorSpace) else {
+              let context = makeContext(width: outputSize.width, height: outputSize.height, colorSpace: image.colorSpace) else {
             return nil
         }
         context.interpolationQuality = .high
         // 写真の画素の座標（y が上向きに直したもの）で描く。縮めて読んだ画像は写真の大きさの矩形に引き伸ばして置くので、
         // 縦と横で丸めの誤差が違っても範囲がずれない
         // CGContext は y が上向き。y が下向きの座標で「画像を +rotation 回して枠に写す」ことは、y が上向きでは −rotation 回すことになる
-        let scale = CGFloat(outputSide) / sideInPhoto
-        context.translateBy(x: CGFloat(outputSide) / 2, y: CGFloat(outputSide) / 2)
-        context.scaleBy(x: scale, y: scale)
+        // 拡大は回した後（枠の向き）に当てるので、出力の幅と高さの丸めの誤差を縦と横で別に吸収しても形がゆがまない
+        context.translateBy(x: CGFloat(outputSize.width) / 2, y: CGFloat(outputSize.height) / 2)
+        context.scaleBy(x: CGFloat(outputSize.width) / sizeInPhoto.width, y: CGFloat(outputSize.height) / sizeInPhoto.height)
         context.rotate(by: -CGFloat(region.rotation.radians))
         context.translateBy(x: -center.x, y: -(orientedSize.height - center.y))
         context.draw(image, in: CGRect(origin: .zero, size: orientedSize))
         return context.makeImage()
     }
 
-    /// 切り抜きのために読む画像の長辺（画素）。切り抜く範囲（一辺 `cropSide`）が `outputSide` 画素に足りるだけの大きさで、元より大きくはしない。
+    /// 切り抜いた画像の幅と高さ（画素）。長い辺は切り抜く範囲（写真の画素で `cropSize`）の長い辺と `maxPixelLength` の小さいほうで、
+    /// 短い辺は縦横比に合わせる（どちらも 1 以上）。小さい範囲は拡大しない。
+    static func outputPixelSize(cropSize: CGSize, maxPixelLength: Int) -> (width: Int, height: Int) {
+        let longSide = max(cropSize.width, cropSize.height)
+        let outputLong = min(longSide, CGFloat(maxPixelLength))
+        // 長い辺は縮める倍率を掛けずに求め、正方形では幅と高さが同じ値になるようにする
+        func length(_ side: CGFloat) -> Int {
+            let value = side == longSide ? outputLong : side * outputLong / longSide
+            return max(Int(value.rounded()), 1)
+        }
+        return (length(cropSize.width), length(cropSize.height))
+    }
+
+    /// 切り抜きのために読む画像の長辺（画素）。切り抜く範囲（長い辺 `cropSide`）が出力の長い辺 `outputSide` 画素に足りるだけの大きさで、
+    /// 元より大きくはしない。
     static func decodePixelLength(orientedSize: CGSize, cropSide: CGFloat, outputSide: Int) -> Int {
         let decodeScale = min(CGFloat(outputSide) / cropSide, 1)
         return Int((max(orientedSize.width, orientedSize.height) * decodeScale).rounded(.up))
     }
 
-    /// 一辺 `side` の正方形の描き先。色空間は写真のもの（RGB なら。広色域の写真の色を保つ）、使えなければ sRGB。
+    /// 幅 `width`・高さ `height` の描き先。色空間は写真のもの（RGB なら。広色域の写真の色を保つ）、使えなければ sRGB。
     /// HDR（ITU-R 2100）や extended range の色空間は 8 bit の JPEG に向かないので、Display P3 に落とす。
-    private static func squareContext(side: Int, colorSpace: CGColorSpace?) -> CGContext? {
+    private static func makeContext(width: Int, height: Int, colorSpace: CGColorSpace?) -> CGContext? {
         let srgb = CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB()
         let displayP3 = CGColorSpace(name: CGColorSpace.displayP3)
         let photoSpace = colorSpace.flatMap { space in
@@ -94,8 +117,8 @@ nonisolated enum PhotoResizer {
         for space in spaces {
             if let context = CGContext(
                 data: nil,
-                width: side,
-                height: side,
+                width: width,
+                height: height,
                 bitsPerComponent: 8,
                 bytesPerRow: 0,
                 space: space,
