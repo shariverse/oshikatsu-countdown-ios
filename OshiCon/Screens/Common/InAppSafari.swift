@@ -47,7 +47,7 @@ private struct InAppSafariModifier: ViewModifier {
 
 /// `SFSafariViewController` を UIKit のモーダルで出す。
 ///
-/// SwiftUI の `.sheet` に入れると、Safari の「完了」で Safari 自身が閉じたあとに SwiftUI もシートを閉じようとして、
+/// SwiftUI の `.sheet` に入れると、Safari の閉じるボタン（iOS 26 は「閉じる」、それより前は「完了」）で Safari 自身が閉じたあとに SwiftUI もシートを閉じようとして、
 /// 下にあるシート（課金画面）まで閉じてしまう。Apple の想定どおり UIKit で出し、閉じるのは Safari に任せる。
 private final class InAppSafariPresenter {
     /// この画面の中に置いた UIViewController。ここから出すと、シートの上でもその上に重なる。
