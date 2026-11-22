@@ -142,6 +142,45 @@ final class OshiConUITests: XCTestCase {
     }
 
     @MainActor
+    func testReorderOshis() throws {
+        let app = launch(hasCompletedOnboarding: true, arguments: ["-seedSampleData"])
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+        tabBar.buttons["推し"].tap()
+        let rows = app.buttons.matching(identifier: "oshiList.row")
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(rows.element(boundBy: 0).label.contains("LUMINA"))
+        XCTAssertTrue(rows.element(boundBy: 2).label.contains("レオ"))
+
+        // 並べ替えの間は、登録のボタンを押せない
+        app.navigationBars["推し"].buttons["並べ替え"].tap()
+        let done = app.navigationBars["推し"].buttons["完了"]
+        XCTAssertTrue(done.waitForExistence(timeout: 2))
+        XCTAssertFalse(app.navigationBars["推し"].buttons["推しを登録"].isEnabled)
+
+        // 3 番目（レオ）の行の右端の並べ替えの印を、いちばん上の行までドラッグする
+        let cells = app.cells
+        let handle = cells.element(boundBy: 2).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5))
+        let top = cells.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.2))
+        handle.press(forDuration: 0.5, thenDragTo: top)
+        let first = rows.element(boundBy: 0)
+        let deadline = Date().addingTimeInterval(5)
+        while !first.label.contains("レオ"), Date() < deadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        XCTAssertTrue(first.label.contains("レオ"))
+        XCTAssertTrue(rows.element(boundBy: 1).label.contains("LUMINA"))
+        done.tap()
+        XCTAssertTrue(app.navigationBars["推し"].buttons["並べ替え"].waitForExistence(timeout: 2))
+
+        // ホームの推しの絞り込みも、並べ替えた順になる
+        tabBar.buttons["ホーム"].tap()
+        let leo = app.buttons["レオ"]
+        XCTAssertTrue(leo.waitForExistence(timeout: 5))
+        XCTAssertLessThan(leo.frame.minX, app.buttons["LUMINA"].frame.minX)
+    }
+
+    @MainActor
     func testSettingsShowsPastEventsToggleAndLicenses() throws {
         let app = launch(hasCompletedOnboarding: true)
         let tabBar = app.tabBars.firstMatch
