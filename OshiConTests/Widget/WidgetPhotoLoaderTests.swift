@@ -76,18 +76,25 @@ struct WidgetPhotoLoaderTests {
     @Test(
         "枠の一辺と画面の倍率から読む一辺を求め、上限で抑える。大きさが分からなければ上限",
         arguments: [
-            (170, 3, 510),
-            (169.5, 2, 339),
-            (158, 3, 474),
-            (400, 3, 720),
-            (0, 3, 720),
-            (170, 0, 720),
-            (.infinity, 3, 720),
-            (.nan, 3, 720)
-        ] as [(CGFloat, CGFloat, Int)]
+            PixelLengthCase(pointLength: 170, scale: 3, expected: 510),
+            PixelLengthCase(pointLength: 169.5, scale: 2, expected: 339),
+            PixelLengthCase(pointLength: 158, scale: 3, expected: 474),
+            PixelLengthCase(pointLength: 400, scale: 3, expected: 720),
+            PixelLengthCase(pointLength: 0, scale: 3, expected: 720),
+            PixelLengthCase(pointLength: 170, scale: 0, expected: 720),
+            PixelLengthCase(pointLength: .infinity, scale: 3, expected: 720),
+            PixelLengthCase(pointLength: .nan, scale: 3, expected: 720)
+        ]
     )
-    func pixelLength(pointLength: CGFloat, scale: CGFloat, expected: Int) {
-        #expect(WidgetPhotoLoader.pixelLength(pointLength: pointLength, scale: scale) == expected)
+    func pixelLength(testCase: PixelLengthCase) {
+        #expect(WidgetPhotoLoader.pixelLength(pointLength: testCase.pointLength, scale: testCase.scale) == testCase.expected)
+    }
+
+    /// 枠の一辺（pt）・画面の倍率と、読む一辺（px）の組。
+    nonisolated struct PixelLengthCase: Sendable {
+        let pointLength: CGFloat
+        let scale: CGFloat
+        let expected: Int
     }
 
     @Test("写真は App Group のデータの Photos から読み、アプリが取り込む場所と同じ")
