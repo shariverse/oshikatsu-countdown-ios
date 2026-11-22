@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@2a37347c023304b7bac2fbab1ea34435ae775f37 oshikatsu-countdown/features/03-home.md
+  元: shariverse/app-specs@41ad368481adb3a176adab916e97cc58b37cadc8 oshikatsu-countdown/features/03-home.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 

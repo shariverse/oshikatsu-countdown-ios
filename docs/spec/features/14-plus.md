@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@2a37347c023304b7bac2fbab1ea34435ae775f37 oshikatsu-countdown/features/14-plus.md
+  元: shariverse/app-specs@41ad368481adb3a176adab916e97cc58b37cadc8 oshikatsu-countdown/features/14-plus.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -65,6 +65,7 @@
 
 - 定期購入と買い切りの商品の欄（名前・価格・お試しの案内・購入のボタン）は、OS の課金の部品（`SubscriptionStoreView`・`ProductView`）で出す
 - 閉じるボタンは、上の「閉じる」の 1 つだけにする（OS の課金の部品が自分で出す × は出さない）
+- 商品の欄のほか（見出し・機能の一覧・買い切りの説明・下のリンク）は、アプリの言語で出す。商品の欄は OS の課金の部品がストアの国の言語で出すので、アプリの言語とストアの言語が違う人には、商品の欄だけが別の言語になる
 - 買い切りから下は画面の下に固定する。とても大きな文字の設定では、この欄の文字を途中の大きさで止める（定期購入の欄を潰さないため）。下のリンクが横に並ばないときは縦に並べる
 
 ## 購入の結果と復元
