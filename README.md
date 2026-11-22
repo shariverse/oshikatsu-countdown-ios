@@ -208,6 +208,15 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 - サブスクリプションの販売地域・価格・お試しは、すでに入っているものを変えません（価格の変更は App Store Connect の画面で行います）。非消耗型の価格は毎回入れ直します（同じ価格なら変わりません）
 - 審査用のスクリーンショット（課金画面）と審査への提出は扱いません。課金画面ができてから App Store Connect の画面で入れます。最初の課金の商品は、アプリの新しいバージョンと一緒に審査に出します
 
+#### 手元での課金の確かめ方
+
+- [Configs/OshiCon.storekit](Configs/OshiCon.storekit) は、`in-app-purchases.json` と同じ商品（サブスクリプショングループ OshiCon Plus の年額 1,980 円・1 週間の無料のお試し、月額 280 円、非消耗型の買い切り 4,800 円。ファミリー共有は OFF、表示名と説明は 12 言語）を入れた StoreKit Configuration ファイルです。
+  ストアフロントは日本です。共有スキーム OshiCon の Run（Options の StoreKit Configuration）と Test（テストプラン [OshiCon.xctestplan](OshiCon.xctestplan) の StoreKit Configuration）に設定してあり、Simulator では App Store Connect に繋がずに購入・復元・期限切れを試せます（Xcode の Debug → StoreKit → Manage Transactions）
+- 商品を変えたら `in-app-purchases.json` と `.storekit` の両方を直します（`StoreKitConfigurationTests` が食い違いを見つけます）
+- UI テストとスクリーンショット（`-useInMemoryStore` のとき）は StoreKit に問い合わせず、Plus は使えない状態に固定します。起動引数 `-plusUnlocked` で使える状態に、`-plusLocked` で使えない状態にします（`LaunchOptions.unlocksPlus`。両方渡したときは `-plusLocked` を優先します）
+- 課金画面の入口（設定の Plus の行）は、開発版（DEBUG のビルド）と TestFlight だけに出し、App Store 版では出しません（`PlusEntryPolicy`。TestFlight かは `AppTransaction` の環境で端末の中で見分けます）。
+  起動引数 `-simulateAppStoreDistribution`（`-useInMemoryStore` のときだけ効く）で App Store 版として動かし、行を隠します。App Store 用スクリーンショットはこれを渡します
+
 ### 11. テーマ
 
 出荷するアプリとウィジェットは、Discussion #80 のテーマ案から採用した「地雷系・ゴシック」（`AppTheme.shipping` = `AppTheme.jiraiGothic`）だけを使います。
@@ -262,11 +271,12 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 
 ```
 .
-├── Configs/                 # xcconfig（署名情報・バージョン・Deployment Target）
+├── Configs/                 # xcconfig（署名情報・バージョン・Deployment Target）・OshiCon.storekit（StoreKit Configuration）
 ├── OshiCon/          # アプリ本体（SwiftUI）
 ├── OshiConTests/     # Unit テスト（Swift Testing）
 ├── OshiConUITests/   # UI テスト（XCTest）
 ├── OshiCon.xcodeproj # 共有スキーム OshiCon を含む
+├── OshiCon.xctestplan # 共有スキーム OshiCon のテストプラン（Unit テスト・UI テスト・StoreKit Configuration）
 ├── docs/                    # ExportOptions.plist のサンプル・App Store の掲載文・テーマ（design/themes.md）・写真の調整の仕様（photo-crop.md）・画像でシェアの仕様（share-card.md）
 ├── scripts/                 # rename.sh・app-store-screenshots.sh（App Store 用スクリーンショット）・render-creative-assets.sh（クリエイティブアセット）
 ├── .swiftlint.yml           # SwiftLint 設定

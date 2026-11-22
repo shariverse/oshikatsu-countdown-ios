@@ -66,9 +66,11 @@ Oshis, fotos e eventos são salvos apenas no seu aparelho e nunca são enviados 
 (Os dados são incluídos nos backups do aparelho no iCloud ou no computador e são apagados quando você apaga o app.)
 
 Tipos de evento: show, aniversário, lançamento, live, outro
+
+Termos de Uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（2170 文字）
+（2259 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 

@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// 初回の導線を終えるまでは導線を、終えたらタブを出す。ウィジェットのリンクと押された通知の画面を開く。
+/// 初回の導線を終えるまでは導線を、終えたらタブを出す。ウィジェットのリンクと押された通知の画面を開く。課金画面のシートを受け持つ。
 struct RootView: View {
     @AppStorage(AppStorageKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @Environment(AppRouter.self) private var router
@@ -24,6 +24,8 @@ struct RootView: View {
                 }
             }
         }
+        // どの画面からでも課金画面を開けるようにする（シートにも下の書体・色・言語が入る）
+        .presentsPlusPaywall()
         .font(theme.typography.text(.body))
         .tint(theme.palette.brand.color)
         .environment(\.locale, .app)

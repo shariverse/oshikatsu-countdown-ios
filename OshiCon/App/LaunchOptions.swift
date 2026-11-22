@@ -40,6 +40,34 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(testReminderArgument)
     }
 
+    /// 推し活カウントダウン Plus を使える状態で起動する（UI テスト・スクリーンショット）。
+    /// メモリ上のストアでは StoreKit に問い合わせず、Plus は使えない状態に固定する（`PlusStore`）。この引数でそれを使える状態に替える。
+    /// メモリ上のストアのときだけ効く。
+    static let plusUnlockedArgument = "-plusUnlocked"
+
+    /// 推し活カウントダウン Plus を使えない状態で起動する（UI テスト・スクリーンショット）。メモリ上のストアの既定と同じだが、
+    /// テストの意図を書くために渡す。`-plusUnlocked` と一緒に渡したときは、こちらを優先する。
+    static let plusLockedArgument = "-plusLocked"
+
+    static var unlocksPlus: Bool {
+        unlocksPlus(arguments: ProcessInfo.processInfo.arguments)
+    }
+
+    /// 起動引数から、メモリ上のストアで Plus を使える状態にするかを決める。
+    static func unlocksPlus(arguments: [String]) -> Bool {
+        arguments.contains(inMemoryStoreArgument)
+            && arguments.contains(plusUnlockedArgument)
+            && !arguments.contains(plusLockedArgument)
+    }
+
+    /// App Store 版として動かす（課金画面の入口を出さない。App Store 用スクリーンショットと UI テスト）。
+    /// DEBUG のビルドでは入口を出すので、配るアプリと同じ画面にするときに渡す（`AppDistributionDetector.live`）。メモリ上のストアのときだけ効く。
+    static let appStoreDistributionArgument = "-simulateAppStoreDistribution"
+
+    static var simulatesAppStoreDistribution: Bool {
+        usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(appStoreDistributionArgument)
+    }
+
     /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
     static let defaultEnvironmentPrefix = "OSHICON_DEFAULT_"
 

@@ -66,9 +66,11 @@
 （資料會包含在裝置的備份（iCloud、電腦）中。刪除 App 後資料會被清除。）
 
 行程類型：演唱會/Live、生日、發售日、直播、其他
+
+使用條款（EULA）：https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 ```
 
-（682 文字）
+（760 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 
