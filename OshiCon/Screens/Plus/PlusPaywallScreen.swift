@@ -8,7 +8,8 @@ import SwiftUI
 
 /// 推し活カウントダウン Plus の課金画面。
 ///
-/// - 見出し（文と SF Symbols の一覧で Plus の機能）の下に、サブスクリプション（月額・年額。`SubscriptionStoreView`）を出す
+/// - 見出し（文と SF Symbols の一覧で Plus の機能）の下に、サブスクリプション（月額・年額。`SubscriptionStoreView`）を出す。
+///   見出しはアプリの言語で出す（`SubscriptionStoreView` が置き換える `\.locale` を入れ直す）。購入ボタン・商品名・価格は Apple がストアフロントの言語で出す
 /// - その下に買い切りを並べ、いちばん下に購入の復元・利用規約・プライバシーポリシーを置く。
 ///   復元とリンクはサブスクリプションと買い切りの両方に効くので、`SubscriptionStoreView` の中ではなく画面の下にまとめる。
 ///   利用規約・プライバシーポリシーは、アプリから出ないようアプリの中の Safari の画面で開く（`opensWebLinksInApp()`）
@@ -21,6 +22,9 @@ struct PlusPaywallScreen: View {
     @Environment(PlusStore.self) private var plus: PlusStore?
     @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @Environment(\.appTheme) private var theme
+    /// アプリの文言の locale。`SubscriptionStoreView` は中身の `\.locale` を商品の価格の locale（ストアフロントの言語と地域）に置き換えるので、
+    /// 見出しに入れ直して、ナビゲーションバーや下の買い切りと同じアプリの言語にそろえる。
+    @Environment(\.locale) private var locale
     @State private var notice: PlusPaywallNotice?
     @State private var isRestoring = false
     /// サブスクリプション中に買い切りを買い終えたときの案内（`PlusLifetimeGuidance`）。
@@ -31,6 +35,8 @@ struct PlusPaywallScreen: View {
         VStack(spacing: 0) {
             SubscriptionStoreView(productIDs: PlusProduct.subscriptionIDs) {
                 PlusPaywallHeader(isUnlocked: isPlusUnlocked)
+                    // 入れ直さないと、商品を読み込んだあと見出しだけがストアフロントの言語で出る
+                    .environment(\.locale, locale)
             }
             .subscriptionStoreButtonLabel(.multiline)
             // シートの中では右上に × の閉じるボタンが自動で出る。閉じるのは開く側がナビゲーションバーに置く「閉じる」に任せ、2 つ並ばないよう隠す
