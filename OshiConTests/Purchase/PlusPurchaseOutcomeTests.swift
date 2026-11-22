@@ -43,9 +43,9 @@ struct PlusPurchaseOutcomeTests {
         #expect(kind(PlusPurchaseOutcome(.failure(Product.PurchaseError.productUnavailable))) == "failed")
     }
 
-    @Test("利用規約は Apple の標準の EULA、プライバシーポリシーは https の URL")
+    @Test("利用規約は Apple の標準の EULA、プライバシーポリシーは公開しているページ")
     func legalLinks() {
         #expect(PlusLegalLink.termsOfUse.absoluteString == "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
-        #expect(PlusLegalLink.privacyPolicy.scheme == "https")
+        #expect(PlusLegalLink.privacyPolicy.absoluteString == "https://shilokuma.jp/privacy/oshikatsu-countdown/")
     }
 }
