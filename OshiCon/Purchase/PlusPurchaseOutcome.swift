@@ -45,9 +45,7 @@ nonisolated enum PlusLegalLink {
     /// 利用規約。App Store Connect で独自の EULA を入れていないので、Apple の標準の使用許諾契約（EULA）。
     static let termsOfUse = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 
-    /// プライバシーポリシー。公開先が決まるまでは、リポジトリの `docs/app-store/privacy-policy.md` を指す。
-    /// 公開したら、この定数だけを差し替える（App Store Connect の「プライバシーポリシー URL」と同じ URL にする）。
-    static let privacyPolicy = URL(
-        string: "https://github.com/shariverse/oshikatsu-countdown-ios/blob/develop/docs/app-store/privacy-policy.md"
-    )!
+    /// プライバシーポリシー。公開しているページ（App Store Connect の「プライバシーポリシー URL」と同じ URL にする）。
+    /// 公開先を変えたら、この定数だけを差し替える。
+    static let privacyPolicy = URL(string: "https://shilokuma.jp/privacy/oshikatsu-countdown/")!
 }

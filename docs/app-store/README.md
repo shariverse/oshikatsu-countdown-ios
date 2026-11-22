@@ -18,7 +18,9 @@
 
 アプリ名は「推し活カウントダウン」に決まった（Discussion #58。ホーム画面の表示名は「推し活カウント」のまま）。App Store Connect で名前が空いているかは、登録するときに人間が確かめる。
 
-- **プライバシーポリシーとサポートページをどこに公開するか・誰が書いた名義にするか**（GitHub Pages など）。下書きの `{{…}}` を埋めてから公開する
+- **サポートページをどこに公開するか**。下書きの `{{…}}` を埋めてから公開する
+  - プライバシーポリシーは https://shilokuma.jp/privacy/oshikatsu-countdown/ に公開している（shilokuma-inc/shilokuma-web の `privacy/oshikatsu-countdown/`）。
+    公開しているページの文面と [privacy-policy.md](privacy-policy.md) の下書きは別に書いてあるので、中身を変えたら公開しているページも直す。課金画面のリンク（`PlusLegalLink.privacyPolicy`）もこの URL
 - 提供者名・お問い合わせ先のメールアドレス（[privacy-policy.md](privacy-policy.md)・[support.md](support.md) の `{{…}}`）
 - 価格と配信国、年齢制限の回答（[listing.md](listing.md) に案を書いた）
 
