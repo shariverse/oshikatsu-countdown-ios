@@ -63,13 +63,97 @@ struct AppRouterTests {
         #expect(router.sheetDismissal == SheetDismissal(count: 2, keepsAddEvent: false))
     }
 
+    @Test("課金画面のリンクは、課金画面を出さないときの移り先として、選んだ予定の詳細をホームのタブに積む")
+    func openPlusPaywallLink() {
+        let router = AppRouter()
+        router.selectedTab = .settings
+        router.pendingAddEvent = true
+        let id = UUID()
+        router.open(.plusPaywall(id), hasCompletedOnboarding: true)
+        #expect(router.selectedTab == .home)
+        #expect(router.homePath == [.eventDetail(id)])
+        #expect(!router.pendingAddEvent)
+        #expect(router.sheetDismissal == SheetDismissal(count: 1, keepsAddEvent: false))
+    }
+
+    @Test("課金画面の入口を出す配り方では、課金画面のリンクでほかのシートを閉じさせ、画面は移らずに課金画面を開く")
+    func openPlusPaywallLinkShowingPaywall() {
+        let router = AppRouter()
+        router.selectedTab = .settings
+        let shown = HomeRoute.eventDetail(UUID())
+        router.homePath = [shown]
+        router.pendingAddEvent = true
+        #expect(router.open(.plusPaywall(UUID()), hasCompletedOnboarding: true, showsPlusPaywall: true))
+        #expect(router.selectedTab == .settings)
+        #expect(router.homePath == [shown])
+        #expect(!router.pendingAddEvent)
+        #expect(router.sheetDismissal == SheetDismissal(count: 1, keepsAddEvent: false))
+    }
+
+    @Test("課金画面の入口を出さない配り方では、課金画面のリンクで課金画面を開かず、カウントダウンのウィジェットと同じく予定の詳細に移る")
+    func openPlusPaywallLinkHidingPaywall() {
+        let router = AppRouter()
+        router.selectedTab = .settings
+        let id = UUID()
+        #expect(!router.open(.plusPaywall(id), hasCompletedOnboarding: true, showsPlusPaywall: false))
+
+        let countdown = AppRouter()
+        countdown.selectedTab = .settings
+        countdown.open(.eventDetail(id), hasCompletedOnboarding: true)
+        #expect(router.selectedTab == countdown.selectedTab)
+        #expect(router.homePath == countdown.homePath)
+        #expect(router.homePath == [.eventDetail(id)])
+        #expect(router.sheetDismissal == countdown.sheetDismissal)
+    }
+
+    @Test("ほかのリンクは、課金画面の入口を出すかによらず、今までどおりに移って課金画面を開かない")
+    func openOtherLinksWithPaywallPolicy() {
+        let id = UUID()
+        for showsPlusPaywall in [true, false] {
+            let router = AppRouter()
+            router.selectedTab = .oshi
+            #expect(!router.open(.eventDetail(id), hasCompletedOnboarding: true, showsPlusPaywall: showsPlusPaywall))
+            #expect(router.selectedTab == .home)
+            #expect(router.homePath == [.eventDetail(id)])
+
+            #expect(!router.open(.addEvent, hasCompletedOnboarding: true, showsPlusPaywall: showsPlusPaywall))
+            #expect(router.pendingAddEvent)
+            #expect(router.homePath.isEmpty)
+
+            router.selectedTab = .settings
+            #expect(!router.open(.home, hasCompletedOnboarding: true, showsPlusPaywall: showsPlusPaywall))
+            #expect(router.selectedTab == .home)
+        }
+    }
+
+    @Test("初回の導線の途中は、課金画面の入口を出す配り方でも、課金画面のリンクで何も開かない")
+    func plusPaywallLinkDuringOnboarding() {
+        let router = AppRouter()
+        router.selectedTab = .settings
+        for showsPlusPaywall in [true, false] {
+            #expect(!router.open(.plusPaywall(UUID()), hasCompletedOnboarding: false, showsPlusPaywall: showsPlusPaywall))
+        }
+        #expect(router.selectedTab == .settings)
+        #expect(router.homePath.isEmpty)
+        #expect(router.sheetDismissal == SheetDismissal())
+    }
+
+    @Test("推しの写真ウィジェットのリンクを読み取る（Plus なら予定の詳細、Plus でなければ課金画面）")
+    func photoWidgetLinks() throws {
+        let id = try #require(UUID(uuidString: "7D1C3B9E-2F4A-4C61-9B0E-5A8D2E6F1C34"))
+        let paywall = try #require(URL(string: "oshicon://plus/7D1C3B9E-2F4A-4C61-9B0E-5A8D2E6F1C34"))
+        #expect(WidgetLink(url: paywall) == .plusPaywall(id))
+        #expect(WidgetLink.plusPaywall(id).url == paywall)
+        #expect(WidgetLink(url: WidgetLink.eventDetail(id).url) == .eventDetail(id))
+    }
+
     @Test("初回の導線の途中は、ウィジェットのリンクで何も開かない")
     func widgetLinkDuringOnboarding() {
         let router = AppRouter()
         router.selectedTab = .settings
         let shown = HomeRoute.eventDetail(UUID())
         router.homePath = [shown]
-        for link in [WidgetLink.eventDetail(UUID()), .addEvent, .home] {
+        for link in [WidgetLink.eventDetail(UUID()), .addEvent, .home, .plusPaywall(UUID())] {
             router.open(link, hasCompletedOnboarding: false)
         }
         #expect(router.selectedTab == .settings)

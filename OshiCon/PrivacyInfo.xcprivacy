@@ -13,7 +13,7 @@
 	<array/>
 	<!-- 理由の申告が必要な API。使っているのは UserDefaults だけ -->
 	<!-- @AppStorage（標準の UserDefaults。初回の導線を終えたか・終わった予定を出すか・通知の設定）と、 -->
-	<!-- ウィジェットと共有する App Group の UserDefaults(suiteName:)（Plus が使えるかの判定の結果。OshiConWidget/PrivacyInfo.xcprivacy にも 1C8F.1 がある） -->
+	<!-- ウィジェットと共有する App Group の UserDefaults(suiteName:)（Plus が使えるかの判定の結果と期限。OshiConWidget/PrivacyInfo.xcprivacy にも 1C8F.1 がある） -->
 	<!-- ファイルは App Group のコンテナでフォルダを作る・写真を消すだけで、タイムスタンプ・空き容量・起動時刻などの API は使っていない -->
 	<!-- それらの API を使うときは、ここと OshiConWidget/PrivacyInfo.xcprivacy に理由を足す -->
 	<key>NSPrivacyAccessedAPITypes</key>

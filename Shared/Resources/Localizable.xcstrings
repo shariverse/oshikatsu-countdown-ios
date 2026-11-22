@@ -14162,6 +14162,40 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Widget foto oshi" } }
       }
     },
+    "推しの写真" : {
+      "comment" : "ウィジェットの一覧に出す推しの写真ウィジェットの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi Photo" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "本命照片" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "我推照片" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Photo de l'oshi" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Foto" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto del oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Foto do oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Foto dell'oshi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto oshi" } }
+      }
+    },
+    "推しの写真を背景に、選んだ予定まであと何日かを表示します" : {
+      "comment" : "ウィジェットの一覧に出す推しの写真ウィジェットの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shows how many days are left until the event you choose, over your oshi's photo." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真を背景に、選んだ予定まであと何日かを表示します" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "以本命的照片为背景，显示距离所选日程还有几天。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "以我推的照片為背景，顯示距離所選行程還有幾天。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진을 배경으로, 선택한 일정까지 며칠 남았는지 표시합니다." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Affiche le nombre de jours restants avant l'événement choisi, sur la photo de ton oshi." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Zeigt auf dem Foto deines Oshi, wie viele Tage es noch bis zum gewählten Termin sind." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Muestra cuántos días faltan para el evento elegido, sobre la foto de tu oshi." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Mostra quantos dias faltam para o evento escolhido, sobre a foto do seu oshi." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Mostra quanti giorni mancano all'evento scelto, sulla foto del tuo oshi." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แสดงจำนวนวันที่เหลือจนถึงกิจกรรมที่เลือก โดยมีรูปโอชิเป็นพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Menampilkan berapa hari lagi menuju acara pilihanmu, dengan foto oshi kamu sebagai latar." } }
+      }
+    },
     "ホーム画面に、推しの写真とカウントダウンを置けます" : {
       "comment" : "課金画面の Plus の機能の説明（推しの写真ウィジェット）",
       "localizations" : {
@@ -14466,6 +14500,23 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Riprova più tardi." } },
         "th" : { "stringUnit" : { "state" : "translated", "value" : "โปรดลองอีกครั้งภายหลัง" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Silakan coba lagi nanti." } }
+      }
+    },
+    "Plus で使えます" : {
+      "comment" : "推しの写真ウィジェット。Plus が使えないときに、薄くした見本に重ねる（読み上げにも使う）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Available with Plus" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Plus で使えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Plus 专享" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "Plus 專屬" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Plus에서 이용할 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Disponible avec Plus" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit Plus verfügbar" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Disponible con Plus" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Disponível com o Plus" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Disponibile con Plus" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้ได้กับ Plus" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tersedia dengan Plus" } }
       }
     }
   },

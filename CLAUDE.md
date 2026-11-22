@@ -42,7 +42,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - `OshiCon/`: アプリだけのコード（画面・写真の取り込み）
   - `Shared/`: アプリと Widget Extension の両方に入るコード（規則・ストア・配色・書体）。ウィジェットからも使う型は `nonisolated` にする
   - `OshiConWidget/`: Widget Extension（`OshiConWidgetExtension`、Bundle ID は `$(APP_BUNDLE_IDENTIFIER).Widget`）。Info.plist に `AppGroupIdentifier` と `UIAppFonts` を持つ
-  - ウィジェットの View（`CountdownWidgetView`・`UpcomingWidgetView`）と見本は `Shared/Widget/` に置き、アプリの Preview からも描く。`Widget`・`TimelineProvider`・`AppIntent` は `OshiConWidget/` に置く
+  - ウィジェットの View（`CountdownWidgetView`・`UpcomingWidgetView`・`PhotoWidgetView`）と見本は `Shared/Widget/` に置き、アプリの Preview からも描く。`Widget`・`TimelineProvider`・`AppIntent` は `OshiConWidget/` に置く
   - `OshiConTests/`・`OshiConUITests/`: テスト。`Shared/` の型も `@testable import OshiCon` で使える
   - 新しいターゲットは `SWIFT_DEFAULT_ACTOR_ISOLATION` などをプロジェクトの階層から受け継ぐ。ターゲット側で上書きしていないか確かめる
 - テーマ（`Shared/Design/AppTheme.swift`）: 地の配色・推し色の文字の調整の割合・角の丸み・書体・装飾をまとめた型。画面とウィジェットは `@Environment(\.appTheme)` から引く
@@ -74,11 +74,13 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   仕様・テストの口（`OshiConTests/Share/`・`ShareCardUITests`・`eventDetail.share`・`shareCard.*`）は `docs/share-card.md`
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）と `1C8F.1`（App Group で Widget Extension と共有）を、
-  Widget Extension が UserDefaults の `1C8F.1` だけを申告している（`PrivacyManifestTests` で確かめる）。App Group の UserDefaults に置くのは Plus が使えるかの判定の結果だけ（`PlusStatusStorage`）。
+  Widget Extension が UserDefaults の `1C8F.1` だけを申告している（`PrivacyManifestTests` で確かめる）。App Group の UserDefaults に置くのは Plus が使えるかの判定の結果と期限だけ（`PlusStatusStorage`）。
   申告が要る API（ファイルのタイムスタンプ・ディスク容量など）を使ったら追記する。データの収集・トラッキングはしない
 - Plus の購入の状態: 商品の productId と「Plus が使えるか」の規則は `Shared/Purchase/PlusEntitlement.swift`（`PlusProduct`・`PlusEntitlement`。猶予期間を含む・返金は数えない）、
-  App Group の UserDefaults への読み書きは `Shared/Purchase/PlusStatusStorage.swift`（Widget Extension は `PlusStatusStorage.appGroup.isUnlocked` で読む）。
-  StoreKit 2 の取引（`Transaction.currentEntitlements`・`Transaction.updates`）を受け持つのはアプリの `OshiCon/Purchase/PlusStore.swift`。画面は `@Environment(\.isPlusUnlocked)` で Plus が使えるかを引く。
+  App Group の UserDefaults への読み書きは `Shared/Purchase/PlusStatusStorage.swift`（判定の結果 `isUnlocked` と期限 `expirationDate`）。
+  期限はサブスクリプションの期限と猶予期間の終わりの遅いほうで、買い切りは nil（`PlusEntitlement.expirationDate(purchases:now:)`）。
+  StoreKit 2 の取引（`Transaction.currentEntitlements`・`Transaction.updates`）を受け持つのはアプリの `OshiCon/Purchase/PlusStore.swift`（今の権利を読むのは `Shared/Purchase/PlusTransactions.swift`）。
+  結果か期限が変わったら書いて `WidgetCenter.shared.reloadAllTimelines()` を呼ぶ。画面は `@Environment(\.isPlusUnlocked)` で Plus が使えるかを引く。
   メモリ上のストアでは StoreKit に触れず、App Group にも書かない。Plus の状態は起動引数で固定する（既定と `-plusLocked` は使えない、`-plusUnlocked` は使える。`LaunchOptions.unlocksPlus`）
   - StoreKit Configuration ファイルは `Configs/OshiCon.storekit`（`in-app-purchases.json` と同じ商品。食い違いは `StoreKitConfigurationTests` が見つける）。
     共有スキームの Run と、テストプラン `OshiCon.xctestplan`（スキームの Test が使う）に設定してある。商品を変えたら両方のファイルを直す
@@ -106,7 +108,20 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 審査ガイドライン 3.1.2(a)（続く価値）に備え、テーマや飾りを定期的に足していく
 - **シェア（1.3.0 から。無料）**: 予定の「あと○日」をカードの画像にして共有シートで渡す（端末の中で作り、通信しない）。透かし（アプリ名）は全員に小さく入れ、会場は既定で載せない
 - 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents / Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
-- ホーム画面ウィジェットは 2 種: カウントダウン（予定 1 件。`AppIntentConfiguration` で予定を選ぶ）と推しカウント（これからの予定の一覧）
+- ホーム画面ウィジェットは 3 種: カウントダウン（予定 1 件。`AppIntentConfiguration` で予定を選ぶ）と推しカウント（これからの予定の一覧）は無料、推しの写真（Plus）
+  - 推しの写真（小・中。kind は `jp.shilokuma.OshiCon.Photo`）: カウントダウンと同じ `SelectEventIntent` で予定を選び、その推しの写真を背景に残り日数を出す。小は写真の全面に日数と予定名、中は左に写真、右に推し名・予定名・日数・日付。
+    写真の上の文字は黒の暗幕の上に白で出す。写真の無い推しは推し色の模様（`ThemePhotoPlaceholder`）
+    - コード: Widget と `PhotoProvider` は `OshiConWidget/PhotoWidget.swift`。中身の型 `PhotoWidgetContent`（未選択・削除・読めないはカウントダウンと同じ）・View `PhotoWidgetView`・描き分けの規則 `PhotoWidgetAppearance`・
+      タイムライン `PhotoWidgetTimeline`・写真の読み込み `WidgetPhotoLoader` は `Shared/Widget/`。アプリの Preview は `WidgetPreview.photo`
+    - 写真は `WidgetPhotoLoader` が App Group の写真を ImageIO のサムネイルでウィジェットの枠の大きさに縮めて読む（一辺 720 px まで）。エントリごとではなく 1 回だけ読む
+    - 写真は地（`containerBackground`）ではなく中身に置く（1 色の描き方では地が外されるため）。そのため `.contentMarginsDisabled()` を付け、余白は View が `widgetContentMargins` から付ける
+    - tinted などフルカラーでない描き方では、暗幕を敷かず、写真を `widgetAccentedRenderingMode(.desaturated)`（iOS 18 から）と `grayscale` で白黒にして薄く描き、色合いを乗せる
+    - Plus の判定: Widget Extension は `Shared/Purchase/PlusWidgetStatus.swift` で、App Group の結果と期限と現在時刻から決める。使えない・期限の前・買い切りはそのまま、期限ちょうどか過ぎていたら
+      Widget Extension の中で StoreKit 2（`Transaction.currentEntitlements` を `PlusEntitlement` の規則で判定。通信しない）で確かめ直す。App Group には書き戻さない（書くのはアプリの `PlusStore` だけ）
+    - タイムライン: 今と 0:00 にエントリを置き、Plus の期限がその範囲の中にあれば期限の時刻にもエントリを置いて、そこから Plus でない表示にし、期限の時刻に作り直す（`.after`）
+    - Plus でないときは、選んだ予定と写真（無ければ模様）を薄くして「Plus で使えます」を重ねる。押したときのリンクは `WidgetLink.plusPaywall`（`oshicon://plus/<UUID>`）で、
+      アプリ（`RootView` の `WidgetLinkReceiver` と `AppRouter.open(_:hasCompletedOnboarding:showsPlusPaywall:)`）は `PlusEntryPolicy.showsEntry(in:)` が true なら `openPlusPaywall` で課金画面を開き、
+      false（App Store 版）ならカウントダウンと同じく予定の詳細に移る。初回の導線の途中なら開かない
   - カウントダウンはロック画面にも置ける（丸・長方形・1 行。描くのは `Shared/Widget/CountdownAccessoryView.swift`）。ロック画面は端末が単色で描くので、推し色の塗りとテーマの装飾は使わない。
     丸の輪は登録した日から開始までの進み具合（詳細画面と同じ `EventCountdown.progress`）。`widgetFamily` は Environment に入れられないので、形は引数で渡す（アプリの Preview は `WidgetPreview.countdownLockScreen`）
 - データ（SwiftData のストアと推しの写真）は**最初から App Group のコンテナに置く**（ウィジェットと共有するため。後から移すとデータの移し替えが要る）
