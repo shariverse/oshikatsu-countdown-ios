@@ -3,8 +3,9 @@
 予定の詳細のツールバーから、予定の「あと○日」を正方形（1:1）のカードの画像にして、共有シート（`ShareLink`）で渡す。1.3.0 から。**無料の機能**（Plus に含めない）。
 実装は AskHub の epic `01M7YB98BHCBT2K8PEFNR58THM`（t1〜t4）。決まったこと（q1〜q12）はこのファイルの「仕様」にまとめた。
 
-> Android 版の SPEC（`shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`）の「画像でシェア」を「あり」にしてこの仕様を書く PR は、同じ epic の別のタスクで出す。
-> Android 版に移すときは、このファイルの「仕様」（Android 固有の部分を除く）を SPEC と見比べる。
+> **仕様の正は [`docs/spec/features/13-share.md`](spec/features/13-share.md)**（仕様リポジトリ `shariverse/app-specs` から生成したもの。Android 版にも同じ仕様が届く）。
+> このファイルの「仕様」は実装したときの記録で、食い違ったら `docs/spec/` が正。仕様を変えるときは app-specs に PR を出す。
+> コードの場所・テストの口は、このファイルに残す。
 
 ## 仕様
 

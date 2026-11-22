@@ -4,9 +4,9 @@
 決定の出典は Discussion #128（依頼 Issue #127）。実装は epic `epic/photo-crop`（PR #130・#134・#136・#138・#142・#143）。
 ループが仮に決めたこと（拡大の上限・文言・枠の大きさなど）は判断ログ Issue #131 にある。
 
-> **Android 版の SPEC（`shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`）には、まだこの仕様が書かれていない。**
-> Discussion #128 の Q4 で「iOS だけ先に作り、Android の SPEC は後で合わせる」と決めたため、しばらく iOS と Android で挙動が違う。
-> Android 版に移すときは、このファイルの「仕様」を SPEC に書き写す。
+> **仕様の正は [`docs/spec/features/07-photo-crop.md`](spec/features/07-photo-crop.md)**（仕様リポジトリ `shariverse/app-specs` から生成したもの。Android 版にも同じ仕様が届く）。
+> このファイルの「仕様」は実装したときの記録で、食い違ったら `docs/spec/` が正。仕様を変えるときは app-specs に PR を出す。
+> コードの場所・テストの口・iOS だけの実装の参考（色空間の扱いなど）は、このファイルに残す。
 
 ## 仕様
 

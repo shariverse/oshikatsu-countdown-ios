@@ -20,7 +20,7 @@
   大きいタイトル（推し・設定）・スクロールで小さくなる動き・戻るボタン・Liquid Glass のバー・地は標準のまま。大きさは iOS の標準のタイトルにそろえ、大きいタイトルはダイナミックタイプの文字の大きさに合わせて大きくし（起動時の大きさ）、inline（シート・ライセンスなど）は文字の大きさに関わらず 17pt のままにします（標準の inline タイトルも大きくならず、高さの決まったバーの中で大きくすると切れるため。Issue #158）。タイトルにハートなどの装飾は付けません。バーのボタン・戻るボタン・タブバーの文字はシステムの書体のままです
 - **ホームの見出し**（Discussion #148 の Q1・Q5）: iOS ではホームのバーにタイトル（「推し活カウントダウン」）の文字を出さず、右上の ＋ だけにします（大きいタイトルの帯も無くし、先頭のカードを上に詰める）。
   タブバーの「ホーム」で場所は分かるため。VoiceOver の画面の名前・UI テスト・戻り先の名前のために `.navigationTitle` は残し、見た目だけ消しています（iOS 18 以降は `toolbar(removing: .title)`、iOS 17 は `.principal` の見えない要素）。
-  iPad のサイドバーの見出し「推し活カウントダウン」はアプリ名として残します。Android 版の SPEC（「2.3 ホーム」）を合わせるかは Android 側で判断します（[android#3](https://github.com/shariverse/oshikatsu-countdown-android/issues/3)）
+  iPad のサイドバーの見出し「推し活カウントダウン」はアプリ名として残します。Android 版でも同じ形にするかは、仕様リポジトリ app-specs のロードマップで検討中にしてあります
 - **装飾**: SwiftUI の図形・`Canvas`・SF Symbols で描き、画像の素材は使いません。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えません。カードの中の文字の上には重ねません
 - **ウィジェット**: 配色と書体はテーマが効きます。装飾（縁取りなど）はアプリの画面だけで、ウィジェットには入れていません
 - **コントラスト**: `PaletteContrastTests` が出荷するテーマ（と 12 色で染めたテーマ）のライト / ダークで回ります（推し色 12 色の文字が画面の地・カードの地・入力欄の地で 4.5:1 以上、本文と補助テキストが模様を重ねた地でも 4.5:1 以上、brand の文字・選択中の印の地の本文が 4.5:1 以上 など）
@@ -114,7 +114,7 @@
 2. **書体を出荷物へ移す**: Kaisei Decol を `Shared/Resources/Fonts/` へ移し、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に足した（Issue #114）。
    容量はアプリと Widget Extension でそれぞれ約 8.8 MB 増える
 3. **デザインキャンバス**（Q8）: 元のキャンバス「推し活カウントダウン 画面デザイン」は変えずに、地雷系・ゴシックのキャンバスを別に足す（人間の作業。未）
-4. **Android 版の SPEC**（Q2）: `shariverse/oshikatsu-countdown-android` の `docs/SPEC.md` に、iOS のテーマ（地雷系・ゴシック）を書く PR を出した（[android#2](https://github.com/shariverse/oshikatsu-countdown-android/pull/2)。Android 側の確認待ち）
+4. **仕様**（Q2）: テーマの仕様の正は、仕様リポジトリ `shariverse/app-specs` の `design/jirai-gothic.md`（このリポジトリでは [`docs/spec/design/jirai-gothic.md`](../spec/design/jirai-gothic.md)）。Android 版に入れるかは app-specs のロードマップで検討中
 5. **App Store 用スクリーンショット**: 見た目が変わったので撮り直す（Issue #116）。Discussion #148 でホームのタイトルが無くなり、バーのタイトルの書体も変わった
 6. **不採用の案**: 標準のテーマと残りの 4 案を [shilokuma-inc/design-knowledge](https://github.com/shilokuma-inc/design-knowledge/pull/4) に残し、このリポジトリから片付けた（Issue #117）。
    値・Preview・装飾・案を比べる見本・DEBUG の `-previewTheme`・撮影の仕組み・Preview 用の書体と、出荷するテーマで使っていない Zen Kaku Gothic New を消した
