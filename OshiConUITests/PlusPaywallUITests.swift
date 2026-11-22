@@ -52,6 +52,38 @@ final class PlusPaywallUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["設定"].exists)
     }
 
+    /// 利用規約・プライバシーポリシーは、アプリから出ずにアプリの中の Safari の画面で開き、「完了」で課金画面に戻る。
+    /// ページの中身は確かめない（読み込みは Safari が受け持ち、通信の状態でテストが揺れないように）。
+    @MainActor
+    func testLegalLinksOpenInApp() throws {
+        let app = launchSettings(arguments: ["-plusLocked"])
+
+        let plusRow = app.buttons["settings.plus"]
+        XCTAssertTrue(plusRow.waitForExistence(timeout: 5))
+        plusRow.tap()
+        let paywallBar = app.navigationBars["推し活カウントダウン Plus"]
+        XCTAssertTrue(paywallBar.waitForExistence(timeout: 5))
+
+        // 同じリンクを 2 回開けること（閉じたあとにシートの状態が残らないこと）も確かめる
+        for identifier in ["plusPaywall.terms", "plusPaywall.privacyPolicy", "plusPaywall.terms"] {
+            let link = app.descendants(matching: .any)[identifier].firstMatch
+            XCTAssertTrue(link.waitForExistence(timeout: 2), identifier)
+            link.tap()
+
+            // Safari の画面（別のプロセスが描く）。文言はアプリではなく端末の言語で出る（CI の Simulator は英語）。
+            // 閉じるボタンは iOS 26 で「閉じる」（Close）、それより前は「完了」（Done）
+            let browser = app.otherElements.matching(NSPredicate(format: "identifier BEGINSWITH %@", "BrowserView")).firstMatch
+            XCTAssertTrue(browser.waitForExistence(timeout: 10), identifier)
+            XCTAssertEqual(app.state, .runningForeground, identifier)
+            let close = browser.buttons.matching(NSPredicate(format: "label IN %@", ["閉じる", "完了", "Close", "Done"])).firstMatch
+            XCTAssertTrue(close.waitForExistence(timeout: 5), identifier)
+            // Safari の画面の要素は、要素の tap() では押せないことがある（別のプロセスが描くため）。要素の中心を座標で押す
+            close.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            XCTAssertTrue(browser.waitForNonExistence(timeout: 5), identifier)
+            XCTAssertTrue(paywallBar.exists, identifier)
+        }
+    }
+
     /// Plus が使える状態では、行と課金画面にその旨を出す。
     @MainActor
     func testPlusRowWhenUnlocked() throws {
