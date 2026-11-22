@@ -154,8 +154,8 @@ final class OshiConUITests: XCTestCase {
 
         // 並べ替えの間は、登録のボタンを押せない
         app.navigationBars["推し"].buttons["並べ替え"].tap()
-        let done = app.navigationBars["推し"].buttons["完了"]
-        XCTAssertTrue(done.waitForExistence(timeout: 2))
+        let confirm = app.navigationBars["推し"].buttons["この順番で確定"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 2))
         XCTAssertFalse(app.navigationBars["推し"].buttons["推しを登録"].isEnabled)
 
         // 3 番目（レオ）の行の右端の並べ替えの印を、いちばん上の行までドラッグする
@@ -170,7 +170,7 @@ final class OshiConUITests: XCTestCase {
         }
         XCTAssertTrue(first.label.contains("レオ"))
         XCTAssertTrue(rows.element(boundBy: 1).label.contains("LUMINA"))
-        done.tap()
+        confirm.tap()
         XCTAssertTrue(app.navigationBars["推し"].buttons["並べ替え"].waitForExistence(timeout: 2))
 
         // ホームの推しの絞り込みも、並べ替えた順になる
