@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@41ad368481adb3a176adab916e97cc58b37cadc8 oshikatsu-countdown/design/jirai-gothic.md
+  元: shariverse/app-specs@f1b95861875616e27ecf5bd7a2ce85d19c79889c oshikatsu-countdown/design/jirai-gothic.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -36,7 +36,7 @@ iOS 版の出荷するテーマ。デザインキャンバスの配色・書体�
 ## 推し色の文字のコントラスト
 
 ライトの地が薄いピンクなので、推し色の文字を黒に寄せて 4.5:1 を保つ（寄せる割合は[推し色](oshi-colors.md#地の上の文字に使うとき)。ダークは白に 45% 寄せる）。
-推し色 12 色の文字は、画面の地・カードの地・入力欄の地のどれに置いても 4.5:1 以上にする。[テーマカラー](#テーマカラー)でどの推し色に染めたときも同じ（測った値は[コントラストの補足](https://github.com/shariverse/app-specs/blob/41ad368481adb3a176adab916e97cc58b37cadc8/oshikatsu-countdown/notes/jirai-gothic-contrast.md)）。
+推し色 12 色の文字は、画面の地・カードの地・入力欄の地のどれに置いても 4.5:1 以上にする。[テーマカラー](#テーマカラー)でどの推し色に染めたときも同じ（測った値は[コントラストの補足](https://github.com/shariverse/app-specs/blob/f1b95861875616e27ecf5bd7a2ce85d19c79889c/oshikatsu-countdown/notes/jirai-gothic-contrast.md)）。
 
 本文と補助テキストは、模様を重ねた地でも 4.5:1 以上にする。
 
@@ -82,4 +82,4 @@ iOS 版の出荷するテーマ。デザインキャンバスの配色・書体�
 | 染め直すとき | 推しの並べ替え・推し色の変更・推しの削除のあと、すぐ染め直す（ウィジェットも描き直す） |
 | 染め方 | 色ごとに、基準のピンク（推し色のピンク `#C8326A`）をどれだけ含むかを求め、その分だけ 1 位の推しの推し色との差を足す。含む割合は、その色の R・G・B を基準のピンクの R・G・B に直線で当てはめたときの傾き（白・黒・灰色は 0、ピンクそのものは 1）。各チャンネルは 0〜1 に収める |
 
-染めた色の目安は[コントラストの補足](https://github.com/shariverse/app-specs/blob/41ad368481adb3a176adab916e97cc58b37cadc8/oshikatsu-countdown/notes/jirai-gothic-contrast.md)。
+染めた色の目安は[コントラストの補足](https://github.com/shariverse/app-specs/blob/f1b95861875616e27ecf5bd7a2ce85d19c79889c/oshikatsu-countdown/notes/jirai-gothic-contrast.md)。
