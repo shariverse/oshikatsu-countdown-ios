@@ -82,7 +82,27 @@ nonisolated enum PlusEntitlement {
         guard product.isSubscription else {
             return true
         }
-        let ends = [purchase.expirationDate, purchase.gracePeriodExpirationDate].compactMap(\.self)
-        return ends.contains { now < $0 }
+        guard let end = end(of: purchase) else {
+            return false
+        }
+        return now < end
+    }
+
+    /// Plus が使えなくなる日時（Widget Extension が App Group の結果をいつまで信じてよいか）。
+    ///
+    /// - 使えるサブスクリプションのうち、期限と猶予期間の終わりの遅いほうがいちばん遅いもの
+    /// - 使える買い切りがあれば nil（期限が無い）
+    /// - 使える購入が無ければ nil（使えないので期限も無い。`isUnlocked(purchases:now:)` と組にして読む）
+    static func expirationDate(purchases: [PlusPurchase], now: Date) -> Date? {
+        let granting = purchases.filter { grants($0, now: now) }
+        guard !granting.contains(where: { PlusProduct(rawValue: $0.productID)?.isSubscription == false }) else {
+            return nil
+        }
+        return granting.compactMap(end(of:)).max()
+    }
+
+    /// サブスクリプションが使えなくなる日時（期限と猶予期間の終わりの遅いほう）。どちらも無ければ nil。
+    private static func end(of purchase: PlusPurchase) -> Date? {
+        [purchase.expirationDate, purchase.gracePeriodExpirationDate].compactMap(\.self).max()
     }
 }

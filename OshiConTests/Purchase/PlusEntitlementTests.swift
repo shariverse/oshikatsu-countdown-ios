@@ -90,4 +90,46 @@ struct PlusEntitlementTests {
     func subscriptionWithoutExpiration() {
         #expect(!PlusEntitlement.isUnlocked(purchases: [PlusPurchase(productID: PlusProduct.yearly.rawValue)], now: now))
     }
+
+    @Test("使えるサブスクリプションの期限は、サブスクリプションの期限")
+    func expirationOfSubscription() {
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: future)], now: now) == future)
+    }
+
+    @Test("猶予期間の終わりが期限より遅ければ猶予期間の終わり、早ければ期限")
+    func expirationWithGracePeriod() {
+        let later = now.addingTimeInterval(3_600)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: past, graceEnds: later)], now: now) == later)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: later, graceEnds: future)], now: now) == later)
+    }
+
+    @Test("サブスクリプションが複数あれば、使えるもののうちいちばん遅い期限")
+    func expirationOfMultipleSubscriptions() {
+        let later = now.addingTimeInterval(3_600)
+        let yearly = PlusPurchase(productID: PlusProduct.yearly.rawValue, expirationDate: later)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: future), yearly], now: now) == later)
+        let revokedYearly = PlusPurchase(productID: PlusProduct.yearly.rawValue, expirationDate: later, revocationDate: past)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: future), revokedYearly], now: now) == future)
+    }
+
+    @Test("買い切りがあれば、サブスクリプションがあっても期限は無い")
+    func expirationOfLifetime() {
+        #expect(PlusEntitlement.expirationDate(purchases: [lifetime], now: now) == nil)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: future), lifetime], now: now) == nil)
+    }
+
+    @Test("返金された買い切りは数えず、サブスクリプションの期限になる")
+    func expirationWithRevokedLifetime() {
+        let revokedLifetime = PlusPurchase(productID: PlusProduct.lifetime.rawValue, revocationDate: past)
+        #expect(PlusEntitlement.expirationDate(purchases: [revokedLifetime, monthly(expires: future)], now: now) == future)
+    }
+
+    @Test("使える購入が無ければ期限も無い（期限ちょうど・期限切れ・猶予期間切れ・未購入・返金）")
+    func expirationWhenLocked() {
+        #expect(PlusEntitlement.expirationDate(purchases: [], now: now) == nil)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: now)], now: now) == nil)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: past, graceEnds: past)], now: now) == nil)
+        #expect(PlusEntitlement.expirationDate(purchases: [monthly(expires: future, revoked: past)], now: now) == nil)
+        #expect(PlusEntitlement.expirationDate(purchases: [PlusPurchase(productID: "jp.shilokuma.OshiCon.other")], now: now) == nil)
+    }
 }
