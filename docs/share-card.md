@@ -106,6 +106,7 @@ ShareCardPreviewScreen(event: event, oshi: oshi, style: .appearance(rendering), 
   - それ以外（Plus でない・解約・期限切れ・背景が OFF・写真が無い・飾りだけ）: `.shipping`。選んだ画像は消さない
   - 着せ替えの背景の写真は推しの写真と別の置き場所（`AppearanceStore.photos`。メモリ上のストアでは一時ディレクトリ）から読むので、`ShareCardPreviewScreen` の `backgroundPhotos` にその置き場所を渡す（`ShareCardImages.load` の `backgroundPhotos`。nil なら `photos`）
   - 規則のテストは `OshiConTests/Share/ShareCardAppearanceStyleTests`
+  - 着せ替えそのもの（背景の写真・飾り・設定・着せ替えの画面）の仕様は [appearance.md](appearance.md)
 
 ### 作らないもの
 
@@ -133,6 +134,7 @@ ShareCardPreviewScreen(event: event, oshi: oshi, style: .appearance(rendering), 
 - Unit（Swift Testing）: `OshiConTests/Share/`
   - `ShareCardContentTests`: `Calendar` と現在時刻を注入して、残りがある・日付の変わり目（23:59:59 と 0:00）・当日（時刻あり／なし、開演の前と後）・終わった・くり返し（年をまたぐ・2/29）・タイムゾーン（東京とロサンゼルス）・会場と写真の有無と既定値・推しなし・推しの名前が載らないこと・英語・透かしの 12 言語
   - `ShareCardRendererTests`: 1080 px 四方の PNG になること、ダイナミックタイプや端末の外観を変えても画素が同じこと、書体（日本語だけテーマの書体・数字は Outfit・固定の大きさ）、写真と模様の描き分け、着せ替えの地（読めないときはテーマの地）
+  - `ShareCardAppearanceStyleTests`: 着せ替えの設定と Plus からカードの地を選ぶ規則、カードの地の画像を `backgroundPhotos` から読むこと
   - `ShareCardSharingTests`: 共有に渡すのが書き出した PNG そのものであること（iOS 18.2 以降）、Info.plist に写真への追加の説明だけがあり読む説明が無いこと、その説明の 12 言語の訳
   - `OshiConTests/Domain/EventTextTests`: `daysAgoParts`
 - UI（XCTest）: `OshiConUITests/ShareCardUITests`。起動引数 `-useInMemoryStore -useTestPhoto` と日本語で起動し、詳細のシェアのボタン（`eventDetail.share`）からプレビューを開いて、

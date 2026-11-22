@@ -101,6 +101,7 @@ struct EventDetailScreen: View {
         }
         .ignoresSafeArea(edges: .top)
         .coordinateSpace(.named(Self.scrollSpace))
+        .appearanceUITestMarker(AppearanceUITestMarker.eventDetailIdentifier, rendering: rendering)
         // Plus の着せ替え（上の写真より下の地だけ）。Plus でなければカードの地の色のまま。購入・解約・期限切れでその場で切り替わる
         .background(
             AppearanceDetailBackground(

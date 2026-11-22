@@ -189,8 +189,15 @@ final class OshiConUITests: XCTestCase {
         XCTAssertTrue(app.datePickers.firstMatch.exists)
 
         // OFF にすると、タイミングと時刻の項目を隠す
+        // いちばん上まで戻し、送った後の惰性が止まってから押す（動いている間に押すと、スクロールが止まるだけでスイッチが切り替わらない）
+        app.swipeDown()
+        app.swipeDown()
         scrollIntoView(reminders, in: app, upward: false)
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        XCTAssertTrue(reminders.isHittable)
         reminders.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        let turnedOff = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "0"), object: reminders)
+        XCTAssertEqual(XCTWaiter().wait(for: [turnedOff], timeout: 2), .completed)
         XCTAssertEqual(reminders.value as? String, "0")
         XCTAssertTrue(app.switches["settings.reminderTiming.thirtyDaysBefore"].waitForNonExistence(timeout: 2))
         XCTAssertFalse(app.datePickers.firstMatch.exists)
