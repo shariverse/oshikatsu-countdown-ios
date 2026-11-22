@@ -46,6 +46,8 @@ final class PlusPaywallUITests: XCTestCase {
             XCTAssertTrue(app.descendants(matching: .any)[identifier].firstMatch.waitForExistence(timeout: 2), identifier)
         }
         XCTAssertFalse(app.descendants(matching: .any)["plusPaywall.unlocked"].exists)
+        // 閉じるボタンはナビゲーションバーの「閉じる」だけ。SubscriptionStoreView がシートの中で自動で出す ×（xmark）は隠している
+        XCTAssertFalse(app.buttons["xmark"].waitForExistence(timeout: 3))
 
         app.buttons["plusPaywall.close"].tap()
         XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForNonExistence(timeout: 3))
