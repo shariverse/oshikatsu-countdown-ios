@@ -34,12 +34,26 @@ nonisolated enum AppearancePreview {
 
     /// 見本に出すホームの中身。登録した予定から先頭の予定が決まればそれを、決まらない（予定が無い・終わった予定だけ）なら見本の推しと予定を出す。
     static func content(events: [OshiEvent], oshis: [Oshi], today: CalendarDay, now: Date, locale: Locale = .app) -> HomeContent {
-        let registered = HomeContent(events: events, oshis: oshis, selectedOshiID: nil, showsPastEvents: false, today: today, locale: locale)
+        let registered = HomeContent(
+            events: events,
+            oshis: oshis,
+            selectedOshiID: nil,
+            showsPastEvents: false,
+            today: today,
+            locale: locale
+        )
         guard registered.featured == nil else {
             return registered
         }
         let sample = SampleData.make(today: today, now: now, locale: locale)
-        return HomeContent(events: sample.events, oshis: sample.oshis, selectedOshiID: nil, showsPastEvents: false, today: today, locale: locale)
+        return HomeContent(
+            events: sample.events,
+            oshis: sample.oshis,
+            selectedOshiID: nil,
+            showsPastEvents: false,
+            today: today,
+            locale: locale
+        )
     }
 
     /// 見本に出す「これからの予定」の行。
