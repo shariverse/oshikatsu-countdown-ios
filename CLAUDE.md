@@ -32,6 +32,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - PR の作成時（opened / reopened / ready_for_review）は UI テストまで流す。ただし **AskHub の作業ブランチ（`askhub/**`）宛ての PR（子 PR）では PR のイベントで動かず、push の Unit テストだけ**になる。
     子 PR の UI テストは、作業ブランチ → `develop` の最終 PR（更新でも UI テストまで流す）で確かめる
   - ドキュメントだけの変更でも Build を動かす（ルールセットで `build / build` を必須にしているため）
+- Spec check（`spec-check.yml`）は、app-specs の `templates/spec-check.yml` を写したもの。確かめる中身は app-specs の main の `scripts/verify_spec.py` にあり、ubuntu で数十秒で終わる。必須チェックにはしていない
 - `develop` / `release/**` への push で Upload（`upload.yml`。TestFlight）、`main` への push では Build だけが動く（Archive の `archive.yml` は手動実行のみ）
 - Simulator 名は OS 更新で改名されることがある。解決できない場合は `xcrun simctl list devices available` で確かめる
 
@@ -100,7 +101,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 
 - **仕様の正は仕様リポジトリ `shariverse/app-specs`**（iOS・Android 共通）。このリポジトリの `docs/spec/` は、そこから iOS 版として生成したもの（共通の仕様と、iOS だけの決定 `docs/spec/platform.md`）。
   機能・文言・規則・配色はこれに従う。部品と操作感は SwiftUI の標準とデザインに従う
-  - `docs/spec/` は直接編集しない（生成したファイル）。変えるときは app-specs に PR を出す
+  - `docs/spec/` は直接編集しない（生成したファイル）。変えるときは app-specs に PR を出す。
+    Spec check（`.github/workflows/spec-check.yml`）が、すべての PR で、`docs/spec/` が app-specs の main から生成したままかを確かめる（手で直すと落ちる）
   - app-specs の main が変わると、Bot（`shariverse-spec-sync`）が `spec-sync` ブランチの PR「【DOCS】仕様を app-specs に合わせる」を出す。iOS では、届いたらすぐマージする。
     `spec-sync` は作り直されるので直接コミットしない。作業ブランチは今までどおり `develop` から切る
   - 実装しながら仕様（使う人から見える振る舞い・文言・規則・配色）を決めた・変えたら、実装の PR と並行して app-specs に仕様の PR を出し（iOS の `status` は `shipped`、Android は `planned`）、
