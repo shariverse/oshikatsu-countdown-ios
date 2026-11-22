@@ -2762,6 +2762,83 @@
         }
       }
     },
+    "この順番で確定" : {
+      "comment" : "推しの一覧で、並べ替えを終えて今の順番に決めるボタン（並べ替えの状態の左上）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save This Order"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この順番で確定"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定此顺序"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "確定此順序"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 순서로 확정"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valider cet ordre"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reihenfolge übernehmen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar este orden"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar esta ordem"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conferma quest'ordine"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ยืนยันลำดับนี้"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tetapkan Urutan Ini"
+          }
+        }
+      }
+    },
     "これからの予定" : {
       "localizations" : {
         "en" : {
@@ -8735,7 +8812,7 @@
       }
     },
     "完了" : {
-      "comment" : "写真の調整画面で、決めた範囲で写真を使うボタン。推しの一覧で、並べ替えを終えるボタン",
+      "comment" : "写真の調整画面で、決めた範囲で写真を使うボタン",
       "localizations" : {
         "en" : {
           "stringUnit" : {
