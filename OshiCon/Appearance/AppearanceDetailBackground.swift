@@ -64,7 +64,10 @@ struct AppearanceDetailBackground: View {
             OshiPhotoDecorationLayer(oshis: oshis)
                 .mask(alignment: .topLeading) {
                     GeometryReader { proxy in
-                        let visible = AppearanceBackgroundLayout.visibleRect(containerSize: proxy.size, excludedTopHeight: excludedTopHeight)
+                        let visible = AppearanceBackgroundLayout.visibleRect(
+                            containerSize: proxy.size,
+                            excludedTopHeight: excludedTopHeight
+                        )
                         Rectangle()
                             .frame(width: visible.width, height: visible.height)
                             .offset(y: visible.minY)
