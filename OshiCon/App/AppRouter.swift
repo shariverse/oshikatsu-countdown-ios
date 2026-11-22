@@ -66,13 +66,14 @@ final class AppRouter {
         homePath = [route]
     }
 
-    /// ウィジェットから開いたリンク。予定の詳細はホームのタブに積む。初回の導線の途中なら開かない（何もしない）。
+    /// ウィジェットから開いたリンク。予定の詳細（課金画面のリンクの移り先も）はホームのタブに積む。初回の導線の途中なら開かない（何もしない）。
     func open(_ link: WidgetLink, hasCompletedOnboarding: Bool) {
         guard hasCompletedOnboarding else {
             return
         }
         switch link {
-        case let .eventDetail(id):
+        // 課金画面のリンクで課金画面を開くかは開く側が決める。ここでは課金画面を出さないときの移り先（選んだ予定の詳細）に移る
+        case let .eventDetail(id), let .plusPaywall(id):
             // 開いているシート（予定の追加の入力中を含む）は閉じる。ウィジェットから別の予定を開くのは利用者の操作なので、確かめない
             pendingAddEvent = false
             sheetDismissal = SheetDismissal(count: sheetDismissal.count + 1, keepsAddEvent: false)
