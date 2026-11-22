@@ -29,6 +29,8 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Used to save the countdown card image you share to your photo library.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 </dict>

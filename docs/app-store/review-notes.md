@@ -23,6 +23,8 @@ App Store Connect の「App Review に関する情報」→「メモ」に貼る
 5. 通知を押すと、その予定のカウントダウンの画面が開きます。
 6. 開始の時刻がある予定の当日は、開始の 3 時間前から 1 時間後まで、ロック画面と Dynamic Island のライブアクティビティで開始までの残り時間を表示します（端末の中だけで動き、プッシュ通知は使いません）。
 7. 設定タブの「推し活カウントダウン Plus」の行を押すと、課金画面が開きます。サブスクリプション（年額・月額）と、その下に買い切りが並び、購入の復元・利用規約・プライバシーポリシーのリンクがあります。
+8. 予定のカウントダウンの画面の右上の共有のボタンから、「あと N 日」を正方形のカードの画像にしてシェアできます。画像は端末の中で作り、共有シートで利用者が選んだ先にだけ渡します（アプリからは送信しません）。
+   写真への追加の許可は、共有シートの「画像を保存」を選んだときにだけ iOS が求めます（写真ライブラリの読み取りの許可は求めません）。
 
 【推し活カウントダウン Plus（App 内課金）】
 推しの写真ウィジェットと、アプリの背景・飾りを推しの写真にする着せ替えを解放する有料の機能です。商品は次の 3 つです。
@@ -59,6 +61,8 @@ This app lets fans add upcoming events for their "oshi" (a favorite idol, artist
 5. Tapping a notification opens the countdown screen for that event.
 6. On the day of an event with a start time, a Live Activity on the Lock Screen and in the Dynamic Island shows the time left from 3 hours before until 1 hour after the start. It runs entirely on the device and does not use push notifications.
 7. Tap "Oshi Countdown Plus" in the Settings tab to open the purchase screen. It shows the subscriptions (yearly and monthly) with the one-time purchase below them, and links to Restore Purchases, the Terms of Use and the Privacy Policy.
+8. From the share button at the top right of an event's countdown screen, the user can share "N days left" as a square card image. The image is created on the device and is handed only to the destination the user picks in the share sheet (the app itself sends nothing).
+   Permission to add photos is requested by iOS only when the user chooses "Save Image" in the share sheet (the app does not ask for photo library read access).
 
 [Oshi Countdown Plus (in-app purchases)]
 Plus is a paid feature that unlocks a photo widget with the user's own oshi photo and lets them decorate the app background and decorations with that photo. There are three products:
