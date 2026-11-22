@@ -22,6 +22,27 @@ extension CountdownWidgetContent {
     }
 }
 
+extension PhotoWidgetContent {
+    /// ウィジェットの一覧とアプリの Preview に出す見本（Plus が使えるとき）。写真は持たないので、推し色の模様で描く。
+    nonisolated static var sample: Self {
+        sample(isPlusUnlocked: true)
+    }
+
+    /// Plus が使える・使えないときの見本。
+    nonisolated static func sample(isPlusUnlocked: Bool) -> Self {
+        let oshi = Oshi(name: "LUMINA", color: .pink)
+        let today = CalendarDay(.now, calendar: .autoupdatingCurrent)
+        let event = OshiEvent(
+            oshiID: oshi.id,
+            kind: .live,
+            title: String(localized: "5th LIVE 東京公演", comment: "ウィジェットの一覧に出す見本の予定名"),
+            day: CalendarDay(Date.now.addingTimeInterval(86_400 * 11), calendar: .autoupdatingCurrent),
+            createdAt: .now
+        )
+        return .event(.init(event: event, oshi: oshi, isPlusUnlocked: isPlusUnlocked, today: today))
+    }
+}
+
 extension UpcomingWidgetContent {
     /// ウィジェットの一覧とアプリの Preview に出す見本。
     nonisolated static var sample: Self {
