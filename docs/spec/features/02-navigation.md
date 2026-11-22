@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@3fcc2bd96ab528c3993e1c314646ce69678cc4bc oshikatsu-countdown/features/02-navigation.md
+  元: shariverse/app-specs@2a37347c023304b7bac2fbab1ea34435ae775f37 oshikatsu-countdown/features/02-navigation.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -8,4 +8,7 @@
 
 ホーム・推し・設定の 3 つ。詳細・入力の画面を開いている間はタブを隠す。
 
-iPhone と iPad の両方が対象。広い画面は `NavigationSplitView` などで組み、横向きでも崩れないようにする。
+iPhone と iPad の両方が対象。アプリの横幅が狭いときはタブバー、広いとき（iPad など）はサイドバーにし、横向きでも崩れないようにする。
+
+- サイドバーは、いちばん上にアプリ名「推し活カウントダウン」、その下に「ホーム」「推し」「設定」を並べる
+- 予定の詳細を開いている間は、タブバーを隠す。予定・推しの追加と編集は、シートで上に重ねる
