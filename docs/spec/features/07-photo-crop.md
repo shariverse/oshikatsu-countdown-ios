@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@41ad368481adb3a176adab916e97cc58b37cadc8 oshikatsu-countdown/features/07-photo-crop.md
+  元: shariverse/app-specs@f1b95861875616e27ecf5bd7a2ce85d19c79889c oshikatsu-countdown/features/07-photo-crop.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -56,4 +56,4 @@
 - 取り込む画像の解像度・画質を選ぶ機能
 - 権限の追加、通信
 
-採らなかった案の理由と、大きな写真の読み込み方などの実装の参考は [写真の調整の補足](https://github.com/shariverse/app-specs/blob/41ad368481adb3a176adab916e97cc58b37cadc8/oshikatsu-countdown/notes/photo-crop.md)。
+採らなかった案の理由と、大きな写真の読み込み方などの実装の参考は [写真の調整の補足](https://github.com/shariverse/app-specs/blob/f1b95861875616e27ecf5bd7a2ce85d19c79889c/oshikatsu-countdown/notes/photo-crop.md)。
