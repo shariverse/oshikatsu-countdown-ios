@@ -98,6 +98,24 @@ final class PlusPaywallUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["plusPaywall.unlocked"].firstMatch.waitForExistence(timeout: 5))
     }
 
+    /// 課金画面の見出しは、商品を読み込んだあともアプリの言語（ここでは日本語）のまま。
+    /// `SubscriptionStoreView` は中身の locale を商品の価格の locale（ストアフロントの言語）に置き換える。
+    /// UI テストでは sandbox の米国のストアフロントになるので、入れ直さないと見出しが英語になる。
+    /// 商品を読み込めないときは置き換えも起きず、確かめられないので飛ばす。
+    @MainActor
+    func testPaywallHeaderStaysInAppLanguageAfterProductsLoad() throws {
+        let app = launchSettings(arguments: ["-plusLocked"])
+        let plusRow = app.buttons["settings.plus"]
+        XCTAssertTrue(plusRow.waitForExistence(timeout: 5))
+        plusRow.tap()
+        XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 5))
+
+        guard app.buttons["Subscription Store View Button"].waitForExistence(timeout: 15) else {
+            throw XCTSkip("サブスクリプションの商品を読み込めなかったので、見出しの言語を確かめられない")
+        }
+        XCTAssertTrue(app.staticTexts["推しの写真で、ホーム画面とアプリをもっと自分らしく。"].waitForExistence(timeout: 2))
+    }
+
     /// 導線を終えた状態で起動し、Plus でない人が推しの写真ウィジェットを押したときのリンク（`oshicon://plus/<予定の id>`）を開く。
     @MainActor
     private func launchAndOpenPaywallLink(arguments: [String]) throws -> XCUIApplication {
