@@ -5,7 +5,7 @@
 
 import XCTest
 
-/// 設定の Plus の行 → 課金画面の導線。
+/// 設定の Plus の行と、推しの写真ウィジェットのリンク → 課金画面の導線。
 ///
 /// UI テストは DEBUG のビルドなので、設定に Plus の行が出る。App Store 版の画面は `-simulateAppStoreDistribution` で確かめる。
 /// メモリ上のストアでは StoreKit に問い合わせないので、Plus の状態は起動引数（`-plusLocked`・`-plusUnlocked`）で固定する。
@@ -62,6 +62,43 @@ final class PlusPaywallUITests: XCTestCase {
         XCTAssertTrue(plusRow.label.contains("Plus をお使いいただけます"))
         plusRow.tap()
         XCTAssertTrue(app.descendants(matching: .any)["plusPaywall.unlocked"].firstMatch.waitForExistence(timeout: 5))
+    }
+
+    /// 導線を終えた状態で起動し、Plus でない人が推しの写真ウィジェットを押したときのリンク（`oshicon://plus/<予定の id>`）を開く。
+    @MainActor
+    private func launchAndOpenPaywallLink(arguments: [String]) throws -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["-useInMemoryStore", "-AppleLanguages", "(ja)", "-AppleLocale", "ja_JP", "-plusLocked"] + arguments
+        app.launchEnvironment = [
+            "OSHICON_DEFAULT_hasCompletedOnboarding": "YES",
+            "OSHICON_DEFAULT_showsPastEvents": "NO"
+        ]
+        app.launch()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
+        app.open(try XCTUnwrap(URL(string: "oshicon://plus/\(UUID().uuidString)")))
+        return app
+    }
+
+    /// 開発版（と TestFlight）では、推しの写真ウィジェットの課金画面のリンクで課金画面を開く。
+    @MainActor
+    func testPhotoWidgetLinkOpensPaywall() throws {
+        let app = try launchAndOpenPaywallLink(arguments: [])
+
+        XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["plusPaywall.restore"].firstMatch.waitForExistence(timeout: 2))
+
+        app.buttons["plusPaywall.close"].tap()
+        XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.tabBars.firstMatch.exists)
+    }
+
+    /// App Store 版では、推しの写真ウィジェットの課金画面のリンクで課金画面を開かない。
+    @MainActor
+    func testPhotoWidgetLinkDoesNotOpenPaywallInAppStoreDistribution() throws {
+        let app = try launchAndOpenPaywallLink(arguments: ["-simulateAppStoreDistribution"])
+
+        XCTAssertFalse(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.tabBars.firstMatch.exists)
     }
 
     /// App Store 版では、設定に Plus の行を出さない。
