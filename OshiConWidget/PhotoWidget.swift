@@ -38,6 +38,7 @@ private struct PhotoWidgetEntryView: View {
             family: family == .systemMedium ? .systemMedium : .systemSmall,
             photo: entry.photo
         )
+        .environment(\.appTheme, .shipping(themeColor: entry.themeColor))
     }
 }
 
@@ -46,6 +47,8 @@ nonisolated struct PhotoEntry: TimelineEntry {
     let content: PhotoWidgetContent
     /// ウィジェットの大きさに縮めて読んだ推しの写真。無い・読めないときは nil（推し色の模様）。
     let photo: CGImage?
+    /// テーマを染める色（1 位の推しの推し色）。見本・読めないときは nil（ピンクのまま）。
+    var themeColor: OshiColor?
 
     /// ウィジェットの一覧に出す見本。
     static func sample(isPlusUnlocked: Bool) -> Self {
@@ -83,7 +86,7 @@ nonisolated struct PhotoProvider: AppIntentTimelineProvider {
             data: data,
             calendar: .autoupdatingCurrent
         )
-        return PhotoEntry(date: now, content: content, photo: Self.photo(for: content, in: context))
+        return PhotoEntry(date: now, content: content, photo: Self.photo(for: content, in: context), themeColor: data.themeColor)
     }
 
     func timeline(for configuration: SelectEventIntent, in context: Context) async -> Timeline<PhotoEntry> {
@@ -110,7 +113,7 @@ nonisolated struct PhotoProvider: AppIntentTimelineProvider {
         // 写真はどのエントリでも同じ推しのものなので、1 回だけ読む
         let photo = contents.first.flatMap { Self.photo(for: $0, in: context) }
         let entries = zip(plan.moments, contents).map { moment, content in
-            PhotoEntry(date: moment.date, content: content, photo: photo)
+            PhotoEntry(date: moment.date, content: content, photo: photo, themeColor: data.themeColor)
         }
         // 期限がエントリの範囲の中にあれば、期限の時刻に作り直して Plus を確かめ直す
         let policy: TimelineReloadPolicy = plan.reloadDate.map { .after($0) } ?? .atEnd

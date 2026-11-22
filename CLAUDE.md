@@ -48,9 +48,11 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - テーマ（`Shared/Design/AppTheme.swift`）: 地の配色・推し色の文字の調整の割合・角の丸み・書体・装飾をまとめた型。画面とウィジェットは `@Environment(\.appTheme)` から引く
   - **出荷するアプリとウィジェットは、Discussion #80 で採用した地雷系・ゴシック `AppTheme.shipping`（= `AppTheme.jiraiGothic`）だけを使う**（Environment の既定値）。
     採用しなかった案（採用前のデザインの標準のテーマと 4 案）は片付け、アイデアは shilokuma-inc/design-knowledge に残した（Issue #117）。テーマを選ぶ仕組みは無い
+  - テーマのピンク（地・装飾・アクセント）は、推しの一覧のいちばん上の推し（1 位の推し）の推し色で染める（`AppTheme.shipping(themeColor:)`。#209。無料）。
+    アプリは `RootView`、ホーム画面のウィジェットはエントリで染めたテーマを入れる。推しがいない・1 位がピンクなら元の配色のまま。染め方とコントラストは `docs/design/themes.md` の「テーマカラー」
   - 推し色の役割（先頭のカードの塗り・写真が無いときの模様の色・残り日数の文字・印）はテーマで置き換えない。テーマが変えるのは地・形・装飾・書体と、推し色の文字を地に合わせる割合（`OshiColor.text(in:)` など）だけ。
     写真が無いときの模様（出荷するテーマは十字とハート）は、推し色で塗ることを変えずに形だけテーマで変えられる（`ThemePhotoPlaceholder`）
-    推し色の文字が地とカードの上で 4.5:1 以上（`PaletteContrastTests` が出荷するテーマで回る）
+    推し色の文字が地とカードの上で 4.5:1 以上（`PaletteContrastTests` が出荷するテーマと 12 色で染めたテーマで回る）
   - 日本語の本文だけテーマの書体にし、ほかの言語はシステムの書体（`AppFont.usesBundledTextFace(locale:)`）
   - ナビゲーションバーのタイトルも日本語だけテーマの書体の太字。書体を決めるのは `Shared/Design/BarTitleFace.swift`、バーの外観に入れるのは `OshiCon/App/NavigationBarAppearance.swift`（起動時に 1 回。`.font` だけを替え、地には触れない）。ホームのバーはタイトルの文字を出さない（`.navigationTitle` は読み上げ用に残す。Discussion #148）
   - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。

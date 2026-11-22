@@ -3,14 +3,16 @@
 //  OshiCon
 //
 
+import SwiftData
 import SwiftUI
 
 /// 初回の導線を終えるまでは導線を、終えたらタブを出す。ウィジェットのリンクと押された通知の画面を開く。課金画面のシートを受け持つ。
+/// アプリ全体のテーマは、推しの一覧のいちばん上の推し（1 位の推し）の推し色で染める（推しがいなければピンクのまま）。
 struct RootView: View {
     @AppStorage(AppStorageKey.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @Environment(AppRouter.self) private var router
     @Environment(ReminderScheduler.self) private var reminders: ReminderScheduler?
-    @Environment(\.appTheme) private var theme
+    @Query(Self.topOshiDescriptor) private var topOshis: [StoredOshi]
     /// 保存・ピン留めの触覚。保存した画面は直後に閉じたり導線の次の歩に進んだりするので、ずっと残るここで鳴らす。
     @State private var haptic = HapticTrigger()
 
@@ -30,6 +32,7 @@ struct RootView: View {
         .presentsPlusPaywall()
         .font(theme.typography.text(.body))
         .tint(theme.palette.brand.color)
+        .environment(\.appTheme, theme)
         .environment(\.locale, .app)
         .environment(\.haptic, HapticAction { haptic.fire($0) })
         .hapticFeedback(haptic)
@@ -41,6 +44,18 @@ struct RootView: View {
             reminders?.openedLink = nil
             router.open(link, hasCompletedOnboarding: hasCompletedOnboarding)
         }
+    }
+
+    /// 1 位の推しだけを読む。
+    private static var topOshiDescriptor: FetchDescriptor<StoredOshi> {
+        var descriptor = FetchDescriptor<StoredOshi>(sortBy: OshiConStore.oshiOrder)
+        descriptor.fetchLimit = 1
+        return descriptor
+    }
+
+    /// 1 位の推しの推し色で染めたテーマ。
+    private var theme: AppTheme {
+        .shipping(themeColor: topOshis.first.map { OshiConStore.oshi(from: $0).color })
     }
 }
 
