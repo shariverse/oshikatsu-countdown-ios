@@ -30,6 +30,7 @@ struct HomeScreen: View {
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
+        .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: appearance.rendering(isPlusUnlocked: isPlusUnlocked))
         // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れでその場で切り替わる
         .background(
             AppearanceScreenBackground(

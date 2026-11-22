@@ -74,7 +74,8 @@ iPhone の画面の比率（約 **9:19.5**。`PhotoCrop.backgroundAspectRatio`�
   背景は iPhone の画面の高さ（Pro Max で 2868px）に近く、ぼかしと暗幕を掛けて敷くので足りる大きさにした。取り込むときは `OshiPhotoLibrary.importPhoto(_:crop:maxPixelLength:)` に渡す
 - EXIF の向き・色空間・メタデータの扱い、大きな写真を縮めて読む決まり、メインアクターの外（`@concurrent`）で行うことは正方形と同じ
 - 調整画面で描く写真の大きさ（`cropSource(data:shortSidePixels:maxLongSidePixels:)` の `shortSidePixels`）は、縦長の枠では写真の短い辺が枠の高さに当たることがあるので、
-  正方形の枠（枠の一辺 × 画面の倍率）より大きく読む必要がある。背景の写真の導線（着せ替えの画面）を作るときに決める
+  正方形の枠（枠の一辺 × 画面の倍率）より大きく読む必要がある。着せ替えの画面では、縦長の枠の上限（短い辺 560pt）の長い辺 × 画面の倍率にする
+  （`AppearancePreview.cropDisplayShortSidePixels(displayScale:)`。着せ替えの仕様は [appearance.md](appearance.md)）
 
 ### 作らないもの
 
