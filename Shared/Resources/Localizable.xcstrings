@@ -81,6 +81,83 @@
         }
       }
     },
+    "%lld 位" : {
+      "comment" : "推しの一覧の並べ替えの状態で、行の左に出す順位の読み上げ（いちばん上が 1 位）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No. %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 位"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 位"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 位"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld위"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "n° %lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Platz %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "n.º %lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nº %lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "n. %lld"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "อันดับ %lld"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No. %lld"
+          }
+        }
+      }
+    },
     "%lld 個中 %lld 個目" : {
       "comment" : "推し色の読み上げの位置。1 つ目が色の数、2 つ目が何個目か",
       "localizations" : {
@@ -1965,6 +2042,83 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Siapa oshi kamu?"
+          }
+        }
+      }
+    },
+    "いちばん上（1 位）の推しの推し色が、アプリの色になります。" : {
+      "comment" : "推しの一覧の並べ替えの状態で、一覧の上に出す案内の本文（2 文目）。いちばん上の推しの推し色でアプリのテーマを染める",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The member color of your top oshi (No. 1) becomes the app's color."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いちばん上（1 位）の推しの推し色が、アプリの色になります。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排在最上面（第 1 位）的本命的应援色会成为 App 的颜色。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排在最上面（第 1 位）的我推的應援色會成為 App 的顏色。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "맨 위(1위) 최애의 멤버 컬러가 앱의 색이 됩니다."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La couleur de ton oshi en haut (n° 1) devient celle de l'app."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Farbe deines Oshi ganz oben (Platz 1) wird zur Farbe der App."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El color de tu oshi de arriba (n.º 1) será el color de la app."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A cor do oshi no topo (nº 1) vira a cor do app."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il colore dell'oshi in cima (n. 1) diventa il colore dell'app."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "สีประจำตัวของโอชิที่อยู่บนสุด (อันดับ 1) จะเป็นสีของแอป"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warna member oshi teratas (No. 1) akan menjadi warna aplikasi."
           }
         }
       }
@@ -6494,6 +6648,83 @@
         }
       }
     },
+    "並べ替え中" : {
+      "comment" : "推しの一覧の並べ替えの状態で、一覧の上に出す案内の見出し",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reordering"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並べ替え中"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在排序"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在排序"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "순서 변경 중"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réorganisation en cours"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reihenfolge bearbeiten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reordenando"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reordenando"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riordinamento in corso"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "กำลังจัดลำดับ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mengurutkan"
+          }
+        }
+      }
+    },
     "予定" : {
       "localizations" : {
         "en" : {
@@ -8731,6 +8962,83 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Putar ke Kanan"
+          }
+        }
+      }
+    },
+    "右端をドラッグして、順番を入れ替えます。" : {
+      "comment" : "推しの一覧の並べ替えの状態で、一覧の上に出す案内の本文。行の右端の印をドラッグして入れ替える",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag the right edge of a row to change the order."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右端をドラッグして、順番を入れ替えます。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖动右侧来调整顺序。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖曳右側來調整順序。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오른쪽 끝을 드래그해서 순서를 바꿉니다."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fais glisser le bord droit d'une ligne pour changer l'ordre."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zieh am rechten Rand einer Zeile, um die Reihenfolge zu ändern."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrastra el borde derecho de una fila para cambiar el orden."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arraste a borda direita de uma linha para mudar a ordem."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascina il bordo destro di una riga per cambiare l'ordine."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ลากขอบด้านขวาเพื่อเปลี่ยนลำดับ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seret tepi kanan baris untuk mengubah urutan."
           }
         }
       }
