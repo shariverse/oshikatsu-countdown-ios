@@ -46,10 +46,44 @@ final class PlusPaywallUITests: XCTestCase {
             XCTAssertTrue(app.descendants(matching: .any)[identifier].firstMatch.waitForExistence(timeout: 2), identifier)
         }
         XCTAssertFalse(app.descendants(matching: .any)["plusPaywall.unlocked"].exists)
+        // 閉じるボタンはナビゲーションバーの「閉じる」だけ。SubscriptionStoreView がシートの中で自動で出す ×（xmark）は隠している
+        XCTAssertFalse(app.buttons["xmark"].waitForExistence(timeout: 3))
 
         app.buttons["plusPaywall.close"].tap()
         XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForNonExistence(timeout: 3))
         XCTAssertTrue(app.navigationBars["設定"].exists)
+    }
+
+    /// 利用規約・プライバシーポリシーは、アプリから出ずにアプリの中の Safari の画面で開き、「完了」で課金画面に戻る。
+    /// ページの中身は確かめない（読み込みは Safari が受け持ち、通信の状態でテストが揺れないように）。
+    @MainActor
+    func testLegalLinksOpenInApp() throws {
+        let app = launchSettings(arguments: ["-plusLocked"])
+
+        let plusRow = app.buttons["settings.plus"]
+        XCTAssertTrue(plusRow.waitForExistence(timeout: 5))
+        plusRow.tap()
+        let paywallBar = app.navigationBars["推し活カウントダウン Plus"]
+        XCTAssertTrue(paywallBar.waitForExistence(timeout: 5))
+
+        // 同じリンクを 2 回開けること（閉じたあとにシートの状態が残らないこと）も確かめる
+        for identifier in ["plusPaywall.terms", "plusPaywall.privacyPolicy", "plusPaywall.terms"] {
+            let link = app.descendants(matching: .any)[identifier].firstMatch
+            XCTAssertTrue(link.waitForExistence(timeout: 2), identifier)
+            link.tap()
+
+            // Safari の画面（別のプロセスが描く）。文言はアプリではなく端末の言語で出る（CI の Simulator は英語）。
+            // 閉じるボタンは iOS 26 で「閉じる」（Close）、それより前は「完了」（Done）
+            let browser = app.otherElements.matching(NSPredicate(format: "identifier BEGINSWITH %@", "BrowserView")).firstMatch
+            XCTAssertTrue(browser.waitForExistence(timeout: 10), identifier)
+            XCTAssertEqual(app.state, .runningForeground, identifier)
+            let close = browser.buttons.matching(NSPredicate(format: "label IN %@", ["閉じる", "完了", "Close", "Done"])).firstMatch
+            XCTAssertTrue(close.waitForExistence(timeout: 5), identifier)
+            // Safari の画面の要素は、要素の tap() では押せないことがある（別のプロセスが描くため）。要素の中心を座標で押す
+            close.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            XCTAssertTrue(browser.waitForNonExistence(timeout: 5), identifier)
+            XCTAssertTrue(paywallBar.exists, identifier)
+        }
     }
 
     /// Plus が使える状態では、行と課金画面にその旨を出す。
@@ -62,6 +96,24 @@ final class PlusPaywallUITests: XCTestCase {
         XCTAssertTrue(plusRow.label.contains("Plus をお使いいただけます"))
         plusRow.tap()
         XCTAssertTrue(app.descendants(matching: .any)["plusPaywall.unlocked"].firstMatch.waitForExistence(timeout: 5))
+    }
+
+    /// 課金画面の見出しは、商品を読み込んだあともアプリの言語（ここでは日本語）のまま。
+    /// `SubscriptionStoreView` は中身の locale を商品の価格の locale（ストアフロントの言語）に置き換える。
+    /// UI テストでは sandbox の米国のストアフロントになるので、入れ直さないと見出しが英語になる。
+    /// 商品を読み込めないときは置き換えも起きず、確かめられないので飛ばす。
+    @MainActor
+    func testPaywallHeaderStaysInAppLanguageAfterProductsLoad() throws {
+        let app = launchSettings(arguments: ["-plusLocked"])
+        let plusRow = app.buttons["settings.plus"]
+        XCTAssertTrue(plusRow.waitForExistence(timeout: 5))
+        plusRow.tap()
+        XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 5))
+
+        guard app.buttons["Subscription Store View Button"].waitForExistence(timeout: 15) else {
+            throw XCTSkip("サブスクリプションの商品を読み込めなかったので、見出しの言語を確かめられない")
+        }
+        XCTAssertTrue(app.staticTexts["推しの写真で、ホーム画面とアプリをもっと自分らしく。"].waitForExistence(timeout: 2))
     }
 
     /// 導線を終えた状態で起動し、Plus でない人が推しの写真ウィジェットを押したときのリンク（`oshicon://plus/<予定の id>`）を開く。

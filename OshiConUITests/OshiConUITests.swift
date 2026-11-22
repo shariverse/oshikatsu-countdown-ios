@@ -142,6 +142,59 @@ final class OshiConUITests: XCTestCase {
     }
 
     @MainActor
+    func testReorderOshis() throws {
+        let app = launch(hasCompletedOnboarding: true, arguments: ["-seedSampleData"])
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+        tabBar.buttons["推し"].tap()
+        let rows = app.buttons.matching(identifier: "oshiList.row")
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(rows.element(boundBy: 0).label.contains("LUMINA"))
+        XCTAssertTrue(rows.element(boundBy: 2).label.contains("レオ"))
+
+        // ふつうの一覧では、並べ替えの案内も順位も出さない
+        let guide = app.descendants(matching: .any).matching(identifier: "oshiList.reorderGuide").firstMatch
+        XCTAssertFalse(guide.exists)
+        XCTAssertFalse(rows.element(boundBy: 0).label.contains("1 位"))
+
+        // 並べ替えの間は、一覧の上に案内・行に順位を出し、登録のボタンを押せない
+        app.navigationBars["推し"].buttons["並べ替え"].tap()
+        let confirm = app.navigationBars["推し"].buttons["この順番で確定"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 2))
+        XCTAssertTrue(guide.waitForExistence(timeout: 2))
+        XCTAssertTrue(guide.label.contains("並べ替え中"))
+        XCTAssertTrue(rows.element(boundBy: 0).label.contains("1 位"))
+        XCTAssertTrue(rows.element(boundBy: 2).label.contains("3 位"))
+        XCTAssertFalse(app.navigationBars["推し"].buttons["推しを登録"].isEnabled)
+
+        // 3 番目（レオ）の行の右端の並べ替えの印を、いちばん上の行までドラッグする。
+        // 一覧の上に案内の行があるので、推しの行の入ったセルだけを数える
+        let cells = app.cells.containing(.button, identifier: "oshiList.row")
+        let handle = cells.element(boundBy: 2).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5))
+        let top = cells.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.2))
+        handle.press(forDuration: 0.5, thenDragTo: top)
+        let first = rows.element(boundBy: 0)
+        let deadline = Date().addingTimeInterval(5)
+        while !first.label.contains("レオ"), Date() < deadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        XCTAssertTrue(first.label.contains("レオ"))
+        // 順位は並べ替えた順で数え直す
+        XCTAssertTrue(first.label.contains("1 位"))
+        XCTAssertTrue(rows.element(boundBy: 1).label.contains("LUMINA"))
+        XCTAssertTrue(rows.element(boundBy: 1).label.contains("2 位"))
+        confirm.tap()
+        XCTAssertTrue(app.navigationBars["推し"].buttons["並べ替え"].waitForExistence(timeout: 2))
+        XCTAssertTrue(guide.waitForNonExistence(timeout: 2))
+
+        // ホームの推しの絞り込みも、並べ替えた順になる
+        tabBar.buttons["ホーム"].tap()
+        let leo = app.buttons["レオ"]
+        XCTAssertTrue(leo.waitForExistence(timeout: 5))
+        XCTAssertLessThan(leo.frame.minX, app.buttons["LUMINA"].frame.minX)
+    }
+
+    @MainActor
     func testSettingsShowsPastEventsToggleAndLicenses() throws {
         let app = launch(hasCompletedOnboarding: true)
         let tabBar = app.tabBars.firstMatch

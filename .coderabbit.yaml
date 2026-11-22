@@ -23,6 +23,8 @@ reviews:
     - "!**/Package.resolved"
     # pbxproj はレビュー対象に残す。手で編集するのはターゲットの追加のときだけ（CLAUDE.md）なので、意図しない変更が入ったら気づけるようにする
     - "!DerivedData/**"
+    # docs/spec/ は仕様リポジトリ app-specs から生成したもの。中身のレビューは app-specs の PR でする
+    - "!docs/spec/**"
   tools:
     swiftlint:
       enabled: true

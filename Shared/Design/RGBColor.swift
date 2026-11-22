@@ -37,6 +37,33 @@ nonisolated struct RGBColor: Hashable, Sendable {
         )
     }
 
+    /// この色が含む `reference` の分を、`color` に置き換えた色（テーマのピンクを 1 位の推しの推し色に染める）。
+    ///
+    /// 含む割合は、この色の 3 つのチャンネルを `reference` のチャンネルに直線で当てはめたときの傾き
+    /// （白・黒・灰色は 0、`reference` そのものは 1、`reference` を薄めた色はその間）。その割合だけ `reference` との差を足す。
+    /// `color` が `reference` と同じなら、この色のまま。各チャンネルは 0〜1 に収める。
+    func retinted(from reference: Self, to color: Self) -> Self {
+        let references = [reference.red, reference.green, reference.blue]
+        let channels = [red, green, blue]
+        let referenceMean = references.reduce(0, +) / 3
+        let mean = channels.reduce(0, +) / 3
+        let variance = references.reduce(0) { $0 + ($1 - referenceMean) * ($1 - referenceMean) }
+        // 基準が灰色なら、含む割合を決められないので変えない
+        guard variance > 0 else {
+            return self
+        }
+        let covariance = zip(references, channels).reduce(0) { $0 + ($1.0 - referenceMean) * ($1.1 - mean) }
+        let amount = covariance / variance
+        func channel(_ value: Double, from: Double, to: Double) -> Double {
+            min(max(value + amount * (to - from), 0), 1)
+        }
+        return Self(
+            red: channel(red, from: reference.red, to: color.red),
+            green: channel(green, from: reference.green, to: color.green),
+            blue: channel(blue, from: reference.blue, to: color.blue)
+        )
+    }
+
     /// WCAG の相対輝度。
     var relativeLuminance: Double {
         func linear(_ value: Double) -> Double {
@@ -77,6 +104,11 @@ nonisolated struct AdaptiveColor: Hashable, Sendable {
 
     func resolved(isDark: Bool) -> RGBColor {
         isDark ? dark : light
+    }
+
+    /// ライトとダークの両方を `RGBColor.retinted(from:to:)` で染めた色。
+    func retinted(from reference: RGBColor, to color: RGBColor) -> Self {
+        Self(light: light.retinted(from: reference, to: color), dark: dark.retinted(from: reference, to: color))
     }
 
     /// 端末の外観に合わせて変わる色。

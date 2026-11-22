@@ -13,7 +13,7 @@ struct HomeScreen: View {
     private static let sheetPresentationDelay = Duration.milliseconds(450)
 
     @Query private var storedEvents: [StoredEvent]
-    @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
+    @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @State private var selectedOshiID: Oshi.ID?
