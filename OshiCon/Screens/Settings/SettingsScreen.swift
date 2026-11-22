@@ -3,14 +3,15 @@
 //  OshiCon
 //
 
+import SwiftData
 import SwiftUI
 
-/// 設定。Plus（入口を出すときだけ）、終わった予定の表示、通知、データの保存先の説明、バージョンとオープンソースライセンス。
+/// 設定。Plus と着せ替え（入口を出すときだけ）、終わった予定の表示、通知、データの保存先の説明、バージョンとオープンソースライセンス。
 struct SettingsScreen: View {
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @Environment(\.appTheme) private var theme
     @Environment(\.appDistributionDetector) private var distributionDetector
-    /// Plus の行を出すか（`PlusEntryPolicy`）。見分け終わるまでは出さない。
+    /// Plus と着せ替えの行を出すか（`PlusEntryPolicy`）。見分け終わるまでは出さない。
     @State private var showsPlusEntry = false
 
     var body: some View {
@@ -66,7 +67,7 @@ struct SettingsScreen: View {
     }
 }
 
-/// Plus の行。押すと課金画面を開く（`\.openPlusPaywall`）。
+/// Plus の行（押すと課金画面を開く。`\.openPlusPaywall`）と、着せ替えの行（押すと着せ替えの画面を開く）。
 private struct PlusSettingsSection: View {
     @Environment(\.appTheme) private var theme
     @Environment(\.isPlusUnlocked) private var isPlusUnlocked
@@ -105,6 +106,24 @@ private struct PlusSettingsSection: View {
                 .contentShape(Rectangle())
             }
             .accessibilityIdentifier("settings.plus")
+            NavigationLink {
+                AppearanceSettingsScreen()
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.title3)
+                        .foregroundStyle(theme.palette.brand.color)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("着せ替え")
+                        Text("背景の写真と、推しの写真の飾り")
+                            .font(theme.typography.text(.footnote))
+                            .foregroundStyle(theme.palette.onSurfaceVariant.color)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+            .accessibilityIdentifier("settings.appearance")
         }
         .themeRowBackground()
     }
@@ -166,6 +185,12 @@ struct OpenSourceLicenseScreen: View {
     NavigationStack {
         SettingsScreen()
     }
+    // 着せ替えの行の先の画面で使う（端末の設定に触れない）
+    .environment(AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    ))
+    .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }
 
 #Preview("App Store 版（Plus の行なし）") {
