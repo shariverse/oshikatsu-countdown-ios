@@ -1,0 +1,39 @@
+# 仕様リポジトリ app-specs の templates/spec-check.yml を写したもの（中身は変えない。直すときは app-specs の側を直して写し直す）。
+# docs/spec/ が、app-specs の main から生成したままかを確かめる
+# （手で直していないか・main に無いコミットから生成していないか・古い仕様に巻き戻していないか・ほかの OS やアプリの仕様でないか）。
+#
+# 確かめる中身は app-specs の scripts/verify_spec.py にあり、毎回 main のものを動かす。
+# このファイルを写し直さなくても、確かめ方の直しは届く。
+# すべての PR で動かす（docs/spec/ に触れない PR でも動いて、成功する）ので、ルールセットの必須チェックにできる。
+
+name: Spec check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  spec-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # PR をベースにマージしたコミット。ベース（第 1 親）の docs/spec/ と比べるので、親まで取る
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          path: app
+          fetch-depth: 2
+          persist-credentials: false
+
+      # 元のコミットが main に入っているかを確かめるので、履歴をすべて取る
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: shariverse/app-specs
+          ref: main
+          path: app-specs
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: docs/spec/ が app-specs の main から生成したままか
+        run: python3 app-specs/scripts/verify_spec.py --spec app/docs/spec --repository "$GITHUB_REPOSITORY" --base 'HEAD^1'
