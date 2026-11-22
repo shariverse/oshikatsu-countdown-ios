@@ -91,6 +91,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
     - 利用規約・プライバシーポリシーは、アプリから出ないようアプリの中の Safari の画面（`SFSafariViewController`）で開く（`OshiCon/Screens/Common/InAppSafari.swift` の `opensWebLinksInApp()`）。
       ページを読み込むのは Safari の別のプロセスで、アプリは通信の中身に触れない。`WKWebView` は使わない（通信しない方針と、プライバシーポリシーの「通信について」）。
       Safari の画面は UIKit のモーダルで出す（SwiftUI の `.sheet` に入れると、Safari の「閉じる」で下の課金画面のシートまで閉じる）。UI テストでは、Safari の画面のボタンを座標で押す（要素の `tap()` が届かないことがある）
+    - `SubscriptionStoreView` は、商品を読み込むと中身（見出し）の `\.locale` を商品の価格の locale（ストアフロントの言語と地域）に置き換える。見出しはアプリの言語で出すため、外側の `\.locale` を入れ直している。
+      購入ボタン・商品名・価格は Apple がストアフロントの言語で出す。`ProductView` の icon の中も同じく置き換わるので、文字を置くなら同じ対応が要る
   - サブスクリプション中に買い切りを買う人への案内（買い切りのそばの注記と、購入後のアラートからの `manageSubscriptionsSheet`）を出すかの規則は `OshiCon/Purchase/PlusLifetimeGuidance.swift`。
     数えるのは自動で更新される（`willAutoRenew`）、今使えるサブスクリプションだけ。`PlusStore.hasRenewingSubscription` に入る
   - 課金画面はどの画面からでも `@Environment(\.openPlusPaywall)` で開く（`OshiCon/Screens/Plus/PlusPaywallPresentation.swift`。`RootView` の `presentsPlusPaywall()` がシートで出す）。
