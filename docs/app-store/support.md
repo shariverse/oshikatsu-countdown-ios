@@ -46,4 +46,4 @@
 
 - {{お問い合わせ先（メールアドレスまたはフォームの URL）}}
 
-[プライバシーポリシー]({{プライバシーポリシーの URL}})
+[プライバシーポリシー](https://shilokuma.jp/privacy/oshikatsu-countdown/)
