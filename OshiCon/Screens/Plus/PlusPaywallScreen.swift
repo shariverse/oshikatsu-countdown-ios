@@ -10,7 +10,8 @@ import SwiftUI
 ///
 /// - 見出し（文と SF Symbols の一覧で Plus の機能）の下に、サブスクリプション（月額・年額。`SubscriptionStoreView`）を出す
 /// - その下に買い切りを並べ、いちばん下に購入の復元・利用規約・プライバシーポリシーを置く。
-///   復元とリンクはサブスクリプションと買い切りの両方に効くので、`SubscriptionStoreView` の中ではなく画面の下にまとめる
+///   復元とリンクはサブスクリプションと買い切りの両方に効くので、`SubscriptionStoreView` の中ではなく画面の下にまとめる。
+///   利用規約・プライバシーポリシーは、アプリから出ないようアプリの中の Safari の画面で開く（`opensWebLinksInApp()`）
 /// - 購入の結果は `PlusStore.process(_:)` に渡す。保留（Ask to Buy）と失敗はアラートで知らせ、取り消しは何も出さない
 /// - 自動で更新されるサブスクリプションがある間は、買い切りのそばに「自分で解約が要る」注記を出し、
 ///   買い切りを買い終えたら同じ旨の案内からサブスクリプションの管理を開ける（`PlusLifetimeGuidance`）
@@ -277,6 +278,8 @@ private struct PlusPaywallFooter: View {
             }
             .font(theme.typography.text(.footnote))
             .frame(maxWidth: .infinity)
+            // 購入の途中でアプリから出ないよう、利用規約・プライバシーポリシーはアプリの中の Safari の画面で開く
+            .opensWebLinksInApp()
         }
         .padding()
         .frame(maxWidth: PlusPaywallLayout.maxContentWidth)
