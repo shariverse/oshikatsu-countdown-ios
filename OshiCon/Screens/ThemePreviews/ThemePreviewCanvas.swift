@@ -28,6 +28,11 @@ struct ThemePreviewCanvas: View {
     @State private var store = ThemePreviewStore()
     /// 画面遷移の状態を描き直しのあとも保つため、`@State` で持つ。
     @State private var router = AppRouter()
+    /// ホームと詳細が引く着せ替えの設定。端末の設定に触れず、空（標準の見た目）から始める。
+    @State private var appearance = AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    )
 
     init(_ theme: AppTheme, _ screen: ThemePreviewScreen, _ colorScheme: ColorScheme) {
         self.theme = theme
@@ -44,6 +49,7 @@ struct ThemePreviewCanvas: View {
             }
         }
         .environment(router)
+        .environment(appearance)
         .environment(\.appTheme, theme)
         .preferredColorScheme(colorScheme)
     }

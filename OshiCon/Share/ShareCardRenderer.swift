@@ -26,9 +26,10 @@ enum ShareCardRenderer {
     static func render(
         _ content: ShareCardContent,
         style: ShareCardStyle = .shipping,
-        photos: OshiPhotoLibrary = .shared
+        photos: OshiPhotoLibrary = .shared,
+        backgroundPhotos: OshiPhotoLibrary? = nil
     ) async -> ShareCardImage? {
-        let images = await ShareCardImages.load(content: content, style: style, photos: photos)
+        let images = await ShareCardImages.load(content: content, style: style, photos: photos, backgroundPhotos: backgroundPhotos)
         return render(content, style: style, images: images)
     }
 

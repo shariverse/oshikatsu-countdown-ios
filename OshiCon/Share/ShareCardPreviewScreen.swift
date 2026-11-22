@@ -14,6 +14,8 @@ struct ShareCardPreviewScreen: View {
     /// カードの見た目の差し替え口（Plus の着せ替えは、ここに推しの写真の地を渡す）。
     var style: ShareCardStyle = .shipping
     var photos = OshiPhotoLibrary.shared
+    /// 地の画像（`style` の `.photo`）の置き場所。nil なら `photos`。着せ替えの背景の写真は `AppearanceStore.photos` を渡す。
+    var backgroundPhotos: OshiPhotoLibrary?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appTheme) private var theme
@@ -83,7 +85,7 @@ struct ShareCardPreviewScreen: View {
         .tint(theme.palette.brand.color)
         // 切り替えや日付が変わったら書き出し直す（写真は読み込み終えてから描く）
         .task(id: content) {
-            let images = await ShareCardImages.load(content: content, style: style, photos: photos)
+            let images = await ShareCardImages.load(content: content, style: style, photos: photos, backgroundPhotos: backgroundPhotos)
             guard !Task.isCancelled else {
                 return
             }
