@@ -86,6 +86,9 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
     共有スキームの Run と、テストプラン `OshiCon.xctestplan`（スキームの Test が使う）に設定してある。商品を変えたら両方のファイルを直す
   - 課金画面は `OshiCon/Screens/Plus/PlusPaywallScreen.swift`（`NavigationStack` は開く側が置く）。見出し（文と SF Symbols の一覧）とサブスクリプション（`SubscriptionStoreView(productIDs:)`）の下に買い切り（`ProductView`）、
     いちばん下に購入の復元・利用規約・プライバシーポリシー。購入の結果の振り分け（購入・保留・取り消し・失敗）と、利用規約・プライバシーポリシーの URL の定数は `OshiCon/Purchase/PlusPurchaseOutcome.swift`（`PlusLegalLink`）
+    - 利用規約・プライバシーポリシーは、アプリから出ないようアプリの中の Safari の画面（`SFSafariViewController`）で開く（`OshiCon/Screens/Common/InAppSafari.swift` の `opensWebLinksInApp()`）。
+      ページを読み込むのは Safari の別のプロセスで、アプリは通信の中身に触れない。`WKWebView` は使わない（通信しない方針と、プライバシーポリシーの「通信について」）。
+      Safari の画面は UIKit のモーダルで出す（SwiftUI の `.sheet` に入れると、Safari の「閉じる」で下の課金画面のシートまで閉じる）。UI テストでは、Safari の画面のボタンを座標で押す（要素の `tap()` が届かないことがある）
   - サブスクリプション中に買い切りを買う人への案内（買い切りのそばの注記と、購入後のアラートからの `manageSubscriptionsSheet`）を出すかの規則は `OshiCon/Purchase/PlusLifetimeGuidance.swift`。
     数えるのは自動で更新される（`willAutoRenew`）、今使えるサブスクリプションだけ。`PlusStore.hasRenewingSubscription` に入る
   - 課金画面はどの画面からでも `@Environment(\.openPlusPaywall)` で開く（`OshiCon/Screens/Plus/PlusPaywallPresentation.swift`。`RootView` の `presentsPlusPaywall()` がシートで出す）。
