@@ -52,6 +52,35 @@ struct AppearanceStoreTests {
         #expect(AppearanceStore(defaults: defaults, photos: photos).settings == store.settings)
     }
 
+    @Test("飾りの濃さと量を変えると範囲に収めて書き、作り直しても読める")
+    func decorationOpacityAndAmountArePersisted() {
+        store.decorationOpacity = 0.75
+        store.decorationAmount = 1
+        #expect(store.settings.decorationStyle == OshiPhotoDecorationStyle(opacity: 0.75, amount: 1))
+        store.decorationOpacity = 3
+        store.decorationAmount = -2
+        #expect(store.decorationOpacity == 1)
+        #expect(store.decorationAmount == 0)
+        #expect(AppearanceStore(defaults: defaults, photos: photos).settings == store.settings)
+    }
+
+    @Test("飾りに出す推しを切り替えると書き、もういない推しの分は外す")
+    func decorationOshis() {
+        let first = UUID()
+        let second = UUID()
+        let deleted = UUID()
+        store.setDecorationIncludes(deleted, false, existingOshiIDs: [first, second, deleted])
+        store.setDecorationIncludes(first, false, existingOshiIDs: [first, second, deleted])
+        #expect(store.settings.decorationStyle.excludedOshiIDs == [first, deleted])
+
+        // 推しが消えた後に切り替えると、消えた推しの分は残さない
+        store.setDecorationIncludes(second, false, existingOshiIDs: [first, second])
+        #expect(store.settings.decorationStyle.excludedOshiIDs == [first, second])
+        store.setDecorationIncludes(first, true, existingOshiIDs: [first, second])
+        #expect(store.settings.decorationStyle.excludedOshiIDs == [second])
+        #expect(AppearanceStore(defaults: defaults, photos: photos).settings == store.settings)
+    }
+
     @Test("背景の写真を選ぶと、縦長の範囲で切り抜いて写真の置き場所に取り込み、ファイル名を書く")
     func replaceBackgroundPhoto() async throws {
         let replaced = try await store.replaceBackgroundPhoto(photo, crop: crop)

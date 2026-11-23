@@ -24,7 +24,7 @@ nonisolated enum AppearanceFixtures {
 struct AppearanceSettingsTests {
     private let photoFileName = AppearanceFixtures.photoFileName
 
-    @Test("書いたことが無ければ、背景は ON・飾りは OFF・強さは中・写真なし")
+    @Test("書いたことが無ければ、背景は ON・飾りは OFF・強さは中・写真なし・飾りは濃さ 0.4・量 0.25・すべての推しを出す")
     func defaults() throws {
         let settings = AppearanceSettings(defaults: try AppearanceFixtures.makeDefaults())
         #expect(settings == AppearanceSettings())
@@ -32,6 +32,10 @@ struct AppearanceSettingsTests {
         #expect(!settings.isDecorationEnabled)
         #expect(settings.intensity == .medium)
         #expect(settings.backgroundPhotoFileName == nil)
+        #expect(settings.decorationStyle == .default)
+        #expect(settings.decorationStyle.opacity == 0.4)
+        #expect(settings.decorationStyle.amount == 0.25)
+        #expect(settings.decorationStyle.excludedOshiIDs.isEmpty)
     }
 
     @Test("書いた設定を読める。写真を外して書くと、ファイル名のキーが消える")
@@ -41,7 +45,8 @@ struct AppearanceSettingsTests {
             isBackgroundEnabled: false,
             isDecorationEnabled: true,
             intensity: .strong,
-            backgroundPhotoFileName: photoFileName
+            backgroundPhotoFileName: photoFileName,
+            decorationStyle: OshiPhotoDecorationStyle(opacity: 0.85, amount: 1, excludedOshiIDs: [UUID(), UUID()])
         )
         settings.write(to: defaults)
         #expect(AppearanceSettings(defaults: defaults) == settings)
@@ -53,14 +58,28 @@ struct AppearanceSettingsTests {
         #expect(defaults.object(forKey: AppStorageKey.appearanceBackgroundPhoto) == nil)
     }
 
-    @Test("知らない強さは中、写真の置き場所の外を指すファイル名は写真なしとして読む")
+    @Test("知らない強さは中、写真の置き場所の外を指すファイル名は写真なし、範囲の外の濃さと量は範囲に収め、UUID でない推しの id は読まない")
     func invalidValues() throws {
         let defaults = try AppearanceFixtures.makeDefaults()
+        let oshiID = UUID()
         defaults.set("extreme", forKey: AppStorageKey.appearanceIntensity)
         defaults.set("../Library/secret.jpg", forKey: AppStorageKey.appearanceBackgroundPhoto)
+        defaults.set(5.0, forKey: AppStorageKey.appearanceDecorationOpacity)
+        defaults.set(-1.0, forKey: AppStorageKey.appearanceDecorationAmount)
+        defaults.set(["not-a-uuid", oshiID.uuidString], forKey: AppStorageKey.appearanceDecorationExcludedOshis)
         let settings = AppearanceSettings(defaults: defaults)
         #expect(settings.intensity == .medium)
         #expect(settings.backgroundPhotoFileName == nil)
+        #expect(settings.decorationStyle.opacity == 1)
+        #expect(settings.decorationStyle.amount == 0)
+        #expect(settings.decorationStyle.excludedOshiIDs == [oshiID])
+
+        // 型の違う値は書いていないものとして既定に戻す
+        defaults.set("dark", forKey: AppStorageKey.appearanceDecorationOpacity)
+        defaults.set("many", forKey: AppStorageKey.appearanceDecorationAmount)
+        let typeMismatch = AppearanceSettings(defaults: defaults)
+        #expect(typeMismatch.decorationStyle.opacity == OshiPhotoDecorationStyle.defaultOpacity)
+        #expect(typeMismatch.decorationStyle.amount == OshiPhotoDecorationStyle.defaultAmount)
     }
 
     @Test("Plus が使えないときは、設定にかかわらず標準の見た目にする")
@@ -117,6 +136,73 @@ struct AppearanceSettingsTests {
         #expect(unlocked.showsOshiPhotoDecoration == isDecorationEnabled)
         #expect((unlocked.backgroundPhoto != nil) == isBackgroundEnabled)
         #expect(!AppearanceRendering(settings: settings, isPlusUnlocked: false).showsOshiPhotoDecoration)
+    }
+
+    @Test("飾りを ON にしていれば、設定の濃さ・量・出す推しで描く。OFF なら濃さ・量を持たず、背景も無ければ標準の見た目")
+    func decorationStyle() {
+        let style = OshiPhotoDecorationStyle(opacity: 0.7, amount: 0.9, excludedOshiIDs: [UUID()])
+        let on = AppearanceRendering(
+            settings: AppearanceSettings(isBackgroundEnabled: false, isDecorationEnabled: true, decorationStyle: style),
+            isPlusUnlocked: true
+        )
+        #expect(on.decoration == style)
+        let off = AppearanceRendering(
+            settings: AppearanceSettings(isBackgroundEnabled: false, isDecorationEnabled: false, decorationStyle: style),
+            isPlusUnlocked: true
+        )
+        #expect(off.decoration == nil)
+        #expect(off.isStandard)
+    }
+
+    @Test("地に写真（背景の写真か飾り）を描くときだけ、文字の後ろに板を敷き、上の端を覆う")
+    func drawsPhotosOnGround() {
+        let photo = AppearanceRendering.BackgroundPhoto(fileName: photoFileName, intensity: .weak)
+        #expect(!AppearanceRendering.standard.drawsPhotosOnGround)
+        #expect(AppearanceRendering(backgroundPhoto: photo, decoration: nil).drawsPhotosOnGround)
+        #expect(AppearanceRendering(backgroundPhoto: nil, decoration: .default).drawsPhotosOnGround)
+        #expect(AppearanceRendering(backgroundPhoto: photo, decoration: .default).drawsPhotosOnGround)
+    }
+}
+
+struct OshiPhotoDecorationStyleTests {
+    @Test("濃さは 0.1〜1、量は 0〜1 に収め、NaN は既定にする")
+    func clamps() {
+        let low = OshiPhotoDecorationStyle(opacity: 0, amount: -0.5)
+        #expect(low.opacity == 0.1)
+        #expect(low.amount == 0)
+        let high = OshiPhotoDecorationStyle(opacity: 2, amount: 3)
+        #expect(high.opacity == 1)
+        #expect(high.amount == 1)
+        let nan = OshiPhotoDecorationStyle(opacity: .nan, amount: .nan)
+        #expect(nan.opacity == OshiPhotoDecorationStyle.defaultOpacity)
+        #expect(nan.amount == OshiPhotoDecorationStyle.defaultAmount)
+
+        // 後から入れた値も範囲に収める（スライダー・ストアから）
+        var style = OshiPhotoDecorationStyle()
+        style.opacity = 1.5
+        style.amount = -1
+        #expect(style.opacity == 1)
+        #expect(style.amount == 0)
+        style.opacity = 0.55
+        #expect(style.opacity == 0.55)
+    }
+
+    @Test("既定ではすべての推しを出し、外した推しだけを出さない")
+    func includes() {
+        let shown = Oshi(name: "A")
+        let hidden = Oshi(name: "B")
+        #expect(OshiPhotoDecorationStyle.default.includes(shown))
+        #expect(OshiPhotoDecorationStyle.default.includes(hidden))
+        let style = OshiPhotoDecorationStyle(excludedOshiIDs: [hidden.id])
+        #expect(style.includes(shown))
+        #expect(!style.includes(hidden))
+    }
+
+    @Test("既定の濃さは初めの版（0.15）より濃い")
+    func defaultIsDenserThanFirstVersion() {
+        #expect(OshiPhotoDecorationStyle.defaultOpacity > 0.15)
+        #expect(OshiPhotoDecorationStyle.opacityRange.contains(OshiPhotoDecorationStyle.defaultOpacity))
+        #expect(OshiPhotoDecorationStyle.amountRange.contains(OshiPhotoDecorationStyle.defaultAmount))
     }
 }
 

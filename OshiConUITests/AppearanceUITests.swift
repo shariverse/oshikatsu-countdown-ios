@@ -5,7 +5,7 @@
 
 import XCTest
 
-/// 設定の「着せ替え」の行 → 着せ替えの画面（写真を選ぶ → 縦長の調整 → 見本に映る → ON/OFF と強さ → 課金画面）と、
+/// 設定の「着せ替え」の行 → 着せ替えの画面（写真を選ぶ → 縦長の調整 → 見本に映る → ON/OFF と強さ・飾りの濃さと量と出す推し → 課金画面）と、
 /// ホームと予定の詳細に着せ替えが効くかの導線。
 ///
 /// - `PhotosPicker` は操作できないので、`-useTestPhoto` で生成した画像を選ぶ（メモリ上のストアのときだけ効く）
@@ -250,6 +250,47 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         row.tap()
         waitForMarker("eventDetail.appearance", in: app, equalTo: "decoration")
+    }
+
+    /// 飾りの濃さと量のスライダー・飾りに出す推しのスイッチが見本に映り、ホームにも効く。飾りが OFF のときは押せない。
+    @MainActor
+    func testDecorationOpacityAmountAndOshis() throws {
+        let app = launchSettings(arguments: ["-plusUnlocked", "-seedSampleData"])
+        openAppearance(in: app)
+
+        // 飾りが OFF のときは、スライダーと推しのスイッチを押せない
+        let opacity = app.sliders["appearance.decorationOpacity"]
+        reveal(opacity, in: app)
+        XCTAssertTrue(opacity.exists)
+        XCTAssertFalse(opacity.isEnabled)
+        XCTAssertEqual(opacity.value as? String, "40%")
+
+        toggle("appearance.decorationToggle", in: app, to: "1")
+        XCTAssertTrue(opacity.isEnabled)
+        waitForPreview(in: app, containing: ["推しの写真の飾りあり", "飾りの濃さ 40%", "飾りの量 25%"])
+
+        // いちばん濃く、いちばん多く（埋め尽くす）する。見本を見るために上へ送ったので、スライダーまで戻る
+        reveal(opacity, in: app)
+        opacity.adjust(toNormalizedSliderPosition: 1)
+        XCTAssertEqual(opacity.value as? String, "100%")
+        let amount = app.sliders["appearance.decorationAmount"]
+        reveal(amount, in: app)
+        amount.adjust(toNormalizedSliderPosition: 1)
+        XCTAssertEqual(amount.value as? String, "100%")
+        waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 100%"])
+
+        // 見本の推し（写真なし）が並び、推しごとに外せる
+        let firstOshi = app.switches["appearance.decorationOshi.0"]
+        reveal(firstOshi, in: app)
+        XCTAssertTrue(firstOshi.exists)
+        XCTAssertEqual(firstOshi.value as? String, "1")
+        XCTAssertTrue(app.staticTexts["写真がありません"].firstMatch.exists)
+        toggle("appearance.decorationOshi.0", in: app, to: "0")
+        toggle("appearance.decorationOshi.0", in: app, to: "1")
+
+        // ホームにも飾りが効く
+        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        waitForMarker("home.appearance", in: app, equalTo: "decoration")
     }
 
     /// App Store 版では、設定に「着せ替え」の行を出さない。
