@@ -20,11 +20,11 @@ struct ShareCardAppearanceStyleTests {
     func photoBackgroundWhenPlusAndEnabled() {
         let settings = AppearanceSettings(isBackgroundEnabled: true, backgroundPhotoFileName: fileName)
         #expect(style(settings, isPlusUnlocked: true) == ShareCardStyle(theme: .shipping, background: .photo(fileName: fileName)))
-        // 強さと飾りはカードに関わらない
+        // 暗幕・ぼかしと飾りはカードに関わらない
         let decorated = AppearanceSettings(
             isBackgroundEnabled: true,
             isDecorationEnabled: true,
-            intensity: .strong,
+            backgroundStyle: AppearanceBackgroundStyle(scrim: 1, blur: 1),
             backgroundPhotoFileName: fileName
         )
         #expect(style(decorated, isPlusUnlocked: true) == ShareCardStyle(theme: .shipping, background: .photo(fileName: fileName)))

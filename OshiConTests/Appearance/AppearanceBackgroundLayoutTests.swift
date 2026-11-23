@@ -125,11 +125,14 @@ struct AppearanceBackgroundLayoutTests {
         #expect(visible(excluding: -20) == CGRect(origin: .zero, size: size))
     }
 
-    @Test("写真を読む前（地の色に幕）でも、地の上の推し色の文字と本文が 4.5:1 以上（ライトとダーク）", arguments: AppearanceIntensity.allCases, [false, true])
-    func contrastBeforeLoading(intensity: AppearanceIntensity, isDark: Bool) {
+    @Test(
+        "写真を読む前（地の色に幕）でも、暗幕とぼかしのいちばん薄い・既定・いちばん濃いで、地の上の推し色の文字と本文が 4.5:1 以上（ライトとダーク）",
+        arguments: [AppearanceBackgroundStyle(scrim: 0, blur: 0), .default, AppearanceBackgroundStyle(scrim: 1, blur: 1)], [false, true]
+    )
+    func contrastBeforeLoading(style: AppearanceBackgroundStyle, isDark: Bool) {
         let theme = AppTheme.shipping
         for isDecorated in [false, true] {
-            let ground = intensity.ground(
+            let ground = style.ground(
                 over: theme.palette.background.resolved(isDark: isDark),
                 in: theme,
                 isDark: isDark,

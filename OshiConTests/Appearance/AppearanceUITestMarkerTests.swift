@@ -20,14 +20,14 @@ struct AppearanceUITestMarkerTests {
         #expect(AppearanceUITestMarker.value(of: AppearanceRendering(settings: settings, isPlusUnlocked: false)) == "standard")
     }
 
-    @Test("背景の写真は強さを付けて、飾りは decoration で表す", arguments: [
-        (AppearanceIntensity.weak, false, "photo:weak"),
-        (.medium, true, "photo:medium,decoration"),
-        (.strong, false, "photo:strong")
+    @Test("背景の写真は暗幕とぼかしによらず photo、飾りは decoration で表す", arguments: [
+        (AppearanceBackgroundStyle(scrim: 0, blur: 0), false, "photo"),
+        (.default, true, "photo,decoration"),
+        (AppearanceBackgroundStyle(scrim: 1, blur: 1), false, "photo")
     ])
-    func photoAndDecoration(intensity: AppearanceIntensity, decoration: Bool, expected: String) {
+    func photoAndDecoration(style: AppearanceBackgroundStyle, decoration: Bool, expected: String) {
         let rendering = AppearanceRendering(
-            backgroundPhoto: .init(fileName: photo, intensity: intensity),
+            backgroundPhoto: .init(fileName: photo, style: style),
             decoration: decoration ? .default : nil
         )
         #expect(AppearanceUITestMarker.value(of: rendering) == expected)

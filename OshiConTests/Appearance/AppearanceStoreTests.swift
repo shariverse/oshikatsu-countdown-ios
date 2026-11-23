@@ -42,14 +42,36 @@ struct AppearanceStoreTests {
         return try FileManager.default.contentsOfDirectory(atPath: path)
     }
 
-    @Test("ON/OFF と強さを変えると UserDefaults に書き、作り直しても読める")
+    @Test("ON/OFF を変えると UserDefaults に書き、作り直しても読める")
     func togglesArePersisted() {
         #expect(store.settings == AppearanceSettings())
         store.isBackgroundEnabled = false
         store.isDecorationEnabled = true
-        store.intensity = .strong
-        #expect(store.settings == AppearanceSettings(isBackgroundEnabled: false, isDecorationEnabled: true, intensity: .strong))
+        #expect(store.settings == AppearanceSettings(isBackgroundEnabled: false, isDecorationEnabled: true))
         #expect(AppearanceStore(defaults: defaults, photos: photos).settings == store.settings)
+    }
+
+    @Test("暗幕の濃さとぼかしの強さを変えると範囲に収めて書き、作り直しても読める")
+    func backgroundScrimAndBlurArePersisted() {
+        store.backgroundScrim = 0.75
+        store.backgroundBlur = 1
+        #expect(store.settings.backgroundStyle == AppearanceBackgroundStyle(scrim: 0.75, blur: 1))
+        #expect(AppearanceStore(defaults: defaults, photos: photos).settings == store.settings)
+        store.backgroundScrim = 3
+        store.backgroundBlur = -2
+        #expect(store.backgroundScrim == 1)
+        #expect(store.backgroundBlur == 0)
+        #expect(AppearanceStore(defaults: defaults, photos: photos).settings == store.settings)
+    }
+
+    @Test("前の版の強さを保存していれば、ストアはその位置で始め、何かを変えたら新しいキーに書く")
+    func legacyIntensityIsMigrated() {
+        defaults.set("weak", forKey: AppStorageKey.appearanceIntensity)
+        let migrated = AppearanceStore(defaults: defaults, photos: photos)
+        #expect(migrated.settings.backgroundStyle == AppearanceBackgroundStyle(scrim: 0.25, blur: 0))
+        migrated.isDecorationEnabled = true
+        #expect(defaults.object(forKey: AppStorageKey.appearanceIntensity) == nil)
+        #expect(AppearanceStore(defaults: defaults, photos: photos).settings == migrated.settings)
     }
 
     @Test("飾りの濃さと量を変えると範囲に収めて書き、作り直しても読める")
@@ -119,11 +141,12 @@ struct AppearanceStoreTests {
     @Test("背景の写真を外すと、ファイルを消し、ほかの設定は残す")
     func removeBackgroundPhoto() async throws {
         store.isDecorationEnabled = true
-        store.intensity = .weak
+        store.backgroundBlur = 0
         try await store.replaceBackgroundPhoto(photo, crop: crop)
         let fileName = try #require(store.settings.backgroundPhotoFileName)
         store.removeBackgroundPhoto()
-        #expect(store.settings == AppearanceSettings(isBackgroundEnabled: true, isDecorationEnabled: true, intensity: .weak))
+        let style = AppearanceBackgroundStyle(blur: 0)
+        #expect(store.settings == AppearanceSettings(isBackgroundEnabled: true, isDecorationEnabled: true, backgroundStyle: style))
         #expect(!exists(fileName))
         #expect(defaults.object(forKey: AppStorageKey.appearanceBackgroundPhoto) == nil)
         // 写真が無いときに外しても何もしない
@@ -140,7 +163,7 @@ struct AppearanceStoreTests {
         #expect(exists(fileName))
         #expect(store.settings.backgroundPhotoFileName == fileName)
         let unlocked = store.rendering(isPlusUnlocked: true)
-        #expect(unlocked.backgroundPhoto == AppearanceRendering.BackgroundPhoto(fileName: fileName, intensity: .medium))
+        #expect(unlocked.backgroundPhoto == AppearanceRendering.BackgroundPhoto(fileName: fileName, style: .default))
         #expect(unlocked.showsOshiPhotoDecoration)
     }
 
