@@ -29,6 +29,15 @@ nonisolated struct ShareCardStyle: Hashable, Sendable {
         Self(theme: .shipping)
     }
 
+    /// 着せ替えで描くもの `rendering` に合わせたカード。背景の写真を敷く（Plus が使え、背景が ON で、写真がある）ときだけ、その写真を地にする。
+    /// それ以外（Plus でない・背景が OFF・写真が無い・飾りだけ）は出荷するテーマのカード。
+    static func appearance(_ rendering: AppearanceRendering) -> Self {
+        guard let photo = rendering.backgroundPhoto else {
+            return .shipping
+        }
+        return Self(theme: .shipping, background: .photo(fileName: photo.fileName))
+    }
+
     /// 地に写真を敷いたとき、透かしを読めるよう写真に重ねる黒の不透明度。
     static let photoBackgroundScrimOpacity = 0.45
 
@@ -57,10 +66,12 @@ nonisolated struct ShareCardImages: Sendable {
     var background: CGImage?
 
     /// `content` の写真と `style` の地の画像を、書き出す大きさで読む。
+    /// 地の画像は `backgroundPhotos`（着せ替えの背景の写真の置き場所。`AppearanceStore.photos`）から読み、nil なら `photos` から読む。
     static func load(
         content: ShareCardContent,
         style: ShareCardStyle,
         photos: OshiPhotoLibrary = .shared,
+        backgroundPhotos: OshiPhotoLibrary? = nil,
         maxPixelLength: Int = ShareCardSize.pixelLength
     ) async -> Self {
         var images = Self()
@@ -68,7 +79,7 @@ nonisolated struct ShareCardImages: Sendable {
             images.photo = await photos.loadImage(fileName: fileName, maxPixelLength: maxPixelLength)
         }
         if case let .photo(fileName) = style.background {
-            images.background = await photos.loadImage(fileName: fileName, maxPixelLength: maxPixelLength)
+            images.background = await (backgroundPhotos ?? photos).loadImage(fileName: fileName, maxPixelLength: maxPixelLength)
         }
         return images
     }

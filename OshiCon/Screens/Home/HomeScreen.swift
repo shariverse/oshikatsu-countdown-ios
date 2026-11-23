@@ -20,6 +20,8 @@ struct HomeScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.appTheme) private var theme
+    @Environment(AppearanceStore.self) private var appearance
+    @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @State private var isAddingEvent = false
     /// 予定の追加のシートが実際に出ている（開こうとしても出せなかったときと分ける）。
     @State private var isAddEventSheetVisible = false
@@ -28,7 +30,16 @@ struct HomeScreen: View {
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
-        .background(ThemeScreenBackground().ignoresSafeArea())
+        .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: appearance.rendering(isPlusUnlocked: isPlusUnlocked))
+        // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れでその場で切り替わる
+        .background(
+            AppearanceScreenBackground(
+                rendering: appearance.rendering(isPlusUnlocked: isPlusUnlocked),
+                oshis: storedOshis.map(OshiConStore.oshi(from:)),
+                photos: appearance.photos
+            )
+            .ignoresSafeArea()
+        )
         // 画面の名前（VoiceOver・iPad の戻り先）として残し、バーには出さない（Discussion #148 の Q1・Q3）。
         // 大きいタイトルの帯も無くし、先頭のカードを上に詰める
         .navigationTitle("推し活カウントダウン")
@@ -233,5 +244,10 @@ struct HomeSection<Content: View>: View {
         HomeScreen()
     }
     .environment(AppRouter())
+    // 端末の設定に触れない着せ替えの設定
+    .environment(AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    ))
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }

@@ -15134,6 +15134,414 @@
         "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้ได้กับ Plus" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Tersedia dengan Plus" } }
       }
+    },
+    "着せ替え" : {
+      "comment" : "設定画面の着せ替えの行の名前と、着せ替えの画面のタイトル",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Custom Look" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "着せ替え" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "换装" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "換裝" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "꾸미기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Personnalisation" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gestaltung" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Personalización" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Personalização" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Personalizzazione" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "การตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ganti Tampilan" } }
+      }
+    },
+    "背景の写真と、推しの写真の飾り" : {
+      "comment" : "設定画面の着せ替えの行の説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Background photo and oshi photo decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景の写真と、推しの写真の飾り" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "背景照片与本命照片装饰" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "背景照片與我推照片裝飾" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경 사진과 최애 사진 장식" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Photo de fond et décorations avec la photo de votre oshi" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hintergrundfoto und Deko mit Oshi-Fotos" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto de fondo y adornos con la foto de tu oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Foto de fundo e enfeites com a foto do seu oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Foto di sfondo e decorazioni con la foto del tuo oshi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปพื้นหลังและของตกแต่งด้วยรูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto latar dan hiasan foto oshi" } }
+      }
+    },
+    "ホームと予定の詳細に、着せ替えが効いています" : {
+      "comment" : "着せ替えの画面。Plus が使えるときに出す",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your custom look is applied to Home and event details" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ホームと予定の詳細に、着せ替えが効いています" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "换装已应用于主页和日程详情" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "換裝已套用到主頁和行程詳情" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "홈과 일정 상세에 꾸미기가 적용되어 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Votre personnalisation s'affiche sur l'accueil et le détail des événements" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Deine Gestaltung gilt für Start und Termindetails" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Tu personalización se aplica al inicio y al detalle de los eventos" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sua personalização aparece no início e nos detalhes dos eventos" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La tua personalizzazione è applicata alla Home e ai dettagli degli eventi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้การตกแต่งกับหน้าหลักและรายละเอียดกิจกรรมแล้ว" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tampilanmu diterapkan di Beranda dan detail acara" } }
+      }
+    },
+    "着せ替えは Plus で使えます" : {
+      "comment" : "着せ替えの画面。Plus がまだ使えないときの案内の見出し",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Custom Look is available with Plus" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "着せ替えは Plus で使えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "换装为 Plus 专享功能" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "換裝為 Plus 專屬功能" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "꾸미기는 Plus에서 이용할 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La personnalisation est disponible avec Plus" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gestaltung ist mit Plus verfügbar" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La personalización está disponible con Plus" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A personalização está disponível com o Plus" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La personalizzazione è disponibile con Plus" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "การตกแต่งใช้ได้กับ Plus" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ganti Tampilan tersedia dengan Plus" } }
+      }
+    },
+    "Plus でなくても、写真を選んで試着し、保存しておけます。Plus にすると、ホームと予定の詳細に映ります" : {
+      "comment" : "着せ替えの画面。Plus がまだ使えないときの案内の説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You can choose a photo, try it on and save it without Plus. With Plus, it appears on Home and event details." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Plus でなくても、写真を選んで試着し、保存しておけます。Plus にすると、ホームと予定の詳細に映ります" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "没有 Plus 也可以选择照片试穿并保存。开通 Plus 后，会显示在主页和日程详情中。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "沒有 Plus 也可以選擇照片試穿並儲存。開通 Plus 後，會顯示在主頁和行程詳情中。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Plus가 없어도 사진을 골라 미리 입혀 보고 저장해 둘 수 있어요. Plus를 이용하면 홈과 일정 상세에 나타나요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Sans Plus, vous pouvez déjà choisir une photo, l'essayer et l'enregistrer. Avec Plus, elle s'affiche sur l'accueil et le détail des événements." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Auch ohne Plus kannst du ein Foto wählen, ausprobieren und speichern. Mit Plus erscheint es auf Start und in den Termindetails." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin Plus puedes elegir una foto, probarla y guardarla. Con Plus, aparece en el inicio y en el detalle de los eventos." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Mesmo sem o Plus, você pode escolher uma foto, experimentar e salvar. Com o Plus, ela aparece no início e nos detalhes dos eventos." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anche senza Plus puoi scegliere una foto, provarla e salvarla. Con Plus, appare nella Home e nei dettagli degli eventi." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แม้ไม่มี Plus ก็เลือกรูป ลองแต่ง และบันทึกไว้ได้ เมื่อใช้ Plus รูปจะแสดงในหน้าหลักและรายละเอียดกิจกรรม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanpa Plus pun kamu bisa memilih foto, mencobanya, dan menyimpannya. Dengan Plus, foto tampil di Beranda dan detail acara." } }
+      }
+    },
+    "Plus で使う" : {
+      "comment" : "着せ替えの画面。課金画面を開くボタン",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Get Plus" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Plus で使う" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开通 Plus" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "開通 Plus" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Plus로 이용하기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Passer à Plus" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Plus holen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Obtener Plus" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Assinar o Plus" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Passa a Plus" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้ Plus" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Dapatkan Plus" } }
+      }
+    },
+    "見本" : {
+      "comment" : "着せ替えの画面。ホームの見本の見出し",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "見本" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "미리보기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่าง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau" } }
+      }
+    },
+    "選んだ写真と設定を、その場でホームの見本に映します" : {
+      "comment" : "着せ替えの画面。ホームの見本の説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your photo and settings are shown right away in this preview of Home." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "選んだ写真と設定を、その場でホームの見本に映します" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "所选照片和设置会立即显示在主页预览中。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "所選照片和設定會立即顯示在主頁預覽中。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "고른 사진과 설정이 홈 미리보기에 바로 나타나요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La photo et les réglages choisis s'affichent aussitôt dans l'aperçu de l'accueil." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Foto und Einstellungen erscheinen sofort in der Vorschau von Start." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto y los ajustes elegidos se muestran al instante en la vista previa del inicio." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A foto e os ajustes escolhidos aparecem na hora na prévia do início." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La foto e le impostazioni scelte appaiono subito nell'anteprima della Home." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปและการตั้งค่าที่เลือกจะแสดงในตัวอย่างหน้าหลักทันที" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto dan pengaturan pilihanmu langsung tampil di pratinjau Beranda." } }
+      }
+    },
+    "背景の写真" : {
+      "comment" : "着せ替えの画面。背景の写真のまとまりの見出し",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Background Photo" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景の写真" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "背景照片" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "背景照片" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경 사진" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Photo de fond" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hintergrundfoto" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto de fondo" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Foto de fundo" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Foto di sfondo" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto Latar" } }
+      }
+    },
+    "背景に写真を敷く" : {
+      "comment" : "着せ替えの画面。背景の写真を使うかの切り替え",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Use Photo as Background" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景に写真を敷く" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "使用照片作为背景" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "使用照片作為背景" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "사진을 배경으로 사용" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Utiliser la photo en fond" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Foto als Hintergrund" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Usar la foto de fondo" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Usar a foto como fundo" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Usa la foto come sfondo" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้รูปเป็นพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pakai Foto sebagai Latar" } }
+      }
+    },
+    "ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。強いほど写真はぼけ、文字が読みやすくなります" : {
+      "comment" : "着せ替えの画面。背景の写真のまとまりの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The photo is dimmed and blurred behind Home and event details. Stronger settings blur it more and keep text easier to read." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。強いほど写真はぼけ、文字が読みやすくなります" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "照片会加上遮罩和模糊，铺在主页和日程详情的背景中。越强照片越模糊，文字越容易阅读。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "照片會加上遮罩和模糊，鋪在主頁和行程詳情的背景中。越強照片越模糊，文字越容易閱讀。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "홈과 일정 상세의 배경에 어둡게 가리고 흐리게 해서 깔아요. 강할수록 사진은 흐려지고 글자는 읽기 쉬워져요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La photo est voilée et floutée en fond de l'accueil et du détail des événements. Plus c'est fort, plus elle est floue et plus le texte est lisible." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das Foto wird abgedunkelt und weichgezeichnet hinter Start und Termindetails gelegt. Je stärker, desto unschärfer das Foto und desto besser lesbar der Text." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto se cubre con un velo y se difumina en el fondo del inicio y del detalle de los eventos. Cuanto más fuerte, más difuminada y más legible el texto." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A foto recebe um véu e desfoque no fundo do início e dos detalhes dos eventos. Quanto mais forte, mais desfocada e mais fácil de ler o texto." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La foto viene velata e sfocata come sfondo della Home e dei dettagli degli eventi. Più è forte, più è sfocata e più il testo è leggibile." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปจะถูกเคลือบและเบลอเป็นพื้นหลังของหน้าหลักและรายละเอียดกิจกรรม ยิ่งแรง รูปยิ่งเบลอและอ่านตัวอักษรได้ง่ายขึ้น" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto diberi lapisan dan blur sebagai latar Beranda dan detail acara. Makin kuat, foto makin buram dan teks makin mudah dibaca." } }
+      }
+    },
+    "暗幕とぼかしの強さ" : {
+      "comment" : "着せ替えの画面。背景の写真に掛ける暗幕とぼかしの強さ（弱・中・強）を選ぶ",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dim & Blur Strength" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "暗幕とぼかしの強さ" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "遮罩与模糊强度" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "遮罩與模糊強度" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "가림과 흐림의 세기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité du voile et du flou" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Stärke von Abdunklung und Unschärfe" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad del velo y el difuminado" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade do véu e do desfoque" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità di velatura e sfocatura" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความแรงของการเคลือบและเบลอ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kekuatan Lapisan & Blur" } }
+      }
+    },
+    "弱" : {
+      "comment" : "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Light" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "弱" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "弱" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "弱" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "약" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Faible" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Schwach" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Suave" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Fraco" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Debole" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "อ่อน" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Lemah" } }
+      }
+    },
+    "中" : {
+      "comment" : "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Medium" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "中" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "中" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "中" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "중" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Moyen" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mittel" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Medio" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Médio" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Medio" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "กลาง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sedang" } }
+      }
+    },
+    "強" : {
+      "comment" : "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Strong" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "強" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "强" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "強" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "강" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fort" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Stark" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fuerte" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Forte" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Forte" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แรง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kuat" } }
+      }
+    },
+    "飾り" : {
+      "comment" : "着せ替えの画面。飾りのまとまりの見出し",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "飾り" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "装饰" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "裝飾" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "장식" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Décorations" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Adornos" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Enfeites" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Decorazioni" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Hiasan" } }
+      }
+    },
+    "飾りを推しの写真にする" : {
+      "comment" : "着せ替えの画面。地の飾りを推しの丸い写真に替えるかの切り替え",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Use Oshi Photos as Decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "飾りを推しの写真にする" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "用本命照片作为装饰" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "用我推照片作為裝飾" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "장식을 최애 사진으로" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Décorer avec les photos de vos oshis" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Fotos als Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Usar fotos de tus oshis como adornos" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Usar fotos dos seus oshis como enfeites" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Usa le foto dei tuoi oshi come decorazioni" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ใช้รูปโอชิเป็นของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pakai Foto Oshi sebagai Hiasan" } }
+      }
+    },
+    "地のハートと十字を、写真を登録した推しの丸い写真に替えます" : {
+      "comment" : "着せ替えの画面。飾りの切り替えの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Replaces the hearts and crosses in the background with round photos of your oshis who have photos." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "地のハートと十字を、写真を登録した推しの丸い写真に替えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "把背景中的爱心和十字换成已登记照片的本命的圆形照片。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "把背景中的愛心和十字換成已登錄照片的我推的圓形照片。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경의 하트와 십자를 사진을 등록한 최애의 동그란 사진으로 바꿔요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Remplace les cœurs et les croix du fond par les photos rondes de vos oshis qui en ont une." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Ersetzt die Herzen und Kreuze im Hintergrund durch runde Fotos deiner Oshis mit Foto." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambia los corazones y las cruces del fondo por las fotos redondas de tus oshis que tengan foto." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Troca os corações e as cruzes do fundo pelas fotos redondas dos seus oshis que têm foto." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Sostituisce cuori e croci dello sfondo con le foto rotonde dei tuoi oshi che hanno una foto." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เปลี่ยนหัวใจและกากบาทบนพื้นหลังเป็นรูปวงกลมของโอชิที่ลงทะเบียนรูปไว้" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mengganti hati dan salib di latar dengan foto bulat oshi yang punya foto." } }
+      }
+    },
+    "ホームの見本" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げ",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Home preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ホームの見本" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "主页预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "主頁預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "홈 미리보기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu de l'accueil" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau von Start" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa del inicio" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia do início" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima della Home" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่างหน้าหลัก" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau Beranda" } }
+      }
+    },
+    "背景の写真あり" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（背景の写真を敷いている）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Background photo on" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景の写真あり" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "有背景照片" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "有背景照片" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경 사진 있음" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Photo de fond activée" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hintergrundfoto an" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Con foto de fondo" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Com foto de fundo" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Foto di sfondo attiva" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "มีรูปพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ada foto latar" } }
+      }
+    },
+    "背景の写真なし" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（背景の写真を敷いていない）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No background photo" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景の写真なし" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无背景照片" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "無背景照片" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경 사진 없음" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Sans photo de fond" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kein Hintergrundfoto" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin foto de fondo" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem foto de fundo" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Nessuna foto di sfondo" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ไม่มีรูปพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanpa foto latar" } }
+      }
+    },
+    "強さ %@" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（暗幕とぼかしの強さ。%@ は弱・中・強）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Strength %@" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "強さ %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "强度 %@" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "強度 %@" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "세기 %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité %@" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Stärke %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade %@" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità %@" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความแรง %@" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kekuatan %@" } }
+      }
+    },
+    "推しの写真の飾りあり" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（飾りを推しの写真にしている）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi photo decorations on" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真の飾りあり" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "有本命照片装饰" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "有我推照片裝飾" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진 장식 있음" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Décorations photo d'oshi activées" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Foto-Deko an" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Con adornos de fotos de oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Com enfeites de fotos de oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Decorazioni con foto degli oshi attive" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "มีของตกแต่งรูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ada hiasan foto oshi" } }
+      }
+    },
+    "推しの写真の飾りなし" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（飾りは標準のまま）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No oshi photo decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの写真の飾りなし" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无本命照片装饰" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "無我推照片裝飾" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 사진 장식 없음" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Sans décorations photo d'oshi" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine Oshi-Foto-Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin adornos de fotos de oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem enfeites de fotos de oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Nessuna decorazione con foto degli oshi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ไม่มีของตกแต่งรูปโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanpa hiasan foto oshi" } }
+      }
     }
   },
   "version" : "1.0"

@@ -16,7 +16,14 @@ struct EventDetailScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.appTheme) private var theme
+    @Environment(AppearanceStore.self) private var appearance
+    @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @Query private var storedEvents: [StoredEvent]
+    /// 着せ替えの飾りに使う推し（ホームと同じ並び）。
+    @Query(sort: OshiConStore.oshiOrder)
+    private var storedOshis: [StoredOshi]
+    /// 上の写真の下端。着せ替えの地を、上の写真より下にだけ敷くのに使う。
+    @State private var headerPosition = AppearanceDetailHeaderPosition()
     @State private var isEditing = false
     @State private var isSharing = false
     @State private var isConfirmingDelete = false
@@ -28,6 +35,8 @@ struct EventDetailScreen: View {
     /// 横向きの iPhone（縦が狭い）では、写真で画面が埋まらないよう低くする。
     private static let compactPhotoHeight: CGFloat = 140
     private static let cardOverlap: CGFloat = 28
+    /// 上の写真の下端を測る座標（スクロールの枠。地と同じく画面の上端から）。
+    nonisolated private static let scrollSpace = "eventDetail.scroll"
 
     init(eventID: OshiEvent.ID) {
         self.eventID = eventID
@@ -77,6 +86,12 @@ struct EventDetailScreen: View {
                     .clipped()
                     // 横向きでは左右の安全領域の外まで敷く
                     .ignoresSafeArea(edges: .horizontal)
+                    // スクロールで動いた上の写真の下端を、着せ替えの地に伝える（この画面の本体は描き直さない）
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.frame(in: .named(Self.scrollSpace)).maxY
+                    } action: { maxY in
+                        headerPosition.update(headerMaxY: maxY)
+                    }
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     EventDetailCard(detail: EventDetailContent(event: event, oshi: oshi, now: context.date, calendar: zonedCalendar))
                 }
@@ -85,7 +100,18 @@ struct EventDetailScreen: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .background(theme.palette.surface.color.ignoresSafeArea())
+        .coordinateSpace(.named(Self.scrollSpace))
+        .appearanceUITestMarker(AppearanceUITestMarker.eventDetailIdentifier, rendering: rendering)
+        // Plus の着せ替え（上の写真より下の地だけ）。Plus でなければカードの地の色のまま。購入・解約・期限切れでその場で切り替わる
+        .background(
+            AppearanceDetailBackground(
+                rendering: rendering,
+                oshis: storedOshis.map(OshiConStore.oshi(from:)),
+                photos: appearance.photos,
+                header: headerPosition
+            )
+            .ignoresSafeArea()
+        )
         .toolbar { toolbar(event: event) }
         // ウィジェットのリンクで画面を切り替えるときは、編集とシェアのシートと削除の確認を閉じる
         .onChange(of: router.sheetDismissal) {
@@ -98,7 +124,8 @@ struct EventDetailScreen: View {
             EventEditorScreen(event: event)
         }
         .sheet(isPresented: $isSharing) {
-            ShareCardPreviewScreen(event: event, oshi: oshi)
+            // Plus で背景の写真を敷いているときは、カードの地もその写真にする（それ以外は出荷するテーマのカード）
+            ShareCardPreviewScreen(event: event, oshi: oshi, style: .appearance(rendering), backgroundPhotos: appearance.photos)
         }
         .alert("この予定を削除しますか？", isPresented: $isConfirmingDelete) {
             Button("削除", role: .destructive) {
@@ -108,6 +135,11 @@ struct EventDetailScreen: View {
         } message: {
             Text(EventDetailContent(event: event, oshi: oshi, now: .now, calendar: zonedCalendar).deleteMessage)
         }
+    }
+
+    /// Plus が使えるかと着せ替えの設定から、実際に描くもの。
+    private var rendering: AppearanceRendering {
+        appearance.rendering(isPlusUnlocked: isPlusUnlocked)
     }
 
     private var photoHeight: CGFloat {
@@ -226,5 +258,10 @@ private struct EventDetailHeader: View {
         EventDetailScreen(eventID: UUID())
     }
     .environment(AppRouter())
+    // 端末の設定に触れない着せ替えの設定
+    .environment(AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    ))
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }

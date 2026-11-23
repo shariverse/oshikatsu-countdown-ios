@@ -85,13 +85,15 @@
 
 ### Plus の着せ替えで差し替える口
 
-カードの見た目は `ShareCardStyle` を通して引く。Plus の着せ替え（別の epic）は、この口に推しの写真の地を渡すだけで、カードの地を差し替えられる。
+カードの見た目は `ShareCardStyle` を通して引く。Plus の着せ替えは、この口に背景の写真の地を渡すだけで、カードの地を差し替える。
 
 ```swift
 // 出荷するテーマ（既定）
 ShareCardPreviewScreen(event: event, oshi: oshi)
-// Plus の着せ替え: 地を推しの写真にする（fileName は OshiPhotoLibrary のファイル名）
+// Plus の着せ替え: 地を背景の写真にする（fileName は OshiPhotoLibrary のファイル名）
 ShareCardPreviewScreen(event: event, oshi: oshi, style: ShareCardStyle(theme: .shipping, background: .photo(fileName: fileName)))
+// 予定の詳細の今の呼び方（Plus と着せ替えの設定から選ぶ）
+ShareCardPreviewScreen(event: event, oshi: oshi, style: .appearance(rendering), backgroundPhotos: appearance.photos)
 ```
 
 - `ShareCardStyle` の値
@@ -99,8 +101,13 @@ ShareCardPreviewScreen(event: event, oshi: oshi, style: ShareCardStyle(theme: .s
   - `background`: カードの地。`.theme`（既定。テーマの地）か `.photo(fileName:)`（取り込んだ画像を地にし、透かしを読めるよう黒を重ねて透かしを白にする）。画像が読めないときはテーマの地にする
   - `colorScheme`: 書き出す外観。既定は `.dark`
 - 差し替えても変えないもの: 推し色の役割（塗りのカード・模様の色）・載せる項目・日数の見せ方・透かし・正方形の大きさ
-- 今は詳細の画面（`EventDetailScreen`）が `style` を渡さず、いつも既定の `.shipping` で描く。Plus の着せ替えを入れるときは、Plus が使えるか（`@Environment(\.isPlusUnlocked)`）で `style` を選んで渡し、
-  解約・期限切れでは `.shipping` に戻す（選んだ画像は消さない）
+- 詳細の画面（`EventDetailScreen`）は、Plus が使えるか（`@Environment(\.isPlusUnlocked)`）と着せ替えの設定（`AppearanceStore`）から描くもの（`AppearanceRendering`）を決め、
+  `ShareCardStyle.appearance(_:)` で選んだ `style` を渡す
+  - Plus が使え、背景の写真を ON にしていて写真がある: `ShareCardStyle(theme: .shipping, background: .photo(fileName:))`（着せ替えの背景の写真。強さと飾りはカードに関わらない）
+  - それ以外（Plus でない・解約・期限切れ・背景が OFF・写真が無い・飾りだけ）: `.shipping`。選んだ画像は消さない
+  - 着せ替えの背景の写真は推しの写真と別の置き場所（`AppearanceStore.photos`。メモリ上のストアでは一時ディレクトリ）から読むので、`ShareCardPreviewScreen` の `backgroundPhotos` にその置き場所を渡す（`ShareCardImages.load` の `backgroundPhotos`。nil なら `photos`）
+  - 規則のテストは `OshiConTests/Share/ShareCardAppearanceStyleTests`
+  - 着せ替えそのもの（背景の写真・飾り・設定・着せ替えの画面）の仕様は [appearance.md](appearance.md)
 
 ### 作らないもの
 
@@ -128,6 +135,7 @@ ShareCardPreviewScreen(event: event, oshi: oshi, style: ShareCardStyle(theme: .s
 - Unit（Swift Testing）: `OshiConTests/Share/`
   - `ShareCardContentTests`: `Calendar` と現在時刻を注入して、残りがある・日付の変わり目（23:59:59 と 0:00）・当日（時刻あり／なし、開演の前と後）・終わった・くり返し（年をまたぐ・2/29）・タイムゾーン（東京とロサンゼルス）・会場と写真の有無と既定値・推しなし・推しの名前が載らないこと・英語・透かしの 12 言語
   - `ShareCardRendererTests`: 1080 px 四方の PNG になること、ダイナミックタイプや端末の外観を変えても画素が同じこと、書体（日本語だけテーマの書体・数字は Outfit・固定の大きさ）、写真と模様の描き分け、着せ替えの地（読めないときはテーマの地）
+  - `ShareCardAppearanceStyleTests`: 着せ替えの設定と Plus からカードの地を選ぶ規則、カードの地の画像を `backgroundPhotos` から読むこと
   - `ShareCardSharingTests`: 共有に渡すのが書き出した PNG そのものであること（iOS 18.2 以降）、Info.plist に写真への追加の説明だけがあり読む説明が無いこと、その説明の 12 言語の訳
   - `OshiConTests/Domain/EventTextTests`: `daysAgoParts`
 - UI（XCTest）: `OshiConUITests/ShareCardUITests`。起動引数 `-useInMemoryStore -useTestPhoto` と日本語で起動し、詳細のシェアのボタン（`eventDetail.share`）からプレビューを開いて、
