@@ -65,8 +65,8 @@ struct AppearanceDetailBackground: View {
                 excludedTopHeight: excludedTopHeight
             )
         }
-        if rendering.showsOshiPhotoDecoration {
-            OshiPhotoDecorationLayer(oshis: oshis)
+        if let decoration = rendering.decoration {
+            OshiPhotoDecorationLayer(oshis: oshis, style: decoration)
                 .mask(alignment: .topLeading) {
                     GeometryReader { proxy in
                         let visible = AppearanceBackgroundLayout.visibleRect(
@@ -86,7 +86,7 @@ struct AppearanceDetailBackground: View {
     AppearanceDetailBackground(
         rendering: AppearanceRendering(
             backgroundPhoto: .init(fileName: "00000000-0000-0000-0000-000000000001.jpg", intensity: .medium),
-            showsOshiPhotoDecoration: true
+            decoration: .default
         ),
         oshis: [Oshi(name: "ミナト", color: .navy)],
         photos: OshiPhotoLibrary(directory: FileManager.default.temporaryDirectory),
@@ -97,7 +97,7 @@ struct AppearanceDetailBackground: View {
 
 #Preview("飾りだけ（ダーク）") {
     AppearanceDetailBackground(
-        rendering: AppearanceRendering(backgroundPhoto: nil, showsOshiPhotoDecoration: true),
+        rendering: AppearanceRendering(backgroundPhoto: nil, decoration: .default),
         oshis: [Oshi(name: "ミナト", color: .navy)],
         photos: .shared,
         header: AppearanceDetailHeaderPosition(bottom: 300)

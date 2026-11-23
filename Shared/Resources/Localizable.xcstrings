@@ -15424,21 +15424,21 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Pakai Foto Oshi sebagai Hiasan" } }
       }
     },
-    "地のハートと十字を、写真を登録した推しの丸い写真に替えます" : {
+    "地のハートと十字の代わりに、推しの丸い写真を並べます" : {
       "comment" : "着せ替えの画面。飾りの切り替えの説明",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Replaces the hearts and crosses in the background with round photos of your oshis who have photos." } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "地のハートと十字を、写真を登録した推しの丸い写真に替えます" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "把背景中的爱心和十字换成已登记照片的本命的圆形照片。" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "把背景中的愛心和十字換成已登錄照片的我推的圓形照片。" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경의 하트와 십자를 사진을 등록한 최애의 동그란 사진으로 바꿔요." } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Remplace les cœurs et les croix du fond par les photos rondes de vos oshis qui en ont une." } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Ersetzt die Herzen und Kreuze im Hintergrund durch runde Fotos deiner Oshis mit Foto." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambia los corazones y las cruces del fondo por las fotos redondas de tus oshis que tengan foto." } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Troca os corações e as cruzes do fundo pelas fotos redondas dos seus oshis que têm foto." } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Sostituisce cuori e croci dello sfondo con le foto rotonde dei tuoi oshi che hanno una foto." } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "เปลี่ยนหัวใจและกากบาทบนพื้นหลังเป็นรูปวงกลมของโอชิที่ลงทะเบียนรูปไว้" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mengganti hati dan salib di latar dengan foto bulat oshi yang punya foto." } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Lines up round photos of your oshis instead of the hearts and crosses in the background." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "地のハートと十字の代わりに、推しの丸い写真を並べます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "用本命的圆形照片代替背景中的爱心和十字。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "用我推的圓形照片代替背景中的愛心和十字。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경의 하트와 십자 대신 최애의 동그란 사진을 늘어놓아요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aligne les photos rondes de vos oshis à la place des cœurs et des croix du fond." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Zeigt runde Fotos deiner Oshis statt der Herzen und Kreuze im Hintergrund." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Coloca fotos redondas de tus oshis en lugar de los corazones y las cruces del fondo." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Coloca fotos redondas dos seus oshis no lugar dos corações e das cruzes do fundo." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Mostra le foto rotonde dei tuoi oshi al posto di cuori e croci dello sfondo." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เรียงรูปวงกลมของโอชิแทนหัวใจและกากบาทบนพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Menampilkan foto bulat oshi sebagai ganti hati dan salib di latar." } }
       }
     },
     "ホームの見本" : {
@@ -15541,6 +15541,193 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Nessuna decorazione con foto degli oshi" } },
         "th" : { "stringUnit" : { "state" : "translated", "value" : "ไม่มีของตกแต่งรูปโอชิ" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanpa hiasan foto oshi" } }
+      }
+    },
+    "飾りの濃さ" : {
+      "comment" : "着せ替えの画面。飾り（推しの丸い写真）の不透明度のスライダーの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Decoration opacity" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "飾りの濃さ" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "装饰浓度" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "裝飾濃度" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "장식 진하기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Opacité des décorations" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Deckkraft der Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Opacidad de los adornos" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Opacidade dos enfeites" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Opacità delle decorazioni" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความเข้มของของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kepekatan hiasan" } }
+      }
+    },
+    "薄い" : {
+      "comment" : "着せ替えの画面。飾りの濃さのスライダーの左端（薄い）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Faint" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "薄い" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "淡" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "淡" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "연하게" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Léger" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Blass" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Suave" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Suave" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tenue" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "จาง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pudar" } }
+      }
+    },
+    "濃い" : {
+      "comment" : "着せ替えの画面。飾りの濃さのスライダーの右端（濃い）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Strong" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "濃い" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "浓" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "濃" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "진하게" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intense" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kräftig" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intenso" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intenso" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intenso" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เข้ม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pekat" } }
+      }
+    },
+    "飾りの量" : {
+      "comment" : "着せ替えの画面。飾り（推しの丸い写真）の数と大きさのスライダーの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Decoration amount" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "飾りの量" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "装饰数量" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "裝飾數量" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "장식 양" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Quantité de décorations" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Menge der Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cantidad de adornos" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Quantidade de enfeites" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Quantità di decorazioni" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ปริมาณของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jumlah hiasan" } }
+      }
+    },
+    "少なめ" : {
+      "comment" : "着せ替えの画面。飾りの量のスライダーの左端（少ない）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Few" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "少なめ" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "少" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "少" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "적게" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Peu" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wenig" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pocos" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Poucos" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Pochi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "น้อย" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sedikit" } }
+      }
+    },
+    "埋め尽くす" : {
+      "comment" : "着せ替えの画面。飾りの量のスライダーの右端（地を推しの丸い写真で埋め尽くす）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fill" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "埋め尽くす" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "铺满" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "鋪滿" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "가득" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Remplir" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Füllen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Llenar" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Preencher" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Riempi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เต็มพื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Penuh" } }
+      }
+    },
+    "飾りに出す推し" : {
+      "comment" : "着せ替えの画面。飾りに出す推しを選ぶまとまりの見出し",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshis in decorations" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "飾りに出す推し" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "装饰中显示的本命" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "裝飾中顯示的我推" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "장식에 넣을 최애" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Oshis dans les décorations" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshis in der Deko" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Oshis en los adornos" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Oshis nos enfeites" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Oshi nelle decorazioni" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "โอชิที่แสดงในของตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Oshi di hiasan" } }
+      }
+    },
+    "写真がありません" : {
+      "comment" : "着せ替えの画面。飾りに出す推しの行で、写真を登録していない推しに添える",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No photo" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "写真がありません" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "没有照片" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "沒有照片" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "사진 없음" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Pas de photo" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kein Foto" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin foto" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem foto" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Nessuna foto" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ไม่มีรูป" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tidak ada foto" } }
+      }
+    },
+    "選んだ推しのうち、写真を登録した推しを順にくり返して並べます" : {
+      "comment" : "着せ替えの画面。飾りに出す推しのまとまりの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Repeats the selected oshis who have photos, in list order." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "選んだ推しのうち、写真を登録した推しを順にくり返して並べます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在选中的本命中，按顺序重复排列已登记照片的本命。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "在選取的我推中，依順序重複排列已登錄照片的我推。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "선택한 최애 중 사진을 등록한 최애를 순서대로 반복해서 늘어놓아요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Répète, dans l'ordre de la liste, les oshis sélectionnés qui ont une photo." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wiederholt die ausgewählten Oshis mit Foto in der Reihenfolge der Liste." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Repite, en el orden de la lista, los oshis seleccionados que tienen foto." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Repete, na ordem da lista, os oshis selecionados que têm foto." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ripete, nell'ordine dell'elenco, gli oshi selezionati che hanno una foto." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เรียงโอชิที่เลือกซึ่งมีรูปซ้ำไปตามลำดับในรายการ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mengulang oshi terpilih yang punya foto, sesuai urutan daftar." } }
+      }
+    },
+    "飾りの濃さ %@" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（飾りの濃さ。%@ は 40% などの百分率）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Decoration opacity %@" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "飾りの濃さ %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "装饰浓度 %@" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "裝飾濃度 %@" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "장식 진하기 %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Opacité des décorations %@" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Deckkraft der Deko %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Opacidad de los adornos %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Opacidade dos enfeites %@" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Opacità delle decorazioni %@" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความเข้มของของตกแต่ง %@" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kepekatan hiasan %@" } }
+      }
+    },
+    "飾りの量 %@" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（飾りの量。%@ は 25% などの百分率）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Decoration amount %@" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "飾りの量 %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "装饰数量 %@" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "裝飾數量 %@" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "장식 양 %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Quantité de décorations %@" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Menge der Deko %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cantidad de adornos %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Quantidade de enfeites %@" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Quantità di decorazioni %@" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ปริมาณของตกแต่ง %@" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jumlah hiasan %@" } }
       }
     }
   },

@@ -108,6 +108,12 @@ nonisolated enum AppStorageKey {
     static let appearanceIntensity = "appearanceIntensity"
     /// 着せ替え: 背景の写真のファイル名（`OshiPhotoLibrary` の中。選んでいなければ無い）。
     static let appearanceBackgroundPhoto = "appearanceBackgroundPhoto"
+    /// 着せ替え: 飾りの濃さ（丸い写真の不透明度。`OshiPhotoDecorationStyle.opacityRange`。既定は 0.4）。
+    static let appearanceDecorationOpacity = "appearanceDecorationOpacity"
+    /// 着せ替え: 飾りの量（0〜1。`OshiPhotoDecorationLayout`。既定は 0.25）。
+    static let appearanceDecorationAmount = "appearanceDecorationAmount"
+    /// 着せ替え: 飾りに出さない推しの id（UUID の文字列の配列。既定は空で、すべての推しを出す）。
+    static let appearanceDecorationExcludedOshis = "appearanceDecorationExcludedOshis"
 
     /// そのタイミングの通知を出す（既定は ON）。
     static func reminderTiming(_ timing: ReminderTiming) -> String {

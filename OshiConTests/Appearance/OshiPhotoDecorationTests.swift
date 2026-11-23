@@ -40,61 +40,59 @@ struct OshiPhotoDecorationTests {
     private let photoA = "\(UUID().uuidString).jpg"
     private let photoC = "\(UUID().uuidString).jpg"
 
-    @Test("写真のある推しを渡した順にくり返し、写真の無い推しのところは今の模様のまま")
-    func assignsInOrder() {
+    @Test("写真のある推しを渡した順に使い、写真の無い推しは使わない")
+    func usesOshisWithPhotosInOrder() {
         let decoration = OshiPhotoDecoration(oshis: [
             Oshi(name: "A", photoFileName: photoA),
             Oshi(name: "B"),
             Oshi(name: "C", photoFileName: photoC)
         ])
         #expect(decoration.hasPhotos)
-        let assigned = (0..<7).map { decoration.photoFileName(forSlot: $0) }
-        #expect(assigned == [photoA, nil, photoC, photoA, nil, photoC, photoA])
-        #expect(decoration.distinctPhotoFileNames == [photoA, photoC])
+        #expect(decoration.photoFileNames == [photoA, photoC])
+        #expect(decoration.opacity == OshiPhotoDecorationStyle.defaultOpacity)
+        #expect(decoration.amount == OshiPhotoDecorationStyle.defaultAmount)
     }
 
-    @Test("写真のある推しがいなければ、すべて今の模様のまま")
+    @Test("出さない推しは使わない。出す推しに写真のある推しがいなければ、テーマの模様のまま")
+    func excludedOshis() {
+        let first = Oshi(name: "A", photoFileName: photoA)
+        let second = Oshi(name: "B")
+        let third = Oshi(name: "C", photoFileName: photoC)
+        let style = OshiPhotoDecorationStyle(opacity: 0.8, amount: 1, excludedOshiIDs: [first.id])
+        let decoration = OshiPhotoDecoration(oshis: [first, second, third], style: style)
+        #expect(decoration.photoFileNames == [photoC])
+        #expect(decoration.opacity == 0.8)
+        #expect(decoration.amount == 1)
+
+        let onlySecond = OshiPhotoDecorationStyle(excludedOshiIDs: [first.id, third.id])
+        #expect(!OshiPhotoDecoration(oshis: [first, second, third], style: onlySecond).hasPhotos)
+    }
+
+    @Test("写真のある推しがいなければ、テーマの模様のまま")
     func noPhotos() {
         for oshis in [[], [Oshi(name: "A"), Oshi(name: "B")]] {
             let decoration = OshiPhotoDecoration(oshis: oshis)
             #expect(!decoration.hasPhotos)
-            #expect(decoration.distinctPhotoFileNames.isEmpty)
-            #expect((0..<10).allSatisfy { decoration.photoFileName(forSlot: $0) == nil })
+            #expect(decoration.photoFileNames.isEmpty)
         }
     }
 
-    @Test("写真の置き場所の外を指すファイル名は、写真が無いものとする")
-    func invalidFileName() {
+    @Test("写真の置き場所の外を指すファイル名は使わず、同じ写真は 1 回だけ使う")
+    func invalidAndDuplicatedFileNames() {
         let decoration = OshiPhotoDecoration(oshis: [
             Oshi(name: "A", photoFileName: "../secret.jpg"),
-            Oshi(name: "B", photoFileName: photoA)
+            Oshi(name: "B", photoFileName: photoA),
+            Oshi(name: "C", photoFileName: photoA)
         ])
-        #expect(decoration.photoFileNames == [nil, photoA])
-        #expect(decoration.photoFileName(forSlot: 0) == nil)
-        #expect(decoration.photoFileName(forSlot: 1) == photoA)
+        #expect(decoration.photoFileNames == [photoA])
         #expect(!OshiPhotoDecoration(oshis: [Oshi(name: "A", photoFileName: "photo.png")]).hasPhotos)
     }
 
-    @Test("負の通し番号には写真を置かない")
-    func negativeSlot() {
-        let decoration = OshiPhotoDecoration(oshis: [Oshi(name: "A", photoFileName: photoA)])
-        #expect(decoration.photoFileName(forSlot: -1) == nil)
-        #expect(decoration.photoFileName(forSlot: 0) == photoA)
-    }
-
-    @Test("丸い写真は模様と同じ中心に、模様の高さの 2.5 倍の直径で置く")
-    func photoRect() {
-        let mark = CrossesAndHeartsPattern.PlacedMark(slot: 0, isCross: true, center: CGPoint(x: 100, y: 50), size: 16)
-        let rect = OshiPhotoDecoration.photoRect(for: mark)
-        #expect(rect == CGRect(x: 80, y: 30, width: 40, height: 40))
-        #expect(OshiPhotoDecoration.maxPhotoDiameter == 40)
-    }
-
-    @Test("写真はいちばん大きい丸の直径を画素にした大きさで読む")
+    @Test("写真はいちばん大きい丸（64pt）の直径を画素にした大きさで読む")
     func decodePixelLength() {
-        #expect(OshiPhotoDecoration.decodePixelLength(displayScale: 3) == 120)
-        #expect(OshiPhotoDecoration.decodePixelLength(displayScale: 2) == 80)
-        #expect(OshiPhotoDecoration.decodePixelLength(displayScale: 0) == 40)
+        #expect(OshiPhotoDecoration.decodePixelLength(displayScale: 3) == 192)
+        #expect(OshiPhotoDecoration.decodePixelLength(displayScale: 2) == 128)
+        #expect(OshiPhotoDecoration.decodePixelLength(displayScale: 0) == 64)
     }
 
     @Test("写真は縦横比を保って丸を覆い、中央に置く")
@@ -108,31 +106,175 @@ struct OshiPhotoDecorationTests {
         #expect(OshiPhotoDecoration.imageRect(imageSize: .zero, filling: circle) == circle)
     }
 
-    @Test("丸い写真どうしは、となりのタイルのものとも重ならない")
-    func photosDoNotOverlap() {
-        let tile = CrossesAndHeartsPattern.tileSize
-        let marks = CrossesAndHeartsPattern.placedMarks(in: CGSize(width: tile.width * 3, height: tile.height * 3))
-        let rects = marks.map(OshiPhotoDecoration.photoRect(for:))
-        for (index, rect) in rects.enumerated() {
-            for other in rects[(index + 1)...] {
-                let distance = hypot(rect.midX - other.midX, rect.midY - other.midY)
-                #expect(distance >= (rect.width + other.width) / 2, "\(rect) \(other)")
+    @Test("丸い写真は指定の一辺の正方形で、丸の外は透明、中は写真の色")
+    func circularImage() throws {
+        let source = try #require(Self.solidImage(width: 300, height: 200, red: 255))
+        let circular = try #require(OshiPhotoDecoration.circularImage(from: source, pixelLength: 64))
+        #expect(circular.width == 64)
+        #expect(circular.height == 64)
+        let pixels = try #require(Self.rgbaPixels(of: circular))
+        // 角は丸の外なので透明
+        #expect(pixels.alpha(x: 0, y: 0) == 0)
+        #expect(pixels.alpha(x: 63, y: 63) == 0)
+        // 中央は写真の色（不透明な赤）
+        #expect(pixels.alpha(x: 32, y: 32) == 255)
+        #expect(pixels.red(x: 32, y: 32) == 255)
+        #expect(OshiPhotoDecoration.circularImage(from: source, pixelLength: 0) == nil)
+    }
+
+    /// 1 色で塗った画像。
+    private static func solidImage(width: Int, height: Int, red: CGFloat) -> CGImage? {
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else {
+            return nil
+        }
+        context.setFillColor(red: red / 255, green: 0, blue: 0, alpha: 1)
+        context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        return context.makeImage()
+    }
+
+    /// 画像を RGBA の画素に描き直したもの。
+    private struct RGBAPixels {
+        let width: Int
+        let bytes: [UInt8]
+
+        func red(x: Int, y: Int) -> UInt8 {
+            bytes[(y * width + x) * 4]
+        }
+
+        func alpha(x: Int, y: Int) -> UInt8 {
+            bytes[(y * width + x) * 4 + 3]
+        }
+    }
+
+    private static func rgbaPixels(of image: CGImage) -> RGBAPixels? {
+        var bytes = [UInt8](repeating: 0, count: image.width * image.height * 4)
+        let drawn = bytes.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(
+                data: buffer.baseAddress,
+                width: image.width,
+                height: image.height,
+                bitsPerComponent: 8,
+                bytesPerRow: image.width * 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else {
+                return false
+            }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+            return true
+        }
+        return drawn ? RGBAPixels(width: image.width, bytes: bytes) : nil
+    }
+}
+
+struct OshiPhotoDecorationLayoutTests {
+    @Test("量 0 は直径 32pt・間隔 128pt、量 1 は直径も間隔も 64pt（丸どうしが接する）。範囲の外は収める")
+    func diameterAndSpacing() {
+        #expect(OshiPhotoDecorationLayout.diameter(amount: 0) == 32)
+        #expect(OshiPhotoDecorationLayout.spacing(amount: 0) == 128)
+        #expect(OshiPhotoDecorationLayout.diameter(amount: 0.25) == 40)
+        #expect(OshiPhotoDecorationLayout.spacing(amount: 0.25) == 112)
+        #expect(OshiPhotoDecorationLayout.diameter(amount: 1) == 64)
+        #expect(OshiPhotoDecorationLayout.spacing(amount: 1) == 64)
+        #expect(OshiPhotoDecorationLayout.diameter(amount: -1) == 32)
+        #expect(OshiPhotoDecorationLayout.diameter(amount: 2) == 64)
+        #expect(OshiPhotoDecorationLayout.diameter(amount: .nan) == 32)
+    }
+
+    @Test("量を増やすほど、地を覆う割合が増え、量 1 では 9 割ほどを覆う", arguments: [CGSize(width: 390, height: 845), CGSize(width: 700, height: 500)])
+    func coverageGrowsWithAmount(size: CGSize) {
+        let amounts = Array(stride(from: 0.0, through: 1.0, by: 0.25))
+        let coverages = amounts.map { Self.coverage(in: size, amount: $0) }
+        for (lower, higher) in zip(coverages, coverages.dropFirst()) {
+            #expect(lower < higher, "\(coverages)")
+        }
+        #expect(coverages[0] < 0.1, "\(coverages)")
+        #expect(coverages[1] < 0.15, "\(coverages)")
+        #expect(coverages[4] > 0.85, "\(coverages)")
+    }
+
+    @Test("どの量でも、丸どうしは重ならない", arguments: [0.0, 0.25, 0.5, 0.75, 1.0])
+    func circlesDoNotOverlap(amount: Double) {
+        let circles = OshiPhotoDecorationLayout.circles(in: CGSize(width: 400, height: 500), amount: amount)
+        #expect(!circles.isEmpty)
+        for (index, circle) in circles.enumerated() {
+            for other in circles[(index + 1)...] {
+                let distance = hypot(circle.rect.midX - other.rect.midX, circle.rect.midY - other.rect.midY)
+                #expect(distance >= (circle.rect.width + other.rect.width) / 2 - 0.001, "\(circle) \(other)")
             }
         }
     }
 
-    @Test(
-        "背景の写真が無いとき、丸い写真が真っ白・真っ黒でも、地の上の本文が 4.5:1 以上（ライトとダーク）",
-        arguments: [false, true]
-    )
-    func contrast(isDark: Bool) {
-        // 背景の写真の上に重ねるときは、地の上の本文の後ろに板を敷くので（AppearanceTextPlate）、ここでは数えない
-        let palette = AppTheme.shipping.palette
-        let ground = palette.background.resolved(isDark: isDark)
-        for photo in [RGBColor.white, .black] {
-            let decorated = OshiPhotoDecoration.ground(ground, under: photo)
-            #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: decorated) >= 4.5, "\(photo)")
-            #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: decorated) >= 4.5, "\(photo)")
+    @Test("地に少しでもかかる丸だけを置き、地の外の丸は置かない", arguments: [0.0, 1.0])
+    func circlesIntersectGround(amount: Double) {
+        let size = CGSize(width: 390, height: 845)
+        let circles = OshiPhotoDecorationLayout.circles(in: size, amount: amount)
+        let ground = CGRect(origin: .zero, size: size)
+        #expect(circles.allSatisfy { $0.rect.intersects(ground) })
+    }
+
+    @Test("大きさが 0 の地には丸を置かない")
+    func emptyGround() {
+        #expect(OshiPhotoDecorationLayout.circles(in: .zero, amount: 1).isEmpty)
+        #expect(OshiPhotoDecorationLayout.circles(in: CGSize(width: 400, height: 0), amount: 1).isEmpty)
+    }
+
+    @Test("推しが 3 人以上なら、となり合う丸はどれも別の推し", arguments: [3, 4, 5, 7])
+    func neighborsDiffer(count: Int) {
+        let circles = OshiPhotoDecorationLayout.circles(in: CGSize(width: 600, height: 800), amount: 1)
+        let spacing = OshiPhotoDecorationLayout.spacing(amount: 1)
+        var neighborPairs = 0
+        for (index, circle) in circles.enumerated() {
+            for other in circles[(index + 1)...] {
+                let distance = hypot(circle.rect.midX - other.rect.midX, circle.rect.midY - other.rect.midY)
+                guard distance < spacing * 1.01 else {
+                    continue
+                }
+                neighborPairs += 1
+                let photo = OshiPhotoDecorationLayout.photoIndex(row: circle.row, column: circle.column, count: count)
+                let otherPhoto = OshiPhotoDecorationLayout.photoIndex(row: other.row, column: other.column, count: count)
+                #expect(photo != otherPhoto, "\(circle) \(other)")
+            }
         }
+        #expect(neighborPairs > 0)
+    }
+
+    @Test("どの推しも使い、番号は 0 から人数より小さい")
+    func usesEveryOshi() {
+        let circles = OshiPhotoDecorationLayout.circles(in: CGSize(width: 390, height: 845), amount: 0.5)
+        for count in 1...6 {
+            let indices = Set(circles.map { OshiPhotoDecorationLayout.photoIndex(row: $0.row, column: $0.column, count: count) })
+            #expect(indices == Set(0..<count))
+        }
+        #expect(OshiPhotoDecorationLayout.photoIndex(row: 3, column: 2, count: 0) == 0)
+    }
+
+    /// 地の格子の点のうち、どれかの丸の中にある割合。
+    private static func coverage(in size: CGSize, amount: Double) -> Double {
+        let circles = OshiPhotoDecorationLayout.circles(in: size, amount: amount)
+        let step: CGFloat = 6
+        var inside = 0
+        var total = 0
+        var y = step / 2
+        while y < size.height {
+            var x = step / 2
+            while x < size.width {
+                total += 1
+                if circles.contains(where: { hypot($0.rect.midX - x, $0.rect.midY - y) <= $0.rect.width / 2 }) {
+                    inside += 1
+                }
+                x += step
+            }
+            y += step
+        }
+        return Double(inside) / Double(max(total, 1))
     }
 }

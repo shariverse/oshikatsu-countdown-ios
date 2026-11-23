@@ -10,7 +10,8 @@ import SwiftUI
 /// 着せ替え（Plus）の設定。設定画面の「着せ替え」の行から開く。
 ///
 /// - 背景の写真を選ぶ・変える・外す（`PhotosPicker` → 縦長の枠の調整画面 `PhotoCropScreen`）、背景と飾りの ON/OFF、暗幕とぼかしの強さ
-/// - ホームの見本（`AppearanceHomePreview`）に、選んだ写真・ON/OFF・強さをその場で映す（Plus でなくても試着できる）
+/// - 飾りの ON/OFF・濃さと量（スライダー）・飾りに出す推し（推しごとのスイッチ）は `AppearanceDecorationSettings`
+/// - ホームの見本（`AppearanceHomePreview`）に、選んだ写真・ON/OFF・強さ・飾りをその場で映す（Plus でなくても試着できる）
 /// - Plus でない人も写真と設定を保存でき（`AppearanceStore`）、案内から課金画面（`\.openPlusPaywall`）を開ける。Plus の人には使えていることを示す
 ///
 /// UI テストでは、起動引数 `-useTestPhoto`（`LaunchOptions.usesTestPhoto`）で `PhotosPicker` の代わりに生成した画像を選ぶボタンにする。
@@ -51,7 +52,7 @@ struct AppearanceSettingsScreen: View {
             plusSection
             previewSection
             backgroundSection
-            decorationSection
+            AppearanceDecorationSettings(oshis: storedOshis.map(OshiConStore.oshi(from:)))
         }
         .scrollContentBackground(.hidden)
         .background(theme.palette.background.color)
@@ -256,24 +257,6 @@ struct AppearanceSettingsScreen: View {
             Text(intensity.title())
                 .tag(intensity)
         }
-    }
-
-    // MARK: - 飾り
-
-    private var decorationSection: some View {
-        @Bindable var store = store
-        return Section("飾り") {
-            Toggle(isOn: $store.isDecorationEnabled) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("飾りを推しの写真にする")
-                    Text("地のハートと十字を、写真を登録した推しの丸い写真に替えます")
-                        .font(theme.typography.text(.footnote))
-                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
-                }
-            }
-            .accessibilityIdentifier("appearance.decorationToggle")
-        }
-        .themeRowBackground()
     }
 
     // MARK: - 写真の取り込み

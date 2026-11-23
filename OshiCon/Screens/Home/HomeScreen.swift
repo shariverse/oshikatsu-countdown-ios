@@ -31,8 +31,8 @@ struct HomeScreen: View {
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
-        // 背景の写真の上では、地の上に直接描く見出し・案内の後ろに板を敷く（`appearanceTextPlate()`）
-        .environment(\.isOverAppearancePhoto, rendering.backgroundPhoto != nil)
+        // 背景の写真・推しの丸い写真の飾りの上では、地の上に直接描く見出し・案内の後ろに板を敷く（`appearanceTextPlate()`）
+        .environment(\.isOverAppearancePhoto, rendering.drawsPhotosOnGround)
         .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: rendering)
         // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れでその場で切り替わる
         .background(

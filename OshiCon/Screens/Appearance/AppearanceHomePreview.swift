@@ -29,8 +29,8 @@ struct AppearanceHomePreview: View {
         let factor = AppearancePreview.displayScaleFactor
         let size = AppearancePreview.displaySize
         home
-            // 実際のホームと同じく、背景の写真の上では見出しの後ろに板を敷く
-            .environment(\.isOverAppearancePhoto, rendering.backgroundPhoto != nil)
+            // 実際のホームと同じく、背景の写真・飾りの上では見出しの後ろに板を敷く
+            .environment(\.isOverAppearancePhoto, rendering.drawsPhotosOnGround)
             .frame(width: canvas.width, height: canvas.height, alignment: .top)
             .background {
                 AppearanceScreenBackground(rendering: rendering, oshis: decorationOshis, photos: photos)
@@ -98,7 +98,7 @@ private enum AppearanceHomePreviewSample {
 
 #Preview("飾り（ダーク）") {
     AppearanceHomePreview(
-        rendering: AppearanceRendering(backgroundPhoto: nil, showsOshiPhotoDecoration: true),
+        rendering: AppearanceRendering(backgroundPhoto: nil, decoration: .default),
         content: AppearanceHomePreviewSample.content,
         decorationOshis: [Oshi(name: "ミナト", color: .navy)],
         photos: .shared

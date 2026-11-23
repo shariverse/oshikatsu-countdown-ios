@@ -117,7 +117,8 @@ struct AppearanceBackgroundPhotoLayers: View {
     }
 }
 
-/// 背景の写真の上の端に掛ける、幕の色のグラデーション。幕が薄くても、ステータスバーの文字（時刻・電池）が写真の色によらず読めるようにする。
+/// 着せ替えの写真（背景の写真・推しの丸い写真の飾り）の上の端に掛ける、幕の色のグラデーション。
+/// 幕が薄くても・飾りが濃くても、ステータスバーの文字（時刻・電池）が写真の色によらず読めるようにする。
 ///
 /// 上から半分は `AppearanceIntensity.statusBarFadeOpacity` のまま覆い、そこから下の端に向けて消す。ホームの地（`AppearanceScreenBackground`）で使う。
 struct AppearanceStatusBarFade: View {
