@@ -17,7 +17,8 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    timeout-minutes: 30
+    # PR を作ったときは UI テストまで流し、30 分を超えるようになったので余裕を持たせる
+    timeout-minutes: 45
 
     steps:
       - name: Select Xcode
