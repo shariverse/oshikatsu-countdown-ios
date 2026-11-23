@@ -58,7 +58,8 @@ struct AppearanceDecorationSettings: View {
         .themeRowBackground()
     }
 
-    /// 飾りの濃さ・量のスライダー。0.05 ずつ動かし、今の値を百分率で出す（読み上げの値も百分率）。
+    /// 飾りの濃さ・量のスライダー。値は 5% ずつに丸め、今の値を百分率で出す（読み上げの値も百分率）。
+    /// `Slider` の `step` は目盛りの点を 19 個並べて騒がしいので使わず、受け取った値を丸める。
     /// アクセシビリティの大きな文字では、両端の言葉を並べると収まらないので、スライダーの下に置く。
     private func decorationSlider(
         _ title: LocalizedStringKey,
@@ -69,6 +70,10 @@ struct AppearanceDecorationSettings: View {
         identifier: String
     ) -> some View {
         let valueText = AppearancePreview.percentText(value.wrappedValue)
+        let stepped = Binding<Double>(
+            get: { value.wrappedValue },
+            set: { value.wrappedValue = Self.roundedToStep($0) }
+        )
         return VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(title)
@@ -79,7 +84,7 @@ struct AppearanceDecorationSettings: View {
                     .accessibilityHidden(true)
             }
             if dynamicTypeSize.isAccessibilitySize {
-                Slider(value: value, in: range, step: 0.05) {
+                Slider(value: stepped, in: range) {
                     Text(title)
                 }
                 .accessibilityValue(Text(verbatim: valueText))
@@ -93,7 +98,7 @@ struct AppearanceDecorationSettings: View {
                 .foregroundStyle(theme.palette.onSurfaceVariant.color)
                 .accessibilityHidden(true)
             } else {
-                Slider(value: value, in: range, step: 0.05) {
+                Slider(value: stepped, in: range) {
                     Text(title)
                 } minimumValueLabel: {
                     Text(minimumLabel)
@@ -109,6 +114,11 @@ struct AppearanceDecorationSettings: View {
             }
         }
         .padding(.vertical, 2)
+    }
+
+    /// スライダーの値を 5% ずつに丸める（`0.3499…` を `0.35` にし、百分率の表示と保存する値をそろえる）。
+    private static func roundedToStep(_ value: Double) -> Double {
+        (value * 20).rounded() / 20
     }
 
     /// 飾りに出す推し。登録した推しを推しの並びで出し、推しごとに切り替える。推しがいなければ出さない。
