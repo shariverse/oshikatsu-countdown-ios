@@ -19,25 +19,30 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - カード・推し色の役割・書体・テーマ（`AppTheme.jiraiGothic`）は変えない
 - 背景と飾りの両方を ON にしたときは、暗幕とぼかしを掛けた写真の上に飾りを重ねる
 - 背景と飾りは `accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない
+- 背景の写真を敷いているときは、ホームの地の上に直接描く文字（「これからの予定」などの見出し・「この推しの予定はまだありません」・予定が無いときの案内）の後ろに、
+  カードの地の色（`surface`）の板を敷く（`AppearanceTextPlate`）。予定の詳細は地の上に文字を置いていない（中身はカードの上）
+- ホームでは、背景の写真の上の端（110pt）を幕の色のグラデーションで覆う（上の半分は不透明度 0.85、そこから消す。`AppearanceStatusBarFade`）。
+  幕が薄いので、写真の色によらずステータスバーの文字（時刻・電池）を読めるようにするため。予定の詳細は上が推しの写真の帯で、スクロールすると素材のバーになるので掛けない
 
 ### 背景の写真
 
 - 写真を選ぶ（`PhotosPicker`）と、推しの写真の調整画面を使い回した**約 9:19.5 の縦長の枠**（角の丸い長方形）で範囲を決め、切り抜いた画像だけを保存する（長い辺 2560px まで。詳しくは [photo-crop.md](photo-crop.md) の「長方形の枠」）
 - 写真に**ぼかし**と**暗幕**を掛ける。幕の色はライトの外観では地の色（`palette.background`）、ダークの外観では黒
-- 強さは **弱・中・強** の 3 段階（既定は中）
+- 強さは **弱・中・強** の 3 段階（既定は中）。背景の推しが見えるよう、幕は薄く、ぼかしは小さくする（弱はぼかさない。#264）
 
-  幕の不透明度は、飾り（推しの丸い写真）を重ねるかどうかで変える。飾りが OFF のときは写真が見えるよう薄くし、飾りが ON のときだけ濃くする。
+  幕の不透明度は、飾り（推しの丸い写真）を重ねるかどうかで変える。飾りが ON のときは、写真の上でも丸い写真が見分けられるよう 0.2 濃くする。
 
   | 強さ | 幕（ライト・飾り OFF） | 幕（ダーク・飾り OFF） | 幕（ライト・飾り ON） | 幕（ダーク・飾り ON） | ぼかしの半径 |
   | --- | --- | --- | --- | --- | --- |
-  | 弱 | 0.74 | 0.70 | 0.86 | 0.82 | 12pt |
-  | 中 | 0.80 | 0.76 | 0.91 | 0.87 | 20pt |
-  | 強 | 0.86 | 0.82 | 0.96 | 0.92 | 30pt |
+  | 弱 | 0.15 | 0.25 | 0.35 | 0.45 | なし（0pt） |
+  | 中 | 0.30 | 0.40 | 0.50 | 0.60 | 4pt |
+  | 強 | 0.45 | 0.55 | 0.65 | 0.75 | 10pt |
 
-  どの段階でも、写真が真っ白・真っ黒のときでも、地の上に直接描く文字（見出し・案内。本文の色 `onSurface`・`onSurfaceVariant`）が 4.5:1 以上になる値にした。
-  推し色の文字はカードの上に描くので数えない（飾りと同じ基準）。
-  - 飾り OFF: 本文の色だけで 4.5:1 を守れる薄さ（ライトは約 0.73・ダークは約 0.69 まで薄くできる）を弱にし、弱・中・強の違いが分かるよう 0.06 ずつ離した
-  - 飾り ON: 飾りを重ねたとき（丸い写真が真っ白・真っ黒。不透明度 0.15）も 4.5:1 以上を保つため、弱の幕はライトで 0.86・ダークで 0.82 より薄くできない。0.05 ずつ離した
+  - 弱・中・強の違いが分かるよう 0.15 ずつ離した。ダークは地を暗く保つため、ライトより 0.1 濃くした
+  - 文字の読みやすさは幕では守らない。幕が薄いので、写真が真っ白・真っ黒だと地の上の文字は 4.5:1 を保てない。
+    そこで背景の写真を敷いているときは、地の上に直接描く文字の後ろにカードの地の色の板を敷く（「敷く画面」）。本文の色（`onSurface`・`onSurfaceVariant`）は
+    カードの地の上で 4.5:1 以上なので（`PaletteContrastTests`）、写真の色や幕の濃さによらず読める。推し色の文字はカードの上に描くので数えない
+  - 初めの版（epic）は、板を敷かずに幕だけで 4.5:1 を守っていたため、幕が 0.70〜0.96・ぼかしが 12〜30pt と濃く、弱でも写真がほとんど見えなかった（#264 で今の値にした）
 - 縦向きの iPhone では写真で地を覆って中央に置く。地のほうが横に広いとき（iPad・横向きの iPhone）は、写真を画面の高さに合わせて中央に置き、
   左右の余りは同じ写真の強いぼかし（60pt）で埋める。左右の余りが 1pt 未満なら覆う側にする
 - 写真は画面の大きさ × 画面の倍率（上限 2560px）に縮めて、メインアクターの外で読む。回転・iPad の分割で読む大きさが変わったら読み直し、その間は今の写真を出したままにする
@@ -95,9 +100,10 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 | 役割 | 場所 |
 | --- | --- |
 | 設定（読み書き）・強さ（幕の不透明度・ぼかし・幕の色）・何を描くかの規則（Plus と設定から） | `OshiCon/Appearance/AppearanceSettings.swift`（`AppearanceSettings`・`AppearanceIntensity`・`AppearanceRendering`） |
+| 背景の写真の上で、地の上の文字の後ろに敷く板（色と、敷くかの Environment `isOverAppearancePhoto`） | `OshiCon/Appearance/AppearanceTextPlate.swift`（`AppearanceTextPlate`・`appearanceTextPlate()`・`appearanceBlockPlate()`） |
 | 設定と背景の写真のファイルを持つストア（差し替え・外す・メモリ上のストアの置き場所） | `OshiCon/Appearance/AppearanceStore.swift`（`AppearanceStore`。`OshiCon.swift` で environment に入れる） |
 | 背景の写真の置き方（覆う・中央に置いて左右を埋める・読む画素数・詳細で上を除く範囲） | `OshiCon/Appearance/AppearanceBackgroundLayout.swift` |
-| 背景の写真を敷く View（読み込み・ぼかし・幕・左右の埋め） | `OshiCon/Appearance/AppearanceBackgroundPhoto.swift`（`AppearanceBackgroundPhotoView`・`AppearanceBackgroundPhotoLayers`） |
+| 背景の写真を敷く View（読み込み・ぼかし・幕・左右の埋め）・上の端のグラデーション | `OshiCon/Appearance/AppearanceBackgroundPhoto.swift`（`AppearanceBackgroundPhotoView`・`AppearanceBackgroundPhotoLayers`・`AppearanceStatusBarFade`） |
 | 飾りの並べ方（どの位置にどの推しの写真を置くか・丸の大きさ・読む画素数） | `OshiCon/Appearance/OshiPhotoDecoration.swift` |
 | 飾りの View | `OshiCon/Appearance/OshiPhotoDecorationView.swift`（`OshiPhotoDecorationLayer`・`OshiPhotoDecorationMarks`・`OshiPhotoDecorationBackground`） |
 | 十字とハートの並び（飾りと同じ位置を使う） | `Shared/Design/ThemeOrnaments+Gothic.swift`（`CrossesAndHeartsPattern`） |
@@ -117,11 +123,12 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 ## テスト
 
 - Unit（Swift Testing）: `OshiConTests/Appearance/`
-  - `AppearanceSettingsTests`: 設定の読み書き・不正な値、Plus と設定から決まる描くもの、強さの並び（飾りの ON/OFF ごと）、飾りを重ねるときだけ幕が濃いこと、幕の色、
-    全段階のコントラスト（飾りの ON/OFF ごとに、ライトとダーク、真っ白と真っ黒の写真の上で、地の上に直接描く本文が 4.5:1 以上）
+  - `AppearanceSettingsTests`: 設定の読み書き・不正な値、Plus と設定から決まる描くもの、強さの並び（飾りの ON/OFF ごと）、飾りを重ねるときだけ幕が濃いこと、
+    写真が見える薄さ（弱は幕 0.15・ぼかしなし）、幕の色、板の上の本文と上の端のステータスバーの文字のコントラスト（出荷するテーマと 12 色で染めたテーマ、ライトとダークで 4.5:1 以上）
   - `AppearanceStoreTests`: 永続化・取り込みの大きさ・差し替えと外すときの削除・読めない写真・Plus でないときも設定と写真が残ること・メモリ上のストア
   - `AppearanceBackgroundLayoutTests`: 縦向き・細長い地・iPad と横向き・余りが 1pt 未満・読む画素数・詳細で上を除く範囲・写真を読む前のコントラスト
-  - `OshiPhotoDecorationTests`: 模様の置き方と通し番号、推しのくり返し、写真の無い推し・写真のある推しがいないとき、丸の大きさと重なり、丸い写真の上の本文のコントラスト
+  - `OshiPhotoDecorationTests`: 模様の置き方と通し番号、推しのくり返し、写真の無い推し・写真のある推しがいないとき、丸の大きさと重なり、
+    背景の写真が無いときの丸い写真の上の本文のコントラスト（背景の写真の上では板を敷く）
   - `AppearancePreviewTests`: 試着は Plus によらず設定のとおり・実際の画面は Plus でなければ標準、見本の中身と大きさ、読み上げの値
   - `AppearanceUITestMarkerTests`: UI テストに見せる値
   - ほかに `OshiConTests/Photo/OshiEditingTests`（推しの写真の差し替え・削除で背景の写真が消えない）、`PhotoCropRectangleTests`・`PhotoResizerRectangleCropTests`（縦長の枠）、
@@ -142,6 +149,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 
 - **大きな写真の取り込み**: 4800 万画素（ProRAW・HEIF）の写真を背景に選んで、調整画面が開くまでと「完了」から見本に映るまでの速さ、メモリ（推しの写真の #135 と同じ観点。背景は上限が 2560px で、狭く切り抜くと元の大きさで読む）
 - **ぼかしの重さ**: ホームと予定の詳細のスクロール、iPad と横向きの左右の強いぼかし（60pt）、回転・Split View で大きさが変わったときに、引っかかり・発熱が無いか。古い端末（iOS 17 の最も古い対応端末）でも見る
-- 暗幕の濃さと強さの差の見え方（ライトでも写真が見え、弱・中・強の違いが分かるか。飾りの ON/OFF で幕の濃さが変わるのが不自然でないか）、ダークの外観、ダイナミックタイプの大きな文字で崩れないか
+- 暗幕の濃さと強さの差の見え方（推しの写真がはっきり見え、弱・中・強の違いが分かるか。飾りの ON/OFF で幕の濃さが変わるのが不自然でないか）、ダークの外観、ダイナミックタイプの大きな文字で崩れないか
+- 幕を薄くしたので、明るい写真・暗い写真の上で、iOS 17・18 の透けたバー（ナビゲーションバーの ＋・いちばん下までスクロールしたときのタブバー）が読めるか。上の端のグラデーションが不自然でないか（iPad・横向きを含む）。見出しの板が大きな文字で崩れないか
 - 購入・解約・期限切れ（Xcode の StoreKit の Manage Transactions）で、ホームと詳細がその場で切り替わり、写真と設定が残ること
 - VoiceOver で、ホームと詳細の読み上げ・並びが変わらないこと
