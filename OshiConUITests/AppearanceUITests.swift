@@ -153,6 +153,22 @@ final class AppearanceUITests: XCTestCase {
         }
     }
 
+    /// スライダー `slider` を `position`（0〜1）まで動かし、値が `expected` になるまで（3 回まで）動かし直す。
+    /// 動きの遅い CI の Simulator では、1 回の `adjust` が端まで届かずに途中（75〜80%）で止まることがあるため。
+    @MainActor
+    private func adjust(
+        _ slider: XCUIElement,
+        to position: CGFloat,
+        expecting expected: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        for _ in 0..<3 where slider.value as? String != expected {
+            slider.adjust(toNormalizedSliderPosition: position)
+        }
+        XCTAssertEqual(slider.value as? String, expected, file: file, line: line)
+    }
+
     /// Plus でない人: 写真を選ぶ・変える・外す、ON/OFF、強さが見本に映り、課金画面を開ける。ホームと詳細は標準のまま。
     @MainActor
     func testTryOnWithoutPlusUpdatesPreviewAndOpensPaywall() throws {
@@ -271,12 +287,10 @@ final class AppearanceUITests: XCTestCase {
 
         // いちばん濃く、いちばん多く（埋め尽くす）する。見本を見るために上へ送ったので、スライダーまで戻る
         reveal(opacity, in: app)
-        opacity.adjust(toNormalizedSliderPosition: 1)
-        XCTAssertEqual(opacity.value as? String, "100%")
+        adjust(opacity, to: 1, expecting: "100%")
         let amount = app.sliders["appearance.decorationAmount"]
         reveal(amount, in: app)
-        amount.adjust(toNormalizedSliderPosition: 1)
-        XCTAssertEqual(amount.value as? String, "100%")
+        adjust(amount, to: 1, expecting: "100%")
         waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 100%"])
 
         // 見本の推し（写真なし）が並び、推しごとに外せる
