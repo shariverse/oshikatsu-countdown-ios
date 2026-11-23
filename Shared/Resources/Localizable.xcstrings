@@ -15305,82 +15305,82 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Pakai Foto sebagai Latar" } }
       }
     },
-    "ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。強いほど写真はぼけ、文字が読みやすくなります" : {
+    "ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。暗幕を薄く、ぼかしを弱くするほど、写真がはっきり見えます" : {
       "comment" : "着せ替えの画面。背景の写真のまとまりの説明",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The photo is dimmed and blurred behind Home and event details. Stronger settings blur it more and keep text easier to read." } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。強いほど写真はぼけ、文字が読みやすくなります" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "照片会加上遮罩和模糊，铺在主页和日程详情的背景中。越强照片越模糊，文字越容易阅读。" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "照片會加上遮罩和模糊，鋪在主頁和行程詳情的背景中。越強照片越模糊，文字越容易閱讀。" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "홈과 일정 상세의 배경에 어둡게 가리고 흐리게 해서 깔아요. 강할수록 사진은 흐려지고 글자는 읽기 쉬워져요." } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La photo est voilée et floutée en fond de l'accueil et du détail des événements. Plus c'est fort, plus elle est floue et plus le texte est lisible." } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das Foto wird abgedunkelt und weichgezeichnet hinter Start und Termindetails gelegt. Je stärker, desto unschärfer das Foto und desto besser lesbar der Text." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto se cubre con un velo y se difumina en el fondo del inicio y del detalle de los eventos. Cuanto más fuerte, más difuminada y más legible el texto." } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A foto recebe um véu e desfoque no fundo do início e dos detalhes dos eventos. Quanto mais forte, mais desfocada e mais fácil de ler o texto." } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "La foto viene velata e sfocata come sfondo della Home e dei dettagli degli eventi. Più è forte, più è sfocata e più il testo è leggibile." } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปจะถูกเคลือบและเบลอเป็นพื้นหลังของหน้าหลักและรายละเอียดกิจกรรม ยิ่งแรง รูปยิ่งเบลอและอ่านตัวอักษรได้ง่ายขึ้น" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto diberi lapisan dan blur sebagai latar Beranda dan detail acara. Makin kuat, foto makin buram dan teks makin mudah dibaca." } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The photo is dimmed and blurred behind Home and event details. Less dimming and blur keeps the photo clearer." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。暗幕を薄く、ぼかしを弱くするほど、写真がはっきり見えます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "照片会加上遮罩和模糊，铺在主页和日程详情的背景中。遮罩越淡、模糊越弱，照片越清晰。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "照片會加上遮罩和模糊，鋪在主頁和行程詳情的背景中。遮罩越淡、模糊越弱，照片越清晰。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "홈과 일정 상세의 배경에 어둡게 가리고 흐리게 해서 깔아요. 가림을 연하게, 흐림을 약하게 할수록 사진이 선명하게 보여요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La photo est voilée et floutée en fond de l'accueil et du détail des événements. Moins il y a de voile et de flou, plus la photo est nette." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das Foto wird abgedunkelt und weichgezeichnet hinter Start und Termindetails gelegt. Je weniger Abdunklung und Unschärfe, desto klarer das Foto." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto se cubre con un velo y se difumina en el fondo del inicio y del detalle de los eventos. Cuanto menos velo y difuminado, más nítida se ve." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A foto recebe um véu e desfoque no fundo do início e dos detalhes dos eventos. Quanto menos véu e desfoque, mais nítida ela fica." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La foto viene velata e sfocata come sfondo della Home e dei dettagli degli eventi. Meno velatura e sfocatura, più la foto è nitida." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปจะถูกเคลือบและเบลอเป็นพื้นหลังของหน้าหลักและรายละเอียดกิจกรรม ยิ่งเคลือบจางและเบลอน้อย รูปยิ่งชัด" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto diberi lapisan dan blur sebagai latar Beranda dan detail acara. Makin tipis lapisan dan blur, foto makin jelas." } }
       }
     },
-    "暗幕とぼかしの強さ" : {
-      "comment" : "着せ替えの画面。背景の写真に掛ける暗幕とぼかしの強さ（弱・中・強）を選ぶ",
+    "暗幕の濃さ" : {
+      "comment" : "着せ替えの画面。背景の写真に掛ける暗幕（幕）の不透明度のスライダーの名前",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dim & Blur Strength" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "暗幕とぼかしの強さ" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "遮罩与模糊强度" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "遮罩與模糊強度" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "가림과 흐림의 세기" } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité du voile et du flou" } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Stärke von Abdunklung und Unschärfe" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad del velo y el difuminado" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade do véu e do desfoque" } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità di velatura e sfocatura" } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความแรงของการเคลือบและเบลอ" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kekuatan Lapisan & Blur" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dimming" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "暗幕の濃さ" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "遮罩浓度" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "遮罩濃度" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "가림 진하기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité du voile" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abdunklung" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad del velo" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade do véu" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità della velatura" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความเข้มของการเคลือบ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kepekatan lapisan" } }
       }
     },
-    "弱" : {
-      "comment" : "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ",
+    "ぼかしの強さ" : {
+      "comment" : "着せ替えの画面。背景の写真に掛けるぼかしの半径のスライダーの名前",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Light" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "弱" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "弱" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "弱" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "약" } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Faible" } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Schwach" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Suave" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Fraco" } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Debole" } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "อ่อน" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Lemah" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Blur" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ぼかしの強さ" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "模糊强度" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "模糊強度" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "흐림 세기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité du flou" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Unschärfe" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad del difuminado" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade do desfoque" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità della sfocatura" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความแรงของการเบลอ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kekuatan blur" } }
       }
     },
-    "中" : {
-      "comment" : "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ",
+    "なし" : {
+      "comment" : "着せ替えの画面。ぼかしの強さのスライダーの左端（ぼかさない）",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Medium" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "中" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "中" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "中" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "중" } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Moyen" } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mittel" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Medio" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Médio" } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Medio" } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "กลาง" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sedang" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "None" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "なし" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "無" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "없음" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aucun" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Ninguno" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Nessuna" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ไม่มี" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tidak ada" } }
       }
     },
-    "強" : {
-      "comment" : "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ",
+    "強い" : {
+      "comment" : "着せ替えの画面。ぼかしの強さのスライダーの右端（強い）",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Strong" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "強" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "強い" } },
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "强" } },
         "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "強" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "강" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "강하게" } },
         "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fort" } },
         "de" : { "stringUnit" : { "state" : "translated", "value" : "Stark" } },
         "es" : { "stringUnit" : { "state" : "translated", "value" : "Fuerte" } },
@@ -15492,21 +15492,38 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanpa foto latar" } }
       }
     },
-    "強さ %@" : {
-      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（暗幕とぼかしの強さ。%@ は弱・中・強）",
+    "暗幕の濃さ %@" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（暗幕の濃さ。%@ は 50% などの百分率）",
       "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Strength %@" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "強さ %@" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "强度 %@" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "強度 %@" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "세기 %@" } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité %@" } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Stärke %@" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad %@" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade %@" } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità %@" } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความแรง %@" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kekuatan %@" } }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dimming %@" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "暗幕の濃さ %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "遮罩浓度 %@" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "遮罩濃度 %@" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "가림 진하기 %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité du voile %@" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abdunklung %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad del velo %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade do véu %@" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità della velatura %@" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความเข้มของการเคลือบ %@" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kepekatan lapisan %@" } }
+      }
+    },
+    "ぼかしの強さ %@" : {
+      "comment" : "着せ替えの画面。ホームの見本の読み上げの値（ぼかしの強さ。%@ は 40% などの百分率）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Blur %@" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ぼかしの強さ %@" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "模糊强度 %@" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "模糊強度 %@" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "흐림 세기 %@" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Intensité du flou %@" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Unschärfe %@" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Intensidad del difuminado %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Intensidade do desfoque %@" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Intensità della sfocatura %@" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ความแรงของการเบลอ %@" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Kekuatan blur %@" } }
       }
     },
     "推しの写真の飾りあり" : {
@@ -15561,7 +15578,7 @@
       }
     },
     "薄い" : {
-      "comment" : "着せ替えの画面。飾りの濃さのスライダーの左端（薄い）",
+      "comment" : "着せ替えの画面。暗幕の濃さ・飾りの濃さのスライダーの左端（薄い）",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Faint" } },
         "ja" : { "stringUnit" : { "state" : "translated", "value" : "薄い" } },
@@ -15578,7 +15595,7 @@
       }
     },
     "濃い" : {
-      "comment" : "着せ替えの画面。飾りの濃さのスライダーの右端（濃い）",
+      "comment" : "着せ替えの画面。暗幕の濃さ・飾りの濃さのスライダーの右端（濃い）",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Strong" } },
         "ja" : { "stringUnit" : { "state" : "translated", "value" : "濃い" } },
