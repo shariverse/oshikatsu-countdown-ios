@@ -25,6 +25,8 @@ struct ReminderSettingsSection: View {
                     ReminderTimingToggle(timing: timing)
                 }
                 DatePicker("通知の時刻", selection: time, displayedComponents: .hourAndMinute)
+                    // 時刻は端末の設定にかかわらず 24 時間表記（予定の開始時刻と同じ）
+                    .environment(\.locale, .app24Hour)
             }
         } header: {
             Text("通知")
