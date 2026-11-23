@@ -14,42 +14,58 @@ import Foundation
 nonisolated struct AppearanceSettings: Equatable, Sendable {
     /// 背景の写真をホームと予定の詳細の地に敷く（写真を選んだときだけ効く）。既定は ON。
     var isBackgroundEnabled: Bool
-    /// 地のハートと十字を、写真のある推しの丸い写真に替える。既定は OFF。
+    /// 地のハートと十字の代わりに、推しの丸い写真を並べる。既定は OFF。
     var isDecorationEnabled: Bool
     /// 背景の写真に掛ける暗幕とぼかしの強さ。
     var intensity: AppearanceIntensity
     /// 背景の写真のファイル名（`OshiPhotoLibrary` の中の `<UUID>.jpg`）。選んでいなければ nil。
     var backgroundPhotoFileName: String?
+    /// 飾りの濃さ・量・出す推し。飾りが OFF でも残す。
+    var decorationStyle: OshiPhotoDecorationStyle
 
     init(
         isBackgroundEnabled: Bool = true,
         isDecorationEnabled: Bool = false,
         intensity: AppearanceIntensity = .default,
-        backgroundPhotoFileName: String? = nil
+        backgroundPhotoFileName: String? = nil,
+        decorationStyle: OshiPhotoDecorationStyle = .default
     ) {
         self.isBackgroundEnabled = isBackgroundEnabled
         self.isDecorationEnabled = isDecorationEnabled
         self.intensity = intensity
         self.backgroundPhotoFileName = backgroundPhotoFileName
+        self.decorationStyle = decorationStyle
     }
 
     /// UserDefaults から読む。書いていない項目は既定の値。写真の置き場所の外を指すファイル名は無いものとする。
+    /// 飾りの濃さ・量は範囲に収め、出さない推しの id は UUID として読めるものだけを使う。
     init(defaults: UserDefaults) {
         let fileName = defaults.string(forKey: AppStorageKey.appearanceBackgroundPhoto)
         let intensity = defaults.string(forKey: AppStorageKey.appearanceIntensity).flatMap(AppearanceIntensity.init(rawValue:))
+        let opacity = defaults.object(forKey: AppStorageKey.appearanceDecorationOpacity) as? Double
+        let amount = defaults.object(forKey: AppStorageKey.appearanceDecorationAmount) as? Double
+        let excluded = defaults.stringArray(forKey: AppStorageKey.appearanceDecorationExcludedOshis) ?? []
         self.init(
             isBackgroundEnabled: defaults.object(forKey: AppStorageKey.appearanceBackgroundEnabled) as? Bool ?? true,
             isDecorationEnabled: defaults.object(forKey: AppStorageKey.appearanceDecorationEnabled) as? Bool ?? false,
             intensity: intensity ?? .default,
-            backgroundPhotoFileName: fileName.flatMap { OshiPhotoLibrary.isValidFileName($0) ? $0 : nil }
+            backgroundPhotoFileName: fileName.flatMap { OshiPhotoLibrary.isValidFileName($0) ? $0 : nil },
+            decorationStyle: OshiPhotoDecorationStyle(
+                opacity: opacity ?? OshiPhotoDecorationStyle.defaultOpacity,
+                amount: amount ?? OshiPhotoDecorationStyle.defaultAmount,
+                excludedOshiIDs: Set(excluded.compactMap(UUID.init(uuidString:)))
+            )
         )
     }
 
-    /// UserDefaults に書く。写真が無ければファイル名のキーを消す。
+    /// UserDefaults に書く。写真が無ければファイル名のキーを消す。出さない推しの id は並べて書く（同じ設定なら同じ値になる）。
     func write(to defaults: UserDefaults) {
         defaults.set(isBackgroundEnabled, forKey: AppStorageKey.appearanceBackgroundEnabled)
         defaults.set(isDecorationEnabled, forKey: AppStorageKey.appearanceDecorationEnabled)
         defaults.set(intensity.rawValue, forKey: AppStorageKey.appearanceIntensity)
+        defaults.set(decorationStyle.opacity, forKey: AppStorageKey.appearanceDecorationOpacity)
+        defaults.set(decorationStyle.amount, forKey: AppStorageKey.appearanceDecorationAmount)
+        defaults.set(decorationStyle.excludedOshiIDs.map(\.uuidString).sorted(), forKey: AppStorageKey.appearanceDecorationExcludedOshis)
         if let backgroundPhotoFileName {
             defaults.set(backgroundPhotoFileName, forKey: AppStorageKey.appearanceBackgroundPhoto)
         } else {
@@ -63,7 +79,7 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
 /// 幕の色はライトでは地の色（`palette.background`）、ダークでは黒。背景の推しが見えるよう、幕は薄く、ぼかしは小さくする（弱はぼかさない）。
 /// 幕では文字の読みやすさを守らない。背景の写真を敷いているときは、地の上に直接描く文字（見出し・案内）の後ろに
 /// カードの地の色の板を敷き（`AppearanceTextPlate`）、写真の色や幕の濃さによらず 4.5:1 以上にする。
-/// 飾り（推しの丸い写真。不透明度 0.15）を重ねるときは、写真の上でも丸い写真が見分けられるよう幕を少し濃くする。
+/// 飾り（推しの丸い写真）を重ねるときは、写真の上でも丸い写真が見分けられるよう幕を少し濃くする。
 nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     case weak
     case medium
@@ -161,15 +177,20 @@ nonisolated struct AppearanceRendering: Equatable, Sendable {
 
     /// 地に敷く背景の写真。敷かないときは nil。
     let backgroundPhoto: BackgroundPhoto?
-    /// 地のハートと十字を、写真のある推しの丸い写真に替えるか。
-    let showsOshiPhotoDecoration: Bool
+    /// 地に並べる推しの丸い写真の飾りの濃さ・量・出す推し。飾りを描かないときは nil。
+    let decoration: OshiPhotoDecorationStyle?
 
     /// 標準の見た目（着せ替えなし）。
-    static let standard = Self(backgroundPhoto: nil, showsOshiPhotoDecoration: false)
+    static let standard = Self(backgroundPhoto: nil, decoration: nil)
 
-    init(backgroundPhoto: BackgroundPhoto?, showsOshiPhotoDecoration: Bool) {
+    init(backgroundPhoto: BackgroundPhoto?, decoration: OshiPhotoDecorationStyle?) {
         self.backgroundPhoto = backgroundPhoto
-        self.showsOshiPhotoDecoration = showsOshiPhotoDecoration
+        self.decoration = decoration
+    }
+
+    /// 地のハートと十字の代わりに、推しの丸い写真の飾りを描くか。
+    var showsOshiPhotoDecoration: Bool {
+        decoration != nil
     }
 
     /// Plus が使えるかと設定から決める。背景の写真は、Plus が使え、背景を ON にしていて、写真を選んでいるときだけ敷く。
@@ -185,7 +206,8 @@ nonisolated struct AppearanceRendering: Equatable, Sendable {
         } else {
             backgroundPhoto = nil
         }
-        showsOshiPhotoDecoration = settings.isDecorationEnabled
+        // 飾りが OFF のときは濃さ・量を持たない（設定に残っていても標準の見た目と同じにする）
+        decoration = settings.isDecorationEnabled ? settings.decorationStyle : nil
     }
 
     /// 標準の見た目か。

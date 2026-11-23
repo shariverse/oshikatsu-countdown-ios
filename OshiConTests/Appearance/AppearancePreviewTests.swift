@@ -91,7 +91,7 @@ struct AppearancePreviewTests {
     func accessibilityValue() {
         let both = AppearanceRendering(
             backgroundPhoto: AppearanceRendering.BackgroundPhoto(fileName: photo, intensity: .medium),
-            showsOshiPhotoDecoration: true
+            decoration: .default
         )
         #expect(AppearancePreview.accessibilityValue(of: both, locale: DomainFixtures.japanese) == "背景の写真あり、強さ 中、推しの写真の飾りあり")
         #expect(AppearancePreview.accessibilityValue(of: .standard, locale: DomainFixtures.japanese) == "背景の写真なし、推しの写真の飾りなし")

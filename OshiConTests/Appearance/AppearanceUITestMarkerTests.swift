@@ -28,14 +28,14 @@ struct AppearanceUITestMarkerTests {
     func photoAndDecoration(intensity: AppearanceIntensity, decoration: Bool, expected: String) {
         let rendering = AppearanceRendering(
             backgroundPhoto: .init(fileName: photo, intensity: intensity),
-            showsOshiPhotoDecoration: decoration
+            decoration: decoration ? .default : nil
         )
         #expect(AppearanceUITestMarker.value(of: rendering) == expected)
     }
 
     @Test("飾りだけは decoration")
     func decorationOnly() {
-        let rendering = AppearanceRendering(backgroundPhoto: nil, showsOshiPhotoDecoration: true)
+        let rendering = AppearanceRendering(backgroundPhoto: nil, decoration: .default)
         #expect(AppearanceUITestMarker.value(of: rendering) == "decoration")
     }
 }

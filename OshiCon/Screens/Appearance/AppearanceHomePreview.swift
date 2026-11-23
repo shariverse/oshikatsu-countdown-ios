@@ -98,7 +98,7 @@ private enum AppearanceHomePreviewSample {
 
 #Preview("飾り（ダーク）") {
     AppearanceHomePreview(
-        rendering: AppearanceRendering(backgroundPhoto: nil, showsOshiPhotoDecoration: true),
+        rendering: AppearanceRendering(backgroundPhoto: nil, decoration: .default),
         content: AppearanceHomePreviewSample.content,
         decorationOshis: [Oshi(name: "ミナト", color: .navy)],
         photos: .shared

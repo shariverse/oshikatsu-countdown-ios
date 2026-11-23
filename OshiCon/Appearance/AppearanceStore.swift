@@ -63,10 +63,35 @@ final class AppearanceStore {
         set { update { $0.isBackgroundEnabled = newValue } }
     }
 
-    /// 地の飾りを推しの丸い写真に替えるか。
+    /// 地の飾りを推しの丸い写真にするか。
     var isDecorationEnabled: Bool {
         get { settings.isDecorationEnabled }
         set { update { $0.isDecorationEnabled = newValue } }
+    }
+
+    /// 飾りの濃さ（丸い写真の不透明度）。範囲の外の値は範囲に収める。
+    var decorationOpacity: Double {
+        get { settings.decorationStyle.opacity }
+        set { update { $0.decorationStyle.opacity = newValue } }
+    }
+
+    /// 飾りの量（0 は少なめ、1 は埋め尽くす）。範囲の外の値は範囲に収める。
+    var decorationAmount: Double {
+        get { settings.decorationStyle.amount }
+        set { update { $0.decorationStyle.amount = newValue } }
+    }
+
+    /// 推し `oshiID` を飾りに出すかを切り替える。あわせて、もういない推し（`existingOshiIDs` に無い推し）の分を設定から外す。
+    func setDecorationIncludes(_ oshiID: UUID, _ isIncluded: Bool, existingOshiIDs: Set<UUID>) {
+        update { settings in
+            var excluded = settings.decorationStyle.excludedOshiIDs.intersection(existingOshiIDs)
+            if isIncluded {
+                excluded.remove(oshiID)
+            } else {
+                excluded.insert(oshiID)
+            }
+            settings.decorationStyle.excludedOshiIDs = excluded
+        }
     }
 
     /// 背景の写真に掛ける暗幕とぼかしの強さ。
