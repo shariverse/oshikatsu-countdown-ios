@@ -87,18 +87,28 @@ struct AppearancePreviewTests {
         #expect(pixels == AppearancePreview.cropDisplayShortSidePixels(displayScale: 1))
     }
 
-    @Test("見本の読み上げは、背景の写真と強さ・飾りを伝える")
+    @Test("見本の読み上げは、背景の写真と強さ・飾りと濃さ・量を伝える")
     func accessibilityValue() {
         let both = AppearanceRendering(
             backgroundPhoto: AppearanceRendering.BackgroundPhoto(fileName: photo, intensity: .medium),
-            decoration: .default
+            decoration: OshiPhotoDecorationStyle(opacity: 0.4, amount: 0.25)
         )
-        #expect(AppearancePreview.accessibilityValue(of: both, locale: DomainFixtures.japanese) == "背景の写真あり、強さ 中、推しの写真の飾りあり")
+        #expect(
+            AppearancePreview.accessibilityValue(of: both, locale: DomainFixtures.japanese)
+                == "背景の写真あり、強さ 中、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%"
+        )
         #expect(AppearancePreview.accessibilityValue(of: .standard, locale: DomainFixtures.japanese) == "背景の写真なし、推しの写真の飾りなし")
         #expect(
             AppearancePreview.accessibilityValue(of: both, locale: DomainFixtures.english)
-                == "Background photo on, Strength Medium, Oshi photo decorations on"
+                == "Background photo on, Strength Medium, Oshi photo decorations on, Decoration opacity 40%, Decoration amount 25%"
         )
+    }
+
+    @Test("濃さ・量は百分率で読む（端数は丸める）")
+    func percentText() {
+        #expect(AppearancePreview.percentText(0.4, locale: DomainFixtures.japanese) == "40%")
+        #expect(AppearancePreview.percentText(1, locale: DomainFixtures.english) == "100%")
+        #expect(AppearancePreview.percentText(0.333, locale: DomainFixtures.japanese) == "33%")
     }
 
     @Test("強さの名前は弱・中・強")

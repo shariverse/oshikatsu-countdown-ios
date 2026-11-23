@@ -68,7 +68,7 @@ nonisolated enum AppearancePreview {
         return Int((PhotoCropLayout.maximumFrameSide / PhotoCrop.backgroundAspectRatio * scale).rounded(.up))
     }
 
-    /// 見本の読み上げの値（`背景の写真あり、強さ 中、推しの写真の飾りあり`）。
+    /// 見本の読み上げの値（`背景の写真あり、強さ 中、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%`）。
     static func accessibilityValue(of rendering: AppearanceRendering, locale: Locale = .app) -> String {
         var parts: [String] = []
         if let photo = rendering.backgroundPhoto {
@@ -78,12 +78,21 @@ nonisolated enum AppearancePreview {
         } else {
             parts.append(String(localized: LocalizedStringResource("背景の写真なし", locale: locale)))
         }
-        parts.append(
-            rendering.showsOshiPhotoDecoration
-                ? String(localized: LocalizedStringResource("推しの写真の飾りあり", locale: locale))
-                : String(localized: LocalizedStringResource("推しの写真の飾りなし", locale: locale))
-        )
+        if let decoration = rendering.decoration {
+            parts.append(String(localized: LocalizedStringResource("推しの写真の飾りあり", locale: locale)))
+            let opacity = percentText(decoration.opacity, locale: locale)
+            parts.append(String(localized: LocalizedStringResource("飾りの濃さ \(opacity)", locale: locale)))
+            let amount = percentText(decoration.amount, locale: locale)
+            parts.append(String(localized: LocalizedStringResource("飾りの量 \(amount)", locale: locale)))
+        } else {
+            parts.append(String(localized: LocalizedStringResource("推しの写真の飾りなし", locale: locale)))
+        }
         return EventText.joinedForSpeech(parts, locale: locale)
+    }
+
+    /// 飾りの濃さ・量（0〜1）を百分率の文字にする（`40%`）。スライダーの読み上げの値と、見本の読み上げの値に使う。
+    static func percentText(_ value: Double, locale: Locale = .app) -> String {
+        value.formatted(.percent.precision(.fractionLength(0)).locale(locale))
     }
 }
 
