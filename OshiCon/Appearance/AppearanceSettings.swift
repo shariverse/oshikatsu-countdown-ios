@@ -61,8 +61,9 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
 /// 背景の写真に掛ける暗幕とぼかしの強さ（弱・中・強）。
 ///
 /// 幕の色はライトでは地の色（`palette.background`）、ダークでは黒。幕の不透明度は、写真が真っ白・真っ黒のときでも、
-/// 地の上に直接描く推し色の文字（`OshiColor.text(in:)`）と本文が 4.5:1 以上になる値にする（`AppearanceIntensityTests`）。
-/// ライトの地は明るく、推し色の文字の余裕が小さいので、ライトの幕はダークより濃い。
+/// 地の上に直接描く文字（見出し・案内。本文の色 `onSurface`・`onSurfaceVariant`）が 4.5:1 以上になる値にする（`AppearanceIntensityTests`）。
+/// 推し色の文字はカードの上に描くので数えない（飾りの `OshiPhotoDecoration` と同じ基準）。
+/// 飾りを重ねたとき（丸い写真が真っ白・真っ黒）も 4.5:1 以上になるよう、弱でも飾りの分の余裕を残す（`OshiPhotoDecorationTests`）。
 nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     case weak
     case medium
@@ -77,15 +78,15 @@ nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     func scrimOpacity(isDark: Bool) -> Double {
         switch (self, isDark) {
         case (.weak, false):
-            0.97
+            0.86
         case (.medium, false):
-            0.98
+            0.91
         case (.strong, false):
-            0.99
+            0.96
         case (.weak, true):
-            0.84
+            0.82
         case (.medium, true):
-            0.88
+            0.87
         case (.strong, true):
             0.92
         }

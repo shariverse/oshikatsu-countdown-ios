@@ -146,16 +146,14 @@ struct AppearanceIntensityTests {
     }
 
     @Test(
-        "どの強さでも、写真が真っ白・真っ黒のときに、地の上の推し色の文字と本文が 4.5:1 以上（ライトとダーク）",
+        "どの強さでも、写真が真っ白・真っ黒のときに、地の上に直接描く本文（見出し・案内）が 4.5:1 以上（ライトとダーク）",
         arguments: AppearanceIntensity.allCases, [false, true]
     )
     func contrast(intensity: AppearanceIntensity, isDark: Bool) {
+        // 推し色の文字はカードの上に描くので数えない（飾りと同じ基準）
         let palette = theme.palette
         for photo in [RGBColor.white, .black] {
             let ground = intensity.ground(over: photo, in: theme, isDark: isDark)
-            for color in OshiColor.allCases {
-                #expect(color.text(in: theme).resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(color) \(photo)")
-            }
             #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo)")
             #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo)")
         }

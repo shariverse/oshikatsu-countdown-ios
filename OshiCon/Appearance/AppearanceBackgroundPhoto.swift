@@ -113,7 +113,7 @@ struct AppearanceBackgroundPhotoLayers: View {
     }
 }
 
-/// Preview で背景の上に置く、地の上に直接描く文字（見出し・本文・推し色の文字）。
+/// Preview で背景の上に置く、地の上に直接描く文字（見出し・案内）。
 private struct AppearanceBackgroundPreviewText: View {
     @Environment(\.appTheme) private var theme
 
@@ -124,11 +124,6 @@ private struct AppearanceBackgroundPreviewText: View {
                 .foregroundStyle(theme.palette.onSurface.color)
             Text("この推しの予定はまだありません")
                 .foregroundStyle(theme.palette.onSurfaceVariant.color)
-            ForEach(OshiColor.allCases, id: \.self) { color in
-                Text(verbatim: color.rawValue)
-                    .font(theme.typography.text(.subheadline, weight: .bold))
-                    .foregroundStyle(color.text(in: theme).color)
-            }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
