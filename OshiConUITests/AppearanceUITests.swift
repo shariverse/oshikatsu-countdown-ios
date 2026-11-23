@@ -13,6 +13,7 @@ import XCTest
 /// - ホームと詳細の地は読み上げから外しているので、メモリ上のストアのときだけ置く口（`home.appearance`・`eventDetail.appearance`。
 ///   `AppearanceUITestMarker`）のラベルで、描いているもの（`standard`・`photo:<強さ>`・`decoration`）を確かめる
 /// - 見本に映ったかは、見本（`appearance.preview`）の読み上げの値で確かめる
+/// - 見本は設定の Form の外（上に固定・左の列）に置いているので、送るときは Form（`appearance.form`）の上で指を動かす
 final class AppearanceUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -50,11 +51,16 @@ final class AppearanceUITests: XCTestCase {
         app.descendants(matching: .any)["appearance.preview"].firstMatch
     }
 
-    /// 見本の読み上げの値が `texts` をすべて含むまで待つ。
+    /// 着せ替えの設定の Form（見本の外）。
+    @MainActor
+    private func form(in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)["appearance.form"].firstMatch
+    }
+
+    /// 見本の読み上げの値が `texts` をすべて含むまで待つ。見本は Form の外に固定しているので、送らずに読める。
     @MainActor
     private func waitForPreview(in app: XCUIApplication, containing texts: [String], file: StaticString = #filePath, line: UInt = #line) {
         let element = preview(in: app)
-        reveal(element, in: app, needsHittable: false)
         XCTAssertTrue(element.waitForExistence(timeout: 5), file: file, line: line)
         let format = texts.map { _ in "value CONTAINS %@" }.joined(separator: " AND ")
         let predicate = NSPredicate(format: format, argumentArray: texts)
@@ -100,7 +106,12 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertNotEqual(photo.value as? String, before)
         app.buttons["photoCrop.done"].tap()
         XCTAssertTrue(app.navigationBars["着せ替え"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["appearance.removePhoto"].waitForExistence(timeout: 5))
+        // 取り込むと「写真を変える」になり、その下の行に「写真を外す」が出る。見本の分だけ Form が短く、画面の外の行は作られないので、送ってから探す
+        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label CONTAINS %@", "写真を変える"), object: select)
+        XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 5), .completed)
+        let remove = app.buttons["appearance.removePhoto"]
+        reveal(remove, in: app)
+        XCTAssertTrue(remove.waitForExistence(timeout: 2))
     }
 
     /// スイッチを押す（ラベルの文字ではなく、右端のスイッチを押す）。
@@ -135,22 +146,37 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.buttons["eventDetail.share"].waitForExistence(timeout: 2))
     }
 
-    /// `element` が画面の中で押せるところに来るまで、ゆっくり送る。Form の画面の外の行は作られないので、下の行へ送っても来なければ上の行へ送る。
-    /// 何度か送っても来なければそのまま返す。押さない要素（見本）は `needsHittable` を false にし、作られたら止める。
+    /// `element` が画面の中で押せるところに来るまで、Form をゆっくり送る。Form の画面の外の行は作られないので、下の行へ送っても来なければ上の行へ送る。
+    /// 何度か送っても来なければそのまま返す。
     @MainActor
-    private func reveal(_ element: XCUIElement, in app: XCUIApplication, needsHittable: Bool = true, maxSwipes: Int = 4) {
-        let isReady = { element.exists && (!needsHittable || element.isHittable) }
+    private func reveal(_ element: XCUIElement, in app: XCUIApplication, maxSwipes: Int = 4) {
+        let form = form(in: app)
         for upward in [true, false] {
             var swipes = 0
-            while !isReady(), swipes < maxSwipes {
+            while !(element.exists && element.isHittable), swipes < maxSwipes {
                 if upward {
-                    app.swipeUp(velocity: .slow)
+                    form.swipeUp(velocity: .slow)
                 } else {
-                    app.swipeDown(velocity: .slow)
+                    form.swipeDown(velocity: .slow)
                 }
                 swipes += 1
             }
         }
+    }
+
+    /// 見本が画面の中にあり、`control`（いま動かしている設定）と重なっていないことを確かめる。
+    @MainActor
+    private func assertPreviewVisible(
+        besides control: XCUIElement,
+        in app: XCUIApplication,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let preview = preview(in: app)
+        XCTAssertTrue(preview.exists, file: file, line: line)
+        let screen = app.windows.firstMatch.frame
+        XCTAssertTrue(screen.contains(preview.frame), "見本: \(preview.frame)、画面: \(screen)", file: file, line: line)
+        XCTAssertFalse(preview.frame.intersects(control.frame), "見本: \(preview.frame)、設定: \(control.frame)", file: file, line: line)
     }
 
     /// Plus でない人: 写真を選ぶ・変える・外す、ON/OFF、強さが見本に映り、課金画面を開ける。ホームと詳細は標準のまま。
@@ -201,8 +227,8 @@ final class AppearanceUITests: XCTestCase {
         // 案内から課金画面を開き、閉じると着せ替えの画面に戻る
         let openPaywall = app.buttons["appearance.openPaywall"]
         // いちばん上の行なので、上へ送ってから探す
-        app.swipeDown(velocity: .fast)
-        app.swipeDown(velocity: .fast)
+        form(in: app).swipeDown(velocity: .fast)
+        form(in: app).swipeDown(velocity: .fast)
         reveal(openPaywall, in: app)
         openPaywall.tap()
         XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 5))
@@ -269,12 +295,15 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(opacity.isEnabled)
         waitForPreview(in: app, containing: ["推しの写真の飾りあり", "飾りの濃さ 40%", "飾りの量 25%"])
 
-        // いちばん濃く、いちばん多く（埋め尽くす）する。見本を見るために上へ送ったので、スライダーまで戻る
+        // いちばん濃く、いちばん多く（埋め尽くす）する。スライダーを動かしている間も、見本は画面の中にあり、その場で映る
         reveal(opacity, in: app)
+        assertPreviewVisible(besides: opacity, in: app)
         opacity.adjust(toNormalizedSliderPosition: 1)
         XCTAssertEqual(opacity.value as? String, "100%")
+        waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 25%"])
         let amount = app.sliders["appearance.decorationAmount"]
         reveal(amount, in: app)
+        assertPreviewVisible(besides: amount, in: app)
         amount.adjust(toNormalizedSliderPosition: 1)
         XCTAssertEqual(amount.value as? String, "100%")
         waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 100%"])
@@ -285,6 +314,7 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(firstOshi.exists)
         XCTAssertEqual(firstOshi.value as? String, "1")
         XCTAssertTrue(app.staticTexts["写真がありません"].firstMatch.exists)
+        assertPreviewVisible(besides: firstOshi, in: app)
         toggle("appearance.decorationOshi.0", in: app, to: "0")
         toggle("appearance.decorationOshi.0", in: app, to: "1")
 
