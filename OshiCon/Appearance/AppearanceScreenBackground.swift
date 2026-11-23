@@ -7,7 +7,8 @@ import SwiftUI
 
 /// 着せ替えで描くもの（`AppearanceRendering`）に合わせたホームの地。
 ///
-/// - 背景の写真があれば、暗幕とぼかしを掛けた写真（`AppearanceBackgroundPhotoView`）を敷き、飾りが ON ならその上に推しの丸い写真の飾りを重ねる
+/// - 背景の写真があれば、暗幕とぼかしを掛けた写真（`AppearanceBackgroundPhotoView`）を敷き、上の端をステータスバーのために幕の色で覆い（`AppearanceStatusBarFade`）、
+///   飾りが ON ならその上に推しの丸い写真の飾りを重ねる
 /// - 背景の写真が無く飾りが ON なら、地の色に推しの丸い写真の飾り（写真の無い推しのところは今の模様）
 /// - どちらも無ければ、テーマの地（`ThemeScreenBackground`）のまま
 ///
@@ -26,6 +27,8 @@ struct AppearanceScreenBackground: View {
             if let photo = rendering.backgroundPhoto {
                 ZStack {
                     AppearanceBackgroundPhotoView(photo: photo, photos: photos, isDecorated: rendering.showsOshiPhotoDecoration)
+                    // 幕が薄いので、ステータスバーの文字が読めるよう上の端だけ幕の色で覆う
+                    AppearanceStatusBarFade()
                     if rendering.showsOshiPhotoDecoration {
                         OshiPhotoDecorationLayer(oshis: oshis)
                     }

@@ -140,7 +140,7 @@ struct AppearanceIntensityTests {
         }
     }
 
-    @Test("飾りを重ねるときだけ幕を濃くし、重ねないときは写真が見えるよう薄くする（ライトの弱は 0.74）", arguments: [false, true])
+    @Test("飾りを重ねるときだけ幕を濃くし、重ねないときは写真が見えるよう薄くする", arguments: [false, true])
     func decoratedIsDenser(isDark: Bool) {
         for intensity in AppearanceIntensity.allCases {
             #expect(
@@ -148,7 +148,32 @@ struct AppearanceIntensityTests {
                 "\(intensity)"
             )
         }
-        #expect(AppearanceIntensity.weak.scrimOpacity(isDark: false, isDecorated: false) == 0.74)
+    }
+
+    @Test("背景の推しが見えるよう、飾りを重ねないときの幕は強でも半分ほどまでにし、弱はぼかさない")
+    func photoStaysVisible() {
+        #expect(AppearanceIntensity.weak.scrimOpacity(isDark: false, isDecorated: false) == 0.15)
+        #expect(AppearanceIntensity.weak.scrimOpacity(isDark: true, isDecorated: false) == 0.25)
+        #expect(AppearanceIntensity.weak.blurRadius == 0)
+        for intensity in AppearanceIntensity.allCases {
+            for isDark in [false, true] {
+                #expect(intensity.scrimOpacity(isDark: isDark, isDecorated: false) <= 0.55, "\(intensity) \(isDark)")
+            }
+            #expect(intensity.blurRadius <= 10, "\(intensity)")
+        }
+    }
+
+    @Test(
+        "ホームの上の端は、写真が真っ白・真っ黒でもステータスバーの文字（ライトは黒、ダークは白）が 4.5:1 以上になる濃さで幕の色に覆う",
+        arguments: PaletteContrastTests.themes, [false, true]
+    )
+    func statusBarFadeContrast(theme: AppTheme, isDark: Bool) {
+        let scrim = AppearanceIntensity.scrimColor(in: theme).resolved(isDark: isDark)
+        let statusBarText = isDark ? RGBColor.white : .black
+        for photo in [RGBColor.white, .black] {
+            let ground = photo.mixed(with: scrim, fraction: AppearanceIntensity.statusBarFadeOpacity)
+            #expect(statusBarText.contrastRatio(with: ground) >= 4.5, "\(photo)")
+        }
     }
 
     @Test("幕の色はライトでは地の色、ダークでは黒")
@@ -159,18 +184,15 @@ struct AppearanceIntensityTests {
     }
 
     @Test(
-        "どの強さでも、飾りの有無によらず、写真が真っ白・真っ黒のときに、地の上に直接描く本文（見出し・案内）が 4.5:1 以上（ライトとダーク）",
-        arguments: AppearanceIntensity.allCases, [false, true]
+        "背景の写真の上で地の上に直接描く本文（見出し・案内）は、板（カードの地）の上に描くので、写真の色や幕の濃さによらず 4.5:1 以上（ライトとダーク）",
+        arguments: PaletteContrastTests.themes, [false, true]
     )
-    func contrast(intensity: AppearanceIntensity, isDark: Bool) {
-        // 推し色の文字はカードの上に描くので数えない（飾りと同じ基準）。飾りを重ねたところは OshiPhotoDecorationTests で確かめる
+    func textPlateContrast(theme: AppTheme, isDark: Bool) {
+        // 幕は薄いので、写真が真っ白・真っ黒だと地の上の本文は 4.5:1 を保てない。そのため文字の後ろに不透明な板を敷く
         let palette = theme.palette
-        for isDecorated in [false, true] {
-            for photo in [RGBColor.white, .black] {
-                let ground = intensity.ground(over: photo, in: theme, isDark: isDark, isDecorated: isDecorated)
-                #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo) \(isDecorated)")
-                #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo) \(isDecorated)")
-            }
-        }
+        let plate = AppearanceTextPlate.color(in: theme).resolved(isDark: isDark)
+        #expect(plate == palette.surface.resolved(isDark: isDark))
+        #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: plate) >= 4.5)
+        #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: plate) >= 4.5)
     }
 }

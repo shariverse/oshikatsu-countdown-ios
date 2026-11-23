@@ -60,11 +60,10 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
 
 /// 背景の写真に掛ける暗幕とぼかしの強さ（弱・中・強）。
 ///
-/// 幕の色はライトでは地の色（`palette.background`）、ダークでは黒。幕の不透明度は、写真が真っ白・真っ黒のときでも、
-/// 地の上に直接描く文字（見出し・案内。本文の色 `onSurface`・`onSurfaceVariant`）が 4.5:1 以上になる値にする（`AppearanceIntensityTests`）。
-/// 推し色の文字はカードの上に描くので数えない（飾りの `OshiPhotoDecoration` と同じ基準）。
-/// 飾り（推しの丸い写真）を重ねないときは、写真が見えるよう本文の色だけで 4.5:1 を守れる薄さにする。
-/// 飾りを重ねるときだけ、丸い写真が真っ白・真っ黒でも 4.5:1 以上になるよう幕を濃くする（`OshiPhotoDecorationTests`）。
+/// 幕の色はライトでは地の色（`palette.background`）、ダークでは黒。背景の推しが見えるよう、幕は薄く、ぼかしは小さくする（弱はぼかさない）。
+/// 幕では文字の読みやすさを守らない。背景の写真を敷いているときは、地の上に直接描く文字（見出し・案内）の後ろに
+/// カードの地の色の板を敷き（`AppearanceTextPlate`）、写真の色や幕の濃さによらず 4.5:1 以上にする。
+/// 飾り（推しの丸い写真。不透明度 0.15）を重ねるときは、写真の上でも丸い写真が見分けられるよう幕を少し濃くする。
 nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     case weak
     case medium
@@ -75,56 +74,64 @@ nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     /// 縦長の写真の左右の余り（iPad・横向き）を埋める、同じ写真のぼかしの半径（pt）。どの強さでも同じ。
     static let sideFillBlurRadius: CGFloat = 60
 
+    /// ホームの地の上の端に掛ける、幕の色のグラデーションの高さ（pt。ステータスバーより少し下まで）。
+    /// 幕が薄いので、写真の色によってはステータスバーの文字（時刻・電池）が読めなくなる。上の端だけ幕の色で覆う。
+    static let statusBarFadeHeight: CGFloat = 110
+
+    /// 上の端のグラデーションの、いちばん上の不透明度。写真が真っ白・真っ黒でもステータスバーの文字（ライトは黒、ダークは白）が 4.5:1 以上になる濃さ。
+    static let statusBarFadeOpacity = 0.85
+
     /// 写真に掛ける幕の不透明度（0〜1）。`isDecorated` は、写真の上に飾り（推しの丸い写真）を重ねるか。
     func scrimOpacity(isDark: Bool, isDecorated: Bool) -> Double {
         isDecorated ? decoratedScrimOpacity(isDark: isDark) : plainScrimOpacity(isDark: isDark)
     }
 
-    /// 飾りを重ねないときの幕の不透明度。弱・中・強の違いが分かるよう 0.06 ずつ離す。
+    /// 飾りを重ねないときの幕の不透明度。弱は写真がほぼそのまま見える薄さにし、弱・中・強の違いが分かるよう 0.15 ずつ離す。
+    /// ダークは地を暗く保つため、ライトより 0.1 濃くする。
     private func plainScrimOpacity(isDark: Bool) -> Double {
         switch (self, isDark) {
         case (.weak, false):
-            0.74
+            0.15
         case (.medium, false):
-            0.80
+            0.30
         case (.strong, false):
-            0.86
+            0.45
         case (.weak, true):
-            0.70
+            0.25
         case (.medium, true):
-            0.76
+            0.40
         case (.strong, true):
-            0.82
+            0.55
         }
     }
 
-    /// 飾りを重ねるときの幕の不透明度。飾りの分の余裕を残し、弱・中・強の違いが分かるよう 0.05 ずつ離す。
+    /// 飾りを重ねるときの幕の不透明度。重ねないときより 0.2 濃くし、写真の上でも丸い写真が見分けられるようにする。
     private func decoratedScrimOpacity(isDark: Bool) -> Double {
         switch (self, isDark) {
         case (.weak, false):
-            0.86
+            0.35
         case (.medium, false):
-            0.91
+            0.50
         case (.strong, false):
-            0.96
+            0.65
         case (.weak, true):
-            0.82
+            0.45
         case (.medium, true):
-            0.87
+            0.60
         case (.strong, true):
-            0.92
+            0.75
         }
     }
 
-    /// 写真に掛けるぼかしの半径（pt）。
+    /// 写真に掛けるぼかしの半径（pt）。弱は推しがはっきり見えるようぼかさない。
     var blurRadius: CGFloat {
         switch self {
         case .weak:
-            12
+            0
         case .medium:
-            20
+            4
         case .strong:
-            30
+            10
         }
     }
 
