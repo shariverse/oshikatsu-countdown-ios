@@ -27,14 +27,17 @@ struct HomeScreen: View {
     @State private var isAddEventSheetVisible = false
 
     var body: some View {
+        let rendering = appearance.rendering(isPlusUnlocked: isPlusUnlocked)
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
-        .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: appearance.rendering(isPlusUnlocked: isPlusUnlocked))
+        // 背景の写真の上では、地の上に直接描く見出し・案内の後ろに板を敷く（`appearanceTextPlate()`）
+        .environment(\.isOverAppearancePhoto, rendering.backgroundPhoto != nil)
+        .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: rendering)
         // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れでその場で切り替わる
         .background(
             AppearanceScreenBackground(
-                rendering: appearance.rendering(isPlusUnlocked: isPlusUnlocked),
+                rendering: rendering,
                 oshis: storedOshis.map(OshiConStore.oshi(from:)),
                 photos: appearance.photos
             )
@@ -139,6 +142,7 @@ struct HomeScreen: View {
                 .buttonStyle(.borderedProminent)
                 .font(theme.typography.text(.headline, weight: .bold))
             }
+            .appearanceBlockPlate()
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -148,6 +152,7 @@ struct HomeScreen: View {
                     if content.emptyState == .noEventsForOshi {
                         Text("この推しの予定はまだありません")
                             .foregroundStyle(theme.palette.onSurfaceVariant.color)
+                            .appearanceTextPlate()
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 40)
                     } else {
@@ -230,6 +235,7 @@ struct HomeSection<Content: View>: View {
                 .foregroundStyle(theme.palette.onSurface.color)
                 .accessibilityAddTraits(.isHeader)
                 .themeHeadingOrnament()
+                .appearanceTextPlate()
             VStack(spacing: 0) {
                 content()
             }

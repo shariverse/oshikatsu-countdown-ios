@@ -117,7 +117,7 @@ struct AppearanceBackgroundPhotoLayers: View {
     }
 }
 
-/// Preview で背景の上に置く、地の上に直接描く文字（見出し・案内）。
+/// Preview で背景の上に置く、地の上に直接描く文字（見出し・案内）。ホームと同じく、背景の写真の上では後ろに板を敷く。
 private struct AppearanceBackgroundPreviewText: View {
     @Environment(\.appTheme) private var theme
 
@@ -126,11 +126,14 @@ private struct AppearanceBackgroundPreviewText: View {
             Text("これからの予定")
                 .font(theme.typography.text(.headline, weight: .bold))
                 .foregroundStyle(theme.palette.onSurface.color)
+                .appearanceTextPlate()
             Text("この推しの予定はまだありません")
                 .foregroundStyle(theme.palette.onSurfaceVariant.color)
+                .appearanceTextPlate()
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .environment(\.isOverAppearancePhoto, true)
     }
 }
 
