@@ -162,7 +162,7 @@ private enum OshiPhotoDecorationPreview {
     ZStack {
         AppearanceBackgroundPhotoLayers(
             image: PhotoCropPreviewImage.make(width: 900, height: 1_950),
-            intensity: .medium,
+            style: .default,
             isDecorated: true
         )
         OshiPhotoDecorationMarks(

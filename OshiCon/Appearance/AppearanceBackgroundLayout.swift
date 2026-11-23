@@ -15,7 +15,7 @@ nonisolated struct AppearanceBackgroundLayout: Equatable, Sendable {
 
     /// 写真を置く枠（地の座標）。地から外にはみ出すことがある。
     let photoFrame: CGRect
-    /// 左右の余りを、同じ写真の強いぼかし（`AppearanceIntensity.sideFillBlurRadius`）で埋めるか。
+    /// 左右の余りを、同じ写真の強いぼかし（`AppearanceBackgroundStyle.sideFillBlurRadius`）で埋めるか。
     let showsSideFill: Bool
 
     /// 大きさ `containerSize` の地に、縦横比 `photoAspectRatio`（幅 ÷ 高さ）の写真を置く。

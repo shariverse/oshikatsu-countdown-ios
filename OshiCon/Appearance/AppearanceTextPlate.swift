@@ -13,7 +13,7 @@ extension EnvironmentValues {
 
 /// 着せ替えの写真（背景の写真・推しの丸い写真の飾り）の上で、地の上に直接描く文字（見出し・案内）の後ろに敷く板。
 ///
-/// 背景の写真は推しが見えるよう幕を薄くし（`AppearanceIntensity`）、飾りは濃くできる（`OshiPhotoDecorationStyle`）ので、写真の色によっては地の上の文字が読めなくなる。
+/// 背景の写真は推しが見えるよう幕を薄くでき（`AppearanceBackgroundStyle`）、飾りは濃くできる（`OshiPhotoDecorationStyle`）ので、写真の色によっては地の上の文字が読めなくなる。
 /// そこで着せ替えの写真を描いているときだけ、文字の後ろをカードの地の色（`surface`）で塗る。
 /// 本文の色（`onSurface`・`onSurfaceVariant`）はカードの地の上で 4.5:1 以上なので（`PaletteContrastTests`）、写真の色や濃さによらず読める。
 /// 標準の見た目のときは板を敷かない（地の模様の上で 4.5:1 以上を保っている）。
