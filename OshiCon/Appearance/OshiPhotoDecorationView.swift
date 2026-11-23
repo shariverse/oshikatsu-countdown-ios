@@ -30,7 +30,8 @@ struct OshiPhotoDecorationLayer: View {
             pixelLength: OshiPhotoDecoration.decodePixelLength(displayScale: displayScale)
         )
         OshiPhotoDecorationMarks(decoration: decoration, images: images)
-            // 推しの写真の差し替え・出す推しの変更・推しの追加と削除・画面の倍率が変わったら読み直す。読み直す間は今の写真を出したままにする
+            // 推しの写真の差し替え・出す推しの変更・推しの追加と削除・画面の倍率が変わったら読み直す。読み直す間は今の写真を出したままにする。
+            // 濃さ・量は読み込みに関わらないので、スライダーを動かしている間は読み直さず、読んだ写真で描き直すだけ
             .task(id: request) {
                 let loaded = await Self.load(request, from: photos)
                 guard !Task.isCancelled else {
@@ -104,23 +105,6 @@ struct OshiPhotoDecorationMarks: View {
     }
 }
 
-/// 地の色 `ground` に、推しの丸い写真の飾り（`OshiPhotoDecorationLayer`）を重ねた画面の地（背景の写真を敷かないとき）。
-struct OshiPhotoDecorationBackground: View {
-    let ground: AdaptiveColor
-    let oshis: [Oshi]
-    let style: OshiPhotoDecorationStyle
-    var photos = OshiPhotoLibrary.shared
-
-    var body: some View {
-        ground.color
-            .overlay {
-                OshiPhotoDecorationLayer(oshis: oshis, style: style, photos: photos)
-            }
-            .accessibilityHidden(true)
-            .allowsHitTesting(false)
-    }
-}
-
 /// Preview で使う推し（写真のある 2 人と、写真の無い 1 人）と、読んだ丸い写真。
 private enum OshiPhotoDecorationPreview {
     static let minato = "00000000-0000-0000-0000-000000000001.jpg"
@@ -174,10 +158,7 @@ private enum OshiPhotoDecorationPreview {
 }
 
 #Preview("写真のある推しがいない（今の模様）") {
-    OshiPhotoDecorationBackground(
-        ground: AppTheme.shipping.palette.background,
-        oshis: [Oshi(name: "ミナト", color: .navy)],
-        style: .default
-    )
-    .ignoresSafeArea()
+    OshiPhotoDecorationLayer(oshis: [Oshi(name: "ミナト", color: .navy)], style: .default)
+        .background(AppTheme.shipping.palette.background.color)
+        .ignoresSafeArea()
 }
