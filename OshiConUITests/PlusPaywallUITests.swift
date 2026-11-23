@@ -160,6 +160,22 @@ final class PlusPaywallUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.firstMatch.exists)
     }
 
+    /// 課金画面を開いたまま、ウィジェット・通知のリンクで予定の詳細を開くと、課金画面を閉じてホームのタブに移る（開いた詳細が課金画面の下に隠れない）。
+    /// 予定の id は無いものでよい（リンクの受け方は同じで、詳細はすぐホームの最初の画面に戻る）。
+    @MainActor
+    func testEventLinkClosesPaywall() throws {
+        let app = launchSettings(arguments: ["-plusLocked"])
+        let plusRow = app.buttons["settings.plus"]
+        XCTAssertTrue(plusRow.waitForExistence(timeout: 5))
+        plusRow.tap()
+        let paywall = app.navigationBars["推し活カウントダウン Plus"]
+        XCTAssertTrue(paywall.waitForExistence(timeout: 5))
+
+        app.open(try XCTUnwrap(URL(string: "oshicon://event/\(UUID().uuidString)")))
+        XCTAssertTrue(paywall.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["home.addEvent"].waitForExistence(timeout: 5))
+    }
+
     /// App Store 版では、設定に Plus の行を出さない。
     @MainActor
     func testPlusRowHiddenInAppStoreDistribution() throws {
