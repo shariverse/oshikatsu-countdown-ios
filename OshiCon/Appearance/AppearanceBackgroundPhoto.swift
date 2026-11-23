@@ -117,6 +117,30 @@ struct AppearanceBackgroundPhotoLayers: View {
     }
 }
 
+/// 背景の写真の上の端に掛ける、幕の色のグラデーション。幕が薄くても、ステータスバーの文字（時刻・電池）が写真の色によらず読めるようにする。
+///
+/// 上から半分は `AppearanceIntensity.statusBarFadeOpacity` のまま覆い、そこから下の端に向けて消す。ホームの地（`AppearanceScreenBackground`）で使う。
+struct AppearanceStatusBarFade: View {
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        let scrim = AppearanceIntensity.scrimColor(in: theme).color
+        LinearGradient(
+            stops: [
+                .init(color: scrim.opacity(AppearanceIntensity.statusBarFadeOpacity), location: 0),
+                .init(color: scrim.opacity(AppearanceIntensity.statusBarFadeOpacity), location: 0.5),
+                .init(color: scrim.opacity(0), location: 1)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: AppearanceIntensity.statusBarFadeHeight)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .accessibilityHidden(true)
+        .allowsHitTesting(false)
+    }
+}
+
 /// Preview で背景の上に置く、地の上に直接描く文字（見出し・案内）。ホームと同じく、背景の写真の上では後ろに板を敷く。
 private struct AppearanceBackgroundPreviewText: View {
     @Environment(\.appTheme) private var theme

@@ -74,6 +74,13 @@ nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     /// 縦長の写真の左右の余り（iPad・横向き）を埋める、同じ写真のぼかしの半径（pt）。どの強さでも同じ。
     static let sideFillBlurRadius: CGFloat = 60
 
+    /// ホームの地の上の端に掛ける、幕の色のグラデーションの高さ（pt。ステータスバーより少し下まで）。
+    /// 幕が薄いので、写真の色によってはステータスバーの文字（時刻・電池）が読めなくなる。上の端だけ幕の色で覆う。
+    static let statusBarFadeHeight: CGFloat = 110
+
+    /// 上の端のグラデーションの、いちばん上の不透明度。写真が真っ白・真っ黒でもステータスバーの文字（ライトは黒、ダークは白）が 4.5:1 以上になる濃さ。
+    static let statusBarFadeOpacity = 0.85
+
     /// 写真に掛ける幕の不透明度（0〜1）。`isDecorated` は、写真の上に飾り（推しの丸い写真）を重ねるか。
     func scrimOpacity(isDark: Bool, isDecorated: Bool) -> Double {
         isDecorated ? decoratedScrimOpacity(isDark: isDark) : plainScrimOpacity(isDark: isDark)
