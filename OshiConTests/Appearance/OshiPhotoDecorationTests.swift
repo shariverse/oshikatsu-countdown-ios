@@ -122,24 +122,17 @@ struct OshiPhotoDecorationTests {
     }
 
     @Test(
-        "丸い写真が真っ白・真っ黒でも、地（飾りを重ねるときの濃い幕を背景の写真に掛けた地を含む）の上の本文が 4.5:1 以上（ライトとダーク）",
+        "背景の写真が無いとき、丸い写真が真っ白・真っ黒でも、地の上の本文が 4.5:1 以上（ライトとダーク）",
         arguments: [false, true]
     )
     func contrast(isDark: Bool) {
-        let theme = AppTheme.shipping
-        let palette = theme.palette
-        var grounds = [palette.background.resolved(isDark: isDark)]
-        for intensity in AppearanceIntensity.allCases {
-            for backgroundPhoto in [RGBColor.white, .black] {
-                grounds.append(intensity.ground(over: backgroundPhoto, in: theme, isDark: isDark, isDecorated: true))
-            }
-        }
-        for ground in grounds {
-            for photo in [RGBColor.white, .black] {
-                let decorated = OshiPhotoDecoration.ground(ground, under: photo)
-                #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: decorated) >= 4.5, "\(ground) \(photo)")
-                #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: decorated) >= 4.5, "\(ground) \(photo)")
-            }
+        // 背景の写真の上に重ねるときは、地の上の本文の後ろに板を敷くので（AppearanceTextPlate）、ここでは数えない
+        let palette = AppTheme.shipping.palette
+        let ground = palette.background.resolved(isDark: isDark)
+        for photo in [RGBColor.white, .black] {
+            let decorated = OshiPhotoDecoration.ground(ground, under: photo)
+            #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: decorated) >= 4.5, "\(photo)")
+            #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: decorated) >= 4.5, "\(photo)")
         }
     }
 }
