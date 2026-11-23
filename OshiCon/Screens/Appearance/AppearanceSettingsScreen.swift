@@ -22,7 +22,7 @@ struct AppearanceSettingsScreen: View {
     @Environment(\.displayScale) private var displayScale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query private var storedEvents: [StoredEvent]
-    @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
+    @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
 
     @State private var selectedItem: PhotosPickerItem?

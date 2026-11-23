@@ -20,7 +20,7 @@ struct EventDetailScreen: View {
     @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @Query private var storedEvents: [StoredEvent]
     /// 着せ替えの飾りに使う推し（ホームと同じ並び）。
-    @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
+    @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
     /// 上の写真の下端。着せ替えの地を、上の写真より下にだけ敷くのに使う。
     @State private var headerPosition = AppearanceDetailHeaderPosition()
