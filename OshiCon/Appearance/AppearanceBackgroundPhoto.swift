@@ -12,6 +12,8 @@ import SwiftUI
 struct AppearanceBackgroundPhotoView: View {
     let photo: AppearanceRendering.BackgroundPhoto
     let photos: OshiPhotoLibrary
+    /// 写真の上に飾り（推しの丸い写真）を重ねるか。重ねるときは幕を濃くする（`AppearanceIntensity.scrimOpacity(isDark:isDecorated:)`）。
+    let isDecorated: Bool
     /// 上から何 pt を写真を敷かずに空けるか（予定の詳細の上の写真の部分）。空けた所には何も描かない（下の地が見える）。
     var excludedTopHeight: CGFloat = 0
 
@@ -35,6 +37,7 @@ struct AppearanceBackgroundPhotoView: View {
                 // 写真を差し替えたら、新しい写真を読むまで前の写真を出さない
                 image: loaded?.fileName == photo.fileName ? loaded?.image : nil,
                 intensity: photo.intensity,
+                isDecorated: isDecorated,
                 excludedTopHeight: excludedTopHeight
             )
             // 画面の大きさ（回転・iPad の分割）が変わったら読み直す。読み直す間は今の写真を出したままにする
@@ -54,12 +57,13 @@ struct AppearanceBackgroundPhotoView: View {
 
 /// 読んだ背景の写真 `image` に、ぼかしと幕を掛けて描く。写真が無い（読む前・読めない）ときはテーマの地の色に幕を掛ける。
 ///
-/// - 幕の色と不透明度・ぼかしの量は `AppearanceIntensity`（ライトは地の色、ダークは黒）
+/// - 幕の色と不透明度・ぼかしの量は `AppearanceIntensity`（ライトは地の色、ダークは黒。飾りを重ねる `isDecorated` ときは幕を濃くする）
 /// - iPad・横向きでは写真を高さに合わせて中央に置き、左右の余りを同じ写真の強いぼかしで埋める（`AppearanceBackgroundLayout`）
 /// - 読み上げ・押せる範囲を変えない
 struct AppearanceBackgroundPhotoLayers: View {
     let image: CGImage?
     let intensity: AppearanceIntensity
+    var isDecorated = false
     var excludedTopHeight: CGFloat = 0
 
     @Environment(\.appTheme) private var theme
@@ -74,7 +78,7 @@ struct AppearanceBackgroundPhotoLayers: View {
                     photoLayers(image, size: proxy.size)
                 }
                 AppearanceIntensity.scrimColor(in: theme).color
-                    .opacity(intensity.scrimOpacity(isDark: colorScheme == .dark))
+                    .opacity(intensity.scrimOpacity(isDark: colorScheme == .dark, isDecorated: isDecorated))
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()

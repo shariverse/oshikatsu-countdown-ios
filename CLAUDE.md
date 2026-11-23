@@ -78,7 +78,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   効かせるのはホームと予定の詳細の地だけ（詳細は上の写真より下）で、`ThemeScreenBackground`（課金画面・シェアのカード・テーマの見本）は変えない。
   設定（背景・飾りの ON/OFF、強さ 弱・中・強、背景の写真のファイル名）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
   画面は `@Environment(AppearanceStore.self)` と `@Environment(\.isPlusUnlocked)` から `store.rendering(isPlusUnlocked:)`（`AppearanceRendering`。Plus でなければ標準）で描くものを決め、背景の写真は `store.photos` から読む（メモリ上のストアでは置き場所が違う）。
-  幕の強さは、写真が真っ白・真っ黒でも地の上に直接描く本文（`onSurface`・`onSurfaceVariant`）が 4.5:1 以上になる値（`AppearanceIntensity`。カードの上の推し色の文字は数えない。飾りと同じ基準）。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で開発版と TestFlight だけ。
+  幕の強さは、写真が真っ白・真っ黒でも地の上に直接描く本文（`onSurface`・`onSurfaceVariant`）が 4.5:1 以上になる値（`AppearanceIntensity`。カードの上の推し色の文字は数えない。飾りと同じ基準）。幕は飾りを重ねるときだけ濃くし、飾りが OFF なら写真が見えるよう薄くする（`scrimOpacity(isDark:isDecorated:)`）。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で開発版と TestFlight だけ。
   メモリ上のストアでは別の UserDefaults と一時ディレクトリを起動のたびに空にして使い、ホームと詳細に描いているものを UI テストに見せる口（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置く。
   仕様・コードの場所・テストの口（`AppearanceUITests`・`appearance.*`）・実機で確かめることは `docs/appearance.md`。Android 版の SPEC には未記載（epic の後で合わせる）
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く

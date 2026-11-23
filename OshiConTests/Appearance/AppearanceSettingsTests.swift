@@ -123,19 +123,32 @@ struct AppearanceSettingsTests {
 struct AppearanceIntensityTests {
     private let theme = AppTheme.shipping
 
-    @Test("強さは弱・中・強の 3 段階で、強いほど幕が濃く、ぼかしが大きい", arguments: [false, true])
-    func ordering(isDark: Bool) {
+    @Test("強さは弱・中・強の 3 段階で、強いほど幕が濃く（0.05 以上の差）、ぼかしが大きい", arguments: [false, true], [false, true])
+    func ordering(isDark: Bool, isDecorated: Bool) {
         let all = AppearanceIntensity.allCases
         #expect(all == [.weak, .medium, .strong])
         for (weaker, stronger) in zip(all, all.dropFirst()) {
-            #expect(weaker.scrimOpacity(isDark: isDark) < stronger.scrimOpacity(isDark: isDark))
+            let difference = stronger.scrimOpacity(isDark: isDark, isDecorated: isDecorated)
+                - weaker.scrimOpacity(isDark: isDark, isDecorated: isDecorated)
+            #expect(difference >= 0.05 - 1e-9)
             #expect(weaker.blurRadius < stronger.blurRadius)
         }
         for intensity in all {
-            #expect(intensity.scrimOpacity(isDark: isDark) > 0)
-            #expect(intensity.scrimOpacity(isDark: isDark) < 1)
+            #expect(intensity.scrimOpacity(isDark: isDark, isDecorated: isDecorated) > 0)
+            #expect(intensity.scrimOpacity(isDark: isDark, isDecorated: isDecorated) < 1)
             #expect(intensity.blurRadius < AppearanceIntensity.sideFillBlurRadius)
         }
+    }
+
+    @Test("飾りを重ねるときだけ幕を濃くし、重ねないときは写真が見えるよう薄くする（ライトの弱は 0.74）", arguments: [false, true])
+    func decoratedIsDenser(isDark: Bool) {
+        for intensity in AppearanceIntensity.allCases {
+            #expect(
+                intensity.scrimOpacity(isDark: isDark, isDecorated: false) < intensity.scrimOpacity(isDark: isDark, isDecorated: true),
+                "\(intensity)"
+            )
+        }
+        #expect(AppearanceIntensity.weak.scrimOpacity(isDark: false, isDecorated: false) == 0.74)
     }
 
     @Test("幕の色はライトでは地の色、ダークでは黒")
@@ -146,16 +159,18 @@ struct AppearanceIntensityTests {
     }
 
     @Test(
-        "どの強さでも、写真が真っ白・真っ黒のときに、地の上に直接描く本文（見出し・案内）が 4.5:1 以上（ライトとダーク）",
+        "どの強さでも、飾りの有無によらず、写真が真っ白・真っ黒のときに、地の上に直接描く本文（見出し・案内）が 4.5:1 以上（ライトとダーク）",
         arguments: AppearanceIntensity.allCases, [false, true]
     )
     func contrast(intensity: AppearanceIntensity, isDark: Bool) {
-        // 推し色の文字はカードの上に描くので数えない（飾りと同じ基準）
+        // 推し色の文字はカードの上に描くので数えない（飾りと同じ基準）。飾りを重ねたところは OshiPhotoDecorationTests で確かめる
         let palette = theme.palette
-        for photo in [RGBColor.white, .black] {
-            let ground = intensity.ground(over: photo, in: theme, isDark: isDark)
-            #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo)")
-            #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo)")
+        for isDecorated in [false, true] {
+            for photo in [RGBColor.white, .black] {
+                let ground = intensity.ground(over: photo, in: theme, isDark: isDark, isDecorated: isDecorated)
+                #expect(palette.onSurface.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo) \(isDecorated)")
+                #expect(palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(photo) \(isDecorated)")
+            }
         }
     }
 }

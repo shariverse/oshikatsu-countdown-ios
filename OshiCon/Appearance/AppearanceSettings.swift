@@ -63,7 +63,8 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
 /// 幕の色はライトでは地の色（`palette.background`）、ダークでは黒。幕の不透明度は、写真が真っ白・真っ黒のときでも、
 /// 地の上に直接描く文字（見出し・案内。本文の色 `onSurface`・`onSurfaceVariant`）が 4.5:1 以上になる値にする（`AppearanceIntensityTests`）。
 /// 推し色の文字はカードの上に描くので数えない（飾りの `OshiPhotoDecoration` と同じ基準）。
-/// 飾りを重ねたとき（丸い写真が真っ白・真っ黒）も 4.5:1 以上になるよう、弱でも飾りの分の余裕を残す（`OshiPhotoDecorationTests`）。
+/// 飾り（推しの丸い写真）を重ねないときは、写真が見えるよう本文の色だけで 4.5:1 を守れる薄さにする。
+/// 飾りを重ねるときだけ、丸い写真が真っ白・真っ黒でも 4.5:1 以上になるよう幕を濃くする（`OshiPhotoDecorationTests`）。
 nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     case weak
     case medium
@@ -74,8 +75,31 @@ nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     /// 縦長の写真の左右の余り（iPad・横向き）を埋める、同じ写真のぼかしの半径（pt）。どの強さでも同じ。
     static let sideFillBlurRadius: CGFloat = 60
 
-    /// 写真に掛ける幕の不透明度（0〜1）。
-    func scrimOpacity(isDark: Bool) -> Double {
+    /// 写真に掛ける幕の不透明度（0〜1）。`isDecorated` は、写真の上に飾り（推しの丸い写真）を重ねるか。
+    func scrimOpacity(isDark: Bool, isDecorated: Bool) -> Double {
+        isDecorated ? decoratedScrimOpacity(isDark: isDark) : plainScrimOpacity(isDark: isDark)
+    }
+
+    /// 飾りを重ねないときの幕の不透明度。弱・中・強の違いが分かるよう 0.06 ずつ離す。
+    private func plainScrimOpacity(isDark: Bool) -> Double {
+        switch (self, isDark) {
+        case (.weak, false):
+            0.74
+        case (.medium, false):
+            0.80
+        case (.strong, false):
+            0.86
+        case (.weak, true):
+            0.70
+        case (.medium, true):
+            0.76
+        case (.strong, true):
+            0.82
+        }
+    }
+
+    /// 飾りを重ねるときの幕の不透明度。飾りの分の余裕を残し、弱・中・強の違いが分かるよう 0.05 ずつ離す。
+    private func decoratedScrimOpacity(isDark: Bool) -> Double {
         switch (self, isDark) {
         case (.weak, false):
             0.86
@@ -110,8 +134,11 @@ nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     }
 
     /// 色 `photo` の写真に幕を掛けた後の地の色（ぼかしは色を変えないので数えない）。コントラストを確かめるのに使う。
-    func ground(over photo: RGBColor, in theme: AppTheme, isDark: Bool) -> RGBColor {
-        photo.mixed(with: Self.scrimColor(in: theme).resolved(isDark: isDark), fraction: scrimOpacity(isDark: isDark))
+    func ground(over photo: RGBColor, in theme: AppTheme, isDark: Bool, isDecorated: Bool) -> RGBColor {
+        photo.mixed(
+            with: Self.scrimColor(in: theme).resolved(isDark: isDark),
+            fraction: scrimOpacity(isDark: isDark, isDecorated: isDecorated)
+        )
     }
 }
 

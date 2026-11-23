@@ -147,7 +147,11 @@ private enum OshiPhotoDecorationPreview {
 
 #Preview("背景の写真の上に飾り") {
     ZStack {
-        AppearanceBackgroundPhotoLayers(image: PhotoCropPreviewImage.make(width: 900, height: 1_950), intensity: .medium)
+        AppearanceBackgroundPhotoLayers(
+            image: PhotoCropPreviewImage.make(width: 900, height: 1_950),
+            intensity: .medium,
+            isDecorated: true
+        )
         OshiPhotoDecorationMarks(decoration: OshiPhotoDecorationPreview.decoration, images: OshiPhotoDecorationPreview.images)
     }
     .ignoresSafeArea()

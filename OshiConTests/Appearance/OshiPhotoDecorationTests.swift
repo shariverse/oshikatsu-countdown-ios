@@ -122,7 +122,7 @@ struct OshiPhotoDecorationTests {
     }
 
     @Test(
-        "丸い写真が真っ白・真っ黒でも、地（背景の写真に幕を掛けた地を含む）の上の本文が 4.5:1 以上（ライトとダーク）",
+        "丸い写真が真っ白・真っ黒でも、地（飾りを重ねるときの濃い幕を背景の写真に掛けた地を含む）の上の本文が 4.5:1 以上（ライトとダーク）",
         arguments: [false, true]
     )
     func contrast(isDark: Bool) {
@@ -131,7 +131,7 @@ struct OshiPhotoDecorationTests {
         var grounds = [palette.background.resolved(isDark: isDark)]
         for intensity in AppearanceIntensity.allCases {
             for backgroundPhoto in [RGBColor.white, .black] {
-                grounds.append(intensity.ground(over: backgroundPhoto, in: theme, isDark: isDark))
+                grounds.append(intensity.ground(over: backgroundPhoto, in: theme, isDark: isDark, isDecorated: true))
             }
         }
         for ground in grounds {

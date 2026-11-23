@@ -128,11 +128,18 @@ struct AppearanceBackgroundLayoutTests {
     @Test("写真を読む前（地の色に幕）でも、地の上の推し色の文字と本文が 4.5:1 以上（ライトとダーク）", arguments: AppearanceIntensity.allCases, [false, true])
     func contrastBeforeLoading(intensity: AppearanceIntensity, isDark: Bool) {
         let theme = AppTheme.shipping
-        let ground = intensity.ground(over: theme.palette.background.resolved(isDark: isDark), in: theme, isDark: isDark)
-        for color in OshiColor.allCases {
-            #expect(color.text(in: theme).resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(color)")
+        for isDecorated in [false, true] {
+            let ground = intensity.ground(
+                over: theme.palette.background.resolved(isDark: isDark),
+                in: theme,
+                isDark: isDark,
+                isDecorated: isDecorated
+            )
+            for color in OshiColor.allCases {
+                #expect(color.text(in: theme).resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(color) \(isDecorated)")
+            }
+            #expect(theme.palette.onSurface.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(isDecorated)")
+            #expect(theme.palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5, "\(isDecorated)")
         }
-        #expect(theme.palette.onSurface.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5)
-        #expect(theme.palette.onSurfaceVariant.resolved(isDark: isDark).contrastRatio(with: ground) >= 4.5)
     }
 }

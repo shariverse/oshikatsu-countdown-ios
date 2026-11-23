@@ -25,7 +25,7 @@ struct AppearanceScreenBackground: View {
         Group {
             if let photo = rendering.backgroundPhoto {
                 ZStack {
-                    AppearanceBackgroundPhotoView(photo: photo, photos: photos)
+                    AppearanceBackgroundPhotoView(photo: photo, photos: photos, isDecorated: rendering.showsOshiPhotoDecoration)
                     if rendering.showsOshiPhotoDecoration {
                         OshiPhotoDecorationLayer(oshis: oshis)
                     }

@@ -58,7 +58,12 @@ struct AppearanceDetailBackground: View {
 
     @ViewBuilder private func dressed(excludedTopHeight: CGFloat) -> some View {
         if let photo = rendering.backgroundPhoto {
-            AppearanceBackgroundPhotoView(photo: photo, photos: photos, excludedTopHeight: excludedTopHeight)
+            AppearanceBackgroundPhotoView(
+                photo: photo,
+                photos: photos,
+                isDecorated: rendering.showsOshiPhotoDecoration,
+                excludedTopHeight: excludedTopHeight
+            )
         }
         if rendering.showsOshiPhotoDecoration {
             OshiPhotoDecorationLayer(oshis: oshis)
