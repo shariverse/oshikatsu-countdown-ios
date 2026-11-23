@@ -6,16 +6,17 @@
 import SwiftUI
 
 extension EnvironmentValues {
-    /// 地に着せ替えの背景の写真を敷いているか。true のとき、地の上に直接描く文字の後ろに板を敷く（`appearanceTextPlate()`）。
+    /// 地に着せ替えの写真（背景の写真か、推しの丸い写真の飾り。`AppearanceRendering.drawsPhotosOnGround`）を描いているか。
+    /// true のとき、地の上に直接描く文字の後ろに板を敷く（`appearanceTextPlate()`）。
     @Entry var isOverAppearancePhoto = false
 }
 
-/// 着せ替えの背景の写真の上で、地の上に直接描く文字（見出し・案内）の後ろに敷く板。
+/// 着せ替えの写真（背景の写真・推しの丸い写真の飾り）の上で、地の上に直接描く文字（見出し・案内）の後ろに敷く板。
 ///
-/// 背景の写真は推しが見えるよう幕を薄くしているので（`AppearanceIntensity`）、写真の色によっては地の上の文字が読めなくなる。
-/// そこで背景の写真を敷いているときだけ、文字の後ろをカードの地の色（`surface`）で塗る。
-/// 本文の色（`onSurface`・`onSurfaceVariant`）はカードの地の上で 4.5:1 以上なので（`PaletteContrastTests`）、写真の色や幕の濃さによらず読める。
-/// 背景の写真が無いとき（標準・飾りだけ）は板を敷かない（地の模様の上で 4.5:1 以上を保っている）。
+/// 背景の写真は推しが見えるよう幕を薄くし（`AppearanceIntensity`）、飾りは濃くできる（`OshiPhotoDecorationStyle`）ので、写真の色によっては地の上の文字が読めなくなる。
+/// そこで着せ替えの写真を描いているときだけ、文字の後ろをカードの地の色（`surface`）で塗る。
+/// 本文の色（`onSurface`・`onSurfaceVariant`）はカードの地の上で 4.5:1 以上なので（`PaletteContrastTests`）、写真の色や濃さによらず読める。
+/// 標準の見た目のときは板を敷かない（地の模様の上で 4.5:1 以上を保っている）。
 nonisolated enum AppearanceTextPlate {
     /// 板の色。カードの地の色。
     static func color(in theme: AppTheme) -> AdaptiveColor {
@@ -24,12 +25,12 @@ nonisolated enum AppearanceTextPlate {
 }
 
 extension View {
-    /// 着せ替えの背景の写真を敷いているとき（`isOverAppearancePhoto`）だけ、見出し・案内の文字の後ろに小さな板を敷く。
+    /// 着せ替えの写真を描いているとき（`isOverAppearancePhoto`）だけ、見出し・案内の文字の後ろに小さな板を敷く。
     func appearanceTextPlate() -> some View {
         modifier(AppearanceTextPlateModifier(style: .label))
     }
 
-    /// 着せ替えの背景の写真を敷いているとき（`isOverAppearancePhoto`）だけ、中身の高さに縮めてカードの形の板を敷く。
+    /// 着せ替えの写真を描いているとき（`isOverAppearancePhoto`）だけ、中身の高さに縮めてカードの形の板を敷く。
     /// 画面いっぱいに広がる空の案内（`ContentUnavailableView`）に使う。
     func appearanceBlockPlate() -> some View {
         modifier(AppearanceTextPlateModifier(style: .block))

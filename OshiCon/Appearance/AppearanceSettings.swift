@@ -91,7 +91,7 @@ nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
     static let sideFillBlurRadius: CGFloat = 60
 
     /// ホームの地の上の端に掛ける、幕の色のグラデーションの高さ（pt。ステータスバーより少し下まで）。
-    /// 幕が薄いので、写真の色によってはステータスバーの文字（時刻・電池）が読めなくなる。上の端だけ幕の色で覆う。
+    /// 幕が薄く、飾り（推しの丸い写真）は濃くできるので、写真の色によってはステータスバーの文字（時刻・電池）が読めなくなる。上の端だけ幕の色で覆う。
     static let statusBarFadeHeight: CGFloat = 110
 
     /// 上の端のグラデーションの、いちばん上の不透明度。写真が真っ白・真っ黒でもステータスバーの文字（ライトは黒、ダークは白）が 4.5:1 以上になる濃さ。
@@ -213,5 +213,14 @@ nonisolated struct AppearanceRendering: Equatable, Sendable {
     /// 標準の見た目か。
     var isStandard: Bool {
         self == .standard
+    }
+
+    /// 地に写真（背景の写真か、推しの丸い写真の飾り）を描くか。
+    ///
+    /// 描くときは、写真の色や濃さによらず読めるよう、ホームの地の上に直接描く文字の後ろに板を敷き（`AppearanceTextPlate`）、
+    /// ホームの上の端をステータスバーのために幕の色で覆う（`AppearanceStatusBarFade`）。
+    /// 飾りだけで写真のある推しがいない（テーマの模様のまま）ときも、同じにする（出す推しが変わるたびに見出しが変わらないように）。
+    var drawsPhotosOnGround: Bool {
+        !isStandard
     }
 }
