@@ -16,18 +16,22 @@ struct AppearanceHomePreview: View {
     let decorationOshis: [Oshi]
     /// 背景の写真の置き場所（`AppearanceStore.photos`）。
     let photos: OshiPhotoLibrary
+    /// 見本を見せる幅（pt）。高さは縦横の比（`AppearancePreview.canvasSize`）から決まる。
+    let width: CGFloat
 
     @Environment(\.appTheme) private var theme
     @Environment(\.displayScale) private var displayScale
 
     /// 見本の上の、ステータスバーの分の余白（pt）。
     private let topInset: CGFloat = 54
-    private let cornerRadius: CGFloat = 24
+    /// 見本の角の丸み（pt。縮める前のホームの大きさで数える）。見本を小さく見せても、端末の角のような形を保つ。
+    private let canvasCornerRadius: CGFloat = 52
 
     var body: some View {
         let canvas = AppearancePreview.canvasSize
-        let factor = AppearancePreview.displayScaleFactor
-        let size = AppearancePreview.displaySize
+        let factor = AppearancePreview.displayScaleFactor(width: width)
+        let size = CGSize(width: canvas.width * factor, height: canvas.height * factor)
+        let cornerRadius = canvasCornerRadius * factor
         home
             // 実際のホームと同じく、背景の写真・飾りの上では見出しの後ろに板を敷く
             .environment(\.isOverAppearancePhoto, rendering.drawsPhotosOnGround)
@@ -91,7 +95,8 @@ private enum AppearanceHomePreviewSample {
         rendering: .standard,
         content: AppearanceHomePreviewSample.content,
         decorationOshis: [],
-        photos: .shared
+        photos: .shared,
+        width: 180
     )
     .padding()
 }
@@ -101,7 +106,8 @@ private enum AppearanceHomePreviewSample {
         rendering: AppearanceRendering(backgroundPhoto: nil, decoration: .default),
         content: AppearanceHomePreviewSample.content,
         decorationOshis: [Oshi(name: "ミナト", color: .navy)],
-        photos: .shared
+        photos: .shared,
+        width: 180
     )
     .padding()
     .preferredColorScheme(.dark)

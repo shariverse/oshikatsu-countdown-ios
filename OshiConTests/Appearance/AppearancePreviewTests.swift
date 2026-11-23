@@ -61,14 +61,20 @@ struct AppearancePreviewTests {
         #expect(AppearancePreview.rows(of: one).map(\.id) == [single.id])
     }
 
-    @Test("見本は背景の写真の枠と同じ縦長の比率で組み、見せる幅に縮める")
-    func canvasMatchesBackgroundAspectRatio() {
+    @Test("見本は背景の写真の枠と同じ縦長の比率で組み、見せる高さに縮める", arguments: [120.0, 300.0, 607.0])
+    func canvasMatchesBackgroundAspectRatio(height: Double) {
         let canvas = AppearancePreview.canvasSize
         #expect(abs(canvas.width / canvas.height - PhotoCrop.backgroundAspectRatio) < 0.001)
-        let size = AppearancePreview.displaySize
-        #expect(size.width == AppearancePreview.displayWidth)
+        let size = AppearancePreview.displaySize(height: CGFloat(height))
+        #expect(abs(size.height - CGFloat(height)) < 0.0001)
         #expect(abs(size.width / size.height - canvas.width / canvas.height) < 0.0001)
-        #expect(abs(AppearancePreview.displayScaleFactor * canvas.width - size.width) < 0.0001)
+        #expect(abs(AppearancePreview.displayScaleFactor(width: size.width) * canvas.width - size.width) < 0.0001)
+    }
+
+    @Test("見せる大きさが負なら 0 にする")
+    func displaySizeWithNegativeLength() {
+        #expect(AppearancePreview.displaySize(height: -10) == .zero)
+        #expect(AppearancePreview.displayScaleFactor(width: -10) == 0)
     }
 
     @Test("調整画面で描く写真は、縦長の枠の上限の長い辺を引き伸ばさずに描ける大きさで読む", arguments: [1.0, 2.0, 3.0])

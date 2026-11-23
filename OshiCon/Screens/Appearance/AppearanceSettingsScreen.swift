@@ -147,7 +147,8 @@ struct AppearanceSettingsScreen: View {
                 rendering: AppearancePreview.rendering(settings: store.settings),
                 content: content,
                 decorationOshis: oshis,
-                photos: store.photos
+                photos: store.photos,
+                width: 180
             )
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
