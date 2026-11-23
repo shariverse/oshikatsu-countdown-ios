@@ -149,6 +149,22 @@ final class AppearanceUITests: XCTestCase {
         }
     }
 
+    /// スライダー `slider` を `position`（0〜1）まで動かし、値が `expected` になるまで（3 回まで）動かし直す。
+    /// 動きの遅い CI の Simulator では、1 回の `adjust` が端まで届かずに途中（75〜80%）で止まることがあるため。
+    @MainActor
+    private func adjust(
+        _ slider: XCUIElement,
+        to position: CGFloat,
+        expecting expected: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        for _ in 0..<3 where slider.value as? String != expected {
+            slider.adjust(toNormalizedSliderPosition: position)
+        }
+        XCTAssertEqual(slider.value as? String, expected, file: file, line: line)
+    }
+
     /// 画面をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
     /// スライダーの無い左の端（行の外の余白）を縦に送る。
     @MainActor
@@ -170,11 +186,9 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(scrim.isEnabled)
         XCTAssertEqual(scrim.value as? String, "50%")
         XCTAssertEqual(blur.value as? String, "40%")
-        scrim.adjust(toNormalizedSliderPosition: 1)
-        XCTAssertEqual(scrim.value as? String, "100%")
+        adjust(scrim, to: 1, expecting: "100%")
         XCTAssertEqual(blur.value as? String, "40%")
-        blur.adjust(toNormalizedSliderPosition: 0)
-        XCTAssertEqual(blur.value as? String, "0%")
+        adjust(blur, to: 0, expecting: "0%")
         waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%"])
 
         toggle("appearance.backgroundToggle", in: app, to: "0")
@@ -295,12 +309,10 @@ final class AppearanceUITests: XCTestCase {
 
         // いちばん濃く、いちばん多く（埋め尽くす）する。見本を見るために上へ送ったので、スライダーまで戻る
         reveal(opacity, in: app)
-        opacity.adjust(toNormalizedSliderPosition: 1)
-        XCTAssertEqual(opacity.value as? String, "100%")
+        adjust(opacity, to: 1, expecting: "100%")
         let amount = app.sliders["appearance.decorationAmount"]
         reveal(amount, in: app)
-        amount.adjust(toNormalizedSliderPosition: 1)
-        XCTAssertEqual(amount.value as? String, "100%")
+        adjust(amount, to: 1, expecting: "100%")
         waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 100%"])
 
         // 見本の推し（写真なし）が並び、推しごとに外せる
