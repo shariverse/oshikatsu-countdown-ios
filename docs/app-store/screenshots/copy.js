@@ -1,12 +1,12 @@
 // App Store 用スクリーンショットの見出し（t）と小見出し（s）。screenshots.html が読む。
-// 10 枚の並びは screenshots.html の SLIDES と同じ。<em> は枚の色（推し色）で強調し、<br> は日本語・中国語だけで改行の位置を決める。
+// 10 枚の並びは screenshots.html の SLIDES と同じ。duo は iPhone Duo だけの差し替え（ロック画面を撮れないので、2 枚目の小見出しからロック画面を外す）。<em> は枚の色（推し色）で強調し、<br> は日本語・中国語だけで改行の位置を決める。
 // 用語は掲載文（docs/app-store/metadata/<言語>.md の「言葉の選び方」）にそろえる。
 // en-GB・es-MX はストアの掲載だけの言語（アプリは en・es で出る）なので、en・es をもとに英国のつづり・中南米の言い方に直す。
 // 価格・実在の人物・作品の名前は入れない。docs/app-store/languages.json の言語を足したら、ここにも 10 枚ぶんを入れる（render-app-store-screenshots.sh が確かめる）。
 window.SCREENSHOT_COPY = {
   ja: [
     { t: "推しに会える日まで、<br><em>あと何日</em>？", s: "ホーム画面のウィジェットと Dynamic Island で、ひと目で" },
-    { t: "当日は、<br><em>開演まで秒読み</em>", s: "ロック画面のライブアクティビティで、開演までを数える" },
+    { t: "当日は、<br><em>開演まで秒読み</em>", s: "ロック画面のライブアクティビティで、開演までを数える", duo: { s: "ライブアクティビティで、開演までを数える" } },
     { t: "開演の瞬間まで、<br><em>秒まで数える</em>", s: "登録した日からの進み具合も、ひと目で" },
     { t: "1 位の推しの色に、<br><em>アプリが染まる</em>", s: "推しを並べ替えるだけ。12 色の推し色で、画面もウィジェットも" },
     { t: "推しの写真で、<br><em>自分だけの画面</em>に", s: "背景も飾りも、推しの写真に着せ替え" },
@@ -18,7 +18,7 @@ window.SCREENSHOT_COPY = {
   ],
   en: [
     { t: "How many days until you see your <em>oshi</em>?", s: "Check at a glance with Home Screen widgets and the Dynamic Island" },
-    { t: "On the day, <em>count down to showtime</em>", s: "A Live Activity on your Lock Screen counts down to the start" },
+    { t: "On the day, <em>count down to showtime</em>", s: "A Live Activity on your Lock Screen counts down to the start", duo: { s: "A Live Activity counts down to the start" } },
     { t: "Count every <em>second</em> to showtime", s: "See how far you've come since you added it, too" },
     { t: "The app takes on your <em>#1 oshi's color</em>", s: "Just reorder your oshis. 12 member colors for screens and widgets" },
     { t: "Make it yours with <em>your oshi's photo</em>", s: "Dress up the background and decorations with photos of your oshi" },
@@ -30,7 +30,7 @@ window.SCREENSHOT_COPY = {
   ],
   "en-GB": [
     { t: "How many days until you see your <em>oshi</em>?", s: "Check at a glance with Home Screen widgets and the Dynamic Island" },
-    { t: "On the day, <em>count down to showtime</em>", s: "A Live Activity on your Lock Screen counts down to the start" },
+    { t: "On the day, <em>count down to showtime</em>", s: "A Live Activity on your Lock Screen counts down to the start", duo: { s: "A Live Activity counts down to the start" } },
     { t: "Count every <em>second</em> to showtime", s: "See how far you've come since you added it, too" },
     { t: "The app takes on your <em>#1 oshi's colour</em>", s: "Just reorder your oshis. 12 member colours for screens and widgets" },
     { t: "Make it yours with <em>your oshi's photo</em>", s: "Dress up the background and decorations with photos of your oshi" },
@@ -42,7 +42,7 @@ window.SCREENSHOT_COPY = {
   ],
   "zh-Hans": [
     { t: "距离见到<em>本命</em>，<br>还有几天？", s: "主屏幕小组件和灵动岛，一眼就能看到" },
-    { t: "活动当天，<br><em>开演倒计时</em>", s: "锁定屏幕的实时活动，倒数到开演" },
+    { t: "活动当天，<br><em>开演倒计时</em>", s: "锁定屏幕的实时活动，倒数到开演", duo: { s: "实时活动倒数到开演" } },
     { t: "到开演那一刻，<br><em>精确到秒</em>", s: "从登记那天起的进度，也一目了然" },
     { t: "整个 App 染上<br><em>第一本命的应援色</em>", s: "只需调整本命的顺序。12 种应援色，界面和小组件一起换" },
     { t: "用本命的照片，<br><em>打造专属画面</em>", s: "背景和装饰都能换成本命的照片" },
@@ -54,7 +54,7 @@ window.SCREENSHOT_COPY = {
   ],
   "zh-Hant": [
     { t: "距離見到<em>我推</em>，<br>還有幾天？", s: "主畫面小工具和動態島，一眼就能看到" },
-    { t: "活動當天，<br><em>開演倒數計時</em>", s: "鎖定畫面的即時動態，倒數到開演" },
+    { t: "活動當天，<br><em>開演倒數計時</em>", s: "鎖定畫面的即時動態，倒數到開演", duo: { s: "即時動態倒數到開演" } },
     { t: "到開演那一刻，<br><em>精準到秒</em>", s: "從登錄那天起的進度，也一目了然" },
     { t: "App 染上<br><em>第一我推的應援色</em>", s: "只要調整我推的順序。12 種應援色，畫面和小工具一起換" },
     { t: "用我推的照片，<br><em>打造專屬畫面</em>", s: "背景和裝飾都能換成我推的照片" },
@@ -66,7 +66,7 @@ window.SCREENSHOT_COPY = {
   ],
   ko: [
     { t: "<em>최애</em>를 만나는 날까지 며칠?", s: "홈 화면 위젯과 Dynamic Island에서 한눈에" },
-    { t: "당일에는 <em>공연 시작까지 초읽기</em>", s: "잠금 화면의 실시간 현황으로 시작까지 카운트다운" },
+    { t: "당일에는 <em>공연 시작까지 초읽기</em>", s: "잠금 화면의 실시간 현황으로 시작까지 카운트다운", duo: { s: "실시간 현황으로 시작까지 카운트다운" } },
     { t: "공연이 시작되는 순간까지 <em>초 단위로</em>", s: "등록한 날부터의 진행 상황도 한눈에" },
     { t: "<em>1순위 최애의 컬러</em>로 물드는 앱", s: "최애 순서만 바꾸면 끝. 12가지 멤버 컬러로 화면도 위젯도" },
     { t: "최애 사진으로 <em>나만의 화면</em>을", s: "배경도 장식도 최애 사진으로 꾸미기" },
@@ -78,7 +78,7 @@ window.SCREENSHOT_COPY = {
   ],
   fr: [
     { t: "Combien de jours avant de voir <em>votre oshi</em> ?", s: "D'un coup d'œil avec les widgets d'écran d'accueil et la Dynamic Island" },
-    { t: "Le jour J, <em>le compte à rebours jusqu'au show</em>", s: "Une Activité en direct sur l'écran verrouillé décompte jusqu'au début" },
+    { t: "Le jour J, <em>le compte à rebours jusqu'au show</em>", s: "Une Activité en direct sur l'écran verrouillé décompte jusqu'au début", duo: { s: "Une Activité en direct décompte jusqu'au début" } },
     { t: "Jusqu'au lever de rideau, <em>à la seconde près</em>", s: "Et voyez le chemin parcouru depuis son ajout" },
     { t: "L'app aux couleurs de <em>votre oshi n° 1</em>", s: "Réorganisez simplement vos oshis. 12 couleurs pour l'app et les widgets" },
     { t: "Votre écran, <em>avec la photo de votre oshi</em>", s: "Habillez le fond et les décorations avec ses photos" },
@@ -90,7 +90,7 @@ window.SCREENSHOT_COPY = {
   ],
   de: [
     { t: "Wie viele Tage noch bis zu <em>deinem Oshi</em>?", s: "Auf einen Blick mit Home-Bildschirm-Widgets und der Dynamic Island" },
-    { t: "Am großen Tag: <em>Countdown bis zum Start</em>", s: "Eine Live-Aktivität auf dem Sperrbildschirm zählt bis zum Beginn" },
+    { t: "Am großen Tag: <em>Countdown bis zum Start</em>", s: "Eine Live-Aktivität auf dem Sperrbildschirm zählt bis zum Beginn", duo: { s: "Eine Live-Aktivität zählt bis zum Beginn" } },
     { t: "Bis zum Showbeginn – <em>auf die Sekunde</em>", s: "Sieh auch, wie viel Zeit seit dem Eintragen vergangen ist" },
     { t: "Die App in der Farbe <em>deines Oshi Nr. 1</em>", s: "Einfach Oshis umsortieren. 12 Farben für App und Widgets" },
     { t: "Dein Bildschirm <em>mit Fotos deines Oshi</em>", s: "Hintergrund und Deko mit Fotos deines Oshi gestalten" },
@@ -102,7 +102,7 @@ window.SCREENSHOT_COPY = {
   ],
   es: [
     { t: "¿Cuántos días faltan para ver a <em>tu oshi</em>?", s: "De un vistazo con los widgets de inicio y la Dynamic Island" },
-    { t: "El gran día, <em>cuenta atrás hasta el show</em>", s: "Una Actividad en directo en la pantalla bloqueada cuenta hasta el inicio" },
+    { t: "El gran día, <em>cuenta atrás hasta el show</em>", s: "Una Actividad en directo en la pantalla bloqueada cuenta hasta el inicio", duo: { s: "Una Actividad en directo cuenta hasta el inicio" } },
     { t: "Hasta que empiece el show, <em>segundo a segundo</em>", s: "Y mira cuánto has avanzado desde que lo añadiste" },
     { t: "La app con el color de <em>tu oshi n.º 1</em>", s: "Solo reordena a tus oshis. 12 colores para la app y los widgets" },
     { t: "Tu pantalla, <em>con fotos de tu oshi</em>", s: "Decora el fondo y los adornos con fotos de tu oshi" },
@@ -114,7 +114,7 @@ window.SCREENSHOT_COPY = {
   ],
   "es-MX": [
     { t: "¿Cuántos días faltan para ver a <em>tu oshi</em>?", s: "De un vistazo con los widgets de la pantalla de inicio y la Dynamic Island" },
-    { t: "El gran día, <em>cuenta regresiva hasta el show</em>", s: "Una Actividad en vivo en la pantalla bloqueada cuenta hasta el inicio" },
+    { t: "El gran día, <em>cuenta regresiva hasta el show</em>", s: "Una Actividad en vivo en la pantalla bloqueada cuenta hasta el inicio", duo: { s: "Una Actividad en vivo cuenta hasta el inicio" } },
     { t: "Hasta que empiece el show, <em>segundo a segundo</em>", s: "Y mira cuánto has avanzado desde que lo agregaste" },
     { t: "La app con el color de <em>tu oshi n.º 1</em>", s: "Solo reordena a tus oshis. 12 colores para la app y los widgets" },
     { t: "Tu pantalla, <em>con fotos de tu oshi</em>", s: "Decora el fondo y los adornos con fotos de tu oshi" },
@@ -126,7 +126,7 @@ window.SCREENSHOT_COPY = {
   ],
   "pt-BR": [
     { t: "Quantos dias faltam pra ver <em>seu oshi</em>?", s: "Num relance com widgets da Tela de Início e a Dynamic Island" },
-    { t: "No grande dia, <em>contagem até o show</em>", s: "Uma Atividade ao Vivo na Tela Bloqueada conta até o início" },
+    { t: "No grande dia, <em>contagem até o show</em>", s: "Uma Atividade ao Vivo na Tela Bloqueada conta até o início", duo: { s: "Uma Atividade ao Vivo conta até o início" } },
     { t: "Até o show começar, <em>segundo a segundo</em>", s: "Veja também o quanto já passou desde que você adicionou" },
     { t: "O app na cor do <em>seu oshi nº 1</em>", s: "É só reordenar seus oshis. 12 cores para o app e os widgets" },
     { t: "Sua tela <em>com fotos do seu oshi</em>", s: "Personalize o fundo e os enfeites com fotos do seu oshi" },
@@ -138,7 +138,7 @@ window.SCREENSHOT_COPY = {
   ],
   it: [
     { t: "Quanti giorni mancano al <em>tuo oshi</em>?", s: "A colpo d'occhio con i widget della schermata Home e la Dynamic Island" },
-    { t: "Nel gran giorno, <em>conto alla rovescia allo show</em>", s: "Un'Attività in tempo reale sulla schermata di blocco conta fino all'inizio" },
+    { t: "Nel gran giorno, <em>conto alla rovescia allo show</em>", s: "Un'Attività in tempo reale sulla schermata di blocco conta fino all'inizio", duo: { s: "Un'Attività in tempo reale conta fino all'inizio" } },
     { t: "Fino all'inizio dello show, <em>al secondo</em>", s: "E vedi quanta strada hai fatto da quando l'hai aggiunto" },
     { t: "L'app nel colore del <em>tuo oshi n. 1</em>", s: "Basta riordinare i tuoi oshi. 12 colori per l'app e i widget" },
     { t: "Il tuo schermo <em>con le foto del tuo oshi</em>", s: "Personalizza sfondo e decorazioni con le foto del tuo oshi" },
@@ -150,7 +150,7 @@ window.SCREENSHOT_COPY = {
   ],
   th: [
     { t: "อีกกี่วันจะได้เจอ<em>โอชิ</em>?", s: "ดูได้ทันทีจากวิดเจ็ตหน้าจอโฮมและ Dynamic Island" },
-    { t: "วันจริง <em>นับถอยหลังถึงเวลาแสดง</em>", s: "กิจกรรมสดบนหน้าจอล็อกนับถอยหลังจนถึงเวลาเริ่ม" },
+    { t: "วันจริง <em>นับถอยหลังถึงเวลาแสดง</em>", s: "กิจกรรมสดบนหน้าจอล็อกนับถอยหลังจนถึงเวลาเริ่ม", duo: { s: "กิจกรรมสดนับถอยหลังจนถึงเวลาเริ่ม" } },
     { t: "นับจนถึงวินาทีเปิดม่าน <em>ละเอียดถึงวินาที</em>", s: "เห็นความคืบหน้าตั้งแต่วันที่บันทึกไว้ด้วย" },
     { t: "แอปเปลี่ยนเป็น<em>สีของโอชิอันดับ 1</em>", s: "แค่จัดลำดับโอชิใหม่ 12 สีประจำตัวทั้งในแอปและวิดเจ็ต" },
     { t: "หน้าจอของคุณเอง <em>ด้วยรูปโอชิ</em>", s: "แต่งพื้นหลังและของตกแต่งด้วยรูปโอชิ" },
@@ -162,7 +162,7 @@ window.SCREENSHOT_COPY = {
   ],
   id: [
     { t: "Berapa hari lagi ketemu <em>oshi</em>-mu?", s: "Lihat sekilas lewat widget Layar Utama dan Dynamic Island" },
-    { t: "Di Hari H, <em>hitung mundur sampai mulai</em>", s: "Aktivitas Langsung di Layar Terkunci menghitung mundur sampai mulai" },
+    { t: "Di Hari H, <em>hitung mundur sampai mulai</em>", s: "Aktivitas Langsung di Layar Terkunci menghitung mundur sampai mulai", duo: { s: "Aktivitas Langsung menghitung mundur sampai mulai" } },
     { t: "Sampai pertunjukan dimulai, <em>sampai ke detik</em>", s: "Lihat juga progresnya sejak kamu menambahkannya" },
     { t: "Aplikasi berwarna <em>oshi nomor 1</em>-mu", s: "Cukup urutkan ulang oshi-mu. 12 warna untuk aplikasi dan widget" },
     { t: "Layar khusus <em>dengan foto oshi</em>-mu", s: "Hias latar dan dekorasi dengan foto oshi-mu" },
