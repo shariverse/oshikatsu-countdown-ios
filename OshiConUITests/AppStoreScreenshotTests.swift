@@ -170,17 +170,29 @@ final class AppStoreScreenshotTests: XCTestCase {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         for _ in 0..<3 {
             XCUIDevice.shared.press(.home)
-            if app.wait(for: .runningBackground, timeout: 3) {
-                Thread.sleep(forTimeInterval: 1)
+            if leftForeground(app) {
                 return
             }
             swipeUpFromBottom(on: springboard)
-            if app.wait(for: .runningBackground, timeout: 3) {
-                Thread.sleep(forTimeInterval: 1)
+            if leftForeground(app) {
                 return
             }
         }
         XCTFail("ホーム画面に出られませんでした")
+    }
+
+    /// 撮影のアプリが前面から外れたか（裏に回ったか、裏で止まったか）を 3 秒まで待つ。
+    @MainActor
+    private func leftForeground(_ app: XCUIApplication) -> Bool {
+        let deadline = Date().addingTimeInterval(3)
+        while Date() < deadline {
+            if app.state != .runningForeground {
+                Thread.sleep(forTimeInterval: 1)
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return false
     }
 
     /// 下の端から上へスワイプする（ロックを解く・ホーム画面に戻る）。
