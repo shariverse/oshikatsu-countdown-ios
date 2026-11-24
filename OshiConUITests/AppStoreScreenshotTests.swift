@@ -195,11 +195,17 @@ final class AppStoreScreenshotTests: XCTestCase {
         return false
     }
 
-    /// 下の端から上へスワイプする（ロックを解く・ホーム画面に戻る）。
+    /// 下の端から上へスワイプする（ロックを解く・ホーム画面に戻る）。iPhone Duo はホームボタンが効かないので、これでホーム画面に戻る。
     @MainActor
     private func swipeUpFromBottom(on springboard: XCUIApplication) {
         let bottom = springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.995))
-        bottom.press(forDuration: 0.05, thenDragTo: springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.4)))
+        // ゆっくり動かすと App スイッチャーが出るので、速く払う
+        bottom.press(
+            forDuration: 0.01,
+            thenDragTo: springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3)),
+            withVelocity: .fast,
+            thenHoldForDuration: 0
+        )
         Thread.sleep(forTimeInterval: 1.5)
     }
 
