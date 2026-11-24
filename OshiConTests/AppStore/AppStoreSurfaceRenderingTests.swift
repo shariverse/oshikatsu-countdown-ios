@@ -110,20 +110,18 @@ struct AppStoreSurfaceRenderingTests {
         try render(WidgetPreview.countdownLockScreen(countdown(birthday), family: .rectangular), to: directory, name: "lock-rectangular")
     }
 
-    /// アプリのアイコン（ホストのアプリのアセット）。読めなければ、アイコンに似せた推し色の地に白いハートで描く。
+    /// 通知の左に出すアプリのアイコン。アイコンと同じく、推し色（ピンク）の地に白いハートで描く。
+    /// アセットカタログの AppIcon（Icon Composer の `.icon`）は `UIImage(named:)` で読めず、Xcode 26.6 の Simulator では例外で落ちるので使わない。
     private func appIcon() -> UIImage {
-        if let icon = UIImage(named: "AppIcon") {
-            return icon
-        }
-        let fallback = ImageRenderer(
+        let renderer = ImageRenderer(
             content: Image(systemName: "heart.fill")
                 .font(.system(size: 60, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 120, height: 120)
                 .background(OshiColor.pink.rgb.color)
         )
-        fallback.scale = 1
-        return fallback.uiImage ?? UIImage()
+        renderer.scale = 1
+        return renderer.uiImage ?? UIImage()
     }
 
     /// 役どころ `role` の見本の推しの写真。
