@@ -155,24 +155,26 @@ final class AppStoreScreenshotTests: XCTestCase {
     }
 
     /// ロックを解く（パスコードは無い）。ロック中にアプリを起動すると前面に来ないので、次の画面の前に解く。
-    /// ホームボタンで解ける機種と、下の端から上へのスワイプが要る機種（iPhone Duo）があるので、両方する（解けた後のスワイプはホーム画面に戻るだけ）
+    /// ホームボタンだけで解く（スワイプすると、iPad では App スイッチャーに入ってしまう）。iPhone Duo はロックできないので、何も起きない
     @MainActor
     private func unlock() {
         XCUIDevice.shared.press(.home)
-        Thread.sleep(forTimeInterval: 1)
-        swipeUpFromBottom(on: XCUIApplication(bundleIdentifier: "com.apple.springboard"))
+        Thread.sleep(forTimeInterval: 1.5)
     }
 
-    /// ホーム画面に出る。撮影のアプリが裏に回るまで、ホームボタンと、下の端から上へのスワイプ（ホームボタンが効かない iPhone Duo）を 3 回まで試す
+    /// ホーム画面に出る。撮影のアプリが裏に回るまで、ホームボタンを 3 回まで押し、それで戻れなければ下の端から上へスワイプする（ホームボタンが効かない iPhone Duo）
     /// （ホーム画面の 1 ページ目の並びは Simulator ごとに違うので、アイコンではなくアプリの状態で確かめる）。
     @MainActor
     private func goHome(from app: XCUIApplication) {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        // スワイプは iPad では App スイッチャーに入ってしまうので、ホームボタンが 3 回とも効かなかったとき（iPhone Duo）だけにする
         for _ in 0..<3 {
             XCUIDevice.shared.press(.home)
             if leftForeground(app) {
                 return
             }
+        }
+        for _ in 0..<2 {
             swipeUpFromBottom(on: springboard)
             if leftForeground(app) {
                 return
@@ -209,15 +211,32 @@ final class AppStoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.5)
     }
 
-    /// ライブアクティビティの許可の「許可」の文言（docs/app-store/languages.json の 12 言語）。
-    private static let allowLabels = ["許可", "Allow", "允许", "允許", "허용", "Autoriser", "Erlauben", "Permitir", "Consenti", "อนุญาต", "Izinkan"]
+    /// ライブアクティビティの許可の「許可」「常に許可」の文言（docs/app-store/languages.json の言語。iOS 27 の iPhone は「許可」、iOS 26 の iPad は「常に許可」）。
+    private static let allowLabels = [
+        "許可", "常に許可", "Allow", "Always Allow", "允许", "始终允许", "允許", "永遠允許", "허용", "항상 허용",
+        "Autoriser", "Toujours autoriser", "Erlauben", "Immer erlauben", "Permitir", "Permitir siempre", "Sempre permitir",
+        "Consenti", "Consenti sempre", "อนุญาต", "อนุญาตเสมอ", "Izinkan", "Selalu Izinkan"
+    ]
 
-    /// ロック画面のライブアクティビティで許可を求められたら、「許可」の文言のボタンを押す。求められなければ何もしない。
-    /// 並びの位置で探すと、iOS 26 ではライブアクティビティそのもの（`ListCell`）を押してアプリが開いてしまうので、文言だけで探す。
+    /// ロック画面のライブアクティビティで許可を求められたら許可する。求められなければ何もしない。
+    /// まず「許可」の文言のボタンを探し、無ければ、ライブアクティビティの帯（`ListCell` など。押すとアプリが開く）を除いたボタンのうち、
+    /// 画面の下半分で横に並んだ 2 つの右（許可）を押す。
     @MainActor
     private func allowLiveActivitiesIfAsked(on springboard: XCUIApplication) {
-        let allow = springboard.buttons.matching(NSPredicate(format: "label IN %@", Self.allowLabels)).firstMatch
-        guard allow.waitForExistence(timeout: 3), allow.isHittable else {
+        let byLabel = springboard.buttons.matching(NSPredicate(format: "label IN %@", Self.allowLabels)).firstMatch
+        if byLabel.waitForExistence(timeout: 3), byLabel.isHittable {
+            byLabel.tap()
+            Thread.sleep(forTimeInterval: 1.5)
+            return
+        }
+        let height = XCUIScreen.main.screenshot().image.size.height
+        let buttons = springboard.buttons.allElementsBoundByIndex.filter { button in
+            button.exists && button.isHittable && button.frame.minY > height / 2 && !button.label.isEmpty
+                && !button.identifier.contains("ListCell") && !button.identifier.contains("Platter")
+        }
+        let rows = Dictionary(grouping: buttons) { Int($0.frame.minY.rounded()) }
+        guard let pair = rows.values.first(where: { $0.count == 2 }),
+              let allow = pair.max(by: { $0.frame.minX < $1.frame.minX }) else {
             return
         }
         allow.tap()
