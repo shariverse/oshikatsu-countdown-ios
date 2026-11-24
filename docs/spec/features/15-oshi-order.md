@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@f1b95861875616e27ecf5bd7a2ce85d19c79889c oshikatsu-countdown/features/15-oshi-order.md
+  元: shariverse/app-specs@c5560e26f143ddf43b07a8b0868d8de8b84777c5 oshikatsu-countdown/features/15-oshi-order.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -26,4 +26,5 @@
   - 各行の左に順位（いちばん上が 1）を出し、入れ替えたら数え直す。1 位はアクセントの色で塗り、ほかは縁取りだけにする。読み上げでは「1 位」のように読む
   - 「この順番で確定」は、塗りのボタンにする
 - 読み上げでは、行の操作の「上に移動」「下に移動」でも入れ替えられる
+- 並べ替えの状態でないときは、ドラッグでも読み上げの操作でも並びを変えない
 - 保存に失敗したら「保存できませんでした」を出し、並びを元に戻す

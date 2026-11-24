@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@f1b95861875616e27ecf5bd7a2ce85d19c79889c oshikatsu-countdown/features/13-share.md
+  元: shariverse/app-specs@c5560e26f143ddf43b07a8b0868d8de8b84777c5 oshikatsu-countdown/features/13-share.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -26,6 +26,9 @@
 - 文字（予定名・日付・会場・日数）は推し色の塗りの上にだけ白で置き、写真の上には重ねない。予定名は 2 行まで
 - [推し色](../design/oshi-colors.md)の役割は変えない（塗り・写真が無いときの模様の色）
 - 配色・書体・装飾は[地雷系・ゴシック](../design/jirai-gothic.md)のダークのもの。地は十字とハート、カードの縁は二重の線、角の丸みはホームの先頭の予定のカードと同じ
+- [背景・飾りの着せ替え](17-dress-up.md)で背景の写真を敷いている（Plus が使え、背景が ON で、写真がある）ときは、カードの外の地を十字とハートの代わりにその写真にする。写真で地を覆い、中央に置いて、黒の幕（不透明度 0.45）を重ねる。透かしは白にする
+  - 暗幕・ぼかしの設定と飾り（推しの丸い写真）はカードに関わらない。写真を読めないときは十字とハートの地にする
+  - Plus が使えなくなったら、十字とハートの地に戻す
 
 ## 載せる項目
 
