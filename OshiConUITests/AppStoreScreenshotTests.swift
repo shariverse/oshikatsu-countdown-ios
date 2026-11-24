@@ -116,15 +116,9 @@ final class AppStoreScreenshotTests: XCTestCase {
     /// アプリの外の面。
     @MainActor
     private func captureSurfacesOutsideApp() {
-        // アプリの外: 何も出ていないロック画面（通知を重ねる）
-        var app = launch()
-        XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
-        lockAndWake()
-        capture("lock-screen-plain")
-        unlock()
-
-        // アプリの外: ロック画面（ライブアクティビティ）とホーム画面（Dynamic Island のライブアクティビティ）
-        app = launch(["-sampleLiveActivity"])
+        // アプリの外: ロック画面（ライブアクティビティ）とホーム画面（Dynamic Island のライブアクティビティ）。
+        // 先にほかのロック画面を撮ると、ライブアクティビティが出ないことがあったので、最初に撮る
+        var app = launch(["-sampleLiveActivity"])
         XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
         Thread.sleep(forTimeInterval: 2)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -139,6 +133,14 @@ final class AppStoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: 2)
         capture("home-screen")
         attachHomeScreenLayout(of: springboard)
+
+        // アプリの外: 何も出ていないロック画面（通知を重ねる）。`-sampleLiveActivity` を渡さずに起動すると、アプリがライブアクティビティを終える
+        app = launch()
+        XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
+        Thread.sleep(forTimeInterval: 2)
+        lockAndWake()
+        capture("lock-screen-plain")
+        unlock()
     }
 
     /// 端末をロックし、画面を点けてロック画面を出す。`seconds` 秒待ってから戻る（通知が届くのを待つ）。
