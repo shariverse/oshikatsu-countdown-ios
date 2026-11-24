@@ -212,24 +212,15 @@ final class AppStoreScreenshotTests: XCTestCase {
     /// ライブアクティビティの許可の「許可」の文言（docs/app-store/languages.json の 12 言語）。
     private static let allowLabels = ["許可", "Allow", "允许", "允許", "허용", "Autoriser", "Erlauben", "Permitir", "Consenti", "อนุญาต", "Izinkan"]
 
-    /// ロック画面のライブアクティビティで許可を求められたら許可する。画面の下半分で横に並んだ 2 つのボタンの右（許可）を押し、
-    /// 見つからなければ「許可」の文言のボタンを押す（iPad は並びで見つからないことがある）。求められなければ何もしない。
+    /// ロック画面のライブアクティビティで許可を求められたら、「許可」の文言のボタンを押す。求められなければ何もしない。
+    /// 並びの位置で探すと、iOS 26 ではライブアクティビティそのもの（`ListCell`）を押してアプリが開いてしまうので、文言だけで探す。
     @MainActor
     private func allowLiveActivitiesIfAsked(on springboard: XCUIApplication) {
-        let height = XCUIScreen.main.screenshot().image.size.height
-        let buttons = springboard.buttons.allElementsBoundByIndex.filter { button in
-            button.exists && button.isHittable && button.frame.minY > height / 2
-        }
-        let rows = Dictionary(grouping: buttons) { Int($0.frame.minY.rounded()) }
-        let byLabel = springboard.buttons.matching(NSPredicate(format: "label IN %@", Self.allowLabels)).firstMatch
-        if let pair = rows.values.first(where: { $0.count == 2 }),
-           let allow = pair.max(by: { $0.frame.minX < $1.frame.minX }) {
-            allow.tap()
-        } else if byLabel.exists, byLabel.isHittable {
-            byLabel.tap()
-        } else {
+        let allow = springboard.buttons.matching(NSPredicate(format: "label IN %@", Self.allowLabels)).firstMatch
+        guard allow.waitForExistence(timeout: 3), allow.isHittable else {
             return
         }
+        allow.tap()
         Thread.sleep(forTimeInterval: 1.5)
     }
 
