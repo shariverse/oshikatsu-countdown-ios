@@ -8,7 +8,7 @@ import Foundation
 
 /// 着せ替えの画面の試着（ホームの見本）と、背景の写真を選ぶときの規則。画面から切り離してテストする。
 ///
-/// 試着は Plus が使えるかにかかわらず、選んだ写真・ON/OFF・強さをそのまま映す（実際のホームと詳細に効くかは `AppearanceRendering`）。
+/// 試着は Plus が使えるかにかかわらず、選んだ写真・ON/OFF・暗幕とぼかし・飾りをそのまま映す（実際のホームと詳細に効くかは `AppearanceRendering`）。
 nonisolated enum AppearancePreview {
     /// 見本のホームを組む大きさ（pt）。iPhone の縦の画面（背景の写真の枠と同じ約 9:19.5）。これを縮めて見せる。
     static let canvasSize = CGSize(width: 390, height: (390 / PhotoCrop.backgroundAspectRatio).rounded())
@@ -68,13 +68,15 @@ nonisolated enum AppearancePreview {
         return Int((PhotoCropLayout.maximumFrameSide / PhotoCrop.backgroundAspectRatio * scale).rounded(.up))
     }
 
-    /// 見本の読み上げの値（`背景の写真あり、強さ 中、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%`）。
+    /// 見本の読み上げの値（`背景の写真あり、暗幕の濃さ 50%、ぼかしの強さ 40%、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%`）。
     static func accessibilityValue(of rendering: AppearanceRendering, locale: Locale = .app) -> String {
         var parts: [String] = []
         if let photo = rendering.backgroundPhoto {
             parts.append(String(localized: LocalizedStringResource("背景の写真あり", locale: locale)))
-            let intensity = photo.intensity.title(locale: locale)
-            parts.append(String(localized: LocalizedStringResource("強さ \(intensity)", locale: locale)))
+            let scrim = percentText(photo.style.scrim, locale: locale)
+            parts.append(String(localized: LocalizedStringResource("暗幕の濃さ \(scrim)", locale: locale)))
+            let blur = percentText(photo.style.blur, locale: locale)
+            parts.append(String(localized: LocalizedStringResource("ぼかしの強さ \(blur)", locale: locale)))
         } else {
             parts.append(String(localized: LocalizedStringResource("背景の写真なし", locale: locale)))
         }
@@ -90,22 +92,8 @@ nonisolated enum AppearancePreview {
         return EventText.joinedForSpeech(parts, locale: locale)
     }
 
-    /// 飾りの濃さ・量（0〜1）を百分率の文字にする（`40%`）。スライダーの読み上げの値と、見本の読み上げの値に使う。
+    /// 暗幕の濃さ・ぼかしの強さ・飾りの濃さ・量（0〜1）を百分率の文字にする（`40%`）。スライダーの読み上げの値と、見本の読み上げの値に使う。
     static func percentText(_ value: Double, locale: Locale = .app) -> String {
         value.formatted(.percent.precision(.fractionLength(0)).locale(locale))
-    }
-}
-
-extension AppearanceIntensity {
-    /// 強さの名前（弱・中・強）。
-    nonisolated func title(locale: Locale = .app) -> String {
-        switch self {
-        case .weak:
-            String(localized: LocalizedStringResource("弱", locale: locale, comment: "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ"))
-        case .medium:
-            String(localized: LocalizedStringResource("中", locale: locale, comment: "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ"))
-        case .strong:
-            String(localized: LocalizedStringResource("強", locale: locale, comment: "着せ替えの背景の写真に掛ける暗幕とぼかしの強さ"))
-        }
     }
 }

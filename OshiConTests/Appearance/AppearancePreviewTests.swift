@@ -15,9 +15,10 @@ struct AppearancePreviewTests {
 
     @Test("試着は Plus が使えなくても、設定のとおりに背景の写真と飾りを映す（実際の画面は標準のまま）")
     func tryOnIgnoresPlus() {
-        let settings = AppearanceSettings(isDecorationEnabled: true, intensity: .strong, backgroundPhotoFileName: photo)
+        let style = AppearanceBackgroundStyle(scrim: 1, blur: 1)
+        let settings = AppearanceSettings(isDecorationEnabled: true, backgroundStyle: style, backgroundPhotoFileName: photo)
         let tryOn = AppearancePreview.rendering(settings: settings)
-        #expect(tryOn.backgroundPhoto == AppearanceRendering.BackgroundPhoto(fileName: photo, intensity: .strong))
+        #expect(tryOn.backgroundPhoto == AppearanceRendering.BackgroundPhoto(fileName: photo, style: style))
         #expect(tryOn.showsOshiPhotoDecoration)
         #expect(AppearanceRendering(settings: settings, isPlusUnlocked: false).isStandard)
     }
@@ -87,33 +88,37 @@ struct AppearancePreviewTests {
         #expect(pixels == AppearancePreview.cropDisplayShortSidePixels(displayScale: 1))
     }
 
-    @Test("見本の読み上げは、背景の写真と強さ・飾りと濃さ・量を伝える")
+    @Test("見本の読み上げは、背景の写真と暗幕の濃さ・ぼかしの強さ、飾りと濃さ・量を伝える")
     func accessibilityValue() {
         let both = AppearanceRendering(
-            backgroundPhoto: AppearanceRendering.BackgroundPhoto(fileName: photo, intensity: .medium),
+            backgroundPhoto: AppearanceRendering.BackgroundPhoto(fileName: photo, style: .default),
             decoration: OshiPhotoDecorationStyle(opacity: 0.4, amount: 0.25)
         )
         #expect(
             AppearancePreview.accessibilityValue(of: both, locale: DomainFixtures.japanese)
-                == "背景の写真あり、強さ 中、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%"
+                == "背景の写真あり、暗幕の濃さ 50%、ぼかしの強さ 40%、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%"
         )
         #expect(AppearancePreview.accessibilityValue(of: .standard, locale: DomainFixtures.japanese) == "背景の写真なし、推しの写真の飾りなし")
         #expect(
             AppearancePreview.accessibilityValue(of: both, locale: DomainFixtures.english)
-                == "Background photo on, Strength Medium, Oshi photo decorations on, Decoration opacity 40%, Decoration amount 25%"
+                == "Background photo on, Dimming 50%, Blur 40%, Oshi photo decorations on, Decoration opacity 40%, Decoration amount 25%"
+        )
+
+        // 暗幕とぼかしは別々の値を伝える
+        let photoOnly = AppearanceRendering(
+            backgroundPhoto: AppearanceRendering.BackgroundPhoto(fileName: photo, style: AppearanceBackgroundStyle(scrim: 0, blur: 1)),
+            decoration: nil
+        )
+        #expect(
+            AppearancePreview.accessibilityValue(of: photoOnly, locale: DomainFixtures.japanese)
+                == "背景の写真あり、暗幕の濃さ 0%、ぼかしの強さ 100%、推しの写真の飾りなし"
         )
     }
 
-    @Test("濃さ・量は百分率で読む（端数は丸める）")
+    @Test("暗幕・ぼかし・濃さ・量は百分率で読む（端数は丸める）")
     func percentText() {
         #expect(AppearancePreview.percentText(0.4, locale: DomainFixtures.japanese) == "40%")
         #expect(AppearancePreview.percentText(1, locale: DomainFixtures.english) == "100%")
         #expect(AppearancePreview.percentText(0.333, locale: DomainFixtures.japanese) == "33%")
-    }
-
-    @Test("強さの名前は弱・中・強")
-    func intensityTitles() {
-        #expect(AppearanceIntensity.allCases.map { $0.title(locale: DomainFixtures.japanese) } == ["弱", "中", "強"])
-        #expect(AppearanceIntensity.allCases.map { $0.title(locale: DomainFixtures.english) } == ["Light", "Medium", "Strong"])
     }
 }

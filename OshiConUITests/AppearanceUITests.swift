@@ -5,13 +5,13 @@
 
 import XCTest
 
-/// 設定の「着せ替え」の行 → 着せ替えの画面（写真を選ぶ → 縦長の調整 → 見本に映る → ON/OFF と強さ・飾りの濃さと量と出す推し → 課金画面）と、
+/// 設定の「着せ替え」の行 → 着せ替えの画面（写真を選ぶ → 縦長の調整 → 見本に映る → ON/OFF と暗幕・ぼかし・飾りの濃さと量と出す推し → 課金画面）と、
 /// ホームと予定の詳細に着せ替えが効くかの導線。
 ///
 /// - `PhotosPicker` は操作できないので、`-useTestPhoto` で生成した画像を選ぶ（メモリ上のストアのときだけ効く）
 /// - メモリ上のストアでは着せ替えの設定と写真が起動のたびに空になるので、1 回の起動の中で写真を選んでから確かめる
 /// - ホームと詳細の地は読み上げから外しているので、メモリ上のストアのときだけ置く口（`home.appearance`・`eventDetail.appearance`。
-///   `AppearanceUITestMarker`）のラベルで、描いているもの（`standard`・`photo:<強さ>`・`decoration`）を確かめる
+///   `AppearanceUITestMarker`）のラベルで、描いているもの（`standard`・`photo`・`decoration`）を確かめる
 /// - 見本に映ったかは、見本（`appearance.preview`）の読み上げの値で確かめる
 final class AppearanceUITests: XCTestCase {
     override func setUpWithError() throws {
@@ -143,11 +143,7 @@ final class AppearanceUITests: XCTestCase {
         for upward in [true, false] {
             var swipes = 0
             while !isReady(), swipes < maxSwipes {
-                if upward {
-                    app.swipeUp(velocity: .slow)
-                } else {
-                    app.swipeDown(velocity: .slow)
-                }
+                scroll(app, upward: upward)
                 swipes += 1
             }
         }
@@ -169,7 +165,46 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertEqual(slider.value as? String, expected, file: file, line: line)
     }
 
-    /// Plus でない人: 写真を選ぶ・変える・外す、ON/OFF、強さが見本に映り、課金画面を開ける。ホームと詳細は標準のまま。
+    /// 画面をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
+    /// スライダーの無い左の端（行の外の余白）を縦に送る。
+    @MainActor
+    private func scroll(_ app: XCUIApplication, upward: Bool) {
+        let top = app.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.3))
+        let bottom = app.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.7))
+        let (start, end) = upward ? (bottom, top) : (top, bottom)
+        start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0)
+    }
+
+    /// 背景の写真を選んだ後に、暗幕とぼかしのスライダーを別々に動かすと見本に映る（暗幕 100%・ぼかし 0% にして返す）。
+    /// 背景を OFF にすると、スライダーは値を見せたまま押せなくなり、ON に戻すと押せる。
+    @MainActor
+    private func adjustScrimAndBlur(in app: XCUIApplication) {
+        let scrim = app.sliders["appearance.backgroundScrim"]
+        let blur = app.sliders["appearance.backgroundBlur"]
+        reveal(blur, in: app)
+        XCTAssertTrue(scrim.exists)
+        XCTAssertTrue(scrim.isEnabled)
+        XCTAssertEqual(scrim.value as? String, "50%")
+        XCTAssertEqual(blur.value as? String, "40%")
+        adjust(scrim, to: 1, expecting: "100%")
+        XCTAssertEqual(blur.value as? String, "40%")
+        adjust(blur, to: 0, expecting: "0%")
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%"])
+
+        toggle("appearance.backgroundToggle", in: app, to: "0")
+        waitForPreview(in: app, containing: ["背景の写真なし"])
+        reveal(blur, in: app, needsHittable: false)
+        XCTAssertFalse(scrim.isEnabled)
+        XCTAssertFalse(blur.isEnabled)
+        XCTAssertEqual(scrim.value as? String, "100%")
+        XCTAssertEqual(blur.value as? String, "0%")
+        toggle("appearance.backgroundToggle", in: app, to: "1")
+        XCTAssertTrue(scrim.isEnabled)
+        XCTAssertTrue(blur.isEnabled)
+        waitForPreview(in: app, containing: ["背景の写真あり"])
+    }
+
+    /// Plus でない人: 写真を選ぶ・変える・外す、ON/OFF、暗幕とぼかしのスライダーが見本に映り、課金画面を開ける。ホームと詳細は標準のまま。
     @MainActor
     func testTryOnWithoutPlusUpdatesPreviewAndOpensPaywall() throws {
         let app = launchSettings(arguments: ["-plusLocked"])
@@ -178,27 +213,14 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertFalse(app.descendants(matching: .any)["appearance.plusActive"].exists)
         waitForPreview(in: app, containing: ["背景の写真なし", "推しの写真の飾りなし"])
 
-        // 写真を選んで縦長の枠で調整すると、Plus でなくても見本に映る（背景は ON、強さは既定の中）
+        // 写真を選んで縦長の枠で調整すると、Plus でなくても見本に映る（背景は ON、暗幕とぼかしは既定）
         pickAndCropPhoto(in: app)
         XCTAssertTrue(app.buttons["appearance.selectPhoto"].label.contains("写真を変える"))
-        waitForPreview(in: app, containing: ["背景の写真あり", "強さ 中"])
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 50%", "ぼかしの強さ 40%"])
 
-        // 強さを選ぶ
-        let intensity = app.segmentedControls["appearance.intensity"]
-        reveal(intensity, in: app)
-        XCTAssertTrue(intensity.exists)
-        intensity.buttons["強"].tap()
-        waitForPreview(in: app, containing: ["背景の写真あり", "強さ 強"])
-        intensity.buttons["弱"].tap()
-        waitForPreview(in: app, containing: ["背景の写真あり", "強さ 弱"])
-
-        // 背景の OFF/ON と飾りの ON
-        toggle("appearance.backgroundToggle", in: app, to: "0")
-        waitForPreview(in: app, containing: ["背景の写真なし"])
-        toggle("appearance.backgroundToggle", in: app, to: "1")
-        waitForPreview(in: app, containing: ["背景の写真あり"])
+        adjustScrimAndBlur(in: app)
         toggle("appearance.decorationToggle", in: app, to: "1")
-        waitForPreview(in: app, containing: ["背景の写真あり", "強さ 弱", "推しの写真の飾りあり"])
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%", "推しの写真の飾りあり"])
 
         // 写真を変えても、外しても見本に映る
         pickAndCropPhoto(in: app)
@@ -242,15 +264,15 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertFalse(app.buttons["appearance.openPaywall"].exists)
 
         pickAndCropPhoto(in: app)
-        waitForPreview(in: app, containing: ["背景の写真あり", "強さ 中"])
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 50%", "ぼかしの強さ 40%"])
         toggle("appearance.decorationToggle", in: app, to: "1")
         waitForPreview(in: app, containing: ["推しの写真の飾りあり"])
 
-        // ホームと詳細に、写真（強さ 中）と飾りが効く
+        // ホームと詳細に、写真と飾りが効く
         app.tabBars.firstMatch.buttons["ホーム"].tap()
-        waitForMarker("home.appearance", in: app, equalTo: "photo:medium,decoration")
+        waitForMarker("home.appearance", in: app, equalTo: "photo,decoration")
         addEventAndOpenDetail(in: app)
-        waitForMarker("eventDetail.appearance", in: app, equalTo: "photo:medium,decoration")
+        waitForMarker("eventDetail.appearance", in: app, equalTo: "photo,decoration")
 
         // 背景を OFF にすると、写真は消えて飾りだけになる。詳細ではタブバーが隠れるので、ホームに戻ってから設定のタブに移る
         app.navigationBars.firstMatch.buttons.element(boundBy: 0).tap()

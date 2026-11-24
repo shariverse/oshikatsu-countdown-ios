@@ -104,7 +104,11 @@ nonisolated enum AppStorageKey {
     static let appearanceBackgroundEnabled = "appearanceBackgroundEnabled"
     /// 着せ替え: 地の飾りを推しの丸い写真に替える（既定は OFF）。
     static let appearanceDecorationEnabled = "appearanceDecorationEnabled"
-    /// 着せ替え: 背景の写真に掛ける暗幕とぼかしの強さ（`AppearanceIntensity` の rawValue。既定は medium）。
+    /// 着せ替え: 背景の写真に掛ける暗幕の濃さ（スライダーの位置 0〜1。`AppearanceBackgroundStyle`。既定は 0.5）。
+    static let appearanceBackgroundScrim = "appearanceBackgroundScrim"
+    /// 着せ替え: 背景の写真に掛けるぼかしの強さ（スライダーの位置 0〜1。`AppearanceBackgroundStyle`。既定は 0.4）。
+    static let appearanceBackgroundBlur = "appearanceBackgroundBlur"
+    /// 着せ替え: 前の版（TestFlight）の暗幕とぼかしの強さ（`weak`・`medium`・`strong`）。暗幕とぼかしを書いていないときに読み替えるだけで、書かない。
     static let appearanceIntensity = "appearanceIntensity"
     /// 着せ替え: 背景の写真のファイル名（`OshiPhotoLibrary` の中。選んでいなければ無い）。
     static let appearanceBackgroundPhoto = "appearanceBackgroundPhoto"

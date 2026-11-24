@@ -85,7 +85,7 @@ struct AppearanceDetailBackground: View {
 #Preview("背景の写真と飾り（上の 300pt を空ける）") {
     AppearanceDetailBackground(
         rendering: AppearanceRendering(
-            backgroundPhoto: .init(fileName: "00000000-0000-0000-0000-000000000001.jpg", intensity: .medium),
+            backgroundPhoto: .init(fileName: "00000000-0000-0000-0000-000000000001.jpg", style: .default),
             decoration: .default
         ),
         oshis: [Oshi(name: "ミナト", color: .navy)],
