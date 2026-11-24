@@ -4,7 +4,8 @@ name: App Store Metadata
 # スクリーンショットを、App Store Connect API で App Store バージョンに登録する。手動実行のみ。
 #
 # 表示サイズと機種は docs/app-store/screenshots.json、言語は docs/app-store/languages.json で決める。
-# スクリーンショットは表示サイズごとに別のジョブで並行して、scripts/app-store-screenshots.sh で撮る（リポジトリに大きな画像を置かない）。
+# スクリーンショットは表示サイズごとに別のジョブで並行して、scripts/app-store-screenshots.sh で撮り、見出しと端末の枠を付けた 10 枚にする
+# （リポジトリに大きな画像を置かない。見出しを付けるのに Google Chrome を使う）。
 # iPhone Duo は GitHub の標準イメージ xcode-27 で撮る（Xcode 27 と iOS 27.1 のランタイムが要る。ランタイムは scripts/app-store-screenshots.sh が入れる）。
 # クリエイティブアセット（プロダクトページのヘッダー / 検索結果）は、6.9 インチのスクリーンショットから scripts/render-creative-assets.sh で書き出し、
 # App Asset Library に上げて言語ごとのローカリゼーションに配置する。
@@ -198,7 +199,7 @@ jobs:
         if: ${{ inputs.screenshots }}
         run: |
           echo "SCREENSHOT_DIR=$RUNNER_TEMP/app-store-screenshots" >> "$GITHUB_ENV"
-          find "$RUNNER_TEMP/app-store-screenshots" -name manifest.json | sort
+          find "$RUNNER_TEMP/app-store-screenshots" -name '[0-9][0-9].png' | sort
 
       - name: Create API private key
         # Secrets はシェル展開ではなく env 経由で渡す
