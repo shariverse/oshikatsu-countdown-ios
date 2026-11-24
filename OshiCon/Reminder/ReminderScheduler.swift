@@ -27,16 +27,20 @@ final class ReminderScheduler: NSObject {
     @ObservationIgnored private let isActive: Bool
     /// UI テストで、通知を押したときの動きを確かめる（`LaunchOptions.schedulesTestReminder`）。予約はしないが、許可と delegate は動かす。
     @ObservationIgnored private let handlesTestReminder: Bool
+    /// App Store 用スクリーンショットで、見本の予定の通知を実際の文面で出す（`LaunchOptions.deliversSampleReminders`）。予約はしないが、許可は求める。
+    @ObservationIgnored private let deliversSampleReminders: Bool
     @ObservationIgnored private var rescheduling: Task<Void, Never>?
 
     init(
         container: ModelContainer,
         isActive: Bool = !LaunchOptions.usesInMemoryStore,
-        handlesTestReminder: Bool = LaunchOptions.schedulesTestReminder
+        handlesTestReminder: Bool = LaunchOptions.schedulesTestReminder,
+        deliversSampleReminders: Bool = LaunchOptions.deliversSampleReminders
     ) {
         self.container = container
         self.isActive = isActive
         self.handlesTestReminder = handlesTestReminder
+        self.deliversSampleReminders = deliversSampleReminders
         super.init()
         if isActive || handlesTestReminder {
             // 押して起動したときの通知を受け取れるよう、起動の途中で delegate にする
@@ -71,7 +75,7 @@ final class ReminderScheduler: NSObject {
 
     /// まだ許可を聞いていなければ聞く（予定を保存した直後と、設定で通知を ON にしたとき）。通知が OFF なら聞かない。
     func requestAuthorizationIfNeeded() {
-        guard isActive || handlesTestReminder, ReminderSettings(defaults: .standard).isEnabled else {
+        guard isActive || handlesTestReminder || deliversSampleReminders, ReminderSettings(defaults: .standard).isEnabled else {
             return
         }
         Task {
@@ -87,6 +91,14 @@ final class ReminderScheduler: NSObject {
             await refreshAuthorizationStatus()
             reschedule()
         }
+    }
+
+    /// App Store 用スクリーンショット: 見本の通知を出せるよう、起動したときに許可を求める（`LaunchOptions.deliversSampleReminders` のときだけ）。
+    func requestAuthorizationForSampleReminders() {
+        guard deliversSampleReminders else {
+            return
+        }
+        requestAuthorizationIfNeeded()
     }
 
     /// 許可の状態を読み直す（設定画面を開いたとき・iOS の設定から戻ったとき）。
@@ -114,6 +126,40 @@ final class ReminderScheduler: NSObject {
                 try await UNUserNotificationCenter.current().add(request)
             } catch {
                 Self.logger.error("テスト用の通知を予約できなかった: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+    }
+
+    /// App Store 用スクリーンショット: 見本の予定の通知の計画（`ReminderPlan`）の先頭の `count` 件を、実際の文面（`ReminderContent`）で 2 秒後に出す。
+    /// `LaunchOptions.deliversSampleReminders` のときだけ。
+    func deliverSampleReminders(count: Int = 3) {
+        guard deliversSampleReminders else {
+            return
+        }
+        let store = OshiConStore(context: container.mainContext)
+        guard let events = try? store.events(), let oshis = try? store.oshis() else {
+            return
+        }
+        let oshiNames = Dictionary(uniqueKeysWithValues: oshis.map { ($0.id, $0.name) })
+        let eventsByID = Dictionary(uniqueKeysWithValues: events.map { ($0.id, $0) })
+        let plan = ReminderPlan(events: events, settings: ReminderSettings(defaults: .standard), now: .now, calendar: .autoupdatingCurrent)
+        // 先に出したものほど下に積まれるので、遠いものから出す
+        let requests = plan.reminders.prefix(count).reversed().enumerated().compactMap { index, reminder -> UNNotificationRequest? in
+            guard let event = eventsByID[reminder.eventID] else {
+                return nil
+            }
+            let text = ReminderContent(reminder: reminder, event: event, oshiName: event.oshiID.flatMap { oshiNames[$0] })
+            let planned = ReminderRequest.make(reminder, content: text)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2 + Double(index), repeats: false)
+            return UNNotificationRequest(identifier: planned.identifier, content: planned.content, trigger: trigger)
+        }
+        Task {
+            for request in requests {
+                do {
+                    try await UNUserNotificationCenter.current().add(request)
+                } catch {
+                    Self.logger.error("見本の通知を出せなかった: \(error.localizedDescription, privacy: .public)")
+                }
             }
         }
     }
@@ -192,8 +238,10 @@ struct ReminderRefresher: ViewModifier {
                 switch phase {
                 case .active:
                     scheduler?.reschedule()
+                    scheduler?.requestAuthorizationForSampleReminders()
                 case .background:
                     scheduler?.scheduleTestReminder()
+                    scheduler?.deliverSampleReminders()
                 default:
                     break
                 }
