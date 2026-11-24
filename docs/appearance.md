@@ -105,8 +105,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 ### 設定画面の「着せ替え」の行と、着せ替えの画面
 
 - 設定画面の Plus の行の下に「着せ替え」の行を置き、押すと着せ替えの画面を開く。
-  **今は Plus の行と同じく、開発版（DEBUG）と TestFlight だけに出す**（`PlusEntryPolicy.showsEntry(in:)`。`PlusEntryPolicy` は変えていない）。
-  App Store 版で出すのは、推しの写真ウィジェットとそろって develop に入ってから別に行う
+  Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で出す。1.3.0 から App Store 版でも出す（それまでは開発版と TestFlight だけ。#284）
 - 着せ替えの画面は上から次の順。2 の見本だけはスクロールする Form の外に置き、どの設定を変えているときも見えるようにする（下の「見本の置き方」。#269）
   1. Plus の案内: Plus でない人は案内の文と「Plus で使う」（`openPlusPaywall` で課金画面を開く）、Plus の人は「Plus をお使いいただけます」
   2. 見本: ホームの部品で組んだホームの見本（390 × 845pt で組み、画面の大きさに合わせて縮める）。選んだ写真・ON/OFF・暗幕とぼかし・飾りを、Plus によらずその場で映す（試着）。
@@ -138,7 +137,6 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 ### 作らないもの
 
 - 推しごとの背景の写真（SwiftData のスキーマの変更）
-- App Store 版で課金画面と着せ替えの入口を出すこと（`PlusEntryPolicy` の変更）
 - 課金画面・シェアのカード・テーマの見本・ウィジェット・ライブアクティビティの地を写真や推しの写真の飾りにすること
 - 新しいテーマや飾り、通信・解析・自前のサーバー、権限・プライバシーマニフェストの追加、外部ライブラリ
 
@@ -193,7 +191,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
     見本の推しのスイッチ（`appearance.decorationOshi.<並びの番号>`）で外せる → ホームに飾りが効く。
     スライダーと推しのスイッチを動かすときも、見本が画面の中にあって設定と重ならないことを確かめる
   - 見本は Form の外に固定しているので、行を探して送るときは Form（`appearance.form`）の上で指を動かす（見本の上では送れない）
-  - `-simulateAppStoreDistribution`: 「着せ替え」の行が出ない
+  - `-simulateAppStoreDistribution`: App Store 版でも「着せ替え」の行が出る
   - ホームと詳細の地は読み上げから外しているので、メモリ上のストアのときだけ 1pt の透明な要素（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置き、
     そのラベル（`standard`・`photo`・`decoration` を `,` でつないだもの）で描いているものを確かめる（暗幕とぼかしの値は見本の読み上げの値で確かめる）。端末のストアで動くアプリには置かない
   - メモリ上のストアでは、着せ替えの設定は別の UserDefaults（`jp.shilokuma.OshiCon.InMemoryAppearance`）、写真は一時ディレクトリに置き、起動のたびに空にする。
