@@ -4,7 +4,8 @@
 見出しはスクリプトが探すので日本語のまま変えない。各見出しの下の最初のコードブロックが登録される文面。
 
 言葉の選び方: スペイン語圏のアニメ・アイドルのファンにも通じる "oshi" を使い、初出で "bias"（K-POP の言い方）を添えた。
-ファン向けなので呼びかけは "tú"。誕生日はファンの口語の "cumples" をサブタイトルに使った（説明文は "cumpleaños"）。
+ファン向けなので呼びかけは "tú"。
+ライブアクティビティ・Dynamic Island は iOS のスペイン語の呼び名（Actividad en directo・Dynamic Island）。Plus の機能の名前はアプリの訳（Widget con la foto de tu oshi・Fondos y adornos personalizados）にそろえた。
 
 ## アプリ名（30 文字まで）
 
@@ -17,67 +18,77 @@ Oshi Countdown: días de fan
 ## サブタイトル（30 文字まで）
 
 ```
-Días para conciertos y cumples
+Conciertos K-pop y cumpleaños
 ```
 
-（30 文字）
+（29 文字）
+
+1.3.0 で、検索の語「K-pop」をサブタイトルに入れた。スペイン語で検索される「cuenta regresiva」はキーワードに入れた。
 
 ## プロモーションテキスト（170 文字まで）
 
 ```
-Conciertos, cumpleaños, lanzamientos, streams: añade los días que esperas y mira de un vistazo cuántos faltan, con el color de tu oshi y en tu pantalla de inicio.
+Nuevo: Oshi Countdown Plus pone la foto de tu oshi en widgets y en el fondo de la app (anual: 1 semana gratis). Compartir como imagen es gratis. Lo gratis sigue gratis.
 ```
 
-（162 文字）
+（168 文字）
 
 ## 説明文（4,000 文字まで）
 
 ```
-La app de cuenta regresiva para fans: añade los conciertos, cumpleaños, lanzamientos, streams y más de tu oshi, y mira exactamente cuántos días faltan para cada uno.
+Cuenta los días que faltan para los conciertos, cumpleaños, lanzamientos y streams de tu oshi. El gran día, una Actividad en directo en la pantalla bloqueada y en la Dynamic Island cuenta el tiempo hasta que empiece el show, gratis.
+
+◆ El gran día, cuenta atrás hasta el show
+En los eventos con hora de inicio, la Actividad en directo empieza 3 horas antes, así ves el tiempo que falta sin abrir la app.
 
 ◆ Cuenta regresiva con el color de tu oshi
-Añade a tu oshi (tu bias) con su nombre y su color de miembro, y sus eventos y cuentas regresivas aparecerán en ese color. También puedes usar una foto de tu oshi como avatar.
+Añade a tu oshi (tu bias) con su nombre y su color de miembro, y sus eventos y cuentas regresivas aparecerán en ese color. Usa una foto de tu oshi como avatar y ordena a tus oshis como quieras: la app y los widgets toman el color del oshi que está arriba.
 
-◆ Tu próximo evento de un vistazo
-El evento más cercano se muestra en grande en la parte superior de la pestaña Inicio. Fija tu evento más importante y filtra los eventos por oshi.
-
-◆ Cuenta regresiva al segundo
-Abre un evento para ver cómo avanzan cada segundo los días, horas, minutos y segundos hasta que empiece. Una barra de progreso muestra cuánto has avanzado desde que lo añadiste.
+◆ Tu próximo evento, al segundo
+El evento más cercano se muestra en grande arriba en Inicio. Abre un evento para ver cómo bajan los días, horas, minutos y segundos. Fija tu evento más importante y filtra por oshi.
 
 ◆ Eventos que se repiten cada año
-Configura cumpleaños y aniversarios para que se repitan cada año: cuando pase el día, la app cuenta hasta la misma fecha del año siguiente. Los eventos del 29 de febrero se cuentan el 28 de febrero en los años no bisiestos.
+Configura cumpleaños y aniversarios para que se repitan cada año: la app cuenta hasta la misma fecha del año siguiente. Los eventos del 29 de febrero se cuentan el 28 de febrero en los años no bisiestos.
 
-◆ Widgets para la pantalla de inicio
-• Cuenta regresiva: los días que faltan para el evento que elijas
+◆ Widgets para la pantalla de inicio y la pantalla bloqueada
+• Cuenta regresiva: los días que faltan para el evento que elijas (también en la pantalla bloqueada)
 • Oshi Count: tus próximos eventos, del más cercano al más lejano
-Toca un widget para abrir los detalles de un evento o añadir uno nuevo.
 
 ◆ Recordatorios antes de tus eventos
-Recibe una notificación 30 días, 7 días y 1 día antes, el mismo día y 1 hora antes del inicio. Puedes cambiar los momentos y la hora de los recordatorios en Ajustes.
+Recibe una notificación 30 días, 7 días y 1 día antes, el mismo día y 1 hora antes del inicio. Cambia los momentos y la hora de los recordatorios en Ajustes.
 
-◆ La cuenta regresiva en la pantalla bloqueada
-Añade el widget Cuenta regresiva a la pantalla bloqueada (circular, rectangular o en una línea) para ver los días que faltan cuando quieras. El día de un evento con hora de inicio, una Actividad en directo en la pantalla bloqueada y en la Dynamic Island cuenta el tiempo hasta el inicio.
+◆ Comparte tu cuenta regresiva como imagen
+Convierte "Faltan 10 días" en una tarjeta cuadrada con la foto y el color de tu oshi, y compártela donde quieras. La imagen se crea en tu dispositivo.
 
-◆ Para iPhone y iPad
-Funciona en la pantalla grande del iPad y en horizontal, y es compatible con el modo oscuro.
+◆ Oshi Countdown Plus (de pago)
+• Widget con la foto de tu oshi: su foto detrás de los días que faltan
+• Fondos y adornos personalizados: decora la app con las fotos de tu oshi
+Elige una suscripción mensual o anual (la anual incluye 1 semana de prueba gratis) o un pago único, que también incluye las funciones Plus que lleguen en el futuro.
+Todo lo que hoy es gratis (cuentas regresivas, widgets, recordatorios, Actividades en directo y compartir) seguirá siendo gratis. No lo pasaremos a Plus.
 
-◆ Tus datos se quedan en tu dispositivo
-Tus oshis, fotos y eventos se guardan solo en tu dispositivo y nunca se envían a ninguna parte. No necesitas cuenta.
-(Los datos se incluyen en las copias de seguridad del dispositivo en iCloud o en un ordenador, y se borran al eliminar la app.)
+◆ iPhone y iPad, sin anuncios, datos en tu dispositivo
+Funciona en iPhone y iPad, con modo oscuro. Sin anuncios y sin cuenta. Tus oshis, fotos y eventos se guardan solo en tu dispositivo y nunca se envían a ninguna parte.
+(Se incluyen en las copias de seguridad del dispositivo en iCloud o en un ordenador, y se borran al eliminar la app.)
 
-Tipos de evento: live, cumpleaños, lanzamiento, stream, otro
+Sobre las suscripciones
+• El pago se cobra en tu cuenta de Apple al confirmar la compra. Las suscripciones se renuevan automáticamente salvo que se cancelen al menos 24 horas antes del final del periodo actual; la renovación se cobra en las 24 horas anteriores al final del periodo.
+• La prueba gratis pasa a ser una suscripción anual de pago salvo que se cancele al menos 24 horas antes de que termine.
+• Gestiona o cancela tu suscripción en Ajustes > [tu nombre] > Suscripciones.
+• Cuando termina una suscripción, la app vuelve al aspecto estándar y conserva las fotos que elegiste.
 
 Condiciones de uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidad: https://shilokuma.jp/privacy/oshikatsu-countdown/
 ```
 
-（2374 文字）
+（3369 文字）
 
 ## キーワード（100 文字まで・カンマ区切り）
 
-アプリ名・サブタイトルの語（oshi, countdown, días, fan, conciertos, cumples など）は外した。
+アプリ名・サブタイトルの語（oshi, countdown, días, fan, conciertos, K-pop, cumpleaños など）は外した。
+サブタイトルの "K-pop" がハイフンのない "kpop" の検索に効くかは分からないので、"kpop" はキーワードにも残した。
 
 ```
-bias,idol,kpop,jpop,cumpleaños,lanzamiento,estreno,stream,directo,aniversario,widget,contador,otaku
+bias,idol,kpop,cuenta,regresiva,lanzamiento,estreno,stream,directo,aniversario,widget,contador,foto
 ```
 
 （99 文字）
