@@ -138,7 +138,7 @@ final class PlusPaywallUITests: XCTestCase {
         return app
     }
 
-    /// 開発版（と TestFlight）では、推しの写真ウィジェットの課金画面のリンクで課金画面を開く。
+    /// 開発版では、推しの写真ウィジェットの課金画面のリンクで課金画面を開く。
     @MainActor
     func testPhotoWidgetLinkOpensPaywall() throws {
         let app = try launchAndOpenPaywallLink(arguments: [])
@@ -151,13 +151,13 @@ final class PlusPaywallUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.firstMatch.exists)
     }
 
-    /// App Store 版では、推しの写真ウィジェットの課金画面のリンクで課金画面を開かない。
+    /// App Store 版でも、推しの写真ウィジェットの課金画面のリンクで課金画面を開く。
     @MainActor
-    func testPhotoWidgetLinkDoesNotOpenPaywallInAppStoreDistribution() throws {
+    func testPhotoWidgetLinkOpensPaywallInAppStoreDistribution() throws {
         let app = try launchAndOpenPaywallLink(arguments: ["-simulateAppStoreDistribution"])
 
-        XCTAssertFalse(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.tabBars.firstMatch.exists)
+        XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["plusPaywall.restore"].firstMatch.waitForExistence(timeout: 2))
     }
 
     /// 課金画面を開いたまま、ウィジェット・通知のリンクで予定の詳細を開くと、課金画面を閉じてホームのタブに移る（開いた詳細が課金画面の下に隠れない）。
@@ -176,13 +176,11 @@ final class PlusPaywallUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.addEvent"].waitForExistence(timeout: 5))
     }
 
-    /// App Store 版では、設定に Plus の行を出さない。
+    /// App Store 版でも、設定に Plus の行を出す。
     @MainActor
-    func testPlusRowHiddenInAppStoreDistribution() throws {
+    func testPlusRowShownInAppStoreDistribution() throws {
         let app = launchSettings(arguments: ["-plusLocked", "-simulateAppStoreDistribution"])
 
-        let showsPast = app.switches.matching(NSPredicate(format: "label CONTAINS %@", "終わった予定も表示する")).firstMatch
-        XCTAssertTrue(showsPast.waitForExistence(timeout: 2))
-        XCTAssertFalse(app.buttons["settings.plus"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["settings.plus"].waitForExistence(timeout: 5))
     }
 }

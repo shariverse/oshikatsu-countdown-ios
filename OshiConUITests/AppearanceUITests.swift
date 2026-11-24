@@ -176,20 +176,31 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertFalse(preview.frame.intersects(control.frame), "見本: \(preview.frame)、設定: \(control.frame)", file: file, line: line)
     }
 
-    /// スライダー `slider` を `position`（0〜1）まで動かし、値が `expected` になるまで（3 回まで）動かし直す。
-    /// 動きの遅い CI の Simulator では、1 回の `adjust` が端まで届かずに途中（75〜80%）で止まることがあるため。
+    /// スライダー `slider` を端（`position` が 1 なら右、0 なら左）へ動かし、値が狙った向きに動いたことを確かめて、動いた後の値（「90%」など）を返す。
+    /// 動きの遅い CI の Simulator では、`adjust(toNormalizedSliderPosition:)` が端まで届かずに途中（75〜95%）で止まったり、
+    /// 引いた指で Form が送られてスライダーが画面の外に出たりする。そのため、ちょうど端の値（`end`）は求めない。
+    /// 端に届くまで 3 回まで動かし直し、動かす前と値を読む前にスライダーを画面の中に戻す。見本に映ったかは、返した値で確かめる。
     @MainActor
-    private func adjust(
+    private func move(
         _ slider: XCUIElement,
         to position: CGFloat,
-        expecting expected: String,
+        end: String,
+        in app: XCUIApplication,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) {
-        for _ in 0..<3 where slider.value as? String != expected {
+    ) -> String {
+        let initial = slider.value as? String ?? ""
+        for _ in 0..<3 {
+            reveal(slider, in: app)
+            guard slider.value as? String != end else { break }
             slider.adjust(toNormalizedSliderPosition: position)
         }
-        XCTAssertEqual(slider.value as? String, expected, file: file, line: line)
+        reveal(slider, in: app)
+        let moved = slider.value as? String ?? ""
+        let (before, after) = (initial.percentValue, moved.percentValue)
+        let message = "スライダーが狙った向きに動いていない: \(initial) → \(moved)"
+        XCTAssertTrue(position > 0.5 ? after > before : after < before, message, file: file, line: line)
+        return moved
     }
 
     /// Form をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
@@ -202,10 +213,10 @@ final class AppearanceUITests: XCTestCase {
         start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0)
     }
 
-    /// 背景の写真を選んだ後に、暗幕とぼかしのスライダーを別々に動かすと見本に映る（暗幕 100%・ぼかし 0% にして返す）。
+    /// 背景の写真を選んだ後に、暗幕とぼかしのスライダーを別々に動かすと見本に映る（暗幕を濃く、ぼかしを弱くして、動いた後の値を返す）。
     /// 背景を OFF にすると、スライダーは値を見せたまま押せなくなり、ON に戻すと押せる。
     @MainActor
-    private func adjustScrimAndBlur(in app: XCUIApplication) {
+    private func adjustScrimAndBlur(in app: XCUIApplication) -> (scrim: String, blur: String) {
         let scrim = app.sliders["appearance.backgroundScrim"]
         let blur = app.sliders["appearance.backgroundBlur"]
         reveal(blur, in: app)
@@ -214,23 +225,25 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertEqual(scrim.value as? String, "50%")
         XCTAssertEqual(blur.value as? String, "40%")
         assertPreviewVisible(besides: scrim, in: app)
-        adjust(scrim, to: 1, expecting: "100%")
+        let scrimValue = move(scrim, to: 1, end: "100%", in: app)
         XCTAssertEqual(blur.value as? String, "40%")
         assertPreviewVisible(besides: blur, in: app)
-        adjust(blur, to: 0, expecting: "0%")
-        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%"])
+        let blurValue = move(blur, to: 0, end: "0%", in: app)
+        XCTAssertEqual(scrim.value as? String, scrimValue)
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ \(scrimValue)", "ぼかしの強さ \(blurValue)"])
 
         toggle("appearance.backgroundToggle", in: app, to: "0")
         waitForPreview(in: app, containing: ["背景の写真なし"])
         reveal(blur, in: app, needsHittable: false)
         XCTAssertFalse(scrim.isEnabled)
         XCTAssertFalse(blur.isEnabled)
-        XCTAssertEqual(scrim.value as? String, "100%")
-        XCTAssertEqual(blur.value as? String, "0%")
+        XCTAssertEqual(scrim.value as? String, scrimValue)
+        XCTAssertEqual(blur.value as? String, blurValue)
         toggle("appearance.backgroundToggle", in: app, to: "1")
         XCTAssertTrue(scrim.isEnabled)
         XCTAssertTrue(blur.isEnabled)
         waitForPreview(in: app, containing: ["背景の写真あり"])
+        return (scrimValue, blurValue)
     }
 
     /// Plus でない人: 写真を選ぶ・変える・外す、ON/OFF、暗幕とぼかしのスライダーが見本に映り、課金画面を開ける。ホームと詳細は標準のまま。
@@ -247,9 +260,9 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.buttons["appearance.selectPhoto"].label.contains("写真を変える"))
         waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 50%", "ぼかしの強さ 40%"])
 
-        adjustScrimAndBlur(in: app)
+        let (scrimValue, blurValue) = adjustScrimAndBlur(in: app)
         toggle("appearance.decorationToggle", in: app, to: "1")
-        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%", "推しの写真の飾りあり"])
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ \(scrimValue)", "ぼかしの強さ \(blurValue)", "推しの写真の飾りあり"])
 
         // 写真を変えても、外しても見本に映る
         pickAndCropPhoto(in: app)
@@ -336,16 +349,16 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(opacity.isEnabled)
         waitForPreview(in: app, containing: ["推しの写真の飾りあり", "飾りの濃さ 40%", "飾りの量 25%"])
 
-        // いちばん濃く、いちばん多く（埋め尽くす）する。スライダーを動かしている間も、見本は画面の中にあり、その場で映る
+        // 濃く、多くする（埋め尽くす側へ）。スライダーを動かしている間も、見本は画面の中にあり、その場で映る
         reveal(opacity, in: app)
         assertPreviewVisible(besides: opacity, in: app)
-        adjust(opacity, to: 1, expecting: "100%")
-        waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 25%"])
+        let opacityValue = move(opacity, to: 1, end: "100%", in: app)
+        waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 25%"])
         let amount = app.sliders["appearance.decorationAmount"]
         reveal(amount, in: app)
         assertPreviewVisible(besides: amount, in: app)
-        adjust(amount, to: 1, expecting: "100%")
-        waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 100%"])
+        let amountValue = move(amount, to: 1, end: "100%", in: app)
+        waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 \(amountValue)"])
 
         // 見本の推し（写真なし）が並び、推しごとに外せる
         let firstOshi = app.switches["appearance.decorationOshi.0"]
@@ -362,16 +375,21 @@ final class AppearanceUITests: XCTestCase {
         waitForMarker("home.appearance", in: app, equalTo: "decoration")
     }
 
-    /// App Store 版では、設定に「着せ替え」の行を出さない。
+    /// App Store 版でも、設定に「着せ替え」の行を出す。
     @MainActor
-    func testAppearanceRowHiddenInAppStoreDistribution() throws {
+    func testAppearanceRowShownInAppStoreDistribution() throws {
         let app = launchSettings(arguments: ["-plusUnlocked", "-simulateAppStoreDistribution"])
 
-        let showsPast = app.switches.matching(NSPredicate(format: "label CONTAINS %@", "終わった予定も表示する")).firstMatch
-        XCTAssertTrue(showsPast.waitForExistence(timeout: 2))
-        XCTAssertFalse(app.buttons["settings.appearance"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["settings.appearance"].waitForExistence(timeout: 5))
         // Plus が使えても、ホームは標準の見た目のまま（設定していないため）
         app.tabBars.firstMatch.buttons["ホーム"].tap()
         waitForMarker("home.appearance", in: app, equalTo: "standard")
+    }
+}
+
+private extension String {
+    /// スライダーの値の文字（「40%」）を数にする。読めなければ -1。
+    var percentValue: Int {
+        Int(dropLast()) ?? -1
     }
 }

@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@f1b95861875616e27ecf5bd7a2ce85d19c79889c oshikatsu-countdown/README.md
+  元: shariverse/app-specs@c5560e26f143ddf43b07a8b0868d8de8b84777c5 oshikatsu-countdown/README.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -33,7 +33,7 @@
 | [推し活カウントダウン Plus](features/14-plus.md) | あり |
 | [推しの並べ替え](features/15-oshi-order.md) | あり |
 | [推しの写真ウィジェット](features/16-photo-widget.md) | あり |
-| [背景・飾りの着せ替え](features/17-dress-up.md) | 予定 |
+| [背景・飾りの着せ替え](features/17-dress-up.md) | あり |
 
 ## 読む順番
 

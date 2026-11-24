@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@f1b95861875616e27ecf5bd7a2ce85d19c79889c oshikatsu-countdown/features/10-home-widgets.md
+  元: shariverse/app-specs@c5560e26f143ddf43b07a8b0868d8de8b84777c5 oshikatsu-countdown/features/10-home-widgets.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -21,6 +21,7 @@
 - 読み上げは「推しの名前、タイトル、あと N 日」
 
 大きさは小（2×2）。予定はウィジェットの編集で選ぶ。置いたばかりのときは、予定を選んでいない。
+ウィジェットの編集は、題「表示する予定を選ぶ」、説明「カウントダウンする予定を選びます。」、欄「予定」。選んだ予定が削除されたら、欄に「見つからない予定」と出る。
 予定を出せないときは、推し色の塗りの代わりにカードの地に次の文言を出す。押すとアプリを開く（ホームのタブに切り替えるだけ）。
 
 | 状態 | 見出し | 補足 |

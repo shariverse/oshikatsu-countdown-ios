@@ -5,6 +5,7 @@
 
 言葉の選び方: アニメ・アイドルのファンの間で通じる "oshi" をそのまま使い、初出で "fave"・"bias"（K-POP の言い方）を添えた。
 推し色は "member color"、予定は "event"。
+英語圏で "oshi" はほとんど検索されない（K-POP のファンは "bias"）ので、アプリ名の "Oshi" は残し、検索の語（K-pop・concert・birthday・bias・idol・D-day）はサブタイトルとキーワードで取る（1.3.0）。
 
 ## アプリ名（30 文字まで）
 
@@ -17,7 +18,7 @@ Oshi Countdown: Fan Event Days
 ## サブタイトル（30 文字まで）
 
 ```
-Days until your fave's big day
+K-pop concert & birthday timer
 ```
 
 （30 文字）
@@ -25,59 +26,73 @@ Days until your fave's big day
 ## プロモーションテキスト（170 文字まで）
 
 ```
-Concerts, birthdays, release days, streams. Add the days you can't wait for and see how many days are left at a glance—in your oshi's color, even on your Home Screen.
+New: Oshi Countdown Plus puts your oshi's photo on widgets and app backgrounds (yearly: 1-week free trial). Share countdowns as images, free. Free features stay free.
 ```
 
 （166 文字）
 
+1.3.0 の告知（Plus とシェア）。検索には効かないので、キーワードは並べない。価格の数字は書かない。
+
 ## 説明文（4,000 文字まで）
 
 ```
-A countdown app for fans: add your oshi's concerts, birthdays, release days, streams and more, and see exactly how many days are left until each one.
+Count down the days to your oshi's concerts, birthdays, release days and streams. On the big day, a Live Activity on your Lock Screen and in the Dynamic Island counts down to showtime, for free.
+
+◆ Countdown to showtime on the big day
+For events with a start time, the Live Activity starts 3 hours before, so you can check the time left without opening the app.
 
 ◆ Countdowns in your oshi's color
-Add your oshi (your fave, your bias) with their name and member color, and their events and countdowns appear in that color. You can also use a photo of your oshi as their avatar.
+Add your oshi (your fave, your bias) with their name and member color, and their events and countdowns appear in that color. Use a photo of your oshi as their avatar, and put your oshi in any order: the app and widgets take on the color of the oshi at the top.
 
-◆ Your next event at a glance
-The nearest upcoming event is shown large at the top of the Home tab. Pin your single most important event, and filter events by oshi.
-
-◆ Count down to the second
-Open an event to watch the days, hours, minutes and seconds until showtime (or start time) tick down every second. A progress bar shows how far you've come since you added it.
+◆ Your next event, down to the second
+The nearest event is shown large at the top of Home. Open an event to watch the days, hours, minutes and seconds tick down. Pin your most important event and filter by oshi.
 
 ◆ Events that repeat every year
-Set birthdays and anniversaries to repeat every year, and once the day has passed, the app counts down to the same date next year. Events on February 29 are counted on February 28 in non-leap years.
+Set birthdays and anniversaries to repeat every year, and the app counts down to the same date next year. Events on February 29 are counted on February 28 in non-leap years.
 
-◆ Home Screen widgets
-• Countdown: days left until one event you choose
+◆ Home Screen and Lock Screen widgets
+• Countdown: days left until one event you choose (also on the Lock Screen)
 • Oshi Count: your upcoming events, nearest first
-Tap a widget to open an event's details or add a new event.
 
 ◆ Reminders before your events
-Get notified 30 days, 7 days and 1 day before, on the day, and 1 hour before the start time. You can change the timings and the time of day in Settings.
+Get notified 30 days, 7 days and 1 day before, on the day, and 1 hour before the start time. Change the timings and the time of day in Settings.
 
-◆ Countdowns on your Lock Screen
-Add the Countdown widget to your Lock Screen (circular, rectangular or inline) to check the days left at any time. On the day of an event with a start time, a Live Activity on the Lock Screen and in the Dynamic Island counts down to the start.
+◆ Share your countdown as an image
+Turn "N days left" into a square card with your oshi's photo and member color, and share it anywhere. The image is created on your device.
 
-◆ Made for iPhone and iPad
-Works on the large iPad screen and in landscape, and supports Dark Mode.
+◆ Oshi Countdown Plus (paid)
+• Oshi Photo widget: your oshi's photo behind the days left
+• Custom backgrounds & decorations: dress up the app with your oshi's photos
+Choose a monthly or yearly subscription (yearly includes a 1-week free trial) or a one-time purchase, which also covers Plus features added later.
+Everything that's free today, including countdowns, widgets, reminders, Live Activities and sharing, stays free. We won't move it behind Plus.
 
-◆ Your data stays on your device
-Your oshi, photos and events are stored only on your device and are never sent anywhere. No account needed.
-(Your data is included in device backups to iCloud or a computer, and is erased when you delete the app.)
+◆ iPhone and iPad, no ads, data on your device
+Works on iPhone and iPad, with Dark Mode. No ads and no account. Your oshi, photos and events are stored only on your device and are never sent anywhere.
+(They're included in device backups to iCloud or a computer, and erased when you delete the app.)
 
-Event types: Live, Birthday, Release, Stream, Other
+About subscriptions
+• Payment is charged to your Apple Account at confirmation of purchase. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period, and renewal is charged within the 24 hours before it ends.
+• The free trial turns into a paid yearly subscription unless canceled at least 24 hours before it ends.
+• Manage or cancel in Settings > [your name] > Subscriptions.
+• After a subscription ends, the app returns to the standard look and keeps the photos you chose.
 
 Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy Policy: https://shilokuma.jp/privacy/oshikatsu-countdown/
 ```
 
-（2102 文字）
+（3028 文字）
+
+冒頭の 1〜2 文は「more」を押さなくても読めるので、競合に無い「当日は開演まで Dynamic Island とロック画面で秒読み（無料）」を入れた。
+Plus は審査ガイドライン 2.3.2・3.1.2 に合わせ、自動更新・お試しのあとの課金・解約の方法を書いた。価格の数字は書かない。
+説明文は検索には効かないが、米国のストアの App Store のタグ（App tags）は `en-US` のメタデータから付くので、K-POP・ウィジェット・ライブアクティビティの語を自然な文で入れている。
 
 ## キーワード（100 文字まで・カンマ区切り）
 
-アプリ名・サブタイトルの語（oshi, countdown, fan, event, days, fave, big, day など）は外した。
+アプリ名・サブタイトルの語（oshi, countdown, fan, event, days, concert, birthday, timer など）は外した。
+サブタイトルの "K-pop" がハイフンのない "kpop" の検索に効くかは分からないので、"kpop" はキーワードにも残した。
 
 ```
-bias,idol,kpop,jpop,concert,birthday,release,stream,anniversary,widget,timer,tracker,live,stan,otaku
+bias,idol,kpop,dday,widget,live,photo,anniversary,release,stream,stan,otaku,vtuber,comeback,fandom
 ```
 
-（100 文字）
+（98 文字）

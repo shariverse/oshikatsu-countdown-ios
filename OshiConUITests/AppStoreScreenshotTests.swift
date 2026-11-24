@@ -97,7 +97,7 @@ final class AppStoreScreenshotTests: XCTestCase {
     /// Plus の着せ替え。
     @MainActor
     private func capturePlusAppearance() {
-        // Plus: 着せ替え（背景の写真と飾り）のホームと、着せ替えの画面。着せ替えの行を出すため、App Store 版としては動かさない
+        // Plus: 着せ替え（背景の写真と飾り）のホームと、着せ替えの画面
         let app = launch(["-sampleAppearance"], plus: true)
         XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
         XCTAssertTrue(app.descendants(matching: .any)["home.appearance"].firstMatch.waitForExistence(timeout: Self.timeout))
@@ -232,9 +232,9 @@ final class AppStoreScreenshotTests: XCTestCase {
 
     /// 見本のデータで起動し直す（動いていれば終わらせてから起動する）。システムの文言もその言語になるよう、言語と地域も渡す。
     /// 当日の配信は、今から 40 分ほど先に始まるようにする（`-sampleStreamStartsSoon`。詳細とライブアクティビティで秒まで数える）。
-    /// 無料の機能の画面では、Plus は使えない状態に固定し（`-plusLocked`。StoreKit に問い合わせない）、
-    /// App Store 版と同じ画面にするため、設定の Plus の行も出さない（`-simulateAppStoreDistribution`）。
-    /// `plus` のときは、Plus を使える状態にし（`-plusUnlocked`）、着せ替えの行を出すため App Store 版としては動かさない。
+    /// 配るアプリと同じ画面にするため、App Store 版として動かす（`-simulateAppStoreDistribution`。1.3.0 から設定に Plus・着せ替えの行も出る）。
+    /// 無料の機能の画面では、Plus は使えない状態に固定する（`-plusLocked`。StoreKit に問い合わせない）。
+    /// `plus` のときは、Plus を使える状態にする（`-plusUnlocked`）。
     /// 見本の推しには、このテストのバンドルにある写真（`SampleOshiPhotos/`）を付ける（`OSHICON_SAMPLE_OSHI_PHOTOS`）。
     @MainActor
     private func launch(_ extraArguments: [String] = [], plus: Bool = false) -> XCUIApplication {
@@ -249,8 +249,9 @@ final class AppStoreScreenshotTests: XCTestCase {
             "-hasCompletedOnboarding", "YES",
             "-showsPastEvents", "NO",
             "-AppleLanguages", "(\(language))",
-            "-AppleLocale", locale
-        ] + (plus ? ["-plusUnlocked"] : ["-plusLocked", "-simulateAppStoreDistribution"]) + extraArguments
+            "-AppleLocale", locale,
+            "-simulateAppStoreDistribution"
+        ] + (plus ? ["-plusUnlocked"] : ["-plusLocked"]) + extraArguments
         if let directory = sampleOshiPhotosDirectory {
             app.launchEnvironment["OSHICON_SAMPLE_OSHI_PHOTOS"] = directory.path(percentEncoded: false)
         } else {

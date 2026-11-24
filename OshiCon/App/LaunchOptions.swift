@@ -146,8 +146,8 @@ nonisolated enum LaunchOptions {
             && !arguments.contains(plusLockedArgument)
     }
 
-    /// App Store 版として動かす（課金画面の入口を出さない。App Store 用スクリーンショットと UI テスト）。
-    /// DEBUG のビルドでは入口を出すので、配るアプリと同じ画面にするときに渡す（`AppDistributionDetector.live`）。メモリ上のストアのときだけ効く。
+    /// App Store 版として動かす（App Store 用スクリーンショットと UI テスト）。
+    /// DEBUG のビルドは開発版になるので、配るアプリと同じ配り方で確かめるときに渡す（`AppDistributionDetector.live`）。メモリ上のストアのときだけ効く。
     static let appStoreDistributionArgument = "-simulateAppStoreDistribution"
 
     static var simulatesAppStoreDistribution: Bool {
