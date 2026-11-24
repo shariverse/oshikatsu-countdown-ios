@@ -274,11 +274,15 @@
     const centers = cluster(icons.map((icon) => icon.x + icon.width / 2));
     const columnPitch = centers.length > 1 ? (centers[centers.length - 1] - centers[0]) / (centers.length - 1) : iconWidth * 1.4;
     const rowPitch = rows.length > 1 ? (rows[rows.length - 1] - rows[0]) / (rows.length - 1) : iconWidth * 1.5;
-    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth };
+    // テストのランナー（OshiConUITests-Runner）のアイコンの行から覆う。見つからなければいちばん下の行から
+    const runner = icons.find((icon) => /UITests|Runner/.test(icon.label || ""));
+    const nearestRow = (y) => rows.reduce((best, row) => (Math.abs(row - y) < Math.abs(best - y) ? row : best), rows[0]);
+    const anchorRow = runner ? nearestRow(runner.y) : rows[rows.length - 1];
+    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow };
   }
 
-  // ウィジェットを、いちばん下のアイコンの行から数えて row 行目・column 列目から、columns 列の幅で置く（高さは描き出した画像の縦横比）。
-  // 上のアイコンの行はそのまま見せ、いちばん下の行（Simulator ではテストのランナーのアイコンがある）からは覆う。
+  // ウィジェットを、テストのランナーのアイコンの行から数えて row 行目・column 列目から、columns 列の幅で置く（高さは描き出した画像の縦横比）。
+  // 上のアイコンの行はそのまま見せ、ランナーのアイコン（アプリの並びは実行ごとに変わる）の行からは覆う。
   // ウィジェットの高さはアイコンとラベルより高いので、覆った行のラベルははみ出さない
   async function placeWidget(target, file, column, row, columns) {
     const grid = iconGrid();
@@ -287,7 +291,7 @@
     const left = grid.firstCenter + grid.columnPitch * column - grid.iconWidth / 2;
     const width = grid.columnPitch * (columns - 1) + grid.iconWidth;
     const height = width * image.naturalHeight / image.naturalWidth;
-    const top = grid.rows[grid.rows.length - 1] + grid.rowPitch * row;
+    const top = grid.anchorRow + grid.rowPitch * row;
     add(`<img class="overlay" src="${image.src}" style="left:${left * scale}px;top:${top * scale}px;` +
       `width:${width * scale}px;height:${height * scale}px">`, target.screen);
     concealOverflowingLabels(target, { left, top, right: left + width, bottom: top + height }, scale);
@@ -327,7 +331,7 @@
   }
 
   const OVERLAYS = {
-    // いちばん下のアイコンの行から、中のウィジェット 1 つ（2 行ぶん）と、その下に小を 2 つ並べる
+    // ランナーのアイコンの行から、中のウィジェット 1 つ（2 行ぶん）と、その下に小を 2 つ並べる
     async homeWidgets(target) {
       await placeWidget(target, "widget-upcoming-medium", 0, 0, 4);
       await placeWidget(target, "widget-countdown-small", 0, 2, 2);
