@@ -9,9 +9,9 @@ import SwiftUI
 
 /// 着せ替え（Plus）の設定。設定画面の「着せ替え」の行から開く。
 ///
-/// - 背景の写真を選ぶ・変える・外す（`PhotosPicker` → 縦長の枠の調整画面 `PhotoCropScreen`）、背景と飾りの ON/OFF、暗幕とぼかしの強さ
+/// - 背景の写真を選ぶ・変える・外す（`PhotosPicker` → 縦長の枠の調整画面 `PhotoCropScreen`）、背景の ON/OFF、暗幕の濃さとぼかしの強さ（スライダー）
 /// - 飾りの ON/OFF・濃さと量（スライダー）・飾りに出す推し（推しごとのスイッチ）は `AppearanceDecorationSettings`
-/// - ホームの見本（`AppearancePreviewPane`）に、選んだ写真・ON/OFF・強さ・飾りをその場で映す（Plus でなくても試着できる）。
+/// - ホームの見本（`AppearancePreviewPane`）に、選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す（Plus でなくても試着できる）。
 ///   見本はスクロールする Form の外に置き、どの設定を変えているときも見えるようにする。幅の狭い画面では上に固定し、幅の広い画面では左に並べる（`AppearancePreviewLayout`）
 /// - Plus でない人も写真と設定を保存でき（`AppearanceStore`）、案内から課金画面（`\.openPlusPaywall`）を開ける。Plus の人には使えていることを示す
 ///
@@ -164,11 +164,30 @@ struct AppearanceSettingsScreen: View {
             }
             Toggle("背景に写真を敷く", isOn: $store.isBackgroundEnabled)
                 .accessibilityIdentifier("appearance.backgroundToggle")
-            intensityPicker(selection: $store.intensity)
+            Group {
+                AppearanceSlider(
+                    title: "暗幕の濃さ",
+                    value: $store.backgroundScrim,
+                    range: AppearanceBackgroundStyle.scrimRange,
+                    minimumLabel: "薄い",
+                    maximumLabel: "濃い",
+                    identifier: "appearance.backgroundScrim"
+                )
+                AppearanceSlider(
+                    title: "ぼかしの強さ",
+                    value: $store.backgroundBlur,
+                    range: AppearanceBackgroundStyle.blurRange,
+                    minimumLabel: "なし",
+                    maximumLabel: "強い",
+                    identifier: "appearance.backgroundBlur"
+                )
+            }
+            // 背景が OFF でも値は残し、見せておく（ON にしたときの見た目が分かるように）
+            .disabled(!store.isBackgroundEnabled)
         } header: {
             Text("背景の写真")
         } footer: {
-            Text("ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。強いほど写真はぼけ、文字が読みやすくなります")
+            Text("ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。暗幕を薄く、ぼかしを弱くするほど、写真がはっきり見えます")
         }
         .themeRowBackground()
     }
@@ -212,35 +231,6 @@ struct AppearanceSettingsScreen: View {
             if isLoading {
                 ProgressView()
             }
-        }
-    }
-
-    /// 暗幕とぼかしの強さ。アクセシビリティの大きな文字では、分割したボタンに収まらないのでメニューにする。
-    @ViewBuilder private func intensityPicker(selection: Binding<AppearanceIntensity>) -> some View {
-        if dynamicTypeSize.isAccessibilitySize {
-            Picker("暗幕とぼかしの強さ", selection: selection) {
-                intensityOptions
-            }
-            .pickerStyle(.menu)
-            .accessibilityIdentifier("appearance.intensity")
-        } else {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("暗幕とぼかしの強さ")
-                Picker("暗幕とぼかしの強さ", selection: selection) {
-                    intensityOptions
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .accessibilityIdentifier("appearance.intensity")
-            }
-            .padding(.vertical, 2)
-        }
-    }
-
-    private var intensityOptions: some View {
-        ForEach(AppearanceIntensity.allCases, id: \.self) { intensity in
-            Text(intensity.title())
-                .tag(intensity)
         }
     }
 

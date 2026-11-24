@@ -12,7 +12,7 @@ import SwiftUI
 struct AppearanceBackgroundPhotoView: View {
     let photo: AppearanceRendering.BackgroundPhoto
     let photos: OshiPhotoLibrary
-    /// 写真の上に飾り（推しの丸い写真）を重ねるか。重ねるときは幕を濃くする（`AppearanceIntensity.scrimOpacity(isDark:isDecorated:)`）。
+    /// 写真の上に飾り（推しの丸い写真）を重ねるか。重ねるときは幕を濃くする（`AppearanceBackgroundStyle.scrimOpacity(isDark:isDecorated:)`）。
     let isDecorated: Bool
     /// 上から何 pt を写真を敷かずに空けるか（予定の詳細の上の写真の部分）。空けた所には何も描かない（下の地が見える）。
     var excludedTopHeight: CGFloat = 0
@@ -36,7 +36,7 @@ struct AppearanceBackgroundPhotoView: View {
             AppearanceBackgroundPhotoLayers(
                 // 写真を差し替えたら、新しい写真を読むまで前の写真を出さない
                 image: loaded?.fileName == photo.fileName ? loaded?.image : nil,
-                intensity: photo.intensity,
+                style: photo.style,
                 isDecorated: isDecorated,
                 excludedTopHeight: excludedTopHeight
             )
@@ -58,12 +58,12 @@ struct AppearanceBackgroundPhotoView: View {
 
 /// 読んだ背景の写真 `image` に、ぼかしと幕を掛けて描く。写真が無い（読む前・読めない）ときはテーマの地の色に幕を掛ける。
 ///
-/// - 幕の色と不透明度・ぼかしの量は `AppearanceIntensity`（ライトは地の色、ダークは黒。飾りを重ねる `isDecorated` ときは幕を濃くする）
+/// - 幕の色と不透明度・ぼかしの量は `AppearanceBackgroundStyle`（ライトは地の色、ダークは黒。飾りを重ねる `isDecorated` ときは幕を濃くする）
 /// - iPad・横向きでは写真を高さに合わせて中央に置き、左右の余りを同じ写真の強いぼかしで埋める（`AppearanceBackgroundLayout`）
 /// - 読み上げ・押せる範囲を変えない
 struct AppearanceBackgroundPhotoLayers: View {
     let image: CGImage?
-    let intensity: AppearanceIntensity
+    let style: AppearanceBackgroundStyle
     var isDecorated = false
     var excludedTopHeight: CGFloat = 0
 
@@ -78,8 +78,8 @@ struct AppearanceBackgroundPhotoLayers: View {
                 if let image {
                     photoLayers(image, size: proxy.size)
                 }
-                AppearanceIntensity.scrimColor(in: theme).color
-                    .opacity(intensity.scrimOpacity(isDark: colorScheme == .dark, isDecorated: isDecorated))
+                AppearanceBackgroundStyle.scrimColor(in: theme).color
+                    .opacity(style.scrimOpacity(isDark: colorScheme == .dark, isDecorated: isDecorated))
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()
@@ -106,13 +106,13 @@ struct AppearanceBackgroundPhotoLayers: View {
                 .scaledToFill()
                 .frame(width: size.width, height: size.height)
                 .clipped()
-                .blur(radius: AppearanceIntensity.sideFillBlurRadius, opaque: true)
+                .blur(radius: AppearanceBackgroundStyle.sideFillBlurRadius, opaque: true)
                 .clipped()
         }
         picture
             .resizable()
             .frame(width: layout.photoFrame.width, height: layout.photoFrame.height)
-            .blur(radius: intensity.blurRadius, opaque: true)
+            .blur(radius: style.blurRadius, opaque: true)
             .clipped()
             .position(x: layout.photoFrame.midX, y: layout.photoFrame.midY)
     }
@@ -121,22 +121,22 @@ struct AppearanceBackgroundPhotoLayers: View {
 /// 着せ替えの写真（背景の写真・推しの丸い写真の飾り）の上の端に掛ける、幕の色のグラデーション。
 /// 幕が薄くても・飾りが濃くても、ステータスバーの文字（時刻・電池）が写真の色によらず読めるようにする。
 ///
-/// 上から半分は `AppearanceIntensity.statusBarFadeOpacity` のまま覆い、そこから下の端に向けて消す。ホームの地（`AppearanceScreenBackground`）で使う。
+/// 上から半分は `AppearanceBackgroundStyle.statusBarFadeOpacity` のまま覆い、そこから下の端に向けて消す。ホームの地（`AppearanceScreenBackground`）で使う。
 struct AppearanceStatusBarFade: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        let scrim = AppearanceIntensity.scrimColor(in: theme).color
+        let scrim = AppearanceBackgroundStyle.scrimColor(in: theme).color
         LinearGradient(
             stops: [
-                .init(color: scrim.opacity(AppearanceIntensity.statusBarFadeOpacity), location: 0),
-                .init(color: scrim.opacity(AppearanceIntensity.statusBarFadeOpacity), location: 0.5),
+                .init(color: scrim.opacity(AppearanceBackgroundStyle.statusBarFadeOpacity), location: 0),
+                .init(color: scrim.opacity(AppearanceBackgroundStyle.statusBarFadeOpacity), location: 0.5),
                 .init(color: scrim.opacity(0), location: 1)
             ],
             startPoint: .top,
             endPoint: .bottom
         )
-        .frame(height: AppearanceIntensity.statusBarFadeHeight)
+        .frame(height: AppearanceBackgroundStyle.statusBarFadeHeight)
         .frame(maxHeight: .infinity, alignment: .top)
         .accessibilityHidden(true)
         .allowsHitTesting(false)
@@ -163,18 +163,21 @@ private struct AppearanceBackgroundPreviewText: View {
     }
 }
 
-#Preview("背景の写真（中）") {
+#Preview("背景の写真（既定の暗幕とぼかし）") {
     AppearanceBackgroundPreviewText()
         .background(
-            AppearanceBackgroundPhotoLayers(image: PhotoCropPreviewImage.make(width: 900, height: 1_950), intensity: .medium)
+            AppearanceBackgroundPhotoLayers(image: PhotoCropPreviewImage.make(width: 900, height: 1_950), style: .default)
                 .ignoresSafeArea()
         )
 }
 
-#Preview("背景の写真（弱・ダーク）") {
+#Preview("背景の写真（暗幕 0%・ぼかしなし・ダーク）") {
     AppearanceBackgroundPreviewText()
         .background(
-            AppearanceBackgroundPhotoLayers(image: PhotoCropPreviewImage.make(width: 900, height: 1_950), intensity: .weak)
+            AppearanceBackgroundPhotoLayers(
+                image: PhotoCropPreviewImage.make(width: 900, height: 1_950),
+                style: AppearanceBackgroundStyle(scrim: 0, blur: 0)
+            )
                 .ignoresSafeArea()
         )
         .preferredColorScheme(.dark)
@@ -183,7 +186,10 @@ private struct AppearanceBackgroundPreviewText: View {
 #Preview("横向き（左右をぼかしで埋める）", traits: .landscapeLeft) {
     AppearanceBackgroundPreviewText()
         .background(
-            AppearanceBackgroundPhotoLayers(image: PhotoCropPreviewImage.make(width: 900, height: 1_950), intensity: .strong)
+            AppearanceBackgroundPhotoLayers(
+                image: PhotoCropPreviewImage.make(width: 900, height: 1_950),
+                style: AppearanceBackgroundStyle(scrim: 1, blur: 1)
+            )
                 .ignoresSafeArea()
         )
 }
@@ -191,7 +197,7 @@ private struct AppearanceBackgroundPreviewText: View {
 #Preview("予定の詳細（上の写真の部分を空ける）") {
     AppearanceBackgroundPhotoLayers(
         image: PhotoCropPreviewImage.make(width: 900, height: 1_950),
-        intensity: .medium,
+        style: .default,
         excludedTopHeight: 300
     )
     .background(AppTheme.shipping.palette.surface.color)
@@ -200,5 +206,5 @@ private struct AppearanceBackgroundPreviewText: View {
 
 #Preview("読む前（写真なし）") {
     AppearanceBackgroundPreviewText()
-        .background(AppearanceBackgroundPhotoLayers(image: nil, intensity: .medium).ignoresSafeArea())
+        .background(AppearanceBackgroundPhotoLayers(image: nil, style: .default).ignoresSafeArea())
 }

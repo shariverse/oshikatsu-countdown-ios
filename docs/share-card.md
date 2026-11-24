@@ -103,7 +103,7 @@ ShareCardPreviewScreen(event: event, oshi: oshi, style: .appearance(rendering), 
 - 差し替えても変えないもの: 推し色の役割（塗りのカード・模様の色）・載せる項目・日数の見せ方・透かし・正方形の大きさ
 - 詳細の画面（`EventDetailScreen`）は、Plus が使えるか（`@Environment(\.isPlusUnlocked)`）と着せ替えの設定（`AppearanceStore`）から描くもの（`AppearanceRendering`）を決め、
   `ShareCardStyle.appearance(_:)` で選んだ `style` を渡す
-  - Plus が使え、背景の写真を ON にしていて写真がある: `ShareCardStyle(theme: .shipping, background: .photo(fileName:))`（着せ替えの背景の写真。強さと飾りはカードに関わらない）
+  - Plus が使え、背景の写真を ON にしていて写真がある: `ShareCardStyle(theme: .shipping, background: .photo(fileName:))`（着せ替えの背景の写真。暗幕・ぼかしと飾りはカードに関わらない）
   - それ以外（Plus でない・解約・期限切れ・背景が OFF・写真が無い・飾りだけ）: `.shipping`。選んだ画像は消さない
   - 着せ替えの背景の写真は推しの写真と別の置き場所（`AppearanceStore.photos`。メモリ上のストアでは一時ディレクトリ）から読むので、`ShareCardPreviewScreen` の `backgroundPhotos` にその置き場所を渡す（`ShareCardImages.load` の `backgroundPhotos`。nil なら `photos`）
   - 規則のテストは `OshiConTests/Share/ShareCardAppearanceStyleTests`

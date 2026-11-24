@@ -77,9 +77,9 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - Plus の着せ替え（背景の写真と推しの写真の飾り）は、規則・ストア・地の View が `OshiCon/Appearance/`、着せ替えの画面とホームの見本が `OshiCon/Screens/Appearance/`。
   着せ替えの画面の見本は設定の Form の外に置き、縦向きの iPhone では上に固定、iPad・横向きでは左に並べる（並べ方と大きさは `AppearancePreviewLayout`。#269）。
   効かせるのはホームと予定の詳細の地だけ（詳細は上の写真より下）で、`ThemeScreenBackground`（課金画面・シェアのカード・テーマの見本）は変えない。
-  設定（背景・飾りの ON/OFF、強さ 弱・中・強、背景の写真のファイル名、飾りの濃さ・量・出さない推し）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
+  設定（背景・飾りの ON/OFF、暗幕の濃さとぼかしの強さ、背景の写真のファイル名、飾りの濃さ・量・出さない推し）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
   画面は `@Environment(AppearanceStore.self)` と `@Environment(\.isPlusUnlocked)` から `store.rendering(isPlusUnlocked:)`（`AppearanceRendering`。Plus でなければ標準）で描くものを決め、背景の写真は `store.photos` から読む（メモリ上のストアでは置き場所が違う）。
-  幕とぼかし（`AppearanceIntensity`）は背景の推しが見えるよう薄く・小さくし（弱は幕 0.15・ぼかしなし。#264）、文字の読みやすさは幕で守らない。背景の写真か飾りを描いているときは、地の上に直接描く文字（ホームの見出し・案内）の後ろにカードの地の色の板を敷いて 4.5:1 以上にする（`OshiCon/Appearance/AppearanceTextPlate.swift`。敷くかは `@Environment(\.isOverAppearancePhoto)`）。地の上に文字を足したら `appearanceTextPlate()` を付ける。幕は飾りを重ねるときだけ少し濃くする（`scrimOpacity(isDark:isDecorated:)`）。
+  幕とぼかし（`AppearanceBackgroundStyle`）は着せ替えの画面の 2 つのスライダーで別々に変え、背景の推しが見えるよう、いちばん濃く・強くしても幕 0.6・ぼかし 10pt までにする（#264・#268）。文字の読みやすさは幕で守らない。背景の写真か飾りを描いているときは、地の上に直接描く文字（ホームの見出し・案内）の後ろにカードの地の色の板を敷いて 4.5:1 以上にする（`OshiCon/Appearance/AppearanceTextPlate.swift`。敷くかは `@Environment(\.isOverAppearancePhoto)`）。地の上に文字を足したら `appearanceTextPlate()` を付ける。幕は飾りを重ねるときだけ少し濃くする（`scrimOpacity(isDark:isDecorated:)`）。
   飾りは、選んだ推し（既定はすべて）のうち写真のある推しの丸い写真を互い違いの並びで並べ、濃さ（10〜100%）と量（少なめ〜埋め尽くす）を着せ替えの画面のスライダーで変える（`OshiPhotoDecorationStyle`・`OshiPhotoDecorationLayout`。#266）。
   飾りも濃くできるので、板とホームの上の端のグラデーションは、背景の写真か飾りを描いているとき（`AppearanceRendering.drawsPhotosOnGround`）に掛ける。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で開発版と TestFlight だけ。
   メモリ上のストアでは別の UserDefaults と一時ディレクトリを起動のたびに空にして使い、ホームと詳細に描いているものを UI テストに見せる口（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置く。

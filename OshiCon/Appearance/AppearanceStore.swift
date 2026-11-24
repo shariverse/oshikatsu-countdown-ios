@@ -94,10 +94,16 @@ final class AppearanceStore {
         }
     }
 
-    /// 背景の写真に掛ける暗幕とぼかしの強さ。
-    var intensity: AppearanceIntensity {
-        get { settings.intensity }
-        set { update { $0.intensity = newValue } }
+    /// 背景の写真に掛ける暗幕の濃さ（スライダーの位置）。範囲の外の値は範囲に収める。
+    var backgroundScrim: Double {
+        get { settings.backgroundStyle.scrim }
+        set { update { $0.backgroundStyle.scrim = newValue } }
+    }
+
+    /// 背景の写真に掛けるぼかしの強さ（スライダーの位置）。範囲の外の値は範囲に収める。
+    var backgroundBlur: Double {
+        get { settings.backgroundStyle.blur }
+        set { update { $0.backgroundStyle.blur = newValue } }
     }
 
     /// 背景の写真を、調整した範囲 `crop`（縦長の枠。`PhotoCrop.backgroundAspectRatio`）で切り抜いて取り込み、差し替える。

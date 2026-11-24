@@ -16,8 +16,8 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
     var isBackgroundEnabled: Bool
     /// 地のハートと十字の代わりに、推しの丸い写真を並べる。既定は OFF。
     var isDecorationEnabled: Bool
-    /// 背景の写真に掛ける暗幕とぼかしの強さ。
-    var intensity: AppearanceIntensity
+    /// 背景の写真に掛ける暗幕の濃さとぼかしの強さ。背景が OFF でも残す。
+    var backgroundStyle: AppearanceBackgroundStyle
     /// 背景の写真のファイル名（`OshiPhotoLibrary` の中の `<UUID>.jpg`）。選んでいなければ nil。
     var backgroundPhotoFileName: String?
     /// 飾りの濃さ・量・出す推し。飾りが OFF でも残す。
@@ -26,29 +26,33 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
     init(
         isBackgroundEnabled: Bool = true,
         isDecorationEnabled: Bool = false,
-        intensity: AppearanceIntensity = .default,
+        backgroundStyle: AppearanceBackgroundStyle = .default,
         backgroundPhotoFileName: String? = nil,
         decorationStyle: OshiPhotoDecorationStyle = .default
     ) {
         self.isBackgroundEnabled = isBackgroundEnabled
         self.isDecorationEnabled = isDecorationEnabled
-        self.intensity = intensity
+        self.backgroundStyle = backgroundStyle
         self.backgroundPhotoFileName = backgroundPhotoFileName
         self.decorationStyle = decorationStyle
     }
 
     /// UserDefaults から読む。書いていない項目は既定の値。写真の置き場所の外を指すファイル名は無いものとする。
-    /// 飾りの濃さ・量は範囲に収め、出さない推しの id は UUID として読めるものだけを使う。
+    /// 暗幕・ぼかし・飾りの濃さ・量は範囲に収め、出さない推しの id は UUID として読めるものだけを使う。
+    /// 暗幕とぼかしを書いていなければ、前の版の強さ（弱・中・強。`AppStorageKey.appearanceIntensity`）から読み替える。
     init(defaults: UserDefaults) {
         let fileName = defaults.string(forKey: AppStorageKey.appearanceBackgroundPhoto)
-        let intensity = defaults.string(forKey: AppStorageKey.appearanceIntensity).flatMap(AppearanceIntensity.init(rawValue:))
+        let legacyStyle = defaults.string(forKey: AppStorageKey.appearanceIntensity)
+            .flatMap(AppearanceBackgroundStyle.init(legacyIntensity:)) ?? .default
+        let scrim = defaults.object(forKey: AppStorageKey.appearanceBackgroundScrim) as? Double
+        let blur = defaults.object(forKey: AppStorageKey.appearanceBackgroundBlur) as? Double
         let opacity = defaults.object(forKey: AppStorageKey.appearanceDecorationOpacity) as? Double
         let amount = defaults.object(forKey: AppStorageKey.appearanceDecorationAmount) as? Double
         let excluded = defaults.stringArray(forKey: AppStorageKey.appearanceDecorationExcludedOshis) ?? []
         self.init(
             isBackgroundEnabled: defaults.object(forKey: AppStorageKey.appearanceBackgroundEnabled) as? Bool ?? true,
             isDecorationEnabled: defaults.object(forKey: AppStorageKey.appearanceDecorationEnabled) as? Bool ?? false,
-            intensity: intensity ?? .default,
+            backgroundStyle: AppearanceBackgroundStyle(scrim: scrim ?? legacyStyle.scrim, blur: blur ?? legacyStyle.blur),
             backgroundPhotoFileName: fileName.flatMap { OshiPhotoLibrary.isValidFileName($0) ? $0 : nil },
             decorationStyle: OshiPhotoDecorationStyle(
                 opacity: opacity ?? OshiPhotoDecorationStyle.defaultOpacity,
@@ -59,10 +63,13 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
     }
 
     /// UserDefaults に書く。写真が無ければファイル名のキーを消す。出さない推しの id は並べて書く（同じ設定なら同じ値になる）。
+    /// 暗幕とぼかしを書いたら、前の版の強さのキーは使わないので消す。
     func write(to defaults: UserDefaults) {
         defaults.set(isBackgroundEnabled, forKey: AppStorageKey.appearanceBackgroundEnabled)
         defaults.set(isDecorationEnabled, forKey: AppStorageKey.appearanceDecorationEnabled)
-        defaults.set(intensity.rawValue, forKey: AppStorageKey.appearanceIntensity)
+        defaults.set(backgroundStyle.scrim, forKey: AppStorageKey.appearanceBackgroundScrim)
+        defaults.set(backgroundStyle.blur, forKey: AppStorageKey.appearanceBackgroundBlur)
+        defaults.removeObject(forKey: AppStorageKey.appearanceIntensity)
         defaults.set(decorationStyle.opacity, forKey: AppStorageKey.appearanceDecorationOpacity)
         defaults.set(decorationStyle.amount, forKey: AppStorageKey.appearanceDecorationAmount)
         defaults.set(decorationStyle.excludedOshiIDs.map(\.uuidString).sorted(), forKey: AppStorageKey.appearanceDecorationExcludedOshis)
@@ -74,81 +81,88 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
     }
 }
 
-/// 背景の写真に掛ける暗幕とぼかしの強さ（弱・中・強）。
+/// 背景の写真に掛ける暗幕の濃さとぼかしの強さ。着せ替えの画面の 2 つのスライダー（0〜1）で変える。
 ///
-/// 幕の色はライトでは地の色（`palette.background`）、ダークでは黒。背景の推しが見えるよう、幕は薄く、ぼかしは小さくする（弱はぼかさない）。
+/// 幕の色はライトでは地の色（`palette.background`）、ダークでは黒。背景の推しが見えるよう、いちばん濃く・強くしても
+/// 幕は 0.6（ライト・飾りなし）、ぼかしは 10pt までにする。
 /// 幕では文字の読みやすさを守らない。背景の写真を敷いているときは、地の上に直接描く文字（見出し・案内）の後ろに
 /// カードの地の色の板を敷き（`AppearanceTextPlate`）、写真の色や幕の濃さによらず 4.5:1 以上にする。
 /// 飾り（推しの丸い写真）を重ねるときは、写真の上でも丸い写真が見分けられるよう幕を少し濃くする。
-nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
-    case weak
-    case medium
-    case strong
+nonisolated struct AppearanceBackgroundStyle: Equatable, Sendable {
+    /// 暗幕の濃さ（スライダーの位置）の範囲。0 は幕なし（ライト・飾りなし）、1 はいちばん濃い。
+    static let scrimRange: ClosedRange<Double> = 0...1
+    /// ぼかしの強さ（スライダーの位置）の範囲。0 はぼかさない、1 はいちばん強い。
+    static let blurRange: ClosedRange<Double> = 0...1
+    /// 暗幕の濃さの既定。前の版の「中」（幕 0.30）と同じ。
+    static let defaultScrim = 0.5
+    /// ぼかしの強さの既定。前の版の「中」（4pt）と同じ。
+    static let defaultBlur = 0.4
 
-    static let `default` = Self.medium
+    /// 暗幕の濃さをいちばん濃くしたときの、ライトで飾りを重ねないときの幕の不透明度。前の版の「強」（0.45）が位置 0.75 になる。
+    static let maxPlainScrimOpacity = 0.6
+    /// ダークの外観で幕に足す不透明度。地を暗く保つため、ライトより濃くする。
+    static let darkScrimOffset = 0.1
+    /// 飾り（推しの丸い写真）を重ねるときに幕に足す不透明度。写真の上でも丸い写真が見分けられるようにする。
+    static let decoratedScrimOffset = 0.2
+    /// ぼかしの強さをいちばん強くしたときの半径（pt）。前の版の「強」と同じ。
+    static let maxBlurRadius: CGFloat = 10
 
-    /// 縦長の写真の左右の余り（iPad・横向き）を埋める、同じ写真のぼかしの半径（pt）。どの強さでも同じ。
+    static let `default` = Self()
+
+    /// 縦長の写真の左右の余り（iPad・横向き）を埋める、同じ写真のぼかしの半径（pt）。暗幕とぼかしの設定によらず同じ。
     static let sideFillBlurRadius: CGFloat = 60
 
     /// ホームの地の上の端に掛ける、幕の色のグラデーションの高さ（pt。ステータスバーより少し下まで）。
-    /// 幕が薄く、飾り（推しの丸い写真）は濃くできるので、写真の色によってはステータスバーの文字（時刻・電池）が読めなくなる。上の端だけ幕の色で覆う。
+    /// 幕は薄くでき、飾り（推しの丸い写真）は濃くできるので、写真の色によってはステータスバーの文字（時刻・電池）が読めなくなる。上の端だけ幕の色で覆う。
     static let statusBarFadeHeight: CGFloat = 110
 
     /// 上の端のグラデーションの、いちばん上の不透明度。写真が真っ白・真っ黒でもステータスバーの文字（ライトは黒、ダークは白）が 4.5:1 以上になる濃さ。
     static let statusBarFadeOpacity = 0.85
 
+    /// 暗幕の濃さ（スライダーの位置）。範囲の外の値は範囲に収める。
+    var scrim: Double {
+        didSet {
+            scrim = Self.clamped(scrim, to: Self.scrimRange, fallback: Self.defaultScrim)
+        }
+    }
+
+    /// ぼかしの強さ（スライダーの位置）。範囲の外の値は範囲に収める。
+    var blur: Double {
+        didSet {
+            blur = Self.clamped(blur, to: Self.blurRange, fallback: Self.defaultBlur)
+        }
+    }
+
+    init(scrim: Double = defaultScrim, blur: Double = defaultBlur) {
+        self.scrim = Self.clamped(scrim, to: Self.scrimRange, fallback: Self.defaultScrim)
+        self.blur = Self.clamped(blur, to: Self.blurRange, fallback: Self.defaultBlur)
+    }
+
+    /// 前の版（TestFlight）で保存した強さ（`weak`・`medium`・`strong`）を、同じ見た目になるスライダーの位置にする。知らない値なら nil。
+    init?(legacyIntensity: String) {
+        switch legacyIntensity {
+        case "weak":
+            self.init(scrim: 0.25, blur: 0)
+        case "medium":
+            self.init(scrim: 0.5, blur: 0.4)
+        case "strong":
+            self.init(scrim: 0.75, blur: 1)
+        default:
+            return nil
+        }
+    }
+
     /// 写真に掛ける幕の不透明度（0〜1）。`isDecorated` は、写真の上に飾り（推しの丸い写真）を重ねるか。
+    /// ライトで飾りを重ねないときは 0〜0.6 で、ダークは 0.1、飾りを重ねるときは 0.2 濃くする（いちばん濃くて 0.9）。
     func scrimOpacity(isDark: Bool, isDecorated: Bool) -> Double {
-        isDecorated ? decoratedScrimOpacity(isDark: isDark) : plainScrimOpacity(isDark: isDark)
+        Self.maxPlainScrimOpacity * scrim
+            + (isDark ? Self.darkScrimOffset : 0)
+            + (isDecorated ? Self.decoratedScrimOffset : 0)
     }
 
-    /// 飾りを重ねないときの幕の不透明度。弱は写真がほぼそのまま見える薄さにし、弱・中・強の違いが分かるよう 0.15 ずつ離す。
-    /// ダークは地を暗く保つため、ライトより 0.1 濃くする。
-    private func plainScrimOpacity(isDark: Bool) -> Double {
-        switch (self, isDark) {
-        case (.weak, false):
-            0.15
-        case (.medium, false):
-            0.30
-        case (.strong, false):
-            0.45
-        case (.weak, true):
-            0.25
-        case (.medium, true):
-            0.40
-        case (.strong, true):
-            0.55
-        }
-    }
-
-    /// 飾りを重ねるときの幕の不透明度。重ねないときより 0.2 濃くし、写真の上でも丸い写真が見分けられるようにする。
-    private func decoratedScrimOpacity(isDark: Bool) -> Double {
-        switch (self, isDark) {
-        case (.weak, false):
-            0.35
-        case (.medium, false):
-            0.50
-        case (.strong, false):
-            0.65
-        case (.weak, true):
-            0.45
-        case (.medium, true):
-            0.60
-        case (.strong, true):
-            0.75
-        }
-    }
-
-    /// 写真に掛けるぼかしの半径（pt）。弱は推しがはっきり見えるようぼかさない。
+    /// 写真に掛けるぼかしの半径（pt）。0 ならぼかさない。
     var blurRadius: CGFloat {
-        switch self {
-        case .weak:
-            0
-        case .medium:
-            4
-        case .strong:
-            10
-        }
+        Self.maxBlurRadius * CGFloat(blur)
     }
 
     /// 写真に掛ける幕の色。ライトでは地の色、ダークでは黒。
@@ -163,6 +177,10 @@ nonisolated enum AppearanceIntensity: String, CaseIterable, Sendable {
             fraction: scrimOpacity(isDark: isDark, isDecorated: isDecorated)
         )
     }
+
+    private static func clamped(_ value: Double, to range: ClosedRange<Double>, fallback: Double) -> Double {
+        value.isNaN ? fallback : min(max(value, range.lowerBound), range.upperBound)
+    }
 }
 
 /// 着せ替えで実際に描くもの。Plus が使えるかと設定（`AppearanceSettings`）から決める。
@@ -172,7 +190,7 @@ nonisolated struct AppearanceRendering: Equatable, Sendable {
     /// 地に敷く背景の写真。
     nonisolated struct BackgroundPhoto: Equatable, Sendable {
         let fileName: String
-        let intensity: AppearanceIntensity
+        let style: AppearanceBackgroundStyle
     }
 
     /// 地に敷く背景の写真。敷かないときは nil。
@@ -202,7 +220,7 @@ nonisolated struct AppearanceRendering: Equatable, Sendable {
         if settings.isBackgroundEnabled,
            let fileName = settings.backgroundPhotoFileName,
            OshiPhotoLibrary.isValidFileName(fileName) {
-            backgroundPhoto = BackgroundPhoto(fileName: fileName, intensity: settings.intensity)
+            backgroundPhoto = BackgroundPhoto(fileName: fileName, style: settings.backgroundStyle)
         } else {
             backgroundPhoto = nil
         }
