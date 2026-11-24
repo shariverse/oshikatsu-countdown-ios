@@ -183,7 +183,7 @@ scripts/render-app-store-screenshots.sh build/app-store-screenshots/APP_IPHONE_6
 | 10 | ライトの外観のホーム | 実物（`-colorScheme light`） |
 
 - アプリの中の画面は Simulator で動かした実物をそのまま使い、HTML で描き直しません（審査ガイドライン 2.3）。ウィジェットはホーム画面・ロック画面に置けない（メモリ上のストアでは共有データも作られない）ので、出荷する View を描き出して、アイコンの並び（UI テストが `home-screen-layout` に残す）に合わせて重ねます
-- 見出しと小見出しは [docs/app-store/screenshots/copy.js](docs/app-store/screenshots/copy.js) に 12 言語で書きます。用語は掲載文にそろえ、価格・実在の人物・作品の名前は入れません。地・模様・枚ごとの色・Plus の印は screenshots.html の `SLIDES` で決めます
+- 見出しと小見出しは [docs/app-store/screenshots/copy.js](docs/app-store/screenshots/copy.js) に、App Store に載せる 14 言語（en-GB・es-MX を含む）で書きます。用語は掲載文にそろえ、価格・実在の人物・作品の名前は入れません。地・模様・枚ごとの色・Plus の印は screenshots.html の `SLIDES` で決めます
 - 表示サイズ（6.9 インチ・6.3 インチの iPhone、13 インチの iPad、iPhone Duo の外側の画面）と機種は [docs/app-store/screenshots.json](docs/app-store/screenshots.json)、言語は [docs/app-store/languages.json](docs/app-store/languages.json) で決めます。言語を省くと全言語を撮ります
 - 機種はその都度新しく作り、1 回ビルドしたものを言語ごとに使い回します。iPhone Duo は Xcode 27 と iOS 27.1 のランタイムが要ります
 - 見本のデータは起動引数 `-useInMemoryStore -seedSampleData` でメモリ上のストアにだけ入ります（端末のデータは書き換えません）。撮影用の起動引数（`-sample…`・`-colorScheme`）も、メモリ上のストアのときだけ効きます。日付は今日から数えるので、いつ撮っても同じ残り日数になります
