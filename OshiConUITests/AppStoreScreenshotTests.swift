@@ -55,7 +55,7 @@ final class AppStoreScreenshotTests: XCTestCase {
 
     /// 見本のデータで起動し直す（動いていれば終わらせてから起動する）。システムの文言もその言語になるよう、言語と地域も渡す。
     /// 無料の機能の画面を撮るので、Plus は使えない状態に固定する（`-plusLocked`。StoreKit に問い合わせない）。
-    /// App Store 版と同じ画面にするため、設定の Plus の行も出さない（`-simulateAppStoreDistribution`）。
+    /// 配るアプリと同じ画面にするため、App Store 版として動かす（`-simulateAppStoreDistribution`。1.3.0 から設定に Plus の行も出る）。
     /// 見本の推しには、このテストのバンドルにある写真（`SampleOshiPhotos/`）を付ける（`OSHICON_SAMPLE_OSHI_PHOTOS`）。
     @MainActor
     private func launch() -> XCUIApplication {

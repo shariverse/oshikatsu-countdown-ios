@@ -81,7 +81,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   画面は `@Environment(AppearanceStore.self)` と `@Environment(\.isPlusUnlocked)` から `store.rendering(isPlusUnlocked:)`（`AppearanceRendering`。Plus でなければ標準）で描くものを決め、背景の写真は `store.photos` から読む（メモリ上のストアでは置き場所が違う）。
   幕とぼかし（`AppearanceBackgroundStyle`）は着せ替えの画面の 2 つのスライダーで別々に変え、背景の推しが見えるよう、いちばん濃く・強くしても幕 0.6・ぼかし 10pt までにする（#264・#268）。文字の読みやすさは幕で守らない。背景の写真か飾りを描いているときは、地の上に直接描く文字（ホームの見出し・案内）の後ろにカードの地の色の板を敷いて 4.5:1 以上にする（`OshiCon/Appearance/AppearanceTextPlate.swift`。敷くかは `@Environment(\.isOverAppearancePhoto)`）。地の上に文字を足したら `appearanceTextPlate()` を付ける。幕は飾りを重ねるときだけ少し濃くする（`scrimOpacity(isDark:isDecorated:)`）。
   飾りは、選んだ推し（既定はすべて）のうち写真のある推しの丸い写真を互い違いの並びで並べ、濃さ（10〜100%）と量（少なめ〜埋め尽くす）を着せ替えの画面のスライダーで変える（`OshiPhotoDecorationStyle`・`OshiPhotoDecorationLayout`。#266）。
-  飾りも濃くできるので、板とホームの上の端のグラデーションは、背景の写真か飾りを描いているとき（`AppearanceRendering.drawsPhotosOnGround`）に掛ける。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で開発版と TestFlight だけ。
+  飾りも濃くできるので、板とホームの上の端のグラデーションは、背景の写真か飾りを描いているとき（`AppearanceRendering.drawsPhotosOnGround`）に掛ける。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で出す（1.3.0 から App Store 版でも出す）。
   メモリ上のストアでは別の UserDefaults と一時ディレクトリを起動のたびに空にして使い、ホームと詳細に描いているものを UI テストに見せる口（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置く。
   仕様・コードの場所・テストの口（`AppearanceUITests`・`appearance.*`）・実機で確かめることは `docs/appearance.md`。Android 版の SPEC には未記載（epic の後で合わせる）
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
@@ -106,7 +106,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - サブスクリプション中に買い切りを買う人への案内（買い切りのそばの注記と、購入後のアラートからの `manageSubscriptionsSheet`）を出すかの規則は `OshiCon/Purchase/PlusLifetimeGuidance.swift`。
     数えるのは自動で更新される（`willAutoRenew`）、今使えるサブスクリプションだけ。`PlusStore.hasRenewingSubscription` に入る
   - 課金画面はどの画面からでも `@Environment(\.openPlusPaywall)` で開く（`OshiCon/Screens/Plus/PlusPaywallPresentation.swift`。`RootView` の `presentsPlusPaywall()` がシートで出す）。
-    入口の設定画面の Plus の行は、開発版（DEBUG）と TestFlight だけに出す。出すかの切り替えは `OshiCon/Purchase/PlusEntryPolicy.swift` の `PlusEntryPolicy.showsEntry(in:)` の 1 か所で、
+    入口の設定画面の Plus の行は、1.3.0 から App Store 版を含むどの配り方でも出す（それまでは開発版と TestFlight だけ）。出すかの切り替えは `OshiCon/Purchase/PlusEntryPolicy.swift` の `PlusEntryPolicy.showsEntry(in:)` の 1 か所で、
     配り方は `AppDistributionDetector`（`@Environment(\.appDistributionDetector)`。`AppTransaction` の環境で見分け、差し替えられる）。起動引数 `-simulateAppStoreDistribution` で App Store 版として動かす
 
 ## アプリ固有の前提
@@ -145,8 +145,8 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
       Widget Extension の中で StoreKit 2（`Transaction.currentEntitlements` を `PlusEntitlement` の規則で判定。通信しない）で確かめ直す。App Group には書き戻さない（書くのはアプリの `PlusStore` だけ）
     - タイムライン: 今と 0:00 にエントリを置き、Plus の期限がその範囲の中にあれば期限の時刻にもエントリを置いて、そこから Plus でない表示にし、期限の時刻に作り直す（`.after`）
     - Plus でないときは、選んだ予定と写真（無ければ模様）を薄くして「Plus で使えます」を重ねる。押したときのリンクは `WidgetLink.plusPaywall`（`oshicon://plus/<UUID>`）で、
-      アプリ（`RootView` の `WidgetLinkReceiver` と `AppRouter.open(_:hasCompletedOnboarding:showsPlusPaywall:)`）は `PlusEntryPolicy.showsEntry(in:)` が true なら `openPlusPaywall` で課金画面を開き、
-      false（App Store 版）ならカウントダウンと同じく予定の詳細に移る。初回の導線の途中なら開かない
+      アプリ（`RootView` の `WidgetLinkReceiver` と `AppRouter.open(_:hasCompletedOnboarding:showsPlusPaywall:)`）は `PlusEntryPolicy.showsEntry(in:)` が true（1.3.0 からはいつも）なら `openPlusPaywall` で課金画面を開き、
+      false ならカウントダウンと同じく予定の詳細に移る。初回の導線の途中なら開かない
   - カウントダウンはロック画面にも置ける（丸・長方形・1 行。描くのは `Shared/Widget/CountdownAccessoryView.swift`）。ロック画面は端末が単色で描くので、推し色の塗りとテーマの装飾は使わない。
     丸の輪は登録した日から開始までの進み具合（詳細画面と同じ `EventCountdown.progress`）。`widgetFamily` は Environment に入れられないので、形は引数で渡す（アプリの Preview は `WidgetPreview.countdownLockScreen`）
 - データ（SwiftData のストアと推しの写真）は**最初から App Group のコンテナに置く**（ウィジェットと共有するため。後から移すとデータの移し替えが要る）

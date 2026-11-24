@@ -215,8 +215,8 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
   ストアフロントは日本です。共有スキーム OshiCon の Run（Options の StoreKit Configuration）と Test（テストプラン [OshiCon.xctestplan](OshiCon.xctestplan) の StoreKit Configuration）に設定してあり、Simulator では App Store Connect に繋がずに購入・復元・期限切れを試せます（Xcode の Debug → StoreKit → Manage Transactions）
 - 商品を変えたら `in-app-purchases.json` と `.storekit` の両方を直します（`StoreKitConfigurationTests` が食い違いを見つけます）
 - UI テストとスクリーンショット（`-useInMemoryStore` のとき）は StoreKit に問い合わせず、Plus は使えない状態に固定します。起動引数 `-plusUnlocked` で使える状態に、`-plusLocked` で使えない状態にします（`LaunchOptions.unlocksPlus`。両方渡したときは `-plusLocked` を優先します）
-- 課金画面の入口（設定の Plus の行）は、開発版（DEBUG のビルド）と TestFlight だけに出し、App Store 版では出しません（`PlusEntryPolicy`。TestFlight かは `AppTransaction` の環境で端末の中で見分けます）。
-  起動引数 `-simulateAppStoreDistribution`（`-useInMemoryStore` のときだけ効く）で App Store 版として動かし、行を隠します。App Store 用スクリーンショットはこれを渡します
+- 課金画面の入口（設定の Plus の行）は、1.3.0 から App Store 版を含むどの配り方でも出します（`PlusEntryPolicy`。それまでは開発版と TestFlight だけ。配り方は `AppTransaction` の環境で端末の中で見分けます）。
+  起動引数 `-simulateAppStoreDistribution`（`-useInMemoryStore` のときだけ効く）で App Store 版として動かします。App Store 用スクリーンショットはこれを渡します
 
 ### 11. テーマ
 
@@ -258,7 +258,7 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 - **飾り**: 地のハートと十字を、写真を登録した推しの丸い写真に順に替えます（写真の無い推しのところは今の模様のまま）
 - コードは `OshiCon/Appearance/`（規則・ストア・地の View）と `OshiCon/Screens/Appearance/`（着せ替えの画面・ホームの見本）にあります。
   設定は UserDefaults（`AppStorageKey.appearance*`）、背景の写真は推しの写真と同じ App Group の置き場所に置き、SwiftData のスキーマは変えていません
-- 設定画面の「着せ替え」の行は、Plus の行と同じく開発版と TestFlight だけに出します（`PlusEntryPolicy`）。Plus でない人も写真を選んで試着・保存でき、Plus でなければホームと詳細は標準の見た目のままです（写真と設定は残します）
+- 設定画面の「着せ替え」の行は、Plus の行と同じく 1.3.0 から App Store 版でも出します（`PlusEntryPolicy`）。Plus でない人も写真を選んで試着・保存でき、Plus でなければホームと詳細は標準の見た目のままです（写真と設定は残します）
 - テスト: Unit は `OshiConTests/Appearance/`、UI は `OshiConUITests/AppearanceUITests`（`-useInMemoryStore -useTestPhoto` と `-plusLocked`・`-plusUnlocked`・`-simulateAppStoreDistribution`）。
   ホームと詳細に効いたかは、メモリ上のストアのときだけ置く `home.appearance`・`eventDetail.appearance` のラベルで確かめます
 
@@ -279,7 +279,7 @@ gh workflow run app-store-purchases.yml --ref develop -f apply=true
 - **Plus の判定**: アプリ（`PlusStore`）が App Group に、Plus が使えるかと期限（サブスクリプションの期限と猶予期間の終わりの遅いほう。買い切りは無し）を書き、変わったらウィジェットを描き直します。
   Widget Extension は `Shared/Purchase/PlusWidgetStatus.swift` で、期限の前ならそのまま使え、期限を過ぎていたら StoreKit 2 の今の権利（`Transaction.currentEntitlements`）で確かめ直します（通信しません。App Group には書き戻しません）
 - **タイムライン**: 今と 0:00 にエントリを置き、Plus の期限がその範囲にあれば期限の時刻にもエントリを置いて、その時刻に作り直します
-- **Plus でないとき**: 選んだ予定と写真を薄くして「Plus で使えます」を重ねます。押すと、開発版と TestFlight では課金画面を開き、App Store 版（`PlusEntryPolicy`。起動引数 `-simulateAppStoreDistribution`）では課金画面を出さずに予定の詳細に移ります（リンクは `oshicon://plus/<UUID>`）
+- **Plus でないとき**: 選んだ予定と写真を薄くして「Plus で使えます」を重ねます。押すと課金画面を開きます（リンクは `oshicon://plus/<UUID>`）。課金画面の入口を出さない配り方（`PlusEntryPolicy`。1.3.0 からは無し）では、課金画面を出さずに予定の詳細に移ります
 - **描き直し**: 予定・推し・写真の保存と削除、時刻・タイムゾーンの変更、アプリが前面に来たときは `WidgetRefresher` が、Plus の状態や期限の変化は `PlusStore` が、すべてのウィジェットを描き直します
 - テスト: Unit は `OshiConTests/Widget/`（`PhotoWidgetContentTests`・`PhotoWidgetAppearanceTests`・`PhotoWidgetTimelineTests`・`WidgetPhotoLoaderTests` など）と `OshiConTests/Purchase/PlusWidgetStatusTests`、UI は `OshiConUITests/PlusPaywallUITests`（課金画面のリンクで開く・開かない）
 

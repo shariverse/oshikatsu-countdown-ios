@@ -193,7 +193,7 @@ struct OpenSourceLicenseScreen: View {
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }
 
-#Preview("App Store 版（Plus の行なし）") {
+#Preview("App Store 版") {
     NavigationStack {
         SettingsScreen()
     }

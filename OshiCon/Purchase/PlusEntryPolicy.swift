@@ -14,7 +14,7 @@ nonisolated enum AppDistribution: Equatable, Sendable {
     case appStore
 
     /// ビルドの種類と、StoreKit の取引の環境（`AppTransaction.environment`）から決める。
-    /// 環境が分からない（読めない・検証できない）ときは、入口を出さないよう App Store 版として扱う。
+    /// 環境が分からない（読めない・検証できない）ときは App Store 版として扱う。
     static func resolve(isDebugBuild: Bool, storeEnvironment: AppStore.Environment?) -> Self {
         if isDebugBuild {
             return .development
@@ -30,16 +30,14 @@ nonisolated enum AppDistribution: Equatable, Sendable {
     }
 }
 
-/// 課金画面の入口（設定画面の Plus の行）を出すかの規則。
+/// 課金画面の入口（設定画面の Plus と着せ替えの行、推しの写真ウィジェットから課金画面を開くこと）を出すかの規則。
 nonisolated enum PlusEntryPolicy {
-    /// 入口を出すか。Plus の機能ができるまでは開発版と TestFlight だけにする。
-    /// App Store 版でも出すとき（Plus の機能の epic）は、ここだけを替える。
+    /// 入口を出すか。1.3.0 で Plus を売り始めたので、App Store 版を含むどの配り方でも出す。
+    /// 配り方で出し分ける（App Store 版で売るのを止めるなど）ときは、ここだけを替える。
     static func showsEntry(in distribution: AppDistribution) -> Bool {
         switch distribution {
-        case .development, .testFlight:
+        case .development, .testFlight, .appStore:
             true
-        case .appStore:
-            false
         }
     }
 }

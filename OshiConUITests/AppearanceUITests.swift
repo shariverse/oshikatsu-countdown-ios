@@ -375,14 +375,12 @@ final class AppearanceUITests: XCTestCase {
         waitForMarker("home.appearance", in: app, equalTo: "decoration")
     }
 
-    /// App Store 版では、設定に「着せ替え」の行を出さない。
+    /// App Store 版でも、設定に「着せ替え」の行を出す。
     @MainActor
-    func testAppearanceRowHiddenInAppStoreDistribution() throws {
+    func testAppearanceRowShownInAppStoreDistribution() throws {
         let app = launchSettings(arguments: ["-plusUnlocked", "-simulateAppStoreDistribution"])
 
-        let showsPast = app.switches.matching(NSPredicate(format: "label CONTAINS %@", "終わった予定も表示する")).firstMatch
-        XCTAssertTrue(showsPast.waitForExistence(timeout: 2))
-        XCTAssertFalse(app.buttons["settings.appearance"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["settings.appearance"].waitForExistence(timeout: 5))
         // Plus が使えても、ホームは標準の見た目のまま（設定していないため）
         app.tabBars.firstMatch.buttons["ホーム"].tap()
         waitForMarker("home.appearance", in: app, equalTo: "standard")
