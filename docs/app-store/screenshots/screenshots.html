@@ -33,6 +33,8 @@
   body[data-lang="zh-Hant"] .shot { font-family: "Outfit", "PingFang TC", sans-serif; }
   body[data-lang="ko"] .shot { font-family: "Outfit", "Apple SD Gothic Neo", sans-serif; }
   body[data-lang="th"] .shot { font-family: "Outfit", "Sukhumvit Set", "Thonburi", sans-serif; }
+  /* 韓国語は単語の間に空白を入れるので、単語の途中（音節の間）では折り返さない */
+  body[data-lang="ko"] .title, body[data-lang="ko"] .sub { word-break: keep-all; }
   .pattern { position: absolute; inset: 0; width: 100%; height: 100%; }
   /* 下に向かって推し色をほのかに灯す */
   .glow { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 45% at 50% 100%, var(--glow), transparent 70%); }
@@ -302,27 +304,87 @@
     // ドックの上の端（ドックのアイコンの上の端から少し上）。ドックのアイコンが無ければ画面の 9 割の高さ
     const dockIcons = layout.icons.filter((icon) => icon.y >= layout.screen.height * 0.8);
     const dockTop = dockIcons.length > 0 ? Math.min(...dockIcons.map((icon) => icon.y)) - 12 : layout.screen.height * 0.9;
-    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow, dockTop };
+    // アイコンを置ける最後の行（アイコンとラベルがドックの上の端より上に収まる行）の下の端。iPhone ではその下とドックの間に「検索」のボタンがある
+    let lastRow = rows[rows.length - 1];
+    while (lastRow + rowPitch + iconHeight <= dockTop) {
+      lastRow += rowPitch;
+    }
+    const gridBottom = lastRow + iconHeight;
+    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow, gridBottom, dockTop };
   }
 
-  // ウィジェットを、テストのランナーのアイコンの行から数えて row 行目・column 列目から、columns 列の幅で置く（高さは描き出した画像の縦横比）。
-  // 上のアイコンの行はそのまま見せ、ランナーのアイコン（アプリの並びは実行ごとに変わる）の行からは覆う。
-  // ウィジェットの高さはアイコンとラベルより高いので、覆った行のラベルははみ出さない
-  async function placeWidget(target, file, column, row, columns) {
+  // 描き出したウィジェットの倍率（AppStoreSurfaceRenderingTests は 3 倍）と、その大きさでの角の丸み（pt）。
+  // アプリのアイコンの角の丸みは、アイコンの幅に対する割合
+  const SURFACE_SCALE = 3;
+  const WIDGET_CORNER_RADIUS = 22;
+  const ICON_CORNER_RATIO = 0.225;
+
+  // ウィジェットを並べて重ねる。widgets は { file, column, row, columns } の並び。テストのランナーのアイコンの行から数えて row 行目・column 列目から、
+  // columns 列の幅で置く（高さは描き出した画像の縦横比で、どれも 2 行ぶん）。上のアイコンの行はそのまま見せ、ランナーのアイコン
+  // （アプリの並びは実行ごとに変わる）の行からは覆う
+  async function placeWidgets(target, widgets) {
     const grid = iconGrid();
     const scale = pointScale(target);
-    const image = await load(`surfaces/${file}.png`);
-    const left = grid.firstCenter + grid.columnPitch * column - grid.iconWidth / 2;
+    const images = await Promise.all(widgets.map((widget) => load(`surfaces/${widget.file}.png`)));
     // 右の端は画面の中に収め、iPhone Duo の外側の画面では右の帯（時刻・ライブアクティビティ・ドック）にかけない
     const rightLimit = window.HOME_LAYOUT.screen.width * (deviceKind === "duo" ? 0.8 : 0.97);
-    const top = grid.anchorRow + grid.rowPitch * row;
-    // 下の端はドックにかけない（iPad はアイコンの間隔が広く、2 行ぶんのウィジェットがドックまで届く）。はみ出すなら縦横比を保って縮める
-    const aspect = image.naturalHeight / image.naturalWidth;
-    const width = Math.min(grid.columnPitch * (columns - 1) + grid.iconWidth, rightLimit - left, (grid.dockTop - 12 - top) / aspect);
-    const height = width * aspect;
-    add(`<img class="overlay" src="${image.src}" style="left:${left * scale}px;top:${top * scale}px;` +
-      `width:${width * scale}px;height:${height * scale}px">`, target.screen);
-    concealOverflowingLabels(target, { left, top, right: left + width, bottom: top + height }, scale);
+    const columnLeft = (column) => grid.firstCenter + grid.columnPitch * column - grid.iconWidth / 2;
+    const fullWidth = (widget) => Math.min(grid.columnPitch * (widget.columns - 1) + grid.iconWidth, rightLimit - columnLeft(widget.column));
+    // 描き出したウィジェットを伸ばすと（iPad）、角の丸みが覆ったアイコンの角の丸みより大きくなり、アイコンの角が丸みの外にのぞく。
+    // その差のぶん（角の対角では丸みの約 3 割）と余白だけ、ウィジェットを四方に広げて覆う。並びの端がそろうよう、広げる幅はどれも同じにする。
+    // iPhone Duo の外側の画面は列の間隔を見積もっていて、横に並べたウィジェットのすき間が 2pt ほどしかないので広げない（角の丸みもアイコンとほぼ同じ）
+    const iconRadius = grid.iconWidth * ICON_CORNER_RATIO;
+    const spread = deviceKind === "duo" ? 0 : Math.max(...widgets.map((widget, index) => {
+      const radius = WIDGET_CORNER_RADIUS * fullWidth(widget) / (images[index].naturalWidth / SURFACE_SCALE);
+      return Math.max(0, radius - iconRadius) * (1 - Math.SQRT1_2);
+    })) + 2;
+    const boxes = widgets.map((widget, index) => {
+      const image = images[index];
+      const left = columnLeft(widget.column) - spread;
+      const right = Math.min(left + fullWidth(widget) + spread * 2, rightLimit);
+      const top = grid.anchorRow + grid.rowPitch * widget.row - spread;
+      // 下の端はドックにかけない（iPad はアイコンの間隔が広く、2 行ぶんのウィジェットがドックまで届く）。はみ出すなら縦横比を保って縮め、
+      // 右の列のウィジェットは右の端を並びにそろえる
+      const aspect = image.naturalHeight / image.naturalWidth;
+      const width = Math.min(right - left, (grid.dockTop - 12 - top) / aspect);
+      const x = widget.column > 0 ? right - width : left;
+      return { image, left: x, top, right: x + width, bottom: top + width * aspect };
+    });
+    concealSearchButton(target, grid, boxes, scale);
+    for (const box of boxes) {
+      add(`<img class="overlay" src="${box.image.src}" style="left:${box.left * scale}px;top:${box.top * scale}px;` +
+        `width:${(box.right - box.left) * scale}px;height:${(box.bottom - box.top) * scale}px">`, target.screen);
+      concealOverflowingLabels(target, box, scale);
+    }
+  }
+
+  // iPhone のホーム画面の「検索」のボタンは、最後の行より下まで伸びた下の段のウィジェットの間からのぞく。すき間に見える部分だけ、
+  // ボタンのすぐ上とすぐ下の壁紙を上下に返して写し、塗り消す（返すので、塗った上下の端で壁紙がつながる）。
+  // ボタンは左右の真ん中で、高さ約 30pt、縦の真ん中は最後の行の下の端とドックの上の端の中ほどの 2pt ほど上
+  // （iOS 26 の Simulator の 6.9 inch・6.3 inch で実測）。ホーム画面とロック画面の壁紙は位置と大きさが違うので、ロック画面からは写せない
+  function concealSearchButton(target, grid, boxes, scale) {
+    if (deviceKind !== "iphone") {
+      return;
+    }
+    const half = 17;
+    const center = (grid.gridBottom + grid.dockTop) / 2 - 2.3;
+    const sorted = [...boxes].sort((a, b) => a.top - b.top || a.left - b.left);
+    for (let index = 0; index + 1 < sorted.length; index++) {
+      const [leftBox, rightBox] = [sorted[index], sorted[index + 1]];
+      const sameRow = Math.abs(leftBox.top - rightBox.top) <= 1 && rightBox.left > leftBox.right;
+      // すき間がボタンの高さを上下とも挟んでいるときだけ塗る（はみ出すと、すき間の外に写した壁紙が見える）
+      const surrounds = Math.max(leftBox.top, rightBox.top) < center - half && Math.min(leftBox.bottom, rightBox.bottom) > center + half;
+      if (!sameRow || !surrounds) {
+        continue;
+      }
+      const left = leftBox.right, width = rightBox.left - leftBox.right;
+      // [塗る上の端, 写す元の上の端]。上の半分はボタンの上の 17pt を、下の半分はボタンの下の 17pt を返して写す
+      for (const [top, sourceTop] of [[center - half, center - half * 2], [center, center + half]]) {
+        add(`<i class="overlay" style="left:${left * scale}px;top:${top * scale}px;width:${width * scale}px;height:${half * scale}px;` +
+          `background:url('${target.image.src}') ${-left * scale}px ${-sourceTop * scale}px / ${target.screenWidth}px ${target.screenHeight}px no-repeat;` +
+          `transform:scaleY(-1)"></i>`, target.screen);
+      }
+    }
   }
 
   // ウィジェットで一部だけ覆ったアイコンの、はみ出した部分をぼかして隠す。長いラベル（テストのランナーの名前など）は左右に、
@@ -366,14 +428,18 @@
   const OVERLAYS = {
     // ランナーのアイコンの行から、中のウィジェット 1 つ（2 行ぶん）と、その下に小を 2 つ並べる
     async homeWidgets(target) {
-      await placeWidget(target, "widget-upcoming-medium", 0, 0, 4);
-      await placeWidget(target, "widget-countdown-small", 0, 2, 2);
-      await placeWidget(target, "widget-countdown-small-2", 2, 2, 2);
+      await placeWidgets(target, [
+        { file: "widget-upcoming-medium", column: 0, row: 0, columns: 4 },
+        { file: "widget-countdown-small", column: 0, row: 2, columns: 2 },
+        { file: "widget-countdown-small-2", column: 2, row: 2, columns: 2 },
+      ]);
     },
     async photoWidgets(target) {
-      await placeWidget(target, "widget-photo-medium", 0, 0, 4);
-      await placeWidget(target, "widget-photo-small", 0, 2, 2);
-      await placeWidget(target, "widget-photo-small-2", 2, 2, 2);
+      await placeWidgets(target, [
+        { file: "widget-photo-medium", column: 0, row: 0, columns: 4 },
+        { file: "widget-photo-small", column: 0, row: 2, columns: 2 },
+        { file: "widget-photo-small-2", column: 2, row: 2, columns: 2 },
+      ]);
     },
     async lockAccessories(target) {
       placeAccessories(target);
@@ -400,11 +466,11 @@
     },
     // iPhone Duo のホーム画面（ライブアクティビティは右の帯）。テストのランナーのアイコンを、小さいカウントダウンのウィジェットで覆う
     async duoHome(target) {
-      await placeWidget(target, "widget-countdown-small", 0, 0, 2);
+      await placeWidgets(target, [{ file: "widget-countdown-small", column: 0, row: 0, columns: 2 }]);
     },
     // iPhone Duo のホーム画面の上の端に、通知のバナーを 1 つ重ねる（右の帯にかからない幅にする）
     async duoBannerNotification(target) {
-      await placeWidget(target, "widget-countdown-small", 0, 0, 2);
+      await placeWidgets(target, [{ file: "widget-countdown-small", column: 0, row: 0, columns: 2 }]);
       const scale = pointScale(target);
       const image = await load("surfaces/notification-1.png");
       const screenPoints = target.screenWidth / scale;

@@ -36,6 +36,8 @@
   body[data-lang="zh-Hant"] { font-family: "SF Pro Display", "PingFang TC", sans-serif; }
   body[data-lang="ko"] { font-family: "SF Pro Display", "Apple SD Gothic Neo", sans-serif; }
   body[data-lang="th"] { font-family: "SF Pro Display", "Sukhumvit Set", "Thonburi", sans-serif; }
+  /* 韓国語は単語の間に空白を入れるので、単語の途中（音節の間）では折り返さない */
+  body[data-lang="ko"] { word-break: keep-all; }
 
   .canvas { position: relative; width: 100vw; height: 100vh; overflow: hidden;
     background:
