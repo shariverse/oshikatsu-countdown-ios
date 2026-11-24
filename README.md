@@ -188,6 +188,7 @@ scripts/render-app-store-screenshots.sh build/app-store-screenshots/APP_IPHONE_6
 - 機種はその都度新しく作り、1 回ビルドしたものを言語ごとに使い回します。iPhone Duo は Xcode 27 と iOS 27.1 のランタイムが要ります
 - 見本のデータは起動引数 `-useInMemoryStore -seedSampleData` でメモリ上のストアにだけ入ります（端末のデータは書き換えません）。撮影用の起動引数（`-sample…`・`-colorScheme`）も、メモリ上のストアのときだけ効きます。日付は今日から数えるので、いつ撮っても同じ残り日数になります
 - 見本の推しには、フリー素材を加工した写真を付けます。画像は UI テストのバンドル（`OshiConUITests/SampleOshiPhotos/`）にあり、アプリには入りません。出典・ライセンスと、差し替えるときに守ることは [docs/app-store/sample-oshi-photos.md](docs/app-store/sample-oshi-photos.md) にあります
+- iPhone Duo（外側の画面）は UI テストからロックできず（ロックのボタンが無く、ホームボタンも効かない）、ホーム画面へは下の端からの速いスワイプで戻ります。そのため 2 枚目はライブアクティビティが右の帯に出ているホーム画面に、8 枚目はホーム画面の上の通知のバナー 1 つにします（screenshots.html の `SLIDES` と copy.js の `duo`）
 - 要素は言語によらないアクセシビリティ ID（`home.featuredEvent`・`home.eventRow` など）で探します。ロックは XCUIDevice の公開の API に無いので、ボタンを押す口（`pressLockButton`）を使います
 - ステータスバーは電池満タン・電波は最大、外観はダークにそろえます。時刻は上書きしません（上書きするとロック画面の日付が 1 月 1 日になり、9:41 ではライブアクティビティの開始の時刻とも合わないため）。ホーム画面のアプリ名・ロック画面の日付もその言語にするため、言語ごとに Simulator の言語・地域を変えて起動し直します。ふだんのテスト（CI を含む）では、撮影と描き出しのテストは飛ばされます
 

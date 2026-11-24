@@ -85,24 +85,31 @@
   // 10 枚。layout が端末の並べ方、screens が使う画面（raw/ の名前）、overlays がホーム画面・ロック画面に重ねるもの
   const SLIDES = [
     { palette: "pink", layout: "single", screens: ["home-screen"], overlays: "homeWidgets", island: false },
-    { palette: "navy", layout: "single", screens: ["lock-screen"], overlays: "lockAccessories", island: false },
+    { palette: "navy", layout: "single", screens: ["lock-screen"], overlays: "lockAccessories", island: false,
+      // iPhone Duo は UI テストからロックできないので、ライブアクティビティが右の帯に出ているホーム画面を使う
+      duo: { screens: ["home-screen"], overlays: "duoHome" } },
     { palette: "orange", layout: "single", screens: ["detail"] },
     { palette: "chocomint", layout: "trio", screens: ["theme-2", "theme-1", "theme-3"] },
     { palette: "red", layout: "pair", screens: ["appearance-home", "appearance-settings"], plus: true },
     { palette: "blue", layout: "single", screens: ["home-screen"], overlays: "photoWidgets", island: false, plus: true },
     { palette: "green", layout: "single", screens: ["share-card"] },
-    { palette: "navy", layout: "single", screens: ["lock-screen-plain"], overlays: "lockNotifications", island: false },
+    { palette: "navy", layout: "single", screens: ["lock-screen-plain"], overlays: "lockNotifications", island: false,
+      // iPhone Duo はロック画面を撮れないので、ホーム画面の上に通知のバナーを 1 つ重ねる
+      duo: { screens: ["home-screen"], overlays: "duoBannerNotification" } },
     { palette: "pink", layout: "single", screens: ["oshi-list"] },
     { palette: "light", layout: "single", screens: ["home-light"], devices: true },
   ];
 
-  const slide = SLIDES[slideNumber - 1];
+  // 端末ごとの差し替え（duo など）があれば重ねる
+  const baseSlide = SLIDES[slideNumber - 1];
+  const slide = baseSlide && { ...baseSlide, ...(baseSlide[deviceKind] || {}) };
   const copy = (window.SCREENSHOT_COPY || {})[lang];
   if (!slide || !copy || !copy[slideNumber - 1]) {
     document.body.innerHTML = `<h1 style="color:red;font-size:120px">No slide ${slideNumber} / copy for "${lang}"</h1>`;
     throw new Error(`screenshots.html に ${slideNumber} 枚目（${lang}）がありません`);
   }
-  const text = copy[slideNumber - 1];
+  // 見出しにも端末ごとの差し替え（copy.js の duo）があれば重ねる
+  const text = { ...copy[slideNumber - 1], ...(copy[slideNumber - 1][deviceKind] || {}) };
   const palette = PALETTES[slide.palette];
   const shot = document.getElementById("shot");
   for (const [key, value] of Object.entries({ ...palette, title: palette.title || "#FFFFFF" })) {
@@ -254,12 +261,24 @@
   // アイコンの枠はラベルを含み、ラベルが長いと幅が広がるので、列は中心で、アイコンの幅はいちばん狭い枠の幅で決める
   function iconGrid() {
     const layout = window.HOME_LAYOUT;
-    if (!layout || layout.icons.length < 2) {
+    if (!layout || layout.icons.length < 1) {
       throw new Error("ホーム画面のアイコンの位置（raw/layout.js）がありません");
     }
-    // ドックのアイコン（画面の下の 2 割）は除く
-    const icons = layout.icons.filter((icon) => icon.y < layout.screen.height * 0.8);
-    const iconWidth = Math.min(...icons.map((icon) => icon.width));
+    // ドックのアイコン（iPhone・iPad は画面の下の 2 割、iPhone Duo の外側の画面は右の 2 割）と、
+    // ほかのページの縮んだアイコン（幅 40pt 未満）と、ホーム画面に最初からあるウィジェット（マップ・カレンダーなど。幅 130pt 超）は除く
+    const icons = layout.icons.filter((icon) => icon.width >= 40 && icon.width <= 130 && icon.y < layout.screen.height * 0.8
+      && icon.x + icon.width < layout.screen.width * 0.8);
+    if (icons.length === 0 && deviceKind === "duo") {
+      // iPhone Duo の外側の画面は、そのページのアイコンが記録に入らないことがあるので、実測した 1 つ目のアイコンの位置を使う
+      // （iOS 27.1 の Simulator。左上の 1 つ目のアイコンとラベルの枠）
+      icons.push({ x: 7, y: 52, width: 98, height: 87, label: "" });
+    }
+    if (icons.length === 0) {
+      throw new Error("ホーム画面のアイコンの位置（raw/layout.js）に、使えるアイコンがありません");
+    }
+    // アイコンの枠はラベルを含むので、幅と高さの小さいほうをアイコンの大きさとみなす
+    const iconWidth = Math.min(...icons.map((icon) => Math.min(icon.width, icon.height)));
+    const iconHeight = Math.min(...icons.map((icon) => icon.height));
     // 同じ行・列でも 1pt ほどずれるので、アイコンの幅の半分より近い値は 1 つにまとめる
     const cluster = (values) => values.sort((a, b) => a - b).reduce((groups, value) => {
       const last = groups[groups.length - 1];
@@ -272,13 +291,18 @@
     }, []).map((group) => group.reduce((sum, value) => sum + value, 0) / group.length);
     const rows = cluster(icons.map((icon) => icon.y));
     const centers = cluster(icons.map((icon) => icon.x + icon.width / 2));
-    const columnPitch = centers.length > 1 ? (centers[centers.length - 1] - centers[0]) / (centers.length - 1) : iconWidth * 1.4;
-    const rowPitch = rows.length > 1 ? (rows[rows.length - 1] - rows[0]) / (rows.length - 1) : iconWidth * 1.5;
+    // 列が 1 つしかなければ（iPhone Duo）、列の間隔はアイコンとラベルの高さとほぼ同じ（iPhone Duo の外側の画面で 88pt）と見積もる
+    const columnPitch = centers.length > 1 ? (centers[centers.length - 1] - centers[0]) / (centers.length - 1) : iconHeight * 1.02;
+    // 行が 1 つしかなければ（iPhone Duo）、iPhone の比（行の間隔はアイコンとラベルの高さの 1.15 倍）で見積もる
+    const rowPitch = rows.length > 1 ? (rows[rows.length - 1] - rows[0]) / (rows.length - 1) : iconHeight * 1.15;
     // テストのランナー（OshiConUITests-Runner）のアイコンの行から覆う。見つからなければいちばん下の行から
     const runner = icons.find((icon) => /UITests|Runner/.test(icon.label || ""));
     const nearestRow = (y) => rows.reduce((best, row) => (Math.abs(row - y) < Math.abs(best - y) ? row : best), rows[0]);
     const anchorRow = runner ? nearestRow(runner.y) : rows[rows.length - 1];
-    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow };
+    // ドックの上の端（ドックのアイコンの上の端から少し上）。ドックのアイコンが無ければ画面の 9 割の高さ
+    const dockIcons = layout.icons.filter((icon) => icon.y >= layout.screen.height * 0.8);
+    const dockTop = dockIcons.length > 0 ? Math.min(...dockIcons.map((icon) => icon.y)) - 12 : layout.screen.height * 0.9;
+    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow, dockTop };
   }
 
   // ウィジェットを、テストのランナーのアイコンの行から数えて row 行目・column 列目から、columns 列の幅で置く（高さは描き出した画像の縦横比）。
@@ -289,9 +313,13 @@
     const scale = pointScale(target);
     const image = await load(`surfaces/${file}.png`);
     const left = grid.firstCenter + grid.columnPitch * column - grid.iconWidth / 2;
-    const width = grid.columnPitch * (columns - 1) + grid.iconWidth;
-    const height = width * image.naturalHeight / image.naturalWidth;
+    // 右の端は画面の中に収め、iPhone Duo の外側の画面では右の帯（時刻・ライブアクティビティ・ドック）にかけない
+    const rightLimit = window.HOME_LAYOUT.screen.width * (deviceKind === "duo" ? 0.8 : 0.97);
     const top = grid.anchorRow + grid.rowPitch * row;
+    // 下の端はドックにかけない（iPad はアイコンの間隔が広く、2 行ぶんのウィジェットがドックまで届く）。はみ出すなら縦横比を保って縮める
+    const aspect = image.naturalHeight / image.naturalWidth;
+    const width = Math.min(grid.columnPitch * (columns - 1) + grid.iconWidth, rightLimit - left, (grid.dockTop - 12 - top) / aspect);
+    const height = width * aspect;
     add(`<img class="overlay" src="${image.src}" style="left:${left * scale}px;top:${top * scale}px;` +
       `width:${width * scale}px;height:${height * scale}px">`, target.screen);
     concealOverflowingLabels(target, { left, top, right: left + width, bottom: top + height }, scale);
@@ -369,6 +397,24 @@
         add(`<img class="overlay" src="${image.src}" style="${box}">`, target.screen);
         top += height + gap;
       });
+    },
+    // iPhone Duo のホーム画面（ライブアクティビティは右の帯）。テストのランナーのアイコンを、小さいカウントダウンのウィジェットで覆う
+    async duoHome(target) {
+      await placeWidget(target, "widget-countdown-small", 0, 0, 2);
+    },
+    // iPhone Duo のホーム画面の上の端に、通知のバナーを 1 つ重ねる（右の帯にかからない幅にする）
+    async duoBannerNotification(target) {
+      await placeWidget(target, "widget-countdown-small", 0, 0, 2);
+      const scale = pointScale(target);
+      const image = await load("surfaces/notification-1.png");
+      const screenPoints = target.screenWidth / scale;
+      const width = Math.min(image.naturalWidth / 3, screenPoints * 0.78);
+      const height = width * image.naturalHeight / image.naturalWidth;
+      const left = 10, top = 10;
+      const box = `left:${left * scale}px;top:${top * scale}px;width:${width * scale}px;height:${height * scale}px;`;
+      add(`<i class="overlay" style="${box}border-radius:${24 * scale * width / (image.naturalWidth / 3)}px;` +
+        `backdrop-filter:blur(${18 * scale}px) saturate(1.4);-webkit-backdrop-filter:blur(${18 * scale}px) saturate(1.4)"></i>`, target.screen);
+      add(`<img class="overlay" src="${image.src}" style="${box}">`, target.screen);
     },
   };
 </script>

@@ -108,7 +108,11 @@ struct AppStoreSurfaceRenderingTests {
         }
         try #require(notifications.count == 3, "見本の予定の通知が 3 件ありません")
         let icon = appIcon()
-        let time = now.formatted(.relative(presentation: .named).locale(.app))
+        // 届いたばかり（「今」・「now」）。日付から相対で作ると、描き出しにかかった秒数で「2 秒前」になるので、差 0 秒で作る
+        let formatter = RelativeDateTimeFormatter()
+        formatter.locale = .app
+        formatter.dateTimeStyle = .named
+        let time = formatter.localizedString(fromTimeInterval: 0)
         for (index, notification) in notifications.enumerated() {
             let card = LockScreenNotificationCard(content: notification, icon: icon, time: time)
             try render(card, to: directory, name: "notification-\(index + 1)")
