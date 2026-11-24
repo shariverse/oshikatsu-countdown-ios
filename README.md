@@ -160,7 +160,7 @@ body=$(gh pr view <番号> --json body -q .body) &&
 見本の推しと予定で、App Store に載せるスクリーンショット 10 枚を、見出しと端末の枠を付けて書き出します。表示サイズを 1 つ選び、言語ごとに次の 3 つを流して `build/app-store-screenshots/<表示サイズ>/<言語>/01.png〜10.png` に書き出します（Google Chrome が要ります）。
 
 1. 撮る: UI テスト（`AppStoreScreenshotTests`）で、アプリの画面と、ホーム画面・ロック画面を撮る（`raw/`）
-2. 描き出す: Unit テスト（`AppStoreSurfaceRenderingTests`）で、ウィジェットとロック画面のアクセサリを、出荷する View から PNG に描き出す（`surfaces/`）
+2. 描き出す: Unit テスト（`AppStoreSurfaceRenderingTests`）で、ウィジェットとロック画面のアクセサリを出荷する View から、通知を実際の文面から PNG に描き出す（`surfaces/`）
 3. 重ねる: [docs/app-store/screenshots/screenshots.html](docs/app-store/screenshots/screenshots.html) で、見出し・地・端末の枠を付ける（`scripts/render-app-store-screenshots.sh`）
 
 ```bash
@@ -178,7 +178,7 @@ scripts/render-app-store-screenshots.sh build/app-store-screenshots/APP_IPHONE_6
 | 5 | Plus の着せ替え | 実物（`-plusUnlocked -sampleAppearance`） |
 | 6 | Plus の推しの写真ウィジェット | ホーム画面は撮影、ウィジェットは描き出して重ねる |
 | 7 | 画像でシェア | 実物 |
-| 8 | 通知 | ロック画面に実物（`-sampleReminders`。通知の計画の先頭の数件を実際の文面で出す） |
+| 8 | 通知 | ロック画面は撮影、通知はアプリが予約する計画の近い 3 件を実際の文面（`ReminderContent`）で描き出して重ねる（iOS 27 の Simulator では通知を安定して出せないため） |
 | 9 | 推しの一覧 | 実物 |
 | 10 | ライトの外観のホーム | 実物（`-colorScheme light`） |
 
