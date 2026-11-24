@@ -90,7 +90,15 @@ struct AppStoreSurfaceRenderingTests {
             name: "widget-photo-medium"
         )
 
-        // ロック画面の通知: アプリが予約する通知の計画の、近いものから 3 件を、実際の文面（ReminderContent）で
+        try renderNotifications(events: events, oshis: oshis, now: now, calendar: calendar, to: directory)
+
+        // ロック画面: 時計の下に置く丸（ドームのライブの進み具合）と長方形（誕生日）。1 行は時計の上の日付と重なるので使わない
+        try render(WidgetPreview.countdownLockScreen(countdown(dome), family: .circular), to: directory, name: "lock-circular")
+        try render(WidgetPreview.countdownLockScreen(countdown(birthday), family: .rectangular), to: directory, name: "lock-rectangular")
+    }
+
+    /// ロック画面の通知: アプリが予約する通知の計画の、近いものから 3 件を、実際の文面（ReminderContent）で描き出す。
+    private func renderNotifications(events: [OshiEvent], oshis: [Oshi], now: Date, calendar: Calendar, to directory: URL) throws {
         let plan = ReminderPlan(events: events, settings: .default, now: now, calendar: calendar)
         let names = Dictionary(uniqueKeysWithValues: oshis.map { ($0.id, $0.name) })
         let notifications = plan.reminders.prefix(3).compactMap { reminder -> ReminderContent? in
@@ -102,12 +110,9 @@ struct AppStoreSurfaceRenderingTests {
         let icon = appIcon()
         let time = now.formatted(.relative(presentation: .named).locale(.app))
         for (index, notification) in notifications.enumerated() {
-            try render(LockScreenNotificationCard(content: notification, icon: icon, time: time), to: directory, name: "notification-\(index + 1)")
+            let card = LockScreenNotificationCard(content: notification, icon: icon, time: time)
+            try render(card, to: directory, name: "notification-\(index + 1)")
         }
-
-        // ロック画面: 時計の下に置く丸（ドームのライブの進み具合）と長方形（誕生日）。1 行は時計の上の日付と重なるので使わない
-        try render(WidgetPreview.countdownLockScreen(countdown(dome), family: .circular), to: directory, name: "lock-circular")
-        try render(WidgetPreview.countdownLockScreen(countdown(birthday), family: .rectangular), to: directory, name: "lock-rectangular")
     }
 
     /// 通知の左に出すアプリのアイコン。アイコンと同じく、推し色（ピンク）の地に白いハートで描く。
