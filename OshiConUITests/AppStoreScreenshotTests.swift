@@ -129,8 +129,10 @@ final class AppStoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: 2)
         capture("home-screen")
         attachHomeScreenLayout(of: springboard)
-        // アプリが裏に回ってからロックすると、iOS 26 でもロック画面にライブアクティビティが出る
+        // アプリが裏に回ってからロックすると、iOS 26 でもロック画面にライブアクティビティが出る。
+        // 1 回目のロックで許可の表示が間に合わなかったとき（遅い CI）のため、ここでももう一度許可を探す
         lockAndWake(waitingFor: 3)
+        allowLiveActivitiesIfAsked(on: springboard)
         capture("lock-screen")
         unlock()
 
@@ -224,7 +226,7 @@ final class AppStoreScreenshotTests: XCTestCase {
     @MainActor
     private func allowLiveActivitiesIfAsked(on springboard: XCUIApplication) {
         let byLabel = springboard.buttons.matching(NSPredicate(format: "label IN %@", Self.allowLabels)).firstMatch
-        if byLabel.waitForExistence(timeout: 3), byLabel.isHittable {
+        if byLabel.waitForExistence(timeout: 6), byLabel.isHittable {
             byLabel.tap()
             Thread.sleep(forTimeInterval: 1.5)
             return
