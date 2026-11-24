@@ -25,6 +25,11 @@
           "locale" : "en_US"
         },
         {
+          "description" : "Buy once and keep Plus forever",
+          "displayName" : "Plus (Lifetime)",
+          "locale" : "en_GB"
+        },
+        {
           "description" : "一度の購入で Plus の機能をずっと使えます",
           "displayName" : "Plus（買い切り）",
           "locale" : "ja"
@@ -58,6 +63,11 @@
           "description" : "Un solo pago y Plus para siempre",
           "displayName" : "Plus (de por vida)",
           "locale" : "es_ES"
+        },
+        {
+          "description" : "Un solo pago y Plus para siempre",
+          "displayName" : "Plus (de por vida)",
+          "locale" : "es_MX"
         },
         {
           "description" : "Pague uma vez e use o Plus para sempre",
@@ -106,6 +116,12 @@
         {
           "customAppName" : "",
           "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "en_GB"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
           "displayName" : "推し活カウントダウン Plus",
           "locale" : "ja"
         },
@@ -144,6 +160,12 @@
           "description" : "",
           "displayName" : "Oshi Countdown Plus",
           "locale" : "es_ES"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "es_MX"
         },
         {
           "customAppName" : "",
@@ -195,6 +217,11 @@
               "locale" : "en_US"
             },
             {
+              "description" : "Your oshi's photo on backgrounds and widgets",
+              "displayName" : "Plus (Yearly)",
+              "locale" : "en_GB"
+            },
+            {
               "description" : "推しの写真で背景・飾り・ウィジェットを着せ替え",
               "displayName" : "Plus（年額）",
               "locale" : "ja"
@@ -228,6 +255,11 @@
               "description" : "Fotos de tu oshi en fondos y widgets",
               "displayName" : "Plus (anual)",
               "locale" : "es_ES"
+            },
+            {
+              "description" : "Fotos de tu oshi en fondos y widgets",
+              "displayName" : "Plus (anual)",
+              "locale" : "es_MX"
             },
             {
               "description" : "Fotos do seu oshi no fundo e nos widgets",
@@ -277,6 +309,11 @@
               "locale" : "en_US"
             },
             {
+              "description" : "Your oshi's photo on backgrounds and widgets",
+              "displayName" : "Plus (Monthly)",
+              "locale" : "en_GB"
+            },
+            {
               "description" : "推しの写真で背景・飾り・ウィジェットを着せ替え",
               "displayName" : "Plus（月額）",
               "locale" : "ja"
@@ -310,6 +347,11 @@
               "description" : "Fotos de tu oshi en fondos y widgets",
               "displayName" : "Plus (mensual)",
               "locale" : "es_ES"
+            },
+            {
+              "description" : "Fotos de tu oshi en fondos y widgets",
+              "displayName" : "Plus (mensual)",
+              "locale" : "es_MX"
             },
             {
               "description" : "Fotos do seu oshi no fundo e nos widgets",

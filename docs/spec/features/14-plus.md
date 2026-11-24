@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@c5560e26f143ddf43b07a8b0868d8de8b84777c5 oshikatsu-countdown/features/14-plus.md
+  元: shariverse/app-specs@665dec3171af0c793e9ea38f15c8bd8b98d2b7c7 oshikatsu-countdown/features/14-plus.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 
@@ -100,4 +100,3 @@
 
 - [設定](08-settings.md)のいちばん上に「推し活カウントダウン Plus」の行を置き、押すと課金画面を開く。説明は「推しの写真ウィジェットと、背景と飾りの着せ替え」。Plus が使える人には「Plus をお使いいただけます」
 - Plus でない人が[推しの写真ウィジェット](16-photo-widget.md)を押したときと、[着せ替え](17-dress-up.md)の画面の「Plus で使う」を押したときも、課金画面を開く
-- 今は、開発版とテスト配信版（TestFlight）だけに入口を出す。App Store 版では設定の Plus と着せ替えの行を出さず、推しの写真ウィジェットを押しても課金画面を開かない。配り方が分からないときも出さない

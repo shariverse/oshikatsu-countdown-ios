@@ -93,6 +93,11 @@
       header: { title: "Count down to every <em>oshi</em> moment.", sub: "Lives, birthdays, release days — see how many days are left at a glance." },
       search: { title: "Your <em>fan days</em>,<br>counted down.", chips: ["Countdowns in your oshi's color", "Home Screen widgets", "iPhone and iPad"] },
     },
+    // en-GB は en を英国のつづりと言い方（colour・gig）に、es-MX は es と同じ文言（中南米でもそのまま通じる）
+    "en-GB": {
+      header: { title: "Count down to every <em>oshi</em> moment.", sub: "Gigs, birthdays, release days — see how many days are left at a glance." },
+      search: { title: "Your <em>fan days</em>,<br>counted down.", chips: ["Countdowns in your oshi's colour", "Home Screen widgets", "iPhone and iPad"] },
+    },
     ja: {
       header: { title: "推しに会える日まで、<em>あと何日</em>？", sub: "ライブ・誕生日・発売日。楽しみな日を推し色で数えよう。" },
       search: { title: "推し活の予定を、<br><em>推し色</em>でカウント。", chips: ["推し色のカウントダウン", "ホーム画面ウィジェット", "iPhone と iPad に対応"] },
@@ -118,6 +123,10 @@
       search: { title: "Deine Fan-Termine,<br><em>im Countdown</em>.", chips: ["Countdown in Fanfarbe", "Widgets für den Home-Bildschirm", "iPhone und iPad"] },
     },
     es: {
+      header: { title: "¿Cuántos días faltan para ver a <em>tu bias</em>?", sub: "Conciertos, cumpleaños, lanzamientos: cuenta los días con el color de tu favorito." },
+      search: { title: "Tus días de fan,<br><em>en cuenta regresiva</em>.", chips: ["Cuenta regresiva con su color", "Widgets de inicio", "iPhone y iPad"] },
+    },
+    "es-MX": {
       header: { title: "¿Cuántos días faltan para ver a <em>tu bias</em>?", sub: "Conciertos, cumpleaños, lanzamientos: cuenta los días con el color de tu favorito." },
       search: { title: "Tus días de fan,<br><em>en cuenta regresiva</em>.", chips: ["Cuenta regresiva con su color", "Widgets de inicio", "iPhone y iPad"] },
     },
@@ -202,7 +211,7 @@
   };
 
   // 文字の多い言語は見出しを小さくする
-  const long = ["fr", "de", "es", "pt-BR", "it", "id"].includes(lang);
+  const long = ["fr", "de", "es", "es-MX", "pt-BR", "it", "id"].includes(lang);
 
   if (type === "header") {
     // 21:9。中央に寄せる（左右は端末によって切れる）
