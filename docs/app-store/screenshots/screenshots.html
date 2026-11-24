@@ -302,7 +302,13 @@
     // ドックの上の端（ドックのアイコンの上の端から少し上）。ドックのアイコンが無ければ画面の 9 割の高さ
     const dockIcons = layout.icons.filter((icon) => icon.y >= layout.screen.height * 0.8);
     const dockTop = dockIcons.length > 0 ? Math.min(...dockIcons.map((icon) => icon.y)) - 12 : layout.screen.height * 0.9;
-    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow, dockTop };
+    // アイコンを置ける最後の行（アイコンとラベルがドックの上の端より上に収まる行）の下の端。iPhone ではその下とドックの間に「検索」のボタンがある
+    let lastRow = rows[rows.length - 1];
+    while (lastRow + rowPitch + iconHeight <= dockTop) {
+      lastRow += rowPitch;
+    }
+    const gridBottom = lastRow + iconHeight;
+    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow, gridBottom, dockTop };
   }
 
   // 描き出したウィジェットの倍率（AppStoreSurfaceRenderingTests は 3 倍）と、その大きさでの角の丸み（pt）。
@@ -342,10 +348,40 @@
       const x = widget.column > 0 ? right - width : left;
       return { image, left: x, top, right: x + width, bottom: top + width * aspect };
     });
+    concealSearchButton(target, grid, boxes, scale);
     for (const box of boxes) {
       add(`<img class="overlay" src="${box.image.src}" style="left:${box.left * scale}px;top:${box.top * scale}px;` +
         `width:${(box.right - box.left) * scale}px;height:${(box.bottom - box.top) * scale}px">`, target.screen);
       concealOverflowingLabels(target, box, scale);
+    }
+  }
+
+  // iPhone のホーム画面の「検索」のボタンは、最後の行より下まで伸びた下の段のウィジェットの間からのぞく。すき間に見える部分だけ、
+  // ボタンのすぐ上とすぐ下の壁紙を上下に返して写し、塗り消す（返すので、塗った上下の端で壁紙がつながる）。
+  // ボタンは左右の真ん中で、高さ約 30pt、縦の真ん中は最後の行の下の端とドックの上の端の中ほどの 2pt ほど上
+  // （iOS 26 の Simulator の 6.9 inch・6.3 inch で実測）。ホーム画面とロック画面の壁紙は位置と大きさが違うので、ロック画面からは写せない
+  function concealSearchButton(target, grid, boxes, scale) {
+    if (deviceKind !== "iphone") {
+      return;
+    }
+    const half = 17;
+    const center = (grid.gridBottom + grid.dockTop) / 2 - 2.3;
+    const sorted = [...boxes].sort((a, b) => a.top - b.top || a.left - b.left);
+    for (let index = 0; index + 1 < sorted.length; index++) {
+      const [leftBox, rightBox] = [sorted[index], sorted[index + 1]];
+      const sameRow = Math.abs(leftBox.top - rightBox.top) <= 1 && rightBox.left > leftBox.right;
+      // すき間がボタンの高さを上下とも挟んでいるときだけ塗る（はみ出すと、すき間の外に写した壁紙が見える）
+      const surrounds = Math.max(leftBox.top, rightBox.top) < center - half && Math.min(leftBox.bottom, rightBox.bottom) > center + half;
+      if (!sameRow || !surrounds) {
+        continue;
+      }
+      const left = leftBox.right, width = rightBox.left - leftBox.right;
+      // [塗る上の端, 写す元の上の端]。上の半分はボタンの上の 17pt を、下の半分はボタンの下の 17pt を返して写す
+      for (const [top, sourceTop] of [[center - half, center - half * 2], [center, center + half]]) {
+        add(`<i class="overlay" style="left:${left * scale}px;top:${top * scale}px;width:${width * scale}px;height:${half * scale}px;` +
+          `background:url('${target.image.src}') ${-left * scale}px ${-sourceTop * scale}px / ${target.screenWidth}px ${target.screenHeight}px no-repeat;` +
+          `transform:scaleY(-1)"></i>`, target.screen);
+      }
     }
   }
 
