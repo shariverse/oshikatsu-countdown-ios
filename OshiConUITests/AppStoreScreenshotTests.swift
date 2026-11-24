@@ -128,7 +128,7 @@ final class AppStoreScreenshotTests: XCTestCase {
         capture("lock-screen")
         // ロックを解くとアプリに戻るので、ホームボタンでホーム画面に出る
         unlock()
-        goHome(springboard)
+        goHome(from: app)
         Thread.sleep(forTimeInterval: 2)
         capture("home-screen")
         attachHomeScreenLayout(of: springboard)
@@ -160,12 +160,14 @@ final class AppStoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.5)
     }
 
-    /// ホーム画面に出る。重い Mac ではホームボタンが 1 回で効かないことがあるので、アイコンが押せるようになるまで 3 回まで押す。
+    /// ホーム画面に出る。重い Mac ではホームボタンが 1 回で効かないことがあるので、撮影のアプリが裏に回るまで 3 回まで押す
+    /// （ホーム画面の 1 ページ目の並びは Simulator ごとに違うので、アイコンではなくアプリの状態で確かめる）。
     @MainActor
-    private func goHome(_ springboard: XCUIApplication) {
+    private func goHome(from app: XCUIApplication) {
         for _ in 0..<3 {
             XCUIDevice.shared.press(.home)
-            if springboard.icons.firstMatch.waitForExistence(timeout: 5), springboard.icons.firstMatch.isHittable {
+            if app.wait(for: .runningBackground, timeout: 5) {
+                Thread.sleep(forTimeInterval: 1)
                 return
             }
         }
