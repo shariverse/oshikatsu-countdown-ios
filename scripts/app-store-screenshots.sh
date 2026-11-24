@@ -220,6 +220,20 @@ while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
   rm -rf "${destination:?}"
   mkdir -p "$destination/raw" "$destination/surfaces"
 
+  # ウィジェットなどの描き出しを先にする（UI テストの後は撮影のアプリが動いたままで、テストのホストが起動しきれず止まることがあった）。
+  # 重いランナーでも起動しきれないことがあるので、1 回だけやり直す
+  surfaces_result="$WORK_DIR/${language}-surfaces.xcresult"
+  if ! render_surfaces "$(cd "$destination/surfaces" && pwd)" "$apple_language" "${apple_locale#*_}" "$surfaces_result"; then
+    echo "::warning::${DISPLAY_TYPE} / ${language} のウィジェットの描き出しに失敗したので、やり直します"
+    rm -rf "$surfaces_result"
+    render_surfaces "$(cd "$destination/surfaces" && pwd)" "$apple_language" "${apple_locale#*_}" "$surfaces_result"
+  fi
+  count=$(find "$destination/surfaces" -name '*.png' | wc -l | tr -d ' ')
+  if [[ "$count" -ne "$EXPECTED_SURFACES" ]]; then
+    echo "${DISPLAY_TYPE} / ${language} のウィジェットが ${count} 個でした（${EXPECTED_SURFACES} 個のはず）。テストが飛ばされていないか確かめてください" >&2
+    exit 1
+  fi
+
   # アプリの中の画面（ステータスバーをそろえる）→ アプリの外の面（上書きを外す）の順に撮り、添付を raw/ に集める
   override_status_bar
   capture "$WORK_DIR/${language}-app.xcresult" "$language" "$apple_language" "$apple_locale" testCaptureScreensInApp "$WORK_DIR/${language}-app"
@@ -244,19 +258,6 @@ while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
       exit 1
     fi
   done
-
-  # テストのホストのアプリが重いランナーで起動しきれないことがあるので、1 回だけやり直す
-  surfaces_result="$WORK_DIR/${language}-surfaces.xcresult"
-  if ! render_surfaces "$(cd "$destination/surfaces" && pwd)" "$apple_language" "${apple_locale#*_}" "$surfaces_result"; then
-    echo "::warning::${DISPLAY_TYPE} / ${language} のウィジェットの描き出しに失敗したので、やり直します"
-    rm -rf "$surfaces_result"
-    render_surfaces "$(cd "$destination/surfaces" && pwd)" "$apple_language" "${apple_locale#*_}" "$surfaces_result"
-  fi
-  count=$(find "$destination/surfaces" -name '*.png' | wc -l | tr -d ' ')
-  if [[ "$count" -ne "$EXPECTED_SURFACES" ]]; then
-    echo "${DISPLAY_TYPE} / ${language} のウィジェットが ${count} 個でした（${EXPECTED_SURFACES} 個のはず）。テストが飛ばされていないか確かめてください" >&2
-    exit 1
-  fi
 
   scripts/render-app-store-screenshots.sh "$destination" "$DISPLAY_TYPE" "$language"
 done 3< <(printf '%s\n' "$LANGUAGE_LIST")
