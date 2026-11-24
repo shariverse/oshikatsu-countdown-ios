@@ -132,3 +132,68 @@ struct SampleDataTests {
         #expect(SampleData.Language(Locale(identifier: identifier)) == expected)
     }
 }
+
+/// App Store 用スクリーンショットで、見本の推しにフリー素材の写真を付ける（`SampleData.attachingPhotos(to:from:library:)`）。
+struct SampleDataPhotoTests {
+    private let today = DomainFixtures.day(2026, 10, 18)
+    private let now = DomainFixtures.date(2026, 10, 18, 9, 41)
+
+    private func content(_ language: SampleData.Language = .japanese) -> SampleData.Content {
+        SampleData.make(today: today, now: now, language: language)
+    }
+
+    @Test("見本の推しは役どころの順に並び、写真のファイル名は役どころから決まる（UI テストのバンドルの sample-oshi-*.jpg と同じ）")
+    func rolesMatchCast() {
+        #expect(SampleData.Role.allCases.count == content().oshis.count)
+        #expect(content(.english).oshis.first?.name == "LUMINA")
+        #expect(SampleData.Role.allCases.map(\.photoFileName) == [
+            "sample-oshi-group.jpg",
+            "sample-oshi-voice-actor.jpg",
+            "sample-oshi-character.jpg",
+            "sample-oshi-stage-actor.jpg",
+            "sample-oshi-streamer.jpg",
+            "sample-oshi-singer.jpg"
+        ])
+        // 見本だけでは写真を付けない（頭文字のまま）
+        #expect(content().oshis.allSatisfy { $0.photoFileName == nil })
+    }
+
+    @Test("写真のある役どころの推しにだけ、写真を推しの写真の置き場所へ <UUID>.jpg の名前で写して付ける。予定と推しの id は変えない")
+    func attachesPhotos() throws {
+        let source = PhotoFixtures.temporaryDirectory()
+        try FileManager.default.createDirectory(at: source, withIntermediateDirectories: true)
+        let groupPhoto = PhotoFixtures.imageData(width: 40, height: 40)
+        let streamerPhoto = PhotoFixtures.imageData(width: 30, height: 30)
+        try groupPhoto.write(to: source.appending(path: SampleData.Role.group.photoFileName))
+        try streamerPhoto.write(to: source.appending(path: SampleData.Role.streamer.photoFileName))
+        let library = OshiPhotoLibrary(directory: PhotoFixtures.temporaryDirectory())
+
+        let original = content()
+        let attached = SampleData.attachingPhotos(to: original, from: source, library: library)
+
+        #expect(attached.oshis.map(\.id) == original.oshis.map(\.id))
+        #expect(attached.oshis.map(\.name) == original.oshis.map(\.name))
+        #expect(attached.events.map(\.id) == original.events.map(\.id))
+        let roles = Dictionary(uniqueKeysWithValues: zip(SampleData.Role.allCases, attached.oshis))
+        let groupFile = try #require(roles[.group]?.photoFileName)
+        let streamerFile = try #require(roles[.streamer]?.photoFileName)
+        #expect(OshiPhotoLibrary.isValidFileName(groupFile))
+        #expect(OshiPhotoLibrary.isValidFileName(streamerFile))
+        #expect(groupFile != streamerFile)
+        #expect(try Data(contentsOf: library.url(for: groupFile)) == groupPhoto)
+        #expect(try Data(contentsOf: library.url(for: streamerFile)) == streamerPhoto)
+        for role in [SampleData.Role.voiceActor, .character, .stageActor, .singer] {
+            #expect(roles[role]?.photoFileName == nil, "\(role)")
+        }
+    }
+
+    @Test("写真のディレクトリが無ければ、見本はそのまま（頭文字）で、写真の置き場所も作らない")
+    func missingDirectoryKeepsInitials() {
+        let library = OshiPhotoLibrary(directory: PhotoFixtures.temporaryDirectory())
+        let missing = PhotoFixtures.temporaryDirectory()
+        let original = content()
+        let attached = SampleData.attachingPhotos(to: original, from: missing, library: library)
+        #expect(attached.oshis == original.oshis)
+        #expect(!FileManager.default.fileExists(atPath: library.directory.path(percentEncoded: false)))
+    }
+}
