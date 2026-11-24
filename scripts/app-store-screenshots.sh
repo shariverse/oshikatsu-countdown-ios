@@ -4,7 +4,7 @@
 #
 #   1. 撮る: 見本の推しと予定で UI テスト（AppStoreScreenshotTests）を流し、アプリの画面・ホーム画面・ロック画面を撮る
 #      （ステータスバーは電池満タン・時刻は上書きしない、外観はダーク。端末の言語もその言語にする）
-#   2. 描き出す: Unit テスト（AppStoreSurfaceRenderingTests）で、ウィジェットとロック画面のアクセサリを本物の View から PNG に描き出す
+#   2. 描き出す: Unit テスト（AppStoreSurfaceRenderingTests）で、ウィジェット・ロック画面のアクセサリ・通知を本物の View から PNG に描き出す
 #   3. 重ねる: scripts/render-app-store-screenshots.sh で、見出し・地・端末の枠を付けて 01.png〜10.png にする
 #
 # 使い方:
@@ -19,7 +19,7 @@
 # 出力先: $SCREENSHOTS_DIR/<表示サイズ>/<言語>/（既定は build/app-store-screenshots）
 #   01.png〜10.png  App Store に載せる画像（App Store Metadata のワークフローが登録する）
 #   raw/            撮った画面と manifest.json（クリエイティブアセットの元にもする）
-#   surfaces/       描き出したウィジェット
+#   surfaces/       描き出したウィジェット・ロック画面のアクセサリ・通知
 #
 # 環境変数:
 #   SCREENSHOTS_DIR  出力先（既定は build/app-store-screenshots）
@@ -44,8 +44,8 @@ if ! jq -e --arg type "$DISPLAY_TYPE" '.displayTypes[$type]' "$SCREENSHOTS_JSON"
 fi
 EXPECTED_SIZES=$(jq -r --arg type "$DISPLAY_TYPE" '.displayTypes[$type].sizes | join(" ")' "$SCREENSHOTS_JSON")
 
-# 描き出すウィジェットの数（AppStoreSurfaceRenderingTests）
-EXPECTED_SURFACES=8
+# 描き出すウィジェット・ロック画面のアクセサリと通知の数（AppStoreSurfaceRenderingTests）
+EXPECTED_SURFACES=11
 
 # 言語の一覧（language appleLanguage appleLocale をタブ区切り）。指定が無ければ全言語、指定に無い言語があれば止まる
 LANGUAGE_LIST=$(jq -r --arg wanted "$LANGUAGES" '
@@ -208,8 +208,7 @@ render_surfaces() {
     -only-testing:OshiConTests/AppStoreSurfaceRenderingTests \
     -testLanguage "$2" \
     -testRegion "$3" \
-    -resultBundlePath "$4" \
-    -quiet
+    -resultBundlePath "$4"
 }
 
 while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
@@ -246,7 +245,13 @@ while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
     fi
   done
 
-  render_surfaces "$(cd "$destination/surfaces" && pwd)" "$apple_language" "${apple_locale#*_}" "$WORK_DIR/${language}-surfaces.xcresult"
+  # テストのホストのアプリが重いランナーで起動しきれないことがあるので、1 回だけやり直す
+  surfaces_result="$WORK_DIR/${language}-surfaces.xcresult"
+  if ! render_surfaces "$(cd "$destination/surfaces" && pwd)" "$apple_language" "${apple_locale#*_}" "$surfaces_result"; then
+    echo "::warning::${DISPLAY_TYPE} / ${language} のウィジェットの描き出しに失敗したので、やり直します"
+    rm -rf "$surfaces_result"
+    render_surfaces "$(cd "$destination/surfaces" && pwd)" "$apple_language" "${apple_locale#*_}" "$surfaces_result"
+  fi
   count=$(find "$destination/surfaces" -name '*.png' | wc -l | tr -d ' ')
   if [[ "$count" -ne "$EXPECTED_SURFACES" ]]; then
     echo "${DISPLAY_TYPE} / ${language} のウィジェットが ${count} 個でした（${EXPECTED_SURFACES} 個のはず）。テストが飛ばされていないか確かめてください" >&2
