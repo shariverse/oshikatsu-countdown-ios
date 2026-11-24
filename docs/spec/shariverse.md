@@ -1,6 +1,6 @@
 <!--
   app-specs から生成したファイル。直接編集しない。
-  元: shariverse/app-specs@f1b95861875616e27ecf5bd7a2ce85d19c79889c shariverse.md
+  元: shariverse/app-specs@c5560e26f143ddf43b07a8b0868d8de8b84777c5 shariverse.md
   変えるときは https://github.com/shariverse/app-specs に PR を出す。
 -->
 

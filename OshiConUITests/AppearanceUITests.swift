@@ -13,6 +13,7 @@ import XCTest
 /// - ホームと詳細の地は読み上げから外しているので、メモリ上のストアのときだけ置く口（`home.appearance`・`eventDetail.appearance`。
 ///   `AppearanceUITestMarker`）のラベルで、描いているもの（`standard`・`photo`・`decoration`）を確かめる
 /// - 見本に映ったかは、見本（`appearance.preview`）の読み上げの値で確かめる
+/// - 見本は設定の Form の外（上に固定・左の列）に置いているので、送るときは Form（`appearance.form`）の上で指を動かす
 final class AppearanceUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -50,11 +51,16 @@ final class AppearanceUITests: XCTestCase {
         app.descendants(matching: .any)["appearance.preview"].firstMatch
     }
 
-    /// 見本の読み上げの値が `texts` をすべて含むまで待つ。
+    /// 着せ替えの設定の Form（見本の外）。
+    @MainActor
+    private func form(in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)["appearance.form"].firstMatch
+    }
+
+    /// 見本の読み上げの値が `texts` をすべて含むまで待つ。見本は Form の外に固定しているので、送らずに読める。
     @MainActor
     private func waitForPreview(in app: XCUIApplication, containing texts: [String], file: StaticString = #filePath, line: UInt = #line) {
         let element = preview(in: app)
-        reveal(element, in: app, needsHittable: false)
         XCTAssertTrue(element.waitForExistence(timeout: 5), file: file, line: line)
         let format = texts.map { _ in "value CONTAINS %@" }.joined(separator: " AND ")
         let predicate = NSPredicate(format: format, argumentArray: texts)
@@ -100,7 +106,12 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertNotEqual(photo.value as? String, before)
         app.buttons["photoCrop.done"].tap()
         XCTAssertTrue(app.navigationBars["着せ替え"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["appearance.removePhoto"].waitForExistence(timeout: 5))
+        // 取り込むと「写真を変える」になり、その下の行に「写真を外す」が出る。見本の分だけ Form が短く、画面の外の行は作られないので、送ってから探す
+        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label CONTAINS %@", "写真を変える"), object: select)
+        XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 5), .completed)
+        let remove = app.buttons["appearance.removePhoto"]
+        reveal(remove, in: app)
+        XCTAssertTrue(remove.waitForExistence(timeout: 2))
     }
 
     /// スイッチを押す（ラベルの文字ではなく、右端のスイッチを押す）。
@@ -135,50 +146,77 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.buttons["eventDetail.share"].waitForExistence(timeout: 2))
     }
 
-    /// `element` が画面の中で押せるところに来るまで、ゆっくり送る。Form の画面の外の行は作られないので、下の行へ送っても来なければ上の行へ送る。
-    /// 何度か送っても来なければそのまま返す。押さない要素（見本）は `needsHittable` を false にし、作られたら止める。
+    /// `element` が画面の中で押せるところに来るまで、Form をゆっくり送る。Form の画面の外の行は作られないので、下の行へ送っても来なければ上の行へ送る。
+    /// 何度か送っても来なければそのまま返す。押さない要素は `needsHittable` を false にし、作られたら止める。
     @MainActor
     private func reveal(_ element: XCUIElement, in app: XCUIApplication, needsHittable: Bool = true, maxSwipes: Int = 4) {
+        let form = form(in: app)
         let isReady = { element.exists && (!needsHittable || element.isHittable) }
         for upward in [true, false] {
             var swipes = 0
             while !isReady(), swipes < maxSwipes {
-                scroll(app, upward: upward)
+                scroll(form, upward: upward)
                 swipes += 1
             }
         }
     }
 
-    /// スライダー `slider` を `position`（0〜1）まで動かし、値が `expected` になるまで（3 回まで）動かし直す。
-    /// 動きの遅い CI の Simulator では、1 回の `adjust` が端まで届かずに途中（75〜80%）で止まることがあるため。
+    /// 見本が画面の中にあり、`control`（いま動かしている設定）と重なっていないことを確かめる。
     @MainActor
-    private func adjust(
-        _ slider: XCUIElement,
-        to position: CGFloat,
-        expecting expected: String,
+    private func assertPreviewVisible(
+        besides control: XCUIElement,
+        in app: XCUIApplication,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        for _ in 0..<3 where slider.value as? String != expected {
-            slider.adjust(toNormalizedSliderPosition: position)
-        }
-        XCTAssertEqual(slider.value as? String, expected, file: file, line: line)
+        let preview = preview(in: app)
+        XCTAssertTrue(preview.exists, file: file, line: line)
+        let screen = app.windows.firstMatch.frame
+        XCTAssertTrue(screen.contains(preview.frame), "見本: \(preview.frame)、画面: \(screen)", file: file, line: line)
+        XCTAssertFalse(preview.frame.intersects(control.frame), "見本: \(preview.frame)、設定: \(control.frame)", file: file, line: line)
     }
 
-    /// 画面をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
-    /// スライダーの無い左の端（行の外の余白）を縦に送る。
+    /// スライダー `slider` を端（`position` が 1 なら右、0 なら左）へ動かし、値が狙った向きに動いたことを確かめて、動いた後の値（「90%」など）を返す。
+    /// 動きの遅い CI の Simulator では、`adjust(toNormalizedSliderPosition:)` が端まで届かずに途中（75〜95%）で止まったり、
+    /// 引いた指で Form が送られてスライダーが画面の外に出たりする。そのため、ちょうど端の値（`end`）は求めない。
+    /// 端に届くまで 3 回まで動かし直し、動かす前と値を読む前にスライダーを画面の中に戻す。見本に映ったかは、返した値で確かめる。
     @MainActor
-    private func scroll(_ app: XCUIApplication, upward: Bool) {
-        let top = app.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.3))
-        let bottom = app.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.7))
+    private func move(
+        _ slider: XCUIElement,
+        to position: CGFloat,
+        end: String,
+        in app: XCUIApplication,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> String {
+        let initial = slider.value as? String ?? ""
+        for _ in 0..<3 {
+            reveal(slider, in: app)
+            guard slider.value as? String != end else { break }
+            slider.adjust(toNormalizedSliderPosition: position)
+        }
+        reveal(slider, in: app)
+        let moved = slider.value as? String ?? ""
+        let (before, after) = (initial.percentValue, moved.percentValue)
+        let message = "スライダーが狙った向きに動いていない: \(initial) → \(moved)"
+        XCTAssertTrue(position > 0.5 ? after > before : after < before, message, file: file, line: line)
+        return moved
+    }
+
+    /// Form をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
+    /// スライダーの無い Form の左の端（行の外の余白）を縦に送る。見本は Form の外にあり、見本の上では送れない。
+    @MainActor
+    private func scroll(_ form: XCUIElement, upward: Bool) {
+        let top = form.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.3))
+        let bottom = form.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.7))
         let (start, end) = upward ? (bottom, top) : (top, bottom)
         start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0)
     }
 
-    /// 背景の写真を選んだ後に、暗幕とぼかしのスライダーを別々に動かすと見本に映る（暗幕 100%・ぼかし 0% にして返す）。
+    /// 背景の写真を選んだ後に、暗幕とぼかしのスライダーを別々に動かすと見本に映る（暗幕を濃く、ぼかしを弱くして、動いた後の値を返す）。
     /// 背景を OFF にすると、スライダーは値を見せたまま押せなくなり、ON に戻すと押せる。
     @MainActor
-    private func adjustScrimAndBlur(in app: XCUIApplication) {
+    private func adjustScrimAndBlur(in app: XCUIApplication) -> (scrim: String, blur: String) {
         let scrim = app.sliders["appearance.backgroundScrim"]
         let blur = app.sliders["appearance.backgroundBlur"]
         reveal(blur, in: app)
@@ -186,22 +224,26 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(scrim.isEnabled)
         XCTAssertEqual(scrim.value as? String, "50%")
         XCTAssertEqual(blur.value as? String, "40%")
-        adjust(scrim, to: 1, expecting: "100%")
+        assertPreviewVisible(besides: scrim, in: app)
+        let scrimValue = move(scrim, to: 1, end: "100%", in: app)
         XCTAssertEqual(blur.value as? String, "40%")
-        adjust(blur, to: 0, expecting: "0%")
-        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%"])
+        assertPreviewVisible(besides: blur, in: app)
+        let blurValue = move(blur, to: 0, end: "0%", in: app)
+        XCTAssertEqual(scrim.value as? String, scrimValue)
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ \(scrimValue)", "ぼかしの強さ \(blurValue)"])
 
         toggle("appearance.backgroundToggle", in: app, to: "0")
         waitForPreview(in: app, containing: ["背景の写真なし"])
         reveal(blur, in: app, needsHittable: false)
         XCTAssertFalse(scrim.isEnabled)
         XCTAssertFalse(blur.isEnabled)
-        XCTAssertEqual(scrim.value as? String, "100%")
-        XCTAssertEqual(blur.value as? String, "0%")
+        XCTAssertEqual(scrim.value as? String, scrimValue)
+        XCTAssertEqual(blur.value as? String, blurValue)
         toggle("appearance.backgroundToggle", in: app, to: "1")
         XCTAssertTrue(scrim.isEnabled)
         XCTAssertTrue(blur.isEnabled)
         waitForPreview(in: app, containing: ["背景の写真あり"])
+        return (scrimValue, blurValue)
     }
 
     /// Plus でない人: 写真を選ぶ・変える・外す、ON/OFF、暗幕とぼかしのスライダーが見本に映り、課金画面を開ける。ホームと詳細は標準のまま。
@@ -218,9 +260,9 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.buttons["appearance.selectPhoto"].label.contains("写真を変える"))
         waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 50%", "ぼかしの強さ 40%"])
 
-        adjustScrimAndBlur(in: app)
+        let (scrimValue, blurValue) = adjustScrimAndBlur(in: app)
         toggle("appearance.decorationToggle", in: app, to: "1")
-        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%", "推しの写真の飾りあり"])
+        waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ \(scrimValue)", "ぼかしの強さ \(blurValue)", "推しの写真の飾りあり"])
 
         // 写真を変えても、外しても見本に映る
         pickAndCropPhoto(in: app)
@@ -239,8 +281,8 @@ final class AppearanceUITests: XCTestCase {
         // 案内から課金画面を開き、閉じると着せ替えの画面に戻る
         let openPaywall = app.buttons["appearance.openPaywall"]
         // いちばん上の行なので、上へ送ってから探す
-        app.swipeDown(velocity: .fast)
-        app.swipeDown(velocity: .fast)
+        form(in: app).swipeDown(velocity: .fast)
+        form(in: app).swipeDown(velocity: .fast)
         reveal(openPaywall, in: app)
         openPaywall.tap()
         XCTAssertTrue(app.navigationBars["推し活カウントダウン Plus"].waitForExistence(timeout: 5))
@@ -307,13 +349,16 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(opacity.isEnabled)
         waitForPreview(in: app, containing: ["推しの写真の飾りあり", "飾りの濃さ 40%", "飾りの量 25%"])
 
-        // いちばん濃く、いちばん多く（埋め尽くす）する。見本を見るために上へ送ったので、スライダーまで戻る
+        // 濃く、多くする（埋め尽くす側へ）。スライダーを動かしている間も、見本は画面の中にあり、その場で映る
         reveal(opacity, in: app)
-        adjust(opacity, to: 1, expecting: "100%")
+        assertPreviewVisible(besides: opacity, in: app)
+        let opacityValue = move(opacity, to: 1, end: "100%", in: app)
+        waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 25%"])
         let amount = app.sliders["appearance.decorationAmount"]
         reveal(amount, in: app)
-        adjust(amount, to: 1, expecting: "100%")
-        waitForPreview(in: app, containing: ["飾りの濃さ 100%", "飾りの量 100%"])
+        assertPreviewVisible(besides: amount, in: app)
+        let amountValue = move(amount, to: 1, end: "100%", in: app)
+        waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 \(amountValue)"])
 
         // 見本の推し（写真なし）が並び、推しごとに外せる
         let firstOshi = app.switches["appearance.decorationOshi.0"]
@@ -321,6 +366,7 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(firstOshi.exists)
         XCTAssertEqual(firstOshi.value as? String, "1")
         XCTAssertTrue(app.staticTexts["写真がありません"].firstMatch.exists)
+        assertPreviewVisible(besides: firstOshi, in: app)
         toggle("appearance.decorationOshi.0", in: app, to: "0")
         toggle("appearance.decorationOshi.0", in: app, to: "1")
 
@@ -340,5 +386,12 @@ final class AppearanceUITests: XCTestCase {
         // Plus が使えても、ホームは標準の見た目のまま（設定していないため）
         app.tabBars.firstMatch.buttons["ホーム"].tap()
         waitForMarker("home.appearance", in: app, equalTo: "standard")
+    }
+}
+
+private extension String {
+    /// スライダーの値の文字（「40%」）を数にする。読めなければ -1。
+    var percentValue: Int {
+        Int(dropLast()) ?? -1
     }
 }

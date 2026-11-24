@@ -63,6 +63,23 @@ struct ShareCardContentTests {
         #expect(midnight.days == .today(startTime: "開演 17:00"))
     }
 
+    @Test("プレビューは中身が変わったら書き出し直すので、同じ日のうちは中身を同じにし、日付が変わったら変える")
+    func contentChangesOnlyWithDay() {
+        let morning = content(event(), now: DomainFixtures.date(2026, 10, 16, 0, 0))
+        let lastMinute = content(event(), now: DomainFixtures.date(2026, 10, 16, 23, 59))
+        let nextDay = content(event(), now: DomainFixtures.date(2026, 10, 17, 0, 0))
+        #expect(morning == lastMinute)
+        #expect(lastMinute != nextDay)
+        // タイムゾーンを変えて日付が変わったときも変える（東京の 10/17 0:00 は、ロサンゼルスではまだ 10/16）
+        let losAngeles = content(
+            event(),
+            now: DomainFixtures.date(2026, 10, 17, 0, 0),
+            calendar: DomainFixtures.calendar(timeZone: "America/Los_Angeles")
+        )
+        #expect(losAngeles != nextDay)
+        #expect(losAngeles == lastMinute)
+    }
+
     @Test("当日は、開始の時刻の前も後も「今日！」と開始の時刻（呼び名は種類で変わる）")
     func todayWithStartTime() {
         let before = content(event(), now: DomainFixtures.date(2026, 10, 18, 9, 0))

@@ -12,19 +12,19 @@ import Foundation
 nonisolated enum AppearancePreview {
     /// 見本のホームを組む大きさ（pt）。iPhone の縦の画面（背景の写真の枠と同じ約 9:19.5）。これを縮めて見せる。
     static let canvasSize = CGSize(width: 390, height: (390 / PhotoCrop.backgroundAspectRatio).rounded())
-    /// 見本を見せる幅（pt）。
-    static let displayWidth: CGFloat = 180
     /// 見本に出す「これからの予定」の行の数。
     static let maxRows = 3
 
-    /// 見本を見せる大きさに縮める倍率。
-    static var displayScaleFactor: CGFloat {
-        displayWidth / canvasSize.width
+    /// 見本を幅 `width`（pt）で見せるときに縮める倍率。
+    static func displayScaleFactor(width: CGFloat) -> CGFloat {
+        max(width, 0) / canvasSize.width
     }
 
-    /// 見本を見せる大きさ（pt）。
-    static var displaySize: CGSize {
-        CGSize(width: displayWidth, height: canvasSize.height * displayScaleFactor)
+    /// 見本を高さ `height`（pt）で見せるときの大きさ（pt）。縦横の比は `canvasSize` のまま。
+    /// 見せる大きさは画面の大きさで変わる（`AppearancePreviewLayout`）。
+    static func displaySize(height: CGFloat) -> CGSize {
+        let factor = max(height, 0) / canvasSize.height
+        return CGSize(width: canvasSize.width * factor, height: canvasSize.height * factor)
     }
 
     /// 試着で描くもの。Plus が使えなくても、設定のとおりに描く。

@@ -33,12 +33,33 @@ struct ShareCardPreviewScreen: View {
     }
 
     /// 端末のタイムゾーンを変えたときも、その日付で数える。
-    private func makeContent() -> ShareCardContent {
-        ShareCardContent(event: event, oshi: oshi, now: .now, calendar: .autoupdatingCurrent, options: options)
+    private func makeContent(now: Date) -> ShareCardContent {
+        ShareCardContent(event: event, oshi: oshi, now: now, calendar: .autoupdatingCurrent, options: options)
     }
 
     var body: some View {
-        let content = makeContent()
+        // 開いたまま日付が変わっても書き出し直せるよう、ホームと同じく 1 分ごと（分の変わり目）に今日を確かめる。
+        // 中身は日の単位なので、同じ日のうちは変わらず、書き出し直さない
+        TimelineView(.everyMinute) { context in
+            let content = makeContent(now: context.date)
+            screen(content: content)
+                // 切り替えや日付が変わったら書き出し直す（写真は読み込み終えてから描く）
+                .task(id: content) {
+                    let images = await ShareCardImages.load(
+                        content: content,
+                        style: style,
+                        photos: photos,
+                        backgroundPhotos: backgroundPhotos
+                    )
+                    guard !Task.isCancelled else {
+                        return
+                    }
+                    rendered = Rendered(content: content, image: ShareCardRenderer.render(content, style: style, images: images))
+                }
+        }
+    }
+
+    private func screen(content: ShareCardContent) -> some View {
         NavigationStack {
             Form {
                 Section {
@@ -83,14 +104,6 @@ struct ShareCardPreviewScreen: View {
         }
         .font(theme.typography.text(.body))
         .tint(theme.palette.brand.color)
-        // 切り替えや日付が変わったら書き出し直す（写真は読み込み終えてから描く）
-        .task(id: content) {
-            let images = await ShareCardImages.load(content: content, style: style, photos: photos, backgroundPhotos: backgroundPhotos)
-            guard !Task.isCancelled else {
-                return
-            }
-            rendered = Rendered(content: content, image: ShareCardRenderer.render(content, style: style, images: images))
-        }
     }
 
     // MARK: 見本

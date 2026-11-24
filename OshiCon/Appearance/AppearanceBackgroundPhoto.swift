@@ -40,7 +40,8 @@ struct AppearanceBackgroundPhotoView: View {
                 isDecorated: isDecorated,
                 excludedTopHeight: excludedTopHeight
             )
-            // 画面の大きさ（回転・iPad の分割）が変わったら読み直す。読み直す間は今の写真を出したままにする
+            // 画面の大きさ（回転・iPad の分割）が変わったら読み直す。読み直す間は今の写真を出したままにする。
+            // 強さ（幕・ぼかし）と飾りの有無は読み込みに関わらないので、変えても読み直さない
             .task(id: LoadRequest(fileName: photo.fileName, pixelLength: pixelLength)) {
                 let fileName = photo.fileName
                 let image = await photos.loadImage(fileName: fileName, maxPixelLength: pixelLength)
