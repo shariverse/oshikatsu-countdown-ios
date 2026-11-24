@@ -178,33 +178,45 @@ final class AppStoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.5)
     }
 
-    /// 通知の許可を聞かれたら許可する。ボタンの文言は言語で変わるので、並びの位置（右が許可）で押す。
-    /// 許可のダイアログは、iOS 26 ではホーム画面（SpringBoard）の、iOS 27 ではアプリの要素として見えるので、両方を探す。
+    /// 通知の許可のダイアログの「許可」の文言（docs/app-store/languages.json の 12 言語）。iOS 27 のダイアログは alert の要素として見えないので、文言で探す
+    private static let allowLabels = ["許可", "Allow", "允许", "允許", "허용", "Autoriser", "Erlauben", "Permitir", "Consenti", "อนุญาต", "Izinkan"]
+
+    /// 通知の許可を聞かれたら許可する。ボタンはホーム画面（SpringBoard）かアプリの要素として見えるので、両方を探す。
+    /// iOS 26 は alert の右のボタン、iOS 27 は「許可」の文言のボタンを押す。見つからなければ、次に直せるよう要素の一覧をログに残す
     @MainActor
     private func allowNotificationsIfAsked(in app: XCUIApplication) {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         let deadline = Date().addingTimeInterval(Self.timeout)
+        let isAllow = NSPredicate(format: "label IN %@", Self.allowLabels)
         while Date() < deadline {
             if let alert = [springboard.alerts.firstMatch, app.alerts.firstMatch].first(where: \.exists) {
                 let buttons = alert.buttons
                 buttons.element(boundBy: buttons.count - 1).tap()
                 return
             }
+            let candidates = [springboard.buttons.matching(isAllow).firstMatch, app.buttons.matching(isAllow).firstMatch]
+            if let allow = candidates.first(where: { $0.exists && $0.isHittable }) {
+                allow.tap()
+                return
+            }
             Thread.sleep(forTimeInterval: 0.5)
         }
+        print("通知の許可のダイアログが見つかりません\n\(springboard.debugDescription)\n\(app.debugDescription)")
     }
 
-    /// ホーム画面のアイコンの位置（ポイント）を `home-screen-layout` の JSON に残す。ウィジェットを重ねる位置を、アイコンの並びから決める。
+    /// ホーム画面のアイコンの位置（ポイント）とラベルを `home-screen-layout` の JSON に残す。ウィジェットを重ねる位置を、アイコンの並びと
+    /// テストのランナーのアイコンの位置から決める（ランナーのアイコンは、ウィジェットで覆って写さない）。
     @MainActor
     private func attachHomeScreenLayout(of springboard: XCUIApplication) {
         let screen = XCUIScreen.main.screenshot().image.size
         let bounds = CGRect(origin: .zero, size: screen)
         // 画面の外（ほかのページ）のアイコンは除く
-        let frames: [CGRect] = springboard.icons.allElementsBoundByIndex.map(\.frame).filter { frame in
-            !frame.isEmpty && bounds.contains(frame)
+        let elements: [XCUIElement] = springboard.icons.allElementsBoundByIndex.filter { icon in
+            !icon.frame.isEmpty && bounds.contains(icon.frame)
         }
-        let icons: [[String: Double]] = frames.map { frame in
-            ["x": frame.minX, "y": frame.minY, "width": frame.width, "height": frame.height]
+        let icons: [[String: Any]] = elements.map { icon in
+            let frame = icon.frame
+            return ["x": frame.minX, "y": frame.minY, "width": frame.width, "height": frame.height, "label": icon.label]
         }
         let size: [String: Double] = ["width": screen.width, "height": screen.height]
         let layout: [String: Any] = ["screen": size, "icons": icons]
