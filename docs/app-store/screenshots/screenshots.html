@@ -299,7 +299,10 @@
     const runner = icons.find((icon) => /UITests|Runner/.test(icon.label || ""));
     const nearestRow = (y) => rows.reduce((best, row) => (Math.abs(row - y) < Math.abs(best - y) ? row : best), rows[0]);
     const anchorRow = runner ? nearestRow(runner.y) : rows[rows.length - 1];
-    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow };
+    // ドックの上の端（ドックのアイコンの上の端から少し上）。ドックのアイコンが無ければ画面の 9 割の高さ
+    const dockIcons = layout.icons.filter((icon) => icon.y >= layout.screen.height * 0.8);
+    const dockTop = dockIcons.length > 0 ? Math.min(...dockIcons.map((icon) => icon.y)) - 12 : layout.screen.height * 0.9;
+    return { rows, firstCenter: centers[0], columnPitch, rowPitch, iconWidth, anchorRow, dockTop };
   }
 
   // ウィジェットを、テストのランナーのアイコンの行から数えて row 行目・column 列目から、columns 列の幅で置く（高さは描き出した画像の縦横比）。
@@ -312,9 +315,11 @@
     const left = grid.firstCenter + grid.columnPitch * column - grid.iconWidth / 2;
     // 右の端は画面の中に収め、iPhone Duo の外側の画面では右の帯（時刻・ライブアクティビティ・ドック）にかけない
     const rightLimit = window.HOME_LAYOUT.screen.width * (deviceKind === "duo" ? 0.8 : 0.97);
-    const width = Math.min(grid.columnPitch * (columns - 1) + grid.iconWidth, rightLimit - left);
-    const height = width * image.naturalHeight / image.naturalWidth;
     const top = grid.anchorRow + grid.rowPitch * row;
+    // 下の端はドックにかけない（iPad はアイコンの間隔が広く、2 行ぶんのウィジェットがドックまで届く）。はみ出すなら縦横比を保って縮める
+    const aspect = image.naturalHeight / image.naturalWidth;
+    const width = Math.min(grid.columnPitch * (columns - 1) + grid.iconWidth, rightLimit - left, (grid.dockTop - 12 - top) / aspect);
+    const height = width * aspect;
     add(`<img class="overlay" src="${image.src}" style="left:${left * scale}px;top:${top * scale}px;` +
       `width:${width * scale}px;height:${height * scale}px">`, target.screen);
     concealOverflowingLabels(target, { left, top, right: left + width, bottom: top + height }, scale);
