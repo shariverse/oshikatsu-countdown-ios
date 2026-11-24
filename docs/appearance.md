@@ -187,7 +187,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
     見本（`appearance.preview` の読み上げの値）に映る → 暗幕とぼかしのスライダー（`appearance.backgroundScrim`・`appearance.backgroundBlur`。背景が OFF なら押せない）・背景と飾りの ON/OFF（`appearance.backgroundToggle`・`appearance.decorationToggle`）・
     写真を変える・外す（`appearance.removePhoto`）→ 課金画面を開く（`appearance.openPaywall`）。ホームと詳細は標準のまま
   - `-plusUnlocked`: 使えていることを示し（`appearance.plusActive`）、ホームと詳細に写真と飾りが効く。背景を OFF にすると、その場で飾りだけになる
-  - `-plusUnlocked -seedSampleData`: 飾りが OFF のときはスライダーを押せない → 飾りを ON にして、濃さ・量のスライダー（`appearance.decorationOpacity`・`appearance.decorationAmount`）をいちばん右にすると見本に映る →
+  - `-plusUnlocked -seedSampleData`: 飾りが OFF のときはスライダーを押せない → 飾りを ON にして、濃さ・量のスライダー（`appearance.decorationOpacity`・`appearance.decorationAmount`）を右へ動かすと、動いた後の値が見本に映る（CI の Simulator ではちょうど端まで届かないことがあるので、端の値は求めず、狙った向きに動いたことと見本の値がスライダーの値と同じことを確かめる） →
     見本の推しのスイッチ（`appearance.decorationOshi.<並びの番号>`）で外せる → ホームに飾りが効く。
     スライダーと推しのスイッチを動かすときも、見本が画面の中にあって設定と重ならないことを確かめる
   - 見本は Form の外に固定しているので、行を探して送るときは Form（`appearance.form`）の上で指を動かす（見本の上では送れない）

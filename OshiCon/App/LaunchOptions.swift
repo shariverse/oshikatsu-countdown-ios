@@ -24,6 +24,19 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(sampleDataArgument)
     }
 
+    /// 見本の推しに付ける写真を置いたディレクトリを渡す環境変数（App Store 用スクリーンショット。写真は UI テストのバンドルの中）。
+    static let sampleOshiPhotosEnvironmentKey = "OSHICON_SAMPLE_OSHI_PHOTOS"
+
+    /// 見本の推しに付ける写真のディレクトリ（`SampleData.attachingPhotos(to:from:library:)`）。見本を入れるときだけ効く。
+    static var sampleOshiPhotosDirectory: URL? {
+        guard seedsSampleData,
+              let path = ProcessInfo.processInfo.environment[sampleOshiPhotosEnvironmentKey],
+              !path.isEmpty else {
+            return nil
+        }
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
     /// 推しの写真を選ぶボタンで、写真ライブラリ（`PhotosPicker`）の代わりにテスト用に生成した画像を選ぶ（UI テスト）。
     /// `PhotosPicker` は別プロセスの画面で UI テストから操作できないため。メモリ上のストアのときだけ効く。
     static let testPhotoArgument = "-useTestPhoto"

@@ -166,6 +166,7 @@ scripts/app-store-screenshots.sh APP_IPHONE_67 ja,en
 - 表示サイズ（6.9 インチ・6.3 インチの iPhone、13 インチの iPad、iPhone Duo）と機種は [docs/app-store/screenshots.json](docs/app-store/screenshots.json)、言語は [docs/app-store/languages.json](docs/app-store/languages.json) で決めます。言語を省くと全言語を撮ります
 - 機種はその都度新しく作り、1 回ビルドしたものを言語ごとに使い回します。iPhone Duo は Xcode 27 と iOS 27.1 のランタイムが要ります
 - 見本のデータは起動引数 `-useInMemoryStore -seedSampleData` でメモリ上のストアにだけ入ります（端末のデータは書き換えません）。日付は今日から数えるので、いつ撮っても同じ残り日数になります
+- 見本の推しには、フリー素材を加工した写真を付けます。画像は UI テストのバンドル（`OshiConUITests/SampleOshiPhotos/`）にあり、アプリには入りません。出典・ライセンスと、差し替えるときに守ることは [docs/app-store/sample-oshi-photos.md](docs/app-store/sample-oshi-photos.md) にあります
 - 撮る画面はホーム・予定の詳細・予定の追加・推しの一覧です。画面の名前は書き出した `manifest.json` にあります。要素は言語によらないアクセシビリティ ID（`home.featuredEvent` など）で探します
 - ステータスバーは 9:41・電池満タンにそろえます。iPad はステータスバーに日付も出るので、言語ごとに Simulator の言語・地域を変えて起動し直します。ふだんのテスト（CI を含む）では、このテストは飛ばされます
 
