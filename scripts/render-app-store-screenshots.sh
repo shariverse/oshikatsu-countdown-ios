@@ -94,7 +94,18 @@ for slide in $(seq 1 "$EXPECTED_SCREENSHOTS"); do
     echo "${slide} 枚目（${LANGUAGE}）を描けませんでした。Chrome で ${url} を開いてエラーを確かめてください" >&2
     exit 1
   fi
-  "$CHROME" "${chrome_flags[@]}" --screenshot="$WORK/raw-output.png" "$url" >/dev/null 2>&1
+  # Chrome は大きな画面（iPad）で、何も言わずに落ちることがあるので、書き出せるまで 3 回まで試す
+  rm -f "$WORK/raw-output.png"
+  for _ in 1 2 3; do
+    if "$CHROME" "${chrome_flags[@]}" --screenshot="$WORK/raw-output.png" "$url" >/dev/null 2>&1 && [[ -s "$WORK/raw-output.png" ]]; then
+      break
+    fi
+    rm -f "$WORK/raw-output.png"
+  done
+  if [[ ! -s "$WORK/raw-output.png" ]]; then
+    echo "${slide} 枚目（${LANGUAGE}）を Chrome で書き出せませんでした: ${url}" >&2
+    exit 1
+  fi
   # 透過を落とす（JPEG を経由して PNG に戻す。App Store Connect は透過のある画像を受け付けない）
   sips -s format jpeg -s formatOptions 100 "$WORK/raw-output.png" --out "$WORK/flat.jpg" >/dev/null
   sips -s format png "$WORK/flat.jpg" --out "$output" >/dev/null
