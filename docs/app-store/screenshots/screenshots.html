@@ -33,6 +33,8 @@
   body[data-lang="zh-Hant"] .shot { font-family: "Outfit", "PingFang TC", sans-serif; }
   body[data-lang="ko"] .shot { font-family: "Outfit", "Apple SD Gothic Neo", sans-serif; }
   body[data-lang="th"] .shot { font-family: "Outfit", "Sukhumvit Set", "Thonburi", sans-serif; }
+  /* 韓国語は単語の間に空白を入れるので、単語の途中（音節の間）では折り返さない */
+  body[data-lang="ko"] .title, body[data-lang="ko"] .sub { word-break: keep-all; }
   .pattern { position: absolute; inset: 0; width: 100%; height: 100%; }
   /* 下に向かって推し色をほのかに灯す */
   .glow { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 45% at 50% 100%, var(--glow), transparent 70%); }

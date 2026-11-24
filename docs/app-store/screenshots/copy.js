@@ -1,5 +1,5 @@
 // App Store 用スクリーンショットの見出し（t）と小見出し（s）。screenshots.html が読む。
-// 10 枚の並びは screenshots.html の SLIDES と同じ。duo は iPhone Duo だけの差し替え（ロック画面を撮れないので、2 枚目の小見出しからロック画面を外す）。<em> は枚の色（推し色）で強調し、<br> は日本語・中国語だけで改行の位置を決める。
+// 10 枚の並びは screenshots.html の SLIDES と同じ。duo は iPhone Duo だけの差し替え（ロック画面を撮れないので、2 枚目の小見出しからロック画面を外す）。<em> は枚の色（推し色）で強調し、<br> は日本語・中国語・韓国語だけで改行の位置を決める。
 // 用語は掲載文（docs/app-store/metadata/<言語>.md の「言葉の選び方」）にそろえる。
 // en-GB・es-MX はストアの掲載だけの言語（アプリは en・es で出る）なので、en・es をもとに英国のつづり・中南米の言い方に直す。
 // 価格・実在の人物・作品の名前は入れない。docs/app-store/languages.json の言語を足したら、ここにも 10 枚ぶんを入れる（render-app-store-screenshots.sh が確かめる）。
@@ -74,7 +74,7 @@ window.SCREENSHOT_COPY = {
     { t: "디데이를 <em>카드로 만들어 공유</em>", s: "최애 사진과 남은 날짜를 한 장의 이미지로" },
     { t: "소중한 날을 <em>놓치지 않게</em>", s: "30일 전·7일 전·전날·당일·시작 1시간 전에 알림" },
     { t: "최애는 몇 명이든. <em>생일은 매년</em>", s: "생일과 기념일은 매년 반복해서 카운트다운" },
-    { t: "<em>iPhone·iPad·iPhone Duo</em> 지원", s: "라이트 모드든 다크 모드든 멤버 컬러 그대로" },
+    { t: "<em>iPhone·iPad·<br>iPhone Duo</em> 지원", s: "라이트 모드든 다크 모드든 멤버 컬러 그대로" },
   ],
   fr: [
     { t: "Combien de jours avant de voir <em>votre oshi</em> ?", s: "D'un coup d'œil avec les widgets d'écran d'accueil et la Dynamic Island" },
