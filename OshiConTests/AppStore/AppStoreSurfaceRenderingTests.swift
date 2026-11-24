@@ -9,7 +9,7 @@ import SwiftUI
 import Testing
 import UIKit
 
-/// App Store 用スクリーンショットの、アプリの外の面（ホーム画面のウィジェット・ロック画面のアクセサリ）を、本物の View から PNG に描き出す。
+/// App Store 用スクリーンショットの、アプリの外の面（ホーム画面のウィジェット・ロック画面のアクセサリと通知）を、本物の View から PNG に描き出す。
 ///
 /// ウィジェットの共有データはメモリ上のストアでは作られず、Simulator のホーム画面・ロック画面にウィジェットを置くこともできないので、
 /// 出荷する View（`CountdownWidgetView`・`UpcomingWidgetView`・`PhotoWidgetView`・`CountdownAccessoryView`）を、
@@ -38,7 +38,7 @@ struct AppStoreSurfaceRenderingTests {
     /// 描き出す倍率。端末の倍率によらず 3 倍で描き、重ねるときに縮める。
     private static let scale: CGFloat = 3
 
-    @Test("ホーム画面のウィジェットとロック画面のアクセサリを描き出す", .enabled(if: outputDirectory != nil))
+    @Test("ホーム画面のウィジェットとロック画面のアクセサリ・通知を描き出す", .enabled(if: outputDirectory != nil))
     func renderSurfaces() throws {
         let directory = try #require(Self.outputDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -90,9 +90,40 @@ struct AppStoreSurfaceRenderingTests {
             name: "widget-photo-medium"
         )
 
+        // ロック画面の通知: アプリが予約する通知の計画の、近いものから 3 件を、実際の文面（ReminderContent）で
+        let plan = ReminderPlan(events: events, settings: .default, now: now, calendar: calendar)
+        let names = Dictionary(uniqueKeysWithValues: oshis.map { ($0.id, $0.name) })
+        let notifications = plan.reminders.prefix(3).compactMap { reminder -> ReminderContent? in
+            events.first { $0.id == reminder.eventID }.map { event in
+                ReminderContent(reminder: reminder, event: event, oshiName: event.oshiID.flatMap { names[$0] })
+            }
+        }
+        try #require(notifications.count == 3, "見本の予定の通知が 3 件ありません")
+        let icon = appIcon()
+        let time = now.formatted(.relative(presentation: .named).locale(.app))
+        for (index, notification) in notifications.enumerated() {
+            try render(LockScreenNotificationCard(content: notification, icon: icon, time: time), to: directory, name: "notification-\(index + 1)")
+        }
+
         // ロック画面: 時計の下に置く丸（ドームのライブの進み具合）と長方形（誕生日）。1 行は時計の上の日付と重なるので使わない
         try render(WidgetPreview.countdownLockScreen(countdown(dome), family: .circular), to: directory, name: "lock-circular")
         try render(WidgetPreview.countdownLockScreen(countdown(birthday), family: .rectangular), to: directory, name: "lock-rectangular")
+    }
+
+    /// アプリのアイコン（ホストのアプリのアセット）。読めなければ、アイコンに似せた推し色の地に白いハートで描く。
+    private func appIcon() -> UIImage {
+        if let icon = UIImage(named: "AppIcon") {
+            return icon
+        }
+        let fallback = ImageRenderer(
+            content: Image(systemName: "heart.fill")
+                .font(.system(size: 60, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 120, height: 120)
+                .background(OshiColor.pink.rgb.color)
+        )
+        fallback.scale = 1
+        return fallback.uiImage ?? UIImage()
     }
 
     /// 役どころ `role` の見本の推しの写真。
