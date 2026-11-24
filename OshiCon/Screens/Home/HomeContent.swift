@@ -94,7 +94,7 @@ nonisolated struct HomeContent: Equatable, Sendable {
 
     init(events: [OshiEvent], oshis: [Oshi], selectedOshiID: Oshi.ID?, showsPastEvents: Bool, today: CalendarDay, locale: Locale = .app) {
         let oshiByID = Dictionary(oshis.map { ($0.id, $0) }) { first, _ in first }
-        let validSelectedID = selectedOshiID.flatMap { oshiByID[$0] == nil ? nil : $0 }
+        let validSelectedID = Self.validSelection(selectedOshiID, among: oshis.map(\.id))
         let filtered = validSelectedID.map { id in events.filter { $0.oshiID == id } } ?? events
         let schedule = EventSchedule(events: filtered, today: today)
         let item = { (scheduled: ScheduledEvent) in
@@ -113,5 +113,10 @@ nonisolated struct HomeContent: Equatable, Sendable {
         } else {
             nil
         }
+    }
+
+    /// 絞り込む推し。選んでいた推しが `oshiIDs` に無ければ（削除されたら）nil（すべて）に戻す。
+    static func validSelection(_ selectedOshiID: Oshi.ID?, among oshiIDs: [Oshi.ID]) -> Oshi.ID? {
+        selectedOshiID.flatMap { oshiIDs.contains($0) ? $0 : nil }
     }
 }

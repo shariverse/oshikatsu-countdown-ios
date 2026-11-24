@@ -62,6 +62,10 @@ struct HomeScreen: View {
                     .accessibilityIdentifier("home.addEvent")
             }
         }
+        // 選んでいた推しが削除されたら「すべて」に戻す。中身（`HomeContent`）だけでなく、絞り込みの選択肢と予定の追加で選んでおく推しも合わせる
+        .onChange(of: storedOshis.map(\.id), initial: true) { _, oshiIDs in
+            selectedOshiID = HomeContent.validSelection(selectedOshiID, among: oshiIDs)
+        }
         // ウィジェットのリンクで画面を切り替えるときは、予定の追加のシートを閉じる（予定の追加のリンクのときは開いたまま）
         .onChange(of: router.sheetDismissal) { _, dismissal in
             if !dismissal.keepsAddEvent {

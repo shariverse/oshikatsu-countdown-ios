@@ -29,7 +29,13 @@ struct EventLiveActivity: Widget {
                     .font(.caption.bold())
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    EventLiveActivityCountdown(attributes: context.attributes, isStale: context.isStale, numeralSize: 24)
+                    // Dynamic Island の書体はシステムのもの（ロック画面はテーマの書体）
+                    EventLiveActivityCountdown(
+                        attributes: context.attributes,
+                        isStale: context.isStale,
+                        numeralSize: 24,
+                        usesSystemTypeface: true
+                    )
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .leading, spacing: 2) {

@@ -7,7 +7,7 @@ import SwiftData
 import SwiftUI
 
 /// 推しの一覧。並び順に、アバター・名前・予定の件数を並べる。押すと編集、「推しを登録」で登録のシートを開く。
-/// 「並べ替え」で並べ替えの状態にし、行をドラッグして順番を入れ替える（いちばん上が 1 位の推し）。読み上げでは、行の操作の「上に移動」「下に移動」でも入れ替えられる。
+/// 「並べ替え」で並べ替えの状態にし、行をドラッグして順番を入れ替える（いちばん上が 1 位の推し）。並べ替えの間は、読み上げの行の操作「上に移動」「下に移動」でも入れ替えられる。
 /// 並べ替えの間は、ふつうの一覧と見分けられるよう、一覧の上に案内・各行に順位を出し、「この順番で確定」を塗りのボタンにする。
 struct OshiListScreen: View {
     @Query(sort: OshiConStore.oshiOrder)
@@ -120,15 +120,19 @@ struct OshiListScreen: View {
                     }
                     .themeRowBackground()
                     .accessibilityIdentifier("oshiList.row")
+                    // 入れ替えるのは並べ替えの間だけ（ドラッグも読み上げの操作も）。ふつうの一覧では行を押すと編集を開く
+                    .moveDisabled(!editMode.isEditing)
                     .accessibilityActions {
-                        if index > 0 {
-                            Button("上に移動") {
-                                move(from: IndexSet(integer: index), to: index - 1)
+                        if editMode.isEditing {
+                            if index > 0 {
+                                Button("上に移動") {
+                                    move(from: IndexSet(integer: index), to: index - 1)
+                                }
                             }
-                        }
-                        if index < storedOshis.count - 1 {
-                            Button("下に移動") {
-                                move(from: IndexSet(integer: index), to: index + 2)
+                            if index < storedOshis.count - 1 {
+                                Button("下に移動") {
+                                    move(from: IndexSet(integer: index), to: index + 2)
+                                }
                             }
                         }
                     }

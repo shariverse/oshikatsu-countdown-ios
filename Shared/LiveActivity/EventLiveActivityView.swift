@@ -40,28 +40,43 @@ struct EventLiveActivityView: View {
 }
 
 /// 残りの時間（`開演まで 1:23:45`）。開演を過ぎたら「今日は当日！」。
+/// 書体は、ロック画面ではテーマのもの、Dynamic Island ではシステムのもの（`usesSystemTypeface`）。
 struct EventLiveActivityCountdown: View {
     let attributes: EventActivityAttributes
     let isStale: Bool
     var numeralSize: CGFloat = 28
+    /// システムの書体で描く（Dynamic Island）。false ならテーマの書体（ロック画面）。
+    var usesSystemTypeface = false
 
     @Environment(\.appTheme) private var theme
+    /// システムの書体の数字も、テーマの数字（`relativeTo: .title`）と同じく文字の大きさの設定に合わせる。
+    @ScaledMetric(relativeTo: .title) private var numeralScale: CGFloat = 1
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 0) {
             if isStale {
                 Text(attributes.startedText)
-                    .font(theme.typography.text(.headline, weight: .bold))
+                    .font(textFont(.headline))
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
             } else {
                 Text(attributes.untilText)
-                    .font(theme.typography.text(.caption, weight: .bold))
+                    .font(textFont(.caption))
                     .lineLimit(1)
                 EventLiveActivityTimer(attributes: attributes)
-                    .font(theme.typography.numeral(size: numeralSize, relativeTo: .title))
+                    .font(numeralFont)
             }
         }
+    }
+
+    private func textFont(_ style: Font.TextStyle) -> Font {
+        usesSystemTypeface ? .system(style, weight: .bold) : theme.typography.text(style, weight: .bold)
+    }
+
+    private var numeralFont: Font {
+        usesSystemTypeface
+            ? .system(size: numeralSize * numeralScale, weight: .bold).monospacedDigit()
+            : theme.typography.numeral(size: numeralSize, relativeTo: .title)
     }
 }
 

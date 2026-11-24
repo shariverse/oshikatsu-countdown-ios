@@ -95,6 +95,14 @@ struct HomeContentTests {
         #expect(content.upcoming.count == 3)
     }
 
+    @Test("画面が持つ絞り込みの選択も、選んでいた推しが消えたら「すべて」に戻し、残っていればそのままにする")
+    func validSelection() {
+        #expect(HomeContent.validSelection(minato.id, among: [lumina.id, minato.id]) == minato.id)
+        #expect(HomeContent.validSelection(minato.id, among: [lumina.id]) == nil)
+        #expect(HomeContent.validSelection(minato.id, among: []) == nil)
+        #expect(HomeContent.validSelection(nil, among: [lumina.id]) == nil)
+    }
+
     @Test("予定が 1 件も無いとき・絞り込んだ推しの予定が無いときの案内")
     func emptyStates() {
         #expect(HomeContent(

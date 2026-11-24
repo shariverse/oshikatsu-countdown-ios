@@ -25,13 +25,18 @@ extension EnvironmentValues {
     @Entry var openPlusPaywall = PlusPaywallAction {}
 }
 
-/// 課金画面をシートで出す。
+/// 課金画面をシートで出す。ウィジェット・通知のリンクで画面を切り替えるときは閉じる（ほかの画面のシートと同じ）。
 private struct PlusPaywallPresenter: ViewModifier {
     @State private var isPresented = false
+    @Environment(AppRouter.self) private var router
 
     func body(content: Content) -> some View {
         content
             .environment(\.openPlusPaywall, PlusPaywallAction { isPresented = true })
+            // 開いた予定の詳細が課金画面の下に隠れないよう閉じる。課金画面のリンクのときは、閉じてから開き直す（`WidgetLinkReceiver`）
+            .onChange(of: router.sheetDismissal) {
+                isPresented = false
+            }
             .sheet(isPresented: $isPresented) {
                 PlusPaywallSheet()
             }
