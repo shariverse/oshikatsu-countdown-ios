@@ -7,13 +7,15 @@
 | ファイル | 言語 |
 | --- | --- |
 | [en.md](metadata/en.md) | 英語（既定の言語） |
+| [en-GB.md](metadata/en-GB.md) | 英語（英国） |
 | [ja.md](metadata/ja.md) | 日本語 |
 | [zh-Hans.md](metadata/zh-Hans.md) | 中国語（簡体字） |
 | [zh-Hant.md](metadata/zh-Hant.md) | 中国語（繁体字） |
 | [ko.md](metadata/ko.md) | 韓国語 |
 | [fr.md](metadata/fr.md) | フランス語 |
 | [de.md](metadata/de.md) | ドイツ語 |
-| [es.md](metadata/es.md) | スペイン語 |
+| [es.md](metadata/es.md) | スペイン語（スペイン） |
+| [es-MX.md](metadata/es-MX.md) | スペイン語（メキシコ） |
 | [pt-BR.md](metadata/pt-BR.md) | ポルトガル語（ブラジル） |
 | [it.md](metadata/it.md) | イタリア語 |
 | [th.md](metadata/th.md) | タイ語 |
