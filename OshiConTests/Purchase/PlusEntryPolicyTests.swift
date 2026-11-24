@@ -22,18 +22,18 @@ struct PlusEntryPolicyTests {
         #expect(AppDistribution.resolve(isDebugBuild: false, storeEnvironment: .xcode) == .development)
     }
 
-    @Test("取引の環境が分からないときは、入口を出さない App Store 版として扱う")
+    @Test("取引の環境が分からないときは App Store 版として扱い、入口は出す")
     func unknownEnvironment() {
         let distribution = AppDistribution.resolve(isDebugBuild: false, storeEnvironment: nil)
         #expect(distribution == .appStore)
-        #expect(!PlusEntryPolicy.showsEntry(in: distribution))
+        #expect(PlusEntryPolicy.showsEntry(in: distribution))
     }
 
-    @Test("入口は開発版と TestFlight だけに出し、App Store 版には出さない")
+    @Test("入口は App Store 版を含むどの配り方でも出す（1.3.0 で Plus を売り始めた）")
     func showsEntry() {
         #expect(PlusEntryPolicy.showsEntry(in: .development))
         #expect(PlusEntryPolicy.showsEntry(in: .testFlight))
-        #expect(!PlusEntryPolicy.showsEntry(in: .appStore))
+        #expect(PlusEntryPolicy.showsEntry(in: .appStore))
     }
 
     @Test("見分ける口は差し替えられる")
