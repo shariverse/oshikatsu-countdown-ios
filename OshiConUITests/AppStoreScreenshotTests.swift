@@ -11,9 +11,9 @@ import XCTest
 /// （docs/app-store/screenshots/screenshots.html。どの画面をどの枚に使うかもそこで決める）。添付の名前は、そこで使う名前と同じにする。
 ///
 /// - アプリの中の画面は、Simulator で動かした実物を撮る（審査ガイドライン 2.3）。画面は端末の設定（ダーク）で、推し色のテーマとホームの 1 枚はライトに固定する
-/// - アプリの外の面のうち、ライブアクティビティ（ロック画面・Dynamic Island）と通知は、見本の予定で実際に出して撮る
-///   （`-sampleLiveActivity`・`-sampleReminders`）。ウィジェットとロック画面のアクセサリは置けないので、
-///   ホーム画面・ロック画面だけを撮り、ウィジェットは `AppStoreSurfaceRenderingTests` が本物の View から描き出したものを重ねる。
+/// - アプリの外の面のうち、ライブアクティビティ（ロック画面・Dynamic Island）は、見本の予定で実際に出して撮る（`-sampleLiveActivity`）。
+///   ウィジェット・ロック画面のアクセサリは置けず、通知は iOS 27 の Simulator では安定して出せないので、ホーム画面・ロック画面だけを撮り、
+///   `AppStoreSurfaceRenderingTests` が本物の View（通知は `ReminderContent` の実際の文面）から描き出したものを重ねる。
 ///   重ねる位置のため、ホーム画面のアイコンの位置を `home-screen-layout`（JSON）に残す
 ///
 /// ふだんのテストでは流さない。`scripts/app-store-screenshots.sh` が環境変数 `APP_STORE_SCREENSHOTS=1`
@@ -116,8 +116,15 @@ final class AppStoreScreenshotTests: XCTestCase {
     /// アプリの外の面。
     @MainActor
     private func captureSurfacesOutsideApp() {
+        // アプリの外: 何も出ていないロック画面（通知を重ねる）
+        var app = launch()
+        XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
+        lockAndWake()
+        capture("lock-screen-plain")
+        unlock()
+
         // アプリの外: ロック画面（ライブアクティビティ）とホーム画面（Dynamic Island のライブアクティビティ）
-        var app = launch(["-sampleLiveActivity"])
+        app = launch(["-sampleLiveActivity"])
         XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
         Thread.sleep(forTimeInterval: 2)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
@@ -128,19 +135,10 @@ final class AppStoreScreenshotTests: XCTestCase {
         // ロックを解くとアプリに戻るので、ホームボタンでホーム画面に出る
         unlock()
         XCUIDevice.shared.press(.home)
-        XCTAssertTrue(springboard.icons.firstMatch.waitForExistence(timeout: 10))
+        XCTAssertTrue(springboard.icons.firstMatch.waitForExistence(timeout: Self.timeout))
         Thread.sleep(forTimeInterval: 2)
         capture("home-screen")
         attachHomeScreenLayout(of: springboard)
-
-        // アプリの外: ロック画面の通知（見本の予定の通知の計画の先頭の数件を、実際の文面で出す）。ライブアクティビティは終える
-        app = launch(["-sampleReminders"])
-        allowNotificationsIfAsked(in: app)
-        XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
-        Thread.sleep(forTimeInterval: 1)
-        lockAndWake(waitingFor: 6)
-        capture("lock-notifications")
-        unlock()
     }
 
     /// 端末をロックし、画面を点けてロック画面を出す。`seconds` 秒待ってから戻る（通知が届くのを待つ）。
@@ -176,32 +174,6 @@ final class AppStoreScreenshotTests: XCTestCase {
         }
         allow.tap()
         Thread.sleep(forTimeInterval: 1.5)
-    }
-
-    /// 通知の許可のダイアログの「許可」の文言（docs/app-store/languages.json の 12 言語）。iOS 27 のダイアログは alert の要素として見えないので、文言で探す
-    private static let allowLabels = ["許可", "Allow", "允许", "允許", "허용", "Autoriser", "Erlauben", "Permitir", "Consenti", "อนุญาต", "Izinkan"]
-
-    /// 通知の許可を聞かれたら許可する。ボタンはホーム画面（SpringBoard）かアプリの要素として見えるので、両方を探す。
-    /// iOS 26 は alert の右のボタン、iOS 27 は「許可」の文言のボタンを押す。見つからなければ、次に直せるよう要素の一覧をログに残す
-    @MainActor
-    private func allowNotificationsIfAsked(in app: XCUIApplication) {
-        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let deadline = Date().addingTimeInterval(Self.timeout)
-        let isAllow = NSPredicate(format: "label IN %@", Self.allowLabels)
-        while Date() < deadline {
-            if let alert = [springboard.alerts.firstMatch, app.alerts.firstMatch].first(where: \.exists) {
-                let buttons = alert.buttons
-                buttons.element(boundBy: buttons.count - 1).tap()
-                return
-            }
-            let candidates = [springboard.buttons.matching(isAllow).firstMatch, app.buttons.matching(isAllow).firstMatch]
-            if let allow = candidates.first(where: { $0.exists && $0.isHittable }) {
-                allow.tap()
-                return
-            }
-            Thread.sleep(forTimeInterval: 0.5)
-        }
-        print("通知の許可のダイアログが見つかりません\n\(springboard.debugDescription)\n\(app.debugDescription)")
     }
 
     /// ホーム画面のアイコンの位置（ポイント）とラベルを `home-screen-layout` の JSON に残す。ウィジェットを重ねる位置を、アイコンの並びと
