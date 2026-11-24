@@ -56,6 +56,7 @@ final class AppStoreScreenshotTests: XCTestCase {
     /// 見本のデータで起動し直す（動いていれば終わらせてから起動する）。システムの文言もその言語になるよう、言語と地域も渡す。
     /// 無料の機能の画面を撮るので、Plus は使えない状態に固定する（`-plusLocked`。StoreKit に問い合わせない）。
     /// App Store 版と同じ画面にするため、設定の Plus の行も出さない（`-simulateAppStoreDistribution`）。
+    /// 見本の推しには、このテストのバンドルにある写真（`SampleOshiPhotos/`）を付ける（`OSHICON_SAMPLE_OSHI_PHOTOS`）。
     @MainActor
     private func launch() -> XCUIApplication {
         let environment = ProcessInfo.processInfo.environment
@@ -72,8 +73,22 @@ final class AppStoreScreenshotTests: XCTestCase {
             "-AppleLanguages", "(\(language))",
             "-AppleLocale", locale
         ]
+        if let directory = sampleOshiPhotosDirectory {
+            app.launchEnvironment["OSHICON_SAMPLE_OSHI_PHOTOS"] = directory.path(percentEncoded: false)
+        } else {
+            XCTFail("見本の推しの写真（sample-oshi-*.jpg）がテストのバンドルにありません")
+        }
         app.launch()
         return app
+    }
+
+    /// 見本の推しの写真（`sample-oshi-<役どころ>.jpg`。アプリの `SampleData.Role`）を置いた、テストのバンドルの中のディレクトリ。
+    /// Simulator のアプリはホストのファイルを読めるので、場所だけを渡す（写真をアプリに入れず、アプリの容量を増やさない）。
+    private var sampleOshiPhotosDirectory: URL? {
+        let bundle = Bundle(for: Self.self)
+        let photo = bundle.url(forResource: "sample-oshi-group", withExtension: "jpg")
+            ?? bundle.url(forResource: "sample-oshi-group", withExtension: "jpg", subdirectory: "SampleOshiPhotos")
+        return photo?.deletingLastPathComponent()
     }
 
     /// 先頭のカード（ピン留めした予定へのリンク）。
