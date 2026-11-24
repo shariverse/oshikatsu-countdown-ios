@@ -31,7 +31,7 @@ final class AppStoreScreenshotTests: XCTestCase {
     }
 
     /// 画面が出るのを待つ秒数。CI や重い Mac では、起動したばかりのアプリの最初の画面が 5 秒では出ないことがある
-    private static let timeout: TimeInterval = 15
+    private static let timeout: TimeInterval = 30
 
     /// 1 位の推しを替えて撮るテーマの色（`SampleData.Role` の生の値）。ピンク（既定の 1 位）に偏らないよう、ほかの 3 色にする。
     private static let themeRoles = ["singer", "voice-actor", "streamer"]
@@ -128,8 +128,7 @@ final class AppStoreScreenshotTests: XCTestCase {
         capture("lock-screen")
         // ロックを解くとアプリに戻るので、ホームボタンでホーム画面に出る
         unlock()
-        XCUIDevice.shared.press(.home)
-        XCTAssertTrue(springboard.icons.firstMatch.waitForExistence(timeout: Self.timeout))
+        goHome(springboard)
         Thread.sleep(forTimeInterval: 2)
         capture("home-screen")
         attachHomeScreenLayout(of: springboard)
@@ -159,6 +158,18 @@ final class AppStoreScreenshotTests: XCTestCase {
     private func unlock() {
         XCUIDevice.shared.press(.home)
         Thread.sleep(forTimeInterval: 1.5)
+    }
+
+    /// ホーム画面に出る。重い Mac ではホームボタンが 1 回で効かないことがあるので、アイコンが押せるようになるまで 3 回まで押す。
+    @MainActor
+    private func goHome(_ springboard: XCUIApplication) {
+        for _ in 0..<3 {
+            XCUIDevice.shared.press(.home)
+            if springboard.icons.firstMatch.waitForExistence(timeout: 5), springboard.icons.firstMatch.isHittable {
+                return
+            }
+        }
+        XCTFail("ホーム画面に出られませんでした")
     }
 
     /// ロック画面のライブアクティビティで許可を求められたら許可する。ボタンの文言は言語で変わるので、
