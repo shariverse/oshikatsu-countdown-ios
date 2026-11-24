@@ -286,7 +286,8 @@
     }, []).map((group) => group.reduce((sum, value) => sum + value, 0) / group.length);
     const rows = cluster(icons.map((icon) => icon.y));
     const centers = cluster(icons.map((icon) => icon.x + icon.width / 2));
-    const columnPitch = centers.length > 1 ? (centers[centers.length - 1] - centers[0]) / (centers.length - 1) : iconWidth * 1.4;
+    // 列が 1 つしかなければ（iPhone Duo）、列の間隔はアイコンとラベルの高さとほぼ同じ（iPhone Duo の外側の画面で 88pt）と見積もる
+    const columnPitch = centers.length > 1 ? (centers[centers.length - 1] - centers[0]) / (centers.length - 1) : iconHeight * 1.02;
     // 行が 1 つしかなければ（iPhone Duo）、iPhone の比（行の間隔はアイコンとラベルの高さの 1.15 倍）で見積もる
     const rowPitch = rows.length > 1 ? (rows[rows.length - 1] - rows[0]) / (rows.length - 1) : iconHeight * 1.15;
     // テストのランナー（OshiConUITests-Runner）のアイコンの行から覆う。見つからなければいちばん下の行から
@@ -304,7 +305,9 @@
     const scale = pointScale(target);
     const image = await load(`surfaces/${file}.png`);
     const left = grid.firstCenter + grid.columnPitch * column - grid.iconWidth / 2;
-    const width = grid.columnPitch * (columns - 1) + grid.iconWidth;
+    // 右の端は画面の中に収め、iPhone Duo の外側の画面では右の帯（時刻・ライブアクティビティ・ドック）にかけない
+    const rightLimit = window.HOME_LAYOUT.screen.width * (deviceKind === "duo" ? 0.8 : 0.97);
+    const width = Math.min(grid.columnPitch * (columns - 1) + grid.iconWidth, rightLimit - left);
     const height = width * image.naturalHeight / image.naturalWidth;
     const top = grid.anchorRow + grid.rowPitch * row;
     add(`<img class="overlay" src="${image.src}" style="left:${left * scale}px;top:${top * scale}px;` +
