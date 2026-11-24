@@ -213,8 +213,10 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(scrim.isEnabled)
         XCTAssertEqual(scrim.value as? String, "50%")
         XCTAssertEqual(blur.value as? String, "40%")
+        assertPreviewVisible(besides: scrim, in: app)
         adjust(scrim, to: 1, expecting: "100%")
         XCTAssertEqual(blur.value as? String, "40%")
+        assertPreviewVisible(besides: blur, in: app)
         adjust(blur, to: 0, expecting: "0%")
         waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ 100%", "ぼかしの強さ 0%"])
 
