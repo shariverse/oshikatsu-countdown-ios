@@ -265,8 +265,8 @@
       throw new Error("ホーム画面のアイコンの位置（raw/layout.js）がありません");
     }
     // ドックのアイコン（iPhone・iPad は画面の下の 2 割、iPhone Duo の外側の画面は右の 2 割）と、
-    // ほかのページの縮んだアイコン（幅 40pt 未満）は除く
-    const icons = layout.icons.filter((icon) => icon.width >= 40 && icon.y < layout.screen.height * 0.8
+    // ほかのページの縮んだアイコン（幅 40pt 未満）と、ホーム画面に最初からあるウィジェット（マップ・カレンダーなど。幅 130pt 超）は除く
+    const icons = layout.icons.filter((icon) => icon.width >= 40 && icon.width <= 130 && icon.y < layout.screen.height * 0.8
       && icon.x + icon.width < layout.screen.width * 0.8);
     if (icons.length === 0 && deviceKind === "duo") {
       // iPhone Duo の外側の画面は、そのページのアイコンが記録に入らないことがあるので、実測した 1 つ目のアイコンの位置を使う
