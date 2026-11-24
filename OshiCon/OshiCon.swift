@@ -38,9 +38,13 @@ struct OshiCon: App {
 
     /// 見本の推しと予定を入れる（メモリ上のストアのときだけ呼ぶ）。名前と予定名は画面の言語（`-AppleLanguages` で変えられる）で選ぶ。
     /// 端末の言語ではなくアプリが選んだ言語（`Locale.app`）にし、文言と見本の言語をそろえる。
+    /// App Store 用スクリーンショットでは、UI テストから渡された写真を見本の推しに付ける（`LaunchOptions.sampleOshiPhotosDirectory`）。
     private static func seedSampleData(into container: ModelContainer) {
         let now = Date.now
-        let sample = SampleData.make(today: CalendarDay(now, calendar: .autoupdatingCurrent), now: now, locale: .app)
+        var sample = SampleData.make(today: CalendarDay(now, calendar: .autoupdatingCurrent), now: now, locale: .app)
+        if let directory = LaunchOptions.sampleOshiPhotosDirectory {
+            sample = SampleData.attachingPhotos(to: sample, from: directory, library: .shared)
+        }
         SampleData.insert(sample, into: container.mainContext, now: now)
     }
 

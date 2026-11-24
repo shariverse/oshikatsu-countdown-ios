@@ -7,12 +7,58 @@ import Foundation
 import SwiftData
 
 /// App Store 用スクリーンショットの見本の推しと予定。起動引数 `-seedSampleData` を付け、メモリ上のストアで起動したときだけ入れる。
-/// 実在の人物・作品名・ロゴは使わない。日付は今日から数えて決めるので、いつ撮っても同じ残り日数になる。
+/// 実在の有名人・作品名・ロゴは使わない。日付は今日から数えて決めるので、いつ撮っても同じ残り日数になる。
 /// スクリーンショットは言語ごとに撮るので、名前と予定名は言語ごとに用意する。
+/// 推しの写真は、スクリーンショットを撮るときだけ、商用利用できるフリー素材を加工した画像を付ける（`attachingPhotos(to:from:library:)`。
+/// 出典とライセンスは docs/app-store/sample-oshi-photos.md）。
 nonisolated enum SampleData {
     struct Content: Sendable {
         let oshis: [Oshi]
         let events: [OshiEvent]
+    }
+
+    /// 見本の推しの役どころ。並びは推しの一覧の並び（`Cast.all`）と同じ。生の値は写真のファイル名に使う。
+    enum Role: String, CaseIterable, Sendable {
+        /// アイドルグループ（ドームのライブの推し）
+        case group
+        /// 声優（誕生日を祝う推し）
+        case voiceActor = "voice-actor"
+        /// アニメのキャラクター（劇場版とグッズの推し）
+        case character
+        /// 舞台俳優（2.5 次元舞台の推し）
+        case stageActor = "stage-actor"
+        /// 配信者
+        case streamer
+        /// 歌手（ファンミーティングの推し）
+        case singer
+
+        /// 写真を置いたディレクトリの中の、この役どころの推しの写真のファイル名（`sample-oshi-voice-actor.jpg` など）。
+        var photoFileName: String {
+            "sample-oshi-\(rawValue).jpg"
+        }
+    }
+
+    /// 見本の推しに、`directory` に置いた役どころごとの写真（`Role.photoFileName`）を付ける。
+    /// 写真は `library`（推しの写真の置き場所）に `<UUID>.jpg` の名前で写す。写真が無い・写せない役どころの推しは、写真なし（頭文字）のまま。
+    /// App Store 用スクリーンショットのときだけ使う（`LaunchOptions.sampleOshiPhotosDirectory`）。
+    static func attachingPhotos(to content: Content, from directory: URL, library: OshiPhotoLibrary) -> Content {
+        let fileManager = FileManager.default
+        var oshis = content.oshis
+        for (index, role) in zip(oshis.indices, Role.allCases) {
+            let source = directory.appending(path: role.photoFileName, directoryHint: .notDirectory)
+            guard fileManager.fileExists(atPath: source.path(percentEncoded: false)) else {
+                continue
+            }
+            let fileName = "\(UUID().uuidString).jpg"
+            do {
+                try fileManager.createDirectory(at: library.directory, withIntermediateDirectories: true)
+                try fileManager.copyItem(at: source, to: library.url(for: fileName))
+            } catch {
+                continue
+            }
+            oshis[index].photoFileName = fileName
+        }
+        return Content(oshis: oshis, events: content.events)
     }
 
     /// 見本を用意している言語。`en` を既定にする。
@@ -180,7 +226,25 @@ private extension SampleData {
         }
 
         var all: [Oshi] {
-            [group, voiceActor, character, stageActor, streamer, singer]
+            Role.allCases.map(oshi(for:))
+        }
+
+        /// 役どころ `role` の推し。
+        func oshi(for role: Role) -> Oshi {
+            switch role {
+            case .group:
+                group
+            case .voiceActor:
+                voiceActor
+            case .character:
+                character
+            case .stageActor:
+                stageActor
+            case .streamer:
+                streamer
+            case .singer:
+                singer
+            }
         }
     }
 }
