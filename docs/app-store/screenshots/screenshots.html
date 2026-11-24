@@ -4,14 +4,14 @@
   直接開くときは screenshots.html?slide=1&lang=ja&device=iphone のように指定する。同じフォルダに次のファイルが要る:
     raw/<名前>.png        UI テスト（AppStoreScreenshotTests）で撮った画面。名前は添付の名前（detail・home-screen など）
     raw/layout.js         ホーム画面のアイコンの位置（home-screen-layout の JSON を window.HOME_LAYOUT に入れたもの）
-    surfaces/<名前>.png   本物の View から描き出したウィジェット・ロック画面のアクセサリ（AppStoreSurfaceRenderingTests）
+    surfaces/<名前>.png   本物の View から描き出したウィジェット・ロック画面のアクセサリ・通知（AppStoreSurfaceRenderingTests）
     fonts/                Kaisei Decol（日本語の見出し）と Outfit（数字・ラテン文字の見出し）
     copy.js               見出しと小見出し（12 言語）
 
   方針（Issue #282）
   - アプリの中の画面は Simulator で動かした実物の画面をそのまま使う（審査ガイドライン 2.3）。ここで描き直さない
   - アプリの外の面は、Simulator で撮ったホーム画面・ロック画面に、本物の View から描き出したウィジェットを、アイコンの並びに合わせて重ねる。
-    ライブアクティビティ（ロック画面・Dynamic Island）と通知は、Simulator で実際に出したものが写っている
+    ライブアクティビティ（ロック画面・Dynamic Island）は、Simulator で実際に出したものが写っている。通知は ReminderContent の実際の文面で描き出して重ねる
   - 地はテーマ（地雷系・ゴシック。docs/design/themes.md）のダークの地に十字とハートの模様。枚ごとに推し色を替え、ピンクに偏らせない。
     10 枚目だけライトの地（ライトの外観の画面）
   - 見出しは日本語だけ Kaisei Decol の太字（アプリの本文と同じく、ほかの言語はその言語の字形のある書体）。価格は入れない。Plus の枚には「PLUS」の印
@@ -91,7 +91,7 @@
     { palette: "red", layout: "pair", screens: ["appearance-home", "appearance-settings"], plus: true },
     { palette: "blue", layout: "single", screens: ["home-screen"], overlays: "photoWidgets", island: false, plus: true },
     { palette: "green", layout: "single", screens: ["share-card"] },
-    { palette: "navy", layout: "single", screens: ["lock-notifications"], island: false },
+    { palette: "navy", layout: "single", screens: ["lock-screen-plain"], overlays: "lockNotifications", island: false },
     { palette: "pink", layout: "single", screens: ["oshi-list"] },
     { palette: "light", layout: "single", screens: ["home-light"], devices: true },
   ];
@@ -297,21 +297,26 @@
     concealOverflowingLabels(target, { left, top, right: left + width, bottom: top + height }, scale);
   }
 
-  // ウィジェットで覆った行のアイコンのうち、ラベルが長くてウィジェットの左右にはみ出した部分（テストのランナーの名前など）を、ぼかして隠す
+  // ウィジェットで一部だけ覆ったアイコンの、はみ出した部分をぼかして隠す。長いラベル（テストのランナーの名前など）は左右に、
+  // 2 行目のアイコンのラベルは下にはみ出す（ウィジェットの高さは 2 行ぶんのアイコンとラベルより低い）
   function concealOverflowingLabels(target, widget, scale) {
+    const pad = 6;
     for (const icon of window.HOME_LAYOUT.icons) {
       const right = icon.x + icon.width, bottom = icon.y + icon.height;
-      const covered = icon.y >= widget.top && bottom <= widget.bottom + 4 && right > widget.left && icon.x < widget.right;
-      if (!covered) {
+      const overlaps = icon.x < widget.right && right > widget.left && icon.y < widget.bottom && bottom > widget.top;
+      if (!overlaps) {
         continue;
       }
-      // 外側にだけ余白を足す（ウィジェットにはかからない）
-      const pad = 6;
-      const strips = [[icon.x - pad, Math.min(right, widget.left)], [Math.max(icon.x, widget.right), right + pad]];
-      for (const [from, to] of strips) {
-        if (to - from > pad + 0.5) {
-          add(`<i class="overlay" style="left:${from * scale}px;top:${(icon.y - pad) * scale}px;` +
-            `width:${(to - from) * scale}px;height:${(icon.height + 2 * pad) * scale}px;` +
+      // [左, 上, 右, 下]（pt）。外側にだけ余白を足し、ウィジェットにはかけない
+      const strips = [
+        [icon.x - pad, icon.y - pad, Math.min(right, widget.left), bottom + pad],
+        [Math.max(icon.x, widget.right), icon.y - pad, right + pad, bottom + pad],
+        [icon.x - pad, Math.max(icon.y, widget.bottom), right + pad, bottom + pad],
+      ];
+      for (const [left, top, stripRight, stripBottom] of strips) {
+        if (stripRight - left > pad + 0.5 && stripBottom - top > pad + 0.5) {
+          add(`<i class="overlay" style="left:${left * scale}px;top:${top * scale}px;` +
+            `width:${(stripRight - left) * scale}px;height:${(stripBottom - top) * scale}px;` +
             `backdrop-filter:blur(${10 * scale}px);-webkit-backdrop-filter:blur(${10 * scale}px);` +
             `border-radius:${pad * scale}px"></i>`, target.screen);
         }
@@ -344,6 +349,26 @@
     },
     async lockAccessories(target) {
       placeAccessories(target);
+    },
+    // ロック画面の下のほうに、通知を 3 件積む（iOS のロック画面と同じく、地をぼかした角丸の札）
+    async lockNotifications(target) {
+      const scale = pointScale(target);
+      const images = await Promise.all([1, 2, 3].map((index) => load(`surfaces/notification-${index}.png`)));
+      // 描き出した倍率（AppStoreSurfaceRenderingTests は 3 倍）から pt に直す
+      const sizes = images.map((image) => ({ width: image.naturalWidth / 3, height: image.naturalHeight / 3 }));
+      const gap = 8;
+      const total = sizes.reduce((sum, size) => sum + size.height, 0) + gap * (sizes.length - 1);
+      const screenPoints = target.screenHeight / scale;
+      let top = screenPoints * 0.86 - total;
+      images.forEach((image, index) => {
+        const { width, height } = sizes[index];
+        const left = (target.screenWidth / scale - width) / 2;
+        const box = `left:${left * scale}px;top:${top * scale}px;width:${width * scale}px;height:${height * scale}px;`;
+        add(`<i class="overlay" style="${box}border-radius:${24 * scale}px;` +
+          `backdrop-filter:blur(${18 * scale}px) saturate(1.4);-webkit-backdrop-filter:blur(${18 * scale}px) saturate(1.4)"></i>`, target.screen);
+        add(`<img class="overlay" src="${image.src}" style="${box}">`, target.screen);
+        top += height + gap;
+      });
     },
   };
 </script>
