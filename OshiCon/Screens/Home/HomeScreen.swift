@@ -216,6 +216,7 @@ struct HomeScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(item.accessibilityLabel)
+            .accessibilityIdentifier("home.eventRow")
             .transition(AppMotion.transition(for: cardMotion))
         }
     }
