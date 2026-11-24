@@ -78,14 +78,6 @@ nonisolated enum LaunchOptions {
         seedsSampleData && ProcessInfo.processInfo.arguments.contains(sampleLiveActivityArgument)
     }
 
-    /// アプリが裏に回ったら、見本の予定の通知の計画（`ReminderPlan`）の先頭の数件を、実際の文面で 2 秒後に出す
-    /// （App Store 用スクリーンショット。ロック画面の通知を撮る）。メモリ上のストアでは予約しないため。見本を入れるときだけ効く。
-    static let sampleRemindersArgument = "-sampleReminders"
-
-    static var deliversSampleReminders: Bool {
-        seedsSampleData && ProcessInfo.processInfo.arguments.contains(sampleRemindersArgument)
-    }
-
     /// 画面の外観を、端末の設定によらずライトかダークに固定する（`-colorScheme light` / `-colorScheme dark`。App Store 用スクリーンショット）。
     /// メモリ上のストアのときだけ効く。
     static let colorSchemeArgument = "-colorScheme"
