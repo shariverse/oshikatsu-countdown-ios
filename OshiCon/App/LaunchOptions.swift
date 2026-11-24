@@ -3,7 +3,7 @@
 //  OshiCon
 //
 
-import Foundation
+import SwiftUI
 
 /// 起動引数で切り替える動き（UI テスト用）。
 ///
@@ -35,6 +35,79 @@ nonisolated enum LaunchOptions {
             return nil
         }
         return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
+    /// 見本の当日の配信の開始を、今から 40 分ほど先にする（App Store 用スクリーンショット。秒まで数える詳細とライブアクティビティを撮る）。
+    /// 見本を入れるときだけ効く（`SampleData.Content.startingStreamSoon(now:calendar:)`）。
+    static let sampleStreamSoonArgument = "-sampleStreamStartsSoon"
+
+    static var startsSampleStreamSoon: Bool {
+        seedsSampleData && ProcessInfo.processInfo.arguments.contains(sampleStreamSoonArgument)
+    }
+
+    /// 推しの一覧のいちばん上（1 位。テーマの色になる）にする見本の推しの役どころ（`-sampleTopOshi singer` のように `SampleData.Role` の生の値を続ける）。
+    /// App Store 用スクリーンショットで、推し色のテーマを撮り分ける。見本を入れるときだけ効く。
+    static let sampleTopOshiArgument = "-sampleTopOshi"
+
+    static var sampleTopOshi: SampleData.Role? {
+        sampleTopOshi(arguments: ProcessInfo.processInfo.arguments, seedsSampleData: seedsSampleData)
+    }
+
+    static func sampleTopOshi(arguments: [String], seedsSampleData: Bool) -> SampleData.Role? {
+        guard seedsSampleData,
+              let index = arguments.firstIndex(of: sampleTopOshiArgument),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        return SampleData.Role(rawValue: arguments[index + 1])
+    }
+
+    /// 着せ替え（背景の写真と飾り）を、見本の推しの写真で入れておく（App Store 用スクリーンショット）。
+    /// 見本の推しに写真を付けるとき（`sampleOshiPhotosDirectory`）だけ効く。
+    static let sampleAppearanceArgument = "-sampleAppearance"
+
+    static var appliesSampleAppearance: Bool {
+        sampleOshiPhotosDirectory != nil && ProcessInfo.processInfo.arguments.contains(sampleAppearanceArgument)
+    }
+
+    /// メモリ上のストアでも、見本の予定の当日のライブアクティビティを実際に出す（App Store 用スクリーンショット。ロック画面と Dynamic Island を撮る）。
+    /// 見本を入れるときだけ効く。見本を入れて、この引数を渡さないときは、前に出したものを終える（ほかの画面に Dynamic Island が写らないように）。
+    static let sampleLiveActivityArgument = "-sampleLiveActivity"
+
+    static var showsSampleLiveActivity: Bool {
+        seedsSampleData && ProcessInfo.processInfo.arguments.contains(sampleLiveActivityArgument)
+    }
+
+    /// アプリが裏に回ったら、見本の予定の通知の計画（`ReminderPlan`）の先頭の数件を、実際の文面で 2 秒後に出す
+    /// （App Store 用スクリーンショット。ロック画面の通知を撮る）。メモリ上のストアでは予約しないため。見本を入れるときだけ効く。
+    static let sampleRemindersArgument = "-sampleReminders"
+
+    static var deliversSampleReminders: Bool {
+        seedsSampleData && ProcessInfo.processInfo.arguments.contains(sampleRemindersArgument)
+    }
+
+    /// 画面の外観を、端末の設定によらずライトかダークに固定する（`-colorScheme light` / `-colorScheme dark`。App Store 用スクリーンショット）。
+    /// メモリ上のストアのときだけ効く。
+    static let colorSchemeArgument = "-colorScheme"
+
+    static var forcedColorScheme: ColorScheme? {
+        forcedColorScheme(arguments: ProcessInfo.processInfo.arguments)
+    }
+
+    static func forcedColorScheme(arguments: [String]) -> ColorScheme? {
+        guard arguments.contains(inMemoryStoreArgument),
+              let index = arguments.firstIndex(of: colorSchemeArgument),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        switch arguments[index + 1] {
+        case "light":
+            return .light
+        case "dark":
+            return .dark
+        default:
+            return nil
+        }
     }
 
     /// 推しの写真を選ぶボタンで、写真ライブラリ（`PhotosPicker`）の代わりにテスト用に生成した画像を選ぶ（UI テスト）。
