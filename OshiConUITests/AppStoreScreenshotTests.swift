@@ -116,22 +116,23 @@ final class AppStoreScreenshotTests: XCTestCase {
     /// アプリの外の面。
     @MainActor
     private func captureSurfacesOutsideApp() {
-        // アプリの外: ロック画面（ライブアクティビティ）とホーム画面（Dynamic Island のライブアクティビティ）。
-        // 先にほかのロック画面を撮ると、ライブアクティビティが出ないことがあったので、最初に撮る
+        // アプリの外: ホーム画面（Dynamic Island のライブアクティビティ）とロック画面（ライブアクティビティ）
         var app = launch(["-sampleLiveActivity"])
         XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
         Thread.sleep(forTimeInterval: 2)
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        // iOS 27 は、アプリのライブアクティビティを初めて出すとき、ロック画面で許可を求める（許可するまで Dynamic Island に出ない）
         lockAndWake()
-        // iOS 27 は、アプリのライブアクティビティを初めて出すとき、ロック画面で許可を求める
         allowLiveActivitiesIfAsked(on: springboard)
-        capture("lock-screen")
-        // ロックを解くとアプリに戻るので、ホームボタンでホーム画面に出る
         unlock()
         goHome(from: app)
         Thread.sleep(forTimeInterval: 2)
         capture("home-screen")
         attachHomeScreenLayout(of: springboard)
+        // アプリが裏に回ってからロックすると、iOS 26 でもロック画面にライブアクティビティが出る
+        lockAndWake(waitingFor: 3)
+        capture("lock-screen")
+        unlock()
 
         // アプリの外: 何も出ていないロック画面（通知を重ねる）。`-sampleLiveActivity` を渡さずに起動すると、アプリがライブアクティビティを終える
         app = launch()
@@ -154,9 +155,14 @@ final class AppStoreScreenshotTests: XCTestCase {
     }
 
     /// ロックを解く（パスコードは無い）。ロック中にアプリを起動すると前面に来ないので、次の画面の前に解く。
+    /// ホームボタンで解ける機種と、下の端から上へのスワイプが要る機種（iPhone Duo）があるので、両方する（解けた後のスワイプはホーム画面に戻るだけ）
     @MainActor
     private func unlock() {
         XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 1)
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let bottom = springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.995))
+        bottom.press(forDuration: 0.05, thenDragTo: springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.4)))
         Thread.sleep(forTimeInterval: 1.5)
     }
 
