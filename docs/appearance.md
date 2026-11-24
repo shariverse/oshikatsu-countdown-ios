@@ -107,15 +107,27 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - 設定画面の Plus の行の下に「着せ替え」の行を置き、押すと着せ替えの画面を開く。
   **今は Plus の行と同じく、開発版（DEBUG）と TestFlight だけに出す**（`PlusEntryPolicy.showsEntry(in:)`。`PlusEntryPolicy` は変えていない）。
   App Store 版で出すのは、推しの写真ウィジェットとそろって develop に入ってから別に行う
-- 着せ替えの画面は上から次の順
+- 着せ替えの画面は上から次の順。2 の見本だけはスクロールする Form の外に置き、どの設定を変えているときも見えるようにする（下の「見本の置き方」。#269）
   1. Plus の案内: Plus でない人は案内の文と「Plus で使う」（`openPlusPaywall` で課金画面を開く）、Plus の人は「Plus をお使いいただけます」
-  2. 見本: ホームの部品で組んだホームの見本（390 × 845pt を幅 180pt に縮める）。選んだ写真・ON/OFF・暗幕とぼかし・飾りを、Plus によらずその場で映す（試着）。
+  2. 見本: ホームの部品で組んだホームの見本（390 × 845pt で組み、画面の大きさに合わせて縮める）。選んだ写真・ON/OFF・暗幕とぼかし・飾りを、Plus によらずその場で映す（試着）。
      予定があれば先頭の予定を、無ければ見本の推しと予定を出す
   3. 背景の写真: 写真を選ぶ／変える・写真を外す・背景の ON/OFF、暗幕の濃さ（薄い〜濃い）とぼかしの強さ（なし〜強い）のスライダー。写真を選び直したら背景を ON にする。
      背景が OFF のときもスライダーの値は見せ、押せなくする
   4. 飾り: 飾りの ON/OFF、濃さ（薄い〜濃い）と量（少なめ〜埋め尽くす）のスライダー。飾りが OFF のときも値は見せ、押せなくする
   5. 飾りに出す推し: 推しごとのスイッチ（推しのアバター・名前、写真の無い推しは「写真がありません」）。推しがいなければ出さない。飾りが OFF のときは押せない
 - スライダー（暗幕・ぼかし・飾りの濃さ・量）は同じ部品（`AppearanceSlider`）。値は 5% ずつに丸め、百分率で出す。アクセシビリティの大きな文字では、両端の言葉をスライダーの下に置く
+- 見本の置き方。並べ方と見本の大きさは `AppearancePreviewLayout` が、ナビゲーションバーとタブバーを除いた中身の大きさから決める
+  - 幅の狭い画面（縦向きの iPhone、iPad の狭い分割・スライドオーバー）: 見本を上に固定し、その下で設定の Form をスクロールする。
+    見本の帯は画面の高さの 45% まで（見本の高さは 120〜340pt）で、いちばん小さい iPhone（SE）でも設定に半分より多く残す。「見本」と説明の文（「選んだ写真と設定を、その場でホームの見本に映します」）は見本の右に置く
+  - 幅の広い画面（幅 700pt 以上か、横長で幅 480pt 以上。iPad・横向きの iPhone）: 見本を左の列、設定の Form を右に並べる。見本は列の高さに収め、幅は 280pt・画面の幅の 40% まで。「見本」と説明の文は見本の下に置く
+  - アクセシビリティの大きな文字: 見本は隠さず、上に固定する帯を画面の高さの 30% までに小さくして、行が高くなった設定に場所を譲る。左の列では見本の下の文に広く空ける。
+    決めた高さに収まらない「見本」と説明の文は縮めて収め（`minimumScaleFactor`）、設定を押し下げない
+  - 見本と設定の境目に細い線（`outlineVariant`）を引く。上に固定するときは、送った設定がこの線の下に隠れる
+  - 回転などで並べ方が変わっても、見本と Form は作り直さない（`AnyLayout`。スクロールの位置と読んだ写真を保つ）
+  - 見本は押せず（`allowsHitTesting(false)`）、スクロールの邪魔をしない。読み上げでは見本を 1 つの要素にし（名前「ホームの見本」、値は映しているもの）、説明の文はそのヒントにする。
+    見える「見本」と説明の文は、同じことを 2 度読まないよう読み上げから外す
+  - スライダーは動かしている間も、値が変わるたび（5% ごと）に見本に映す。暗幕・ぼかし・飾りの濃さ・量だけが変わったときは写真を読み直さず、
+    背景の写真の ON/OFF でも飾りの推しの写真を読み直さない（模様に戻ってちらつかない）
 - 文言は 12 言語（`Shared/Resources/Localizable.xcstrings`）
 
 ### シェアのカード
@@ -140,13 +152,14 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 | 背景の写真の置き方（覆う・中央に置いて左右を埋める・読む画素数・詳細で上を除く範囲） | `OshiCon/Appearance/AppearanceBackgroundLayout.swift` |
 | 背景の写真を敷く View（読み込み・ぼかし・幕・左右の埋め）・上の端のグラデーション | `OshiCon/Appearance/AppearanceBackgroundPhoto.swift`（`AppearanceBackgroundPhotoView`・`AppearanceBackgroundPhotoLayers`・`AppearanceStatusBarFade`） |
 | 飾りの濃さ・量・出す推し、並べる推しの写真、丸の並べ方（量ごとの大きさと間隔・どの丸にどの推し）、丸い写真の作り方・読む画素数 | `OshiCon/Appearance/OshiPhotoDecoration.swift`（`OshiPhotoDecorationStyle`・`OshiPhotoDecoration`・`OshiPhotoDecorationLayout`） |
-| 飾りの View | `OshiCon/Appearance/OshiPhotoDecorationView.swift`（`OshiPhotoDecorationLayer`・`OshiPhotoDecorationMarks`・`OshiPhotoDecorationBackground`） |
+| 飾りの View | `OshiCon/Appearance/OshiPhotoDecorationView.swift`（`OshiPhotoDecorationLayer`・`OshiPhotoDecorationMarks`） |
 | 十字とハートの並び（写真のある推しがいないときの飾り） | `Shared/Design/ThemeOrnaments+Gothic.swift`（`CrossesAndHeartsPattern`） |
 | ホームの地 | `OshiCon/Appearance/AppearanceScreenBackground.swift`（`HomeScreen` と見本で使う） |
 | 予定の詳細の地と、上の写真の下端 | `OshiCon/Appearance/AppearanceDetailBackground.swift`（`AppearanceDetailBackground`・`AppearanceDetailHeaderPosition`） |
 | 試着の規則（見本の大きさ・中身・読み上げの値・調整画面で読む画素数・百分率の文字） | `OshiCon/Appearance/AppearancePreview.swift` |
+| 着せ替えの画面の並べ方（見本を上に固定する・左に並べる）と、見本を見せる大きさ | `OshiCon/Appearance/AppearancePreviewLayout.swift`（`AppearancePreviewLayout`） |
 | UI テストから描いているものを読む口 | `OshiCon/Appearance/AppearanceUITestMarker.swift` |
-| 着せ替えの画面・飾りのまとまり（スライダー・出す推し）・スライダーの部品・ホームの見本 | `OshiCon/Screens/Appearance/AppearanceSettingsScreen.swift`・`AppearanceDecorationSettings.swift`・`AppearanceSlider.swift`・`AppearanceHomePreview.swift` |
+| 着せ替えの画面・飾りのまとまり（スライダー・出す推し）・スライダーの部品・見本の帯と列・ホームの見本 | `OshiCon/Screens/Appearance/AppearanceSettingsScreen.swift`・`AppearanceDecorationSettings.swift`・`AppearanceSlider.swift`・`AppearancePreviewPane.swift`・`AppearanceHomePreview.swift` |
 | 設定の「着せ替え」の行 | `OshiCon/Screens/Settings/SettingsScreen.swift`（`PlusSettingsSection`） |
 | 縦長の枠の調整と切り抜き | `OshiCon/Photo/`（[photo-crop.md](photo-crop.md)） |
 | シェアのカードの地を選ぶ規則 | `OshiCon/Share/ShareCardStyle.swift`（`ShareCardStyle.appearance(_:)`） |
@@ -166,6 +179,8 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   - `OshiPhotoDecorationTests`: 十字とハートの置き方、並べる推し（写真の無い推し・出さない推し・写真のある推しがいないとき・重なり）、読む画素数、丸い写真（丸の外が透明）
   - `OshiPhotoDecorationLayoutTests`: 量ごとの直径と間隔、量を増やすほど覆う割合が増えて量 100% で 9 割ほどになること、どの量でも丸が重ならないこと、となり合う丸が別の推しになること
   - `AppearancePreviewTests`: 試着は Plus によらず設定のとおり・実際の画面は Plus でなければ標準、見本の中身と大きさ、読み上げの値（暗幕の濃さ・ぼかしの強さ・飾りの濃さ・量の百分率を含む）
+  - `AppearancePreviewLayoutTests`: 縦向きの iPhone（SE〜Pro Max）は上に固定して設定に半分より多く残すこと、大きな文字では見本を小さくすること、
+    iPad と横向きの iPhone は左右に並べて見本と下の文を高さに、左の列を幅の 4 割に収めること、iPad の狭い分割は上に固定すること、測れていない大きさ
   - `AppearanceUITestMarkerTests`: UI テストに見せる値
   - ほかに `OshiConTests/Photo/OshiEditingTests`（推しの写真の差し替え・削除で背景の写真が消えない）、`PhotoCropRectangleTests`・`PhotoResizerRectangleCropTests`（縦長の枠）、
     `OshiConTests/Share/ShareCardAppearanceStyleTests`（シェアのカードの地を選ぶ規則）
@@ -175,13 +190,15 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
     写真を変える・外す（`appearance.removePhoto`）→ 課金画面を開く（`appearance.openPaywall`）。ホームと詳細は標準のまま
   - `-plusUnlocked`: 使えていることを示し（`appearance.plusActive`）、ホームと詳細に写真と飾りが効く。背景を OFF にすると、その場で飾りだけになる
   - `-plusUnlocked -seedSampleData`: 飾りが OFF のときはスライダーを押せない → 飾りを ON にして、濃さ・量のスライダー（`appearance.decorationOpacity`・`appearance.decorationAmount`）をいちばん右にすると見本に映る →
-    見本の推しのスイッチ（`appearance.decorationOshi.<並びの番号>`）で外せる → ホームに飾りが効く
+    見本の推しのスイッチ（`appearance.decorationOshi.<並びの番号>`）で外せる → ホームに飾りが効く。
+    スライダーと推しのスイッチを動かすときも、見本が画面の中にあって設定と重ならないことを確かめる
+  - 見本は Form の外に固定しているので、行を探して送るときは Form（`appearance.form`）の上で指を動かす（見本の上では送れない）
   - `-simulateAppStoreDistribution`: 「着せ替え」の行が出ない
   - ホームと詳細の地は読み上げから外しているので、メモリ上のストアのときだけ 1pt の透明な要素（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置き、
     そのラベル（`standard`・`photo`・`decoration` を `,` でつないだもの）で描いているものを確かめる（暗幕とぼかしの値は見本の読み上げの値で確かめる）。端末のストアで動くアプリには置かない
   - メモリ上のストアでは、着せ替えの設定は別の UserDefaults（`jp.shilokuma.OshiCon.InMemoryAppearance`）、写真は一時ディレクトリに置き、起動のたびに空にする。
     そのため 1 回の起動の中で写真を選んでから確かめる
-- iPad Pro 13-inch (M5) でビルドし、横向き・大きな文字・ダークは #Preview（着せ替えの画面・背景の写真・飾り・詳細の地）で見る
+- iPad Pro 13-inch (M5) でビルドし、横向き・大きな文字・ダークは #Preview（着せ替えの画面・見本の帯と列・背景の写真・飾り・詳細の地）で見る
 
 ## 実機で確かめること
 
@@ -190,6 +207,8 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - 暗幕とぼかしの見え方（既定の暗幕 50%・ぼかし 40% で推しの写真がはっきり見えるか、スライダーの範囲が足りるか。飾りの ON/OFF で幕の濃さが変わるのが不自然でないか）、ダークの外観、ダイナミックタイプの大きな文字で崩れないか
 - **ぼかしの重さ（スライダー）**: ぼかしのスライダーを動かしている間、ホームの見本の追従に引っかかりが無いか
 - **飾りの描画の重さ**: 量 100%・濃さ 100% で、iPad（横向き・Split View）のホームと予定の詳細のスクロール、着せ替えの画面でスライダーを動かしたときの見本の追従に、引っかかりが無いか
+- **着せ替えの画面の見本**: いちばん小さい iPhone（SE・17e）で、上に固定した見本が小さすぎないか、設定を操作しやすいか（大きな文字を含む）。
+  iPad の Split View・Stage Manager で窓の大きさを変えたときに、並べ方が切り替わっても崩れないか
 - 飾りの見え方（既定の濃さ 40%・量 25% が好みに合うか、埋め尽くしたときに推しの顔が分かるか、推しが 2 人のときに上下の行で同じ推しが並ぶのが気にならないか）
 - 幕を薄くしたので、明るい写真・暗い写真の上で、iOS 17・18 の透けたバー（ナビゲーションバーの ＋・いちばん下までスクロールしたときのタブバー）が読めるか。上の端のグラデーションが不自然でないか（iPad・横向きを含む）。見出しの板が大きな文字で崩れないか
 - 購入・解約・期限切れ（Xcode の StoreKit の Manage Transactions）で、ホームと詳細がその場で切り替わり、写真と設定が残ること

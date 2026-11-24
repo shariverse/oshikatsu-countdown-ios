@@ -28,11 +28,12 @@ struct AppearanceScreenBackground: View {
                 ZStack {
                     if let photo = rendering.backgroundPhoto {
                         AppearanceBackgroundPhotoView(photo: photo, photos: photos, isDecorated: rendering.showsOshiPhotoDecoration)
-                        if let decoration = rendering.decoration {
-                            OshiPhotoDecorationLayer(oshis: oshis, style: decoration)
-                        }
-                    } else if let decoration = rendering.decoration {
-                        OshiPhotoDecorationBackground(ground: theme.palette.background, oshis: oshis, style: decoration)
+                    } else {
+                        theme.palette.background.color
+                    }
+                    // 背景の写真の ON/OFF で飾りを作り直さない（読んだ推しの写真を捨てて模様に戻らない）よう、写真の有無の外に置く
+                    if let decoration = rendering.decoration {
+                        OshiPhotoDecorationLayer(oshis: oshis, style: decoration)
                     }
                     // 幕は薄く、飾りは濃くできるので、ステータスバーの文字が読めるよう上の端だけ幕の色で覆う
                     AppearanceStatusBarFade()

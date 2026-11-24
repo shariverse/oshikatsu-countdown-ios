@@ -11,7 +11,8 @@ import SwiftUI
 ///
 /// - 背景の写真を選ぶ・変える・外す（`PhotosPicker` → 縦長の枠の調整画面 `PhotoCropScreen`）、背景の ON/OFF、暗幕の濃さとぼかしの強さ（スライダー）
 /// - 飾りの ON/OFF・濃さと量（スライダー）・飾りに出す推し（推しごとのスイッチ）は `AppearanceDecorationSettings`
-/// - ホームの見本（`AppearanceHomePreview`）に、選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す（Plus でなくても試着できる）
+/// - ホームの見本（`AppearancePreviewPane`）に、選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す（Plus でなくても試着できる）。
+///   見本はスクロールする Form の外に置き、どの設定を変えているときも見えるようにする。幅の狭い画面では上に固定し、幅の広い画面では左に並べる（`AppearancePreviewLayout`）
 /// - Plus でない人も写真と設定を保存でき（`AppearanceStore`）、案内から課金画面（`\.openPlusPaywall`）を開ける。Plus の人には使えていることを示す
 ///
 /// UI テストでは、起動引数 `-useTestPhoto`（`LaunchOptions.usesTestPhoto`）で `PhotosPicker` の代わりに生成した画像を選ぶボタンにする。
@@ -21,7 +22,7 @@ struct AppearanceSettingsScreen: View {
     @Environment(\.openPlusPaywall) private var openPlusPaywall
     @Environment(\.appTheme) private var theme
     @Environment(\.displayScale) private var displayScale
-    @Query private var storedEvents: [StoredEvent]
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
 
@@ -47,13 +48,28 @@ struct AppearanceSettingsScreen: View {
     }
 
     var body: some View {
-        Form {
-            plusSection
-            previewSection
-            backgroundSection
-            AppearanceDecorationSettings(oshis: storedOshis.map(OshiConStore.oshi(from:)))
+        let oshis = storedOshis.map(OshiConStore.oshi(from:))
+        GeometryReader { proxy in
+            let layout = AppearancePreviewLayout(containerSize: proxy.size, isAccessibilitySize: dynamicTypeSize.isAccessibilitySize)
+            let isSide = layout.arrangement == .sideBySide
+            // 回転などで並べ方が変わっても、見本と Form を作り直さない（スクロールの位置と読んだ写真を保つ）よう、並べ方だけを替える
+            let stack = isSide ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
+            stack {
+                AppearancePreviewPane(layout: layout, oshis: oshis)
+                // 見本と設定の境目の細い線。上に固定するときは、送った設定がこの線の下に隠れる
+                theme.palette.outlineVariant.color
+                    .frame(width: isSide ? 1 / displayScale : nil, height: isSide ? nil : 1 / displayScale)
+                    .accessibilityHidden(true)
+                Form {
+                    plusSection
+                    backgroundSection
+                    AppearanceDecorationSettings(oshis: oshis)
+                }
+                .scrollContentBackground(.hidden)
+                // UI テストは、見本の外（Form の上）で指を動かして送る
+                .accessibilityIdentifier("appearance.form")
+            }
         }
-        .scrollContentBackground(.hidden)
         .background(theme.palette.background.color)
         .navigationTitle("着せ替え")
         .navigationBarTitleDisplayMode(.inline)
@@ -124,36 +140,6 @@ struct AppearanceSettingsScreen: View {
                 }
                 .accessibilityIdentifier("appearance.openPaywall")
             }
-        }
-        .themeRowBackground()
-    }
-
-    // MARK: - 見本
-
-    private var previewSection: some View {
-        let now = Date()
-        // 端末のタイムゾーンを変えたときも、その日付で数える
-        let today = CalendarDay(now, calendar: .autoupdatingCurrent)
-        let oshis = storedOshis.map(OshiConStore.oshi(from:))
-        let content = AppearancePreview.content(
-            events: storedEvents.compactMap(OshiConStore.event(from:)),
-            oshis: oshis,
-            today: today,
-            now: now
-        )
-        return Section {
-            AppearanceHomePreview(
-                rendering: AppearancePreview.rendering(settings: store.settings),
-                content: content,
-                decorationOshis: oshis,
-                photos: store.photos
-            )
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-        } header: {
-            Text("見本")
-        } footer: {
-            Text("選んだ写真と設定を、その場でホームの見本に映します")
         }
         .themeRowBackground()
     }
