@@ -1,7 +1,8 @@
 // App Store 用スクリーンショットの見出し（t）と小見出し（s）。screenshots.html が読む。
 // 10 枚の並びは screenshots.html の SLIDES と同じ。<em> は枚の色（推し色）で強調し、<br> は日本語・中国語だけで改行の位置を決める。
 // 用語は掲載文（docs/app-store/metadata/<言語>.md の「言葉の選び方」）にそろえる。
-// 価格・実在の人物・作品の名前は入れない。言語を足したら、12 言語すべてに 10 枚ぶんを入れる（render-app-store-screenshots.sh が確かめる）。
+// en-GB・es-MX はストアの掲載だけの言語（アプリは en・es で出る）なので、en・es をもとに英国のつづり・中南米の言い方に直す。
+// 価格・実在の人物・作品の名前は入れない。docs/app-store/languages.json の言語を足したら、ここにも 10 枚ぶんを入れる（render-app-store-screenshots.sh が確かめる）。
 window.SCREENSHOT_COPY = {
   ja: [
     { t: "推しに会える日まで、<br><em>あと何日</em>？", s: "ホーム画面のウィジェットと Dynamic Island で、ひと目で" },
@@ -26,6 +27,18 @@ window.SCREENSHOT_COPY = {
     { t: "Never miss <em>a big day</em>", s: "Reminders 30 days, 7 days and 1 day before, on the day, and 1 hour before the start" },
     { t: "As many oshis as you like. <em>Birthdays every year.</em>", s: "Birthdays and anniversaries repeat every year" },
     { t: "For <em>iPhone, iPad and iPhone Duo</em>", s: "Light or dark, your oshi's colors stay true" },
+  ],
+  "en-GB": [
+    { t: "How many days until you see your <em>oshi</em>?", s: "Check at a glance with Home Screen widgets and the Dynamic Island" },
+    { t: "On the day, <em>count down to showtime</em>", s: "A Live Activity on your Lock Screen counts down to the start" },
+    { t: "Count every <em>second</em> to showtime", s: "See how far you've come since you added it, too" },
+    { t: "The app takes on your <em>#1 oshi's colour</em>", s: "Just reorder your oshis. 12 member colours for screens and widgets" },
+    { t: "Make it yours with <em>your oshi's photo</em>", s: "Dress up the background and decorations with photos of your oshi" },
+    { t: "Your oshi, <em>right on your Home Screen</em>", s: "A photo widget shows the days left" },
+    { t: "Share your countdown <em>as a card</em>", s: "Your oshi's photo and the days left, in one image" },
+    { t: "Never miss <em>a big day</em>", s: "Reminders 30 days, 7 days and 1 day before, on the day, and 1 hour before the start" },
+    { t: "As many oshis as you like. <em>Birthdays every year.</em>", s: "Birthdays and anniversaries repeat every year" },
+    { t: "For <em>iPhone, iPad and iPhone Duo</em>", s: "Light or dark, your oshi's colours stay true" },
   ],
   "zh-Hans": [
     { t: "距离见到<em>本命</em>，<br>还有几天？", s: "主屏幕小组件和灵动岛，一眼就能看到" },
@@ -96,6 +109,18 @@ window.SCREENSHOT_COPY = {
     { t: "Tu oshi, <em>en la pantalla de inicio</em>", s: "Un widget de foto muestra los días que faltan" },
     { t: "Comparte tu cuenta atrás <em>como tarjeta</em>", s: "La foto de tu oshi y los días que faltan, en una imagen" },
     { t: "No te pierdas <em>ningún gran día</em>", s: "Avisos 30 días, 7 días y 1 día antes, el mismo día y 1 hora antes del inicio" },
+    { t: "Todos los oshis que quieras. <em>Cumples cada año.</em>", s: "Cumpleaños y aniversarios se repiten cada año" },
+    { t: "Para <em>iPhone, iPad y iPhone Duo</em>", s: "En modo claro u oscuro, los colores de tu oshi se mantienen" },
+  ],
+  "es-MX": [
+    { t: "¿Cuántos días faltan para ver a <em>tu oshi</em>?", s: "De un vistazo con los widgets de la pantalla de inicio y la Dynamic Island" },
+    { t: "El gran día, <em>cuenta regresiva hasta el show</em>", s: "Una Actividad en vivo en la pantalla bloqueada cuenta hasta el inicio" },
+    { t: "Hasta que empiece el show, <em>segundo a segundo</em>", s: "Y mira cuánto has avanzado desde que lo agregaste" },
+    { t: "La app con el color de <em>tu oshi n.º 1</em>", s: "Solo reordena a tus oshis. 12 colores para la app y los widgets" },
+    { t: "Tu pantalla, <em>con fotos de tu oshi</em>", s: "Decora el fondo y los adornos con fotos de tu oshi" },
+    { t: "Tu oshi, <em>en la pantalla de inicio</em>", s: "Un widget de foto muestra los días que faltan" },
+    { t: "Comparte tu cuenta regresiva <em>como tarjeta</em>", s: "La foto de tu oshi y los días que faltan, en una imagen" },
+    { t: "No te pierdas <em>ningún gran día</em>", s: "Recordatorios 30 días, 7 días y 1 día antes, el mismo día y 1 hora antes del inicio" },
     { t: "Todos los oshis que quieras. <em>Cumples cada año.</em>", s: "Cumpleaños y aniversarios se repiten cada año" },
     { t: "Para <em>iPhone, iPad y iPhone Duo</em>", s: "En modo claro u oscuro, los colores de tu oshi se mantienen" },
   ],
