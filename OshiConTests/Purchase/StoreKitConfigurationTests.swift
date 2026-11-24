@@ -91,8 +91,9 @@ struct StoreKitConfigurationTests {
         #expect(subscriptions.count + products.count == PlusProduct.allCases.count)
     }
 
-    @Test("サブスクリプショングループの名前と表示名（12 言語）が同じ")
+    @Test("サブスクリプショングループの名前と表示名（languages.json の全言語）が同じ")
     func subscriptionGroup() throws {
+        let languageCount = try Self.storeKitLocales().count
         let expected = try #require(try Self.purchases()["subscriptionGroup"] as? Object)
         let groups = try Self.objects(try Self.storeKit()["subscriptionGroups"])
         #expect(groups.count == 1)
@@ -100,12 +101,14 @@ struct StoreKitConfigurationTests {
         #expect(group["name"] as? String == expected["referenceName"] as? String)
         let localizations = try Self.actualLocalizations(group["localizations"], includesDescription: false)
         let expectedLocalizations = try Self.expectedLocalizations(expected["localizations"], includesDescription: false)
-        #expect(localizations.count == 12)
+        // App Store に載せるすべての言語（languages.json）の表示名がある
+        #expect(localizations.count == languageCount)
         #expect(localizations == expectedLocalizations)
     }
 
-    @Test("サブスクリプションの価格・期間・お試し・ファミリー共有・表示名（12 言語）が同じ")
+    @Test("サブスクリプションの価格・期間・お試し・ファミリー共有・表示名（languages.json の全言語）が同じ")
     func subscriptions() throws {
+        let languageCount = try Self.storeKitLocales().count
         let group = try #require(try Self.objects(try Self.storeKit()["subscriptionGroups"]).first)
         let actual = try Self.objects(group["subscriptions"])
         let expected = try Self.objects(try Self.purchases()["subscriptions"])
@@ -132,13 +135,15 @@ struct StoreKitConfigurationTests {
             }
             let localizations = try Self.actualLocalizations(product["localizations"], includesDescription: true)
             let expectedLocalizations = try Self.expectedLocalizations(subscription["localizations"], includesDescription: true)
-            #expect(localizations.count == 12)
+            // App Store に載せるすべての言語（languages.json）の表示名がある
+            #expect(localizations.count == languageCount)
             #expect(localizations == expectedLocalizations)
         }
     }
 
-    @Test("買い切り（非消耗型）の価格・ファミリー共有・表示名（12 言語）が同じ")
+    @Test("買い切り（非消耗型）の価格・ファミリー共有・表示名（languages.json の全言語）が同じ")
     func lifetime() throws {
+        let languageCount = try Self.storeKitLocales().count
         let actual = try Self.objects(try Self.storeKit()["products"])
         let expected = try Self.objects(try Self.purchases()["inAppPurchases"])
         #expect(actual.count == expected.count)
@@ -152,7 +157,8 @@ struct StoreKitConfigurationTests {
             #expect(product["familyShareable"] as? Bool == purchase["familySharable"] as? Bool)
             let localizations = try Self.actualLocalizations(product["localizations"], includesDescription: true)
             let expectedLocalizations = try Self.expectedLocalizations(purchase["localizations"], includesDescription: true)
-            #expect(localizations.count == 12)
+            // App Store に載せるすべての言語（languages.json）の表示名がある
+            #expect(localizations.count == languageCount)
             #expect(localizations == expectedLocalizations)
         }
     }
