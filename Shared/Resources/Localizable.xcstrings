@@ -16284,6 +16284,125 @@
         "th" : { "stringUnit" : { "state" : "translated", "value" : "เทียบกับก่อนตกแต่ง" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Bandingkan dengan sebelumnya" } }
       }
+    },
+    "アイコン" : {
+      "comment" : "着せ替えの画面。設定のタブ（ホーム画面のアプリアイコンの色）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Icon" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "アイコン" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图标" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "圖示" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "아이콘" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Icône" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Symbol" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Icono" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Ícone" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Icona" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ไอคอน" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ikon" } }
+      }
+    },
+    "ホーム画面のアイコンを、推し色の 12 色から選べます。ライトとダークの外観のどちらにも合わせます" : {
+      "comment" : "着せ替えの画面。アイコンのタブの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose your Home Screen icon from the 12 member colors. It suits both light and dark appearance." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ホーム画面のアイコンを、推し色の 12 色から選べます。ライトとダークの外観のどちらにも合わせます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "可从 12 种应援色中选择主屏幕上的图标。浅色和深色外观都适用。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "可從 12 種應援色中選擇主畫面上的圖示。淺色和深色外觀都適用。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "홈 화면의 아이콘을 멤버 컬러 12색 중에서 고를 수 있어요. 라이트와 다크 모드 모두에 어울려요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Choisissez l'icône de l'écran d'accueil parmi les 12 couleurs de membre. Elle s'adapte aux apparences claire et sombre." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wähle das Symbol auf dem Home-Bildschirm aus den 12 Mitgliedsfarben. Es passt zum hellen und zum dunklen Erscheinungsbild." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Elige el icono de la pantalla de inicio entre los 12 colores del miembro. Se adapta a los aspectos claro y oscuro." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escolha o ícone da tela de início entre as 12 cores do membro. Ele combina com a aparência clara e a escura." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Scegli l'icona della schermata Home tra i 12 colori del membro. Si adatta all'aspetto chiaro e a quello scuro." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เลือกไอคอนบนหน้าจอโฮมได้จากสีประจำตัว 12 สี ใช้ได้ทั้งโหมดสว่างและโหมดมืด" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pilih ikon di Layar Utama dari 12 warna member. Cocok untuk tampilan terang maupun gelap." } }
+      }
+    },
+    "アイコンの見本" : {
+      "comment" : "着せ替えの画面。アプリアイコンの見本の読み上げの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Icon preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "アイコンの見本" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图标预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "圖示預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "아이콘 미리보기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu de l'icône" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau des Symbols" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa del icono" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia do ícone" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima dell'icona" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่างไอคอน" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau ikon" } }
+      }
+    },
+    "ライト" : {
+      "comment" : "着せ替えの画面。アプリアイコンの見本の見出し（ライトの外観のアイコン）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Light" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ライト" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "浅色" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "淺色" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "라이트" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Clair" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hell" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Claro" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Claro" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Chiaro" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "สว่าง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Terang" } }
+      }
+    },
+    "ダーク" : {
+      "comment" : "着せ替えの画面。アプリアイコンの見本の見出し（ダークの外観のアイコン）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dark" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "ダーク" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "深色" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "深色" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "다크" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Sombre" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dunkel" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Oscuro" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Escuro" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Scuro" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "มืด" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Gelap" } }
+      }
+    },
+    "選んだ色が、ホーム画面のアイコンになります" : {
+      "comment" : "着せ替えの画面。アイコンのタブの Plus の案内（Plus の人）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The color you choose becomes your Home Screen icon." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "選んだ色が、ホーム画面のアイコンになります" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "所选颜色会成为主屏幕上的图标。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "所選顏色會成為主畫面上的圖示。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "고른 색이 홈 화면의 아이콘이 돼요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La couleur choisie devient l'icône de l'écran d'accueil." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die gewählte Farbe wird zum Symbol auf dem Home-Bildschirm." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "El color elegido será el icono de la pantalla de inicio." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A cor escolhida vira o ícone da tela de início." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il colore scelto diventa l'icona della schermata Home." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "สีที่เลือกจะเป็นไอคอนบนหน้าจอโฮม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Warna pilihanmu menjadi ikon di Layar Utama." } }
+      }
+    },
+    "Plus でなくても、色を選んで見本で試せます。Plus にすると、ホーム画面のアイコンが替わります" : {
+      "comment" : "着せ替えの画面。アイコンのタブの Plus の案内（Plus でない人）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You can choose a color and try it in the preview without Plus. With Plus, your Home Screen icon changes." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "Plus でなくても、色を選んで見本で試せます。Plus にすると、ホーム画面のアイコンが替わります" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "没有 Plus 也可以选择颜色并在预览中试看。开通 Plus 后，主屏幕上的图标会随之更换。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "沒有 Plus 也可以選擇顏色並在預覽中試看。開通 Plus 後，主畫面上的圖示會隨之更換。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "Plus가 없어도 색을 골라 미리보기에서 확인할 수 있어요. Plus를 이용하면 홈 화면의 아이콘이 바뀌어요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Sans Plus, vous pouvez déjà choisir une couleur et l'essayer dans l'aperçu. Avec Plus, l'icône de l'écran d'accueil change." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Auch ohne Plus kannst du eine Farbe wählen und in der Vorschau ausprobieren. Mit Plus ändert sich das Symbol auf dem Home-Bildschirm." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Sin Plus puedes elegir un color y probarlo en la vista previa. Con Plus, cambia el icono de la pantalla de inicio." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Mesmo sem o Plus, você pode escolher uma cor e experimentar na prévia. Com o Plus, o ícone da tela de início muda." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anche senza Plus puoi scegliere un colore e provarlo nell'anteprima. Con Plus, l'icona della schermata Home cambia." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แม้ไม่มี Plus ก็เลือกสีและลองดูในตัวอย่างได้ เมื่อใช้ Plus ไอคอนบนหน้าจอโฮมจะเปลี่ยนไป" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanpa Plus pun kamu bisa memilih warna dan mencobanya di pratinjau. Dengan Plus, ikon di Layar Utama ikut berganti." } }
+      }
     }
   },
   "version" : "1.0"

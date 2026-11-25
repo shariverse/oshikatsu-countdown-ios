@@ -13,6 +13,8 @@ enum AppearanceEditorTab: String, CaseIterable, Identifiable {
     case background
     /// 飾り（ON/OFF・濃さ・量・出す推し）。
     case decoration
+    /// ホーム画面のアプリアイコンの色（推し色の 12 色）。開いている間は、上の見本をアイコンの見本にする（`AppearanceIconPreview`）。
+    case icon
 
     var id: Self {
         self
@@ -24,6 +26,8 @@ enum AppearanceEditorTab: String, CaseIterable, Identifiable {
             "背景"
         case .decoration:
             "飾り"
+        case .icon:
+            "アイコン"
         }
     }
 
@@ -34,23 +38,26 @@ enum AppearanceEditorTab: String, CaseIterable, Identifiable {
             "photo"
         case .decoration:
             "sparkles"
+        case .icon:
+            "heart.square"
         }
     }
 }
 
 /// 着せ替えの画面の設定のトレー。見本の下（上の角を丸める）か、見本の右（`AppearancePreviewLayout`）に置く。
 ///
-/// 上にタブ（「背景」「飾り」）を並べ、その下に選んだタブの設定をスクロールで出す。いちばん下に Plus の案内を添える。
-/// 見本はトレーの外にあるので、どの設定を変えているときも見える。
+/// 上にタブ（「背景」「飾り」「アイコン」）を並べ、その下に選んだタブの設定をスクロールで出す。いちばん下に Plus の案内を添える。
+/// 見本はトレーの外にあるので、どの設定を変えているときも見える。選んでいるタブは画面が持つ（タブによって見本を替えるため）。
 struct AppearanceEditorTray: View {
     /// 登録した推し（推しの並び）。
     let oshis: [Oshi]
     let arrangement: AppearancePreviewLayout.Arrangement
+    /// 選んでいるタブ。
+    @Binding var tab: AppearanceEditorTab
 
     @Environment(\.appTheme) private var theme
     @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @Environment(\.displayScale) private var displayScale
-    @State private var tab = AppearanceEditorTab.background
 
     /// 見本の下に置くときの、上の角の丸み（pt）。
     private static let cornerRadius: CGFloat = 24
@@ -96,6 +103,8 @@ struct AppearanceEditorTray: View {
             AppearanceBackgroundSettings()
         case .decoration:
             AppearanceDecorationSettings(oshis: oshis)
+        case .icon:
+            AppearanceIconSettings()
         }
     }
 
@@ -147,15 +156,24 @@ struct AppearanceEditorTray: View {
     // MARK: - Plus の案内
 
     /// いちばん下に添える Plus の案内。Plus でない人には試着できること、Plus の人には効いていることを伝える。
+    /// アプリアイコンは、ホームと予定の詳細ではなくホーム画面に効くので、「アイコン」のタブでは文を替える。
     @ViewBuilder private var plusNote: some View {
         VStack(alignment: .leading, spacing: 2) {
             if isPlusUnlocked {
-                Text("ホームと予定の詳細に、着せ替えが効いています")
+                if tab == .icon {
+                    Text("選んだ色が、ホーム画面のアイコンになります")
+                } else {
+                    Text("ホームと予定の詳細に、着せ替えが効いています")
+                }
             } else {
                 Text("着せ替えは Plus で使えます")
                     .font(theme.typography.text(.footnote, weight: .bold))
                     .foregroundStyle(theme.palette.onSurface.color)
-                Text("Plus でなくても、写真を選んで試着し、保存しておけます。Plus にすると、ホームと予定の詳細に映ります")
+                if tab == .icon {
+                    Text("Plus でなくても、色を選んで見本で試せます。Plus にすると、ホーム画面のアイコンが替わります")
+                } else {
+                    Text("Plus でなくても、写真を選んで試着し、保存しておけます。Plus にすると、ホームと予定の詳細に映ります")
+                }
             }
         }
         .font(theme.typography.text(.footnote))
@@ -193,7 +211,12 @@ struct AppearanceEditorTray: View {
 }
 
 #Preview("トレー（Plus でない）") {
-    AppearanceEditorTray(oshis: [Oshi(name: "ミナト", color: .navy), Oshi(name: "LUMINA", color: .pink)], arrangement: .pinnedTop)
+    @Previewable @State var tab = AppearanceEditorTab.background
+    AppearanceEditorTray(
+        oshis: [Oshi(name: "ミナト", color: .navy), Oshi(name: "LUMINA", color: .pink)],
+        arrangement: .pinnedTop,
+        tab: $tab
+    )
         .frame(height: 320)
         .frame(maxHeight: .infinity, alignment: .bottom)
         .environment(AppearanceStore.volatile(

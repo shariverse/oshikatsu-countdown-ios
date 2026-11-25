@@ -10,7 +10,8 @@ import SwiftUI
 ///
 /// - 見本の舞台（`AppearancePreviewStage`）: ホーム・予定の詳細・シェアのカードの見本を大きく置き、選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す
 ///   （Plus でなくても試着できる）。見本の下の切り替えと横のスワイプで見本を替え、「全画面」で全画面の試着（`AppearanceTryOnScreen`）を開く
-/// - 設定のトレー（`AppearanceEditorTray`）: 「背景」と「飾り」のタブに分けた設定
+/// - 設定のトレー（`AppearanceEditorTray`）: 「背景」「飾り」「アイコン」のタブに分けた設定。「アイコン」のタブの間は、
+///   見本の舞台の代わりにアプリアイコンの見本（`AppearanceIconPreview`）を置く
 /// - 見本はスクロールする設定の外に置き、どの設定を変えているときも見えるようにする。幅の狭い画面では見本を上、トレーを下に置き、
 ///   幅の広い画面では見本を左、トレーを右に並べる（`AppearancePreviewLayout`）
 /// - Plus でない人も写真と設定を保存でき（`AppearanceStore`）、バーの「Plus で使う」から課金画面（`\.openPlusPaywall`）を開ける。Plus の人には使えていることを示す
@@ -26,6 +27,8 @@ struct AppearanceSettingsScreen: View {
 
     /// 映している見本。全画面の試着と同じものを切り替える。
     @State private var previewKind = AppearancePreview.Kind.home
+    /// 設定のトレーで選んでいるタブ。
+    @State private var editorTab = AppearanceEditorTab.background
     /// 全画面の試着を出しているか。
     @State private var isTryingOn = false
     /// 全画面の試着の「Plus で使う」を押した。全画面が閉じきってから課金画面を開く（重ねて出せないため）。
@@ -40,10 +43,15 @@ struct AppearanceSettingsScreen: View {
                 ? AnyLayout(HStackLayout(spacing: 0))
                 : AnyLayout(VStackLayout(spacing: 0))
             stack {
-                AppearancePreviewStage(layout: layout, oshis: oshis, kind: $previewKind) {
-                    isTryingOn = true
+                if editorTab == .icon {
+                    // アプリアイコンはホーム・予定の詳細・シェアの見本に映らないので、アイコンの見本にする
+                    AppearanceIconPreview(layout: layout)
+                } else {
+                    AppearancePreviewStage(layout: layout, oshis: oshis, kind: $previewKind) {
+                        isTryingOn = true
+                    }
                 }
-                AppearanceEditorTray(oshis: oshis, arrangement: layout.arrangement)
+                AppearanceEditorTray(oshis: oshis, arrangement: layout.arrangement, tab: $editorTab)
             }
         }
         .background {
