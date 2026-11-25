@@ -33,26 +33,67 @@ struct EventDetailContentTests {
         EventDetailContent(event: event, oshi: oshi, now: now, calendar: DomainFixtures.tokyo, locale: locale)
     }
 
-    @Test("開始の前は、開始までの見出しと時:分:秒・読み上げ")
+    /// タイルの数字（時間・分・秒の順）。
+    private func tileNumbers(_ detail: EventDetailContent) -> [String] {
+        detail.clockTiles.map(\.number)
+    }
+
+    @Test("開始の前は、開始までの見出しと「あと N 日」、時間・分・秒のタイル・読み上げ")
     func beforeStart() {
         let detail = content(event(), oshi: minato, now: DomainFixtures.date(2026, 10, 15, 9, 54, 51))
         #expect(detail.countdown.status == .upcoming)
+        #expect(detail.countdownDisplay == .counting)
         #expect(detail.untilLabel == "開演まで")
         #expect(detail.countdown.remainingParts.days == 3)
-        #expect(detail.clockText == "07:05:09")
+        #expect(detail.remainingDaysParts == .init(prefix: "あと", number: "3", suffix: "日"))
+        #expect(tileNumbers(detail) == ["07", "05", "09"])
+        #expect(detail.clockTiles.map(\.label) == ["時間", "分", "秒"])
+        #expect(detail.clockTiles.map(\.unit) == [.hours, .minutes, .seconds])
+        // 1 秒ごとに進む秒のタイルだけを目立たせる
+        #expect(detail.clockTiles.map(\.isLive) == [false, false, true])
         #expect(detail.remainingDescription == "残り 3日 7時間 5分")
+        // 読み上げに秒は入れない（毎秒読み上げ直さない）
         #expect(detail.countdownAccessibilityLabel == "開演まで、残り 3日 7時間 5分")
-        #expect(detail.remainingDaysParts == .init(prefix: "", number: "3", suffix: "日"))
         #expect(detail.oshiName == "ミナト")
         #expect(detail.color == .navy)
     }
 
-    @Test("時刻の無い予定は「当日まで」で、その日の 0:00 までを数える。日時は日付だけ")
+    @Test("時刻の無い予定は「当日まで」で、その日の 0:00 までをタイルで数える。日時は日付だけ")
     func withoutStartTime() {
         let detail = content(event(startTime: nil), now: DomainFixtures.date(2026, 10, 17, 23, 0))
+        #expect(detail.countdownDisplay == .counting)
         #expect(detail.untilLabel == "当日まで")
-        #expect(detail.clockText == "01:00:00")
+        #expect(detail.remainingDaysParts == .init(prefix: "あと", number: "0", suffix: "日"))
+        #expect(tileNumbers(detail) == ["01", "00", "00"])
         #expect(detail.dateText == "10月18日(日)")
+    }
+
+    @Test("当日の開始の前は、日数の代わりに「今日！」を出し、開始までをタイルで数える")
+    func onTheDayBeforeStart() {
+        // 日付が変わった直後から、開始の 1 秒前まで
+        let midnight = content(event(), now: DomainFixtures.date(2026, 10, 18, 0, 0))
+        #expect(midnight.countdownDisplay == .countingOnTheDay)
+        #expect(tileNumbers(midnight) == ["17", "00", "00"])
+
+        let detail = content(event(), now: DomainFixtures.date(2026, 10, 18, 16, 18, 33))
+        #expect(detail.countdown.status == .upcoming)
+        #expect(detail.countdownDisplay == .countingOnTheDay)
+        #expect(tileNumbers(detail) == ["00", "41", "27"])
+        #expect(detail.countdownAccessibilityLabel == "今日！、開演まで、残り 41分")
+
+        let lastSecond = content(event(), now: DomainFixtures.date(2026, 10, 18, 16, 59, 59))
+        #expect(lastSecond.countdownDisplay == .countingOnTheDay)
+        #expect(tileNumbers(lastSecond) == ["00", "00", "01"])
+    }
+
+    @Test("前日は、残りが 24 時間を切っていても「今日！」にしない（あと 0 日とタイル）")
+    func dayBeforeWithinTwentyFourHours() {
+        let detail = content(event(), now: DomainFixtures.date(2026, 10, 17, 20, 45, 24))
+        #expect(detail.countdown.daysUntil == 1)
+        #expect(detail.countdownDisplay == .counting)
+        #expect(detail.remainingDaysParts == .init(prefix: "あと", number: "0", suffix: "日"))
+        #expect(tileNumbers(detail) == ["20", "14", "36"])
+        #expect(detail.countdownAccessibilityLabel == "開演まで、残り 20時間 14分")
     }
 
     @Test("開始の時刻の呼び名は種類で変わる", arguments: [(EventKind.release, "発売まで"), (.stream, "配信開始まで"), (.birthday, "開始まで")])
@@ -64,11 +105,33 @@ struct EventDetailContentTests {
     func todayAndEnded() {
         let today = content(event(), now: DomainFixtures.date(2026, 10, 18, 17, 0))
         #expect(today.countdown.status == .today)
-        #expect(today.clockText == "00:00:00")
+        #expect(today.countdownDisplay == .today)
+        // 数えないので、タイルは出さない
+        #expect(today.clockTiles.isEmpty)
 
         let ended = content(event(), now: DomainFixtures.date(2026, 10, 21, 9, 0))
         #expect(ended.countdown.status == .ended)
+        #expect(ended.countdownDisplay == .ended)
+        #expect(ended.clockTiles.isEmpty)
         #expect(ended.daysAgoText == "3 日前")
+    }
+
+    @Test("時刻の無い予定は、当日になったら当日（タイルは出さない）")
+    func todayWithoutStartTime() {
+        let detail = content(event(startTime: nil), now: DomainFixtures.date(2026, 10, 18, 0, 0))
+        #expect(detail.countdownDisplay == .today)
+        #expect(detail.clockTiles.isEmpty)
+    }
+
+    @Test("毎年くり返す予定は、当日を過ぎたら次の回までを数える")
+    func repeatingAfterTheDay() {
+        let birthday = event(kind: .birthday, day: DomainFixtures.day(2000, 10, 18), startTime: nil, repeatsYearly: true)
+        #expect(content(birthday, now: DomainFixtures.date(2026, 10, 18, 9, 0)).countdownDisplay == .today)
+
+        let next = content(birthday, now: DomainFixtures.date(2026, 10, 19, 9, 0))
+        #expect(next.countdownDisplay == .counting)
+        #expect(next.remainingDaysParts == .init(prefix: "あと", number: "363", suffix: "日"))
+        #expect(tileNumbers(next) == ["15", "00", "00"])
     }
 
     @Test("進み具合は登録した時刻から開始まで。両端の日付と割合")
@@ -111,12 +174,15 @@ struct EventDetailContentTests {
         let detail = content(event(), oshi: minato, now: DomainFixtures.date(2026, 10, 15, 9, 54, 51), locale: DomainFixtures.english)
         #expect(detail.untilLabel == "Until showtime")
         #expect(detail.remainingDescription == "3 days, 7 hours, 5 minutes left")
-        #expect(detail.remainingDaysParts == .init(prefix: "", number: "3", suffix: "days"))
+        #expect(detail.remainingDaysParts == .init(prefix: "", number: "3", suffix: "days left"))
+        #expect(detail.clockTiles.map(\.label) == ["hr", "min", "sec"])
         #expect(detail.dateText == "Sun, Oct 18 Show 17:00")
         #expect(detail.kindLabel == "Live")
         #expect(detail.progressStartText == "Added 9/2")
         #expect(detail.progressEndText == "Day 10/18")
         #expect(detail.deleteMessage == "\u{201C}5th LIVE\u{201D} will be deleted. This can't be undone.")
+        let onTheDay = content(event(), now: DomainFixtures.date(2026, 10, 18, 16, 18, 33), locale: DomainFixtures.english)
+        #expect(onTheDay.countdownAccessibilityLabel == "Today!, Until showtime, 41 minutes left")
         let noOshi = content(event(), now: DomainFixtures.date(2026, 10, 21, 9, 0), locale: DomainFixtures.english)
         #expect(noOshi.oshiName == "No oshi")
         #expect(noOshi.daysAgoText == "3 days ago")
