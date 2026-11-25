@@ -164,21 +164,24 @@ final class AppStoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.5)
     }
 
-    /// ホーム画面に出る。撮影のアプリが裏に回るまで、ホームボタンを 3 回まで押し、それで戻れなければ下の端から上へスワイプする（ホームボタンが効かない iPhone Duo）
-    /// （ホーム画面の 1 ページ目の並びは Simulator ごとに違うので、アイコンではなくアプリの状態で確かめる）。
+    /// ホーム画面に出る。撮影のアプリが裏に回り、ホーム画面のアイコンの並びが見えるまで、ホームボタンを 3 回まで押し、それで戻れなければ下の端から上へスワイプする（ホームボタンが効かない iPhone Duo）
+    /// （ホーム画面の 1 ページ目の並びは Simulator ごとに違うので、どのアイコンかは見ない）。
+    /// アプリが裏に回っただけでは確かめない。遅い CI では App スイッチャーに入ることがある（iPhone はロックを解くホームボタンと続けて押したことになり、iPhone Duo はスワイプが遅いと受け取られる）。
+    /// App スイッチャーの中では、ドックのアイコンは見えても、並びのアイコンは見えない
     @MainActor
     private func goHome(from app: XCUIApplication) {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         // スワイプは iPad では App スイッチャーに入ってしまうので、ホームボタンが 3 回とも効かなかったとき（iPhone Duo）だけにする
         for _ in 0..<3 {
             XCUIDevice.shared.press(.home)
-            if leftForeground(app) {
+            if leftForeground(app), showsHomeScreen(springboard) {
                 return
             }
         }
-        for _ in 0..<2 {
+        // App スイッチャーに入ったときも、もう一度スワイプするとホーム画面に出る
+        for _ in 0..<3 {
             swipeUpFromBottom(on: springboard)
-            if leftForeground(app) {
+            if leftForeground(app), showsHomeScreen(springboard) {
                 return
             }
         }
@@ -250,10 +253,11 @@ final class AppStoreScreenshotTests: XCTestCase {
     @MainActor
     private func attachHomeScreenLayout(of springboard: XCUIApplication) {
         let screen = XCUIScreen.main.screenshot().image.size
-        let bounds = CGRect(origin: .zero, size: screen)
-        // 画面の外（ほかのページ）のアイコンは除く
-        let elements: [XCUIElement] = springboard.icons.allElementsBoundByIndex.filter { icon in
-            !icon.frame.isEmpty && bounds.contains(icon.frame)
+        let elements = iconsOnScreen(of: springboard)
+        // 並びのアイコンが無いと重ねる位置を決められない（App スイッチャーを撮ったおそれもある）ので、ここで失敗にして撮り直させる
+        guard !gridIcons(in: elements, screen: screen).isEmpty else {
+            XCTFail("ホーム画面のアイコンの並びが見つかりませんでした")
+            return
         }
         let icons: [[String: Any]] = elements.map { icon in
             let frame = icon.frame
@@ -380,5 +384,41 @@ final class AppStoreScreenshotTests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+}
+
+// MARK: - ホーム画面のアイコン
+
+private extension AppStoreScreenshotTests {
+    /// ホーム画面のアイコンの並びが画面の中に見えるかを 3 秒まで待つ。
+    @MainActor
+    func showsHomeScreen(_ springboard: XCUIApplication) -> Bool {
+        let deadline = Date().addingTimeInterval(3)
+        while Date() < deadline {
+            if !gridIcons(in: iconsOnScreen(of: springboard), screen: XCUIScreen.main.screenshot().image.size).isEmpty {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
+    }
+
+    /// 画面の中にあるホーム画面のアイコン（ほかのページのアイコンは除く）。ドックのアイコンも含む。
+    @MainActor
+    func iconsOnScreen(of springboard: XCUIApplication) -> [XCUIElement] {
+        let bounds = CGRect(origin: .zero, size: XCUIScreen.main.screenshot().image.size)
+        return springboard.icons.allElementsBoundByIndex.filter { icon in
+            !icon.frame.isEmpty && bounds.contains(icon.frame)
+        }
+    }
+
+    /// アイコンの並びのアイコン。docs/app-store/screenshots/screenshots.html の `iconGrid()` が重ねる位置に使うものと同じく、
+    /// ドック（iPhone・iPad は画面の下の 2 割、iPhone Duo の外側の画面は右の 2 割）と、縮んだアイコン（幅 40pt 未満）と、ウィジェット（幅 130pt 超）を除く
+    @MainActor
+    func gridIcons(in icons: [XCUIElement], screen: CGSize) -> [XCUIElement] {
+        icons.filter { icon in
+            let frame = icon.frame
+            return frame.width >= 40 && frame.width <= 130 && frame.minY < screen.height * 0.8 && frame.maxX < screen.width * 0.8
+        }
     }
 }
