@@ -134,10 +134,14 @@ final class AppStoreScreenshotTests: XCTestCase {
         // 1 回目のロックで許可の表示が間に合わなかったとき（遅い CI）のため、ここでももう一度許可を探す
         lockAndWake(waitingFor: 3)
         allowLiveActivitiesIfAsked(on: springboard)
-        guard ensureLiveActivityOnLockScreen(of: springboard) else {
+        // 壁紙が暗く写ったら、ロックし直して撮り直す（ライブアクティビティが出ているかも確かめ直す）
+        guard ensureLiveActivityOnLockScreen(of: springboard),
+              captureLockScreen("lock-screen", relock: {
+                  lockAndWake(waitingFor: 3)
+                  return ensureLiveActivityOnLockScreen(of: springboard)
+              }) else {
             return
         }
-        capture("lock-screen")
         unlock()
 
         // アプリの外: 何も出ていないロック画面（通知を重ねる）。`-sampleLiveActivity` を渡さずに起動すると、アプリがライブアクティビティを終える
@@ -145,7 +149,12 @@ final class AppStoreScreenshotTests: XCTestCase {
         XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
         Thread.sleep(forTimeInterval: 2)
         lockAndWake()
-        capture("lock-screen-plain")
+        guard captureLockScreen("lock-screen-plain", relock: {
+            lockAndWake()
+            return true
+        }) else {
+            return
+        }
         unlock()
     }
 
