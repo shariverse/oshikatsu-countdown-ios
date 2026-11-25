@@ -44,9 +44,11 @@ require 'tmpdir'
 require 'uri'
 
 API_BASE = 'https://api.appstoreconnect.apple.com'
-# 番号を変えたり文面を入れたりできる（審査に出す前・却下後の）バージョンの状態。
-# READY_FOR_REVIEW は、審査の提出物の下書きに入れたが、まだ提出していない状態（画面では「審査準備完了」。編集できる）
-EDITABLE_STATES = %w[PREPARE_FOR_SUBMISSION READY_FOR_REVIEW DEVELOPER_REJECTED REJECTED METADATA_REJECTED INVALID_BINARY].freeze
+# 番号を変えたり文面を入れたりできる（審査に出す前・却下後の）バージョンの状態
+EDITABLE_STATES = %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED INVALID_BINARY].freeze
+# 審査の提出物の下書きに入れたが、まだ提出していない状態（画面では「審査準備完了」）。
+# スクリーンショットを消せない（HTTP 409「Can't Delete Screenshot while Ready For Review」）ので、下書きから外してから流す
+IN_DRAFT_SUBMISSION_STATE = 'READY_FOR_REVIEW'
 PROCESSING_TIMEOUT = 15 * 60
 
 # App Store Connect の文字数の上限
@@ -249,6 +251,10 @@ def prepare_version(client, app_id, version_string)
   version = versions.find { |v| v.dig('attributes', 'versionString') == version_string }
   if version
     state = version_state(version)
+    if state == IN_DRAFT_SUBMISSION_STATE
+      abort "::error::バージョン #{version_string} は審査の提出物の下書きに入っています（#{state}）。スクリーンショットを差し替えられないので、" \
+            'App Store Connect で下書きからバージョンを外してから流し、終わったら「審査用に追加」し直してください'
+    end
     abort "::error::バージョン #{version_string} は編集できない状態です（#{state}）" unless EDITABLE_STATES.include?(state)
     return [version, 'そのまま使いました']
   end
