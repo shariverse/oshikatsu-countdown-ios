@@ -291,7 +291,13 @@ while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
     fi
   done
 
-  scripts/render-app-store-screenshots.sh "$destination" "$DISPLAY_TYPE" "$language"
+  # 重ねられなかった言語も、書き出した途中の 01.png〜 を消して（登録されないように）次の言語に進む。撮った画面（raw/）は、手元で重ね直して確かめられるよう残す
+  if ! scripts/render-app-store-screenshots.sh "$destination" "$DISPLAY_TYPE" "$language"; then
+    echo "::error::${DISPLAY_TYPE} / ${language} に見出しと端末の枠を重ねられませんでした。この言語は飛ばします"
+    rm -f "$destination"/[0-9][0-9].png
+    failed_languages+="${language} "
+    continue
+  fi
 done 3< <(printf '%s\n' "$LANGUAGE_LIST")
 
 if [[ -n "$failed_languages" ]]; then
