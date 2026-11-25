@@ -202,6 +202,8 @@ gh workflow run app-store-metadata.yml --ref develop
 gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE_67 -f languages=ja,en -f upload=false
 # クリエイティブアセットのデザインだけを変えたとき（前の実行の 6.9 インチの画面から書き出して配置する。撮り直さない）
 gh workflow run app-store-metadata.yml --ref develop -f screenshots=false -f creative_from_run=<前の実行の ID>,<前の実行の ID> -f languages=ja,en
+# 実行中の回と表示サイズ・言語が重ならない回を、待たずに並べて流す（macOS のランナーを空けないため）
+gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE_DUO -f languages=th -f creative_assets=false -f parallel=true
 ```
 
 - 文面は各見出しの下のコードブロックから読みます。文字数の上限を超えていたら何も登録せずに止まります。`metadata/<言語>.md` が無い言語は飛ばします（ja は無ければ `listing.md` を読みます）
@@ -213,6 +215,7 @@ gh workflow run app-store-metadata.yml --ref develop -f screenshots=false -f cre
 - クリエイティブアセットだけを作り直すときは、`creative_from_run` に 6.9 インチを撮った前の実行の ID（言語を分けて撮ったならカンマ区切りで複数）を入れ、`screenshots` を外して流します。その実行の Artifact（`screenshots-APP_IPHONE_67`）に入っている言語をすべて書き出して配置します（`languages` は掲載文を登録する言語です。絞ると掲載文の登録もその言語だけになります）。ほかの表示サイズの撮り直しと一緒に流すこともできます
 - iPhone Duo は GitHub の標準イメージ `xcode-27`（actions/runner-images の xcode-27-arm64。org で用意するものは無い）で撮ります。イメージに iOS 27.1 のランタイムが無いので、撮影の前にダウンロードします（数分かかります）
 - iPhone Duo は 1 言語に 20 分ほどかかるので、言語ごとに別のジョブで撮ります（screenshots.json の `jobPerLanguage`）
+- 実行は 1 回ずつ流れ、次の回は前の回が終わるまで待ちます（待てるのは 1 回だけで、後から入れた回が待っている回を置き換えます）。`parallel` を入れた回だけは待たずに動くので、実行中の回と表示サイズ・言語が重ならないときだけ使います
 - 1 つの表示サイズ（言語ごとに分けたものは 1 つの言語）の撮影が失敗しても、撮れたぶんと掲載文は登録します。撮った画像は Artifact（`screenshots-<表示サイズ>`。言語ごとに分けたものは `screenshots-<表示サイズ>-<言語>`）にも残ります
 - 指定したバージョンが無ければ、審査前のバージョンの番号を変えます（新規アプリに最初からある「1.0」など）。それも無ければ作ります
 - サポート URL・プライバシーポリシー URL・著作権・App Review の連絡先・カテゴリ・年齢制限・価格・App のプライバシー・ビルドの選択は扱いません。App Store Connect の画面で入れてから審査に提出します（提出もこのワークフローでは行いません）
