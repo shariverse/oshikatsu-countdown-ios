@@ -9,7 +9,7 @@ import SwiftUI
 /// 着せ替え（Plus）の画面。設定画面の「着せ替え」の行から開く。
 ///
 /// - 見本の舞台（`AppearancePreviewStage`）: ホーム・予定の詳細・シェアのカードの見本を大きく置き、選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す
-///   （Plus でなくても試着できる）。見本の下の切り替えと横のスワイプで見本を替える
+///   （Plus でなくても試着できる）。見本の下の切り替えと横のスワイプで見本を替え、「全画面」で全画面の試着（`AppearanceTryOnScreen`）を開く
 /// - 設定のトレー（`AppearanceEditorTray`）: 「背景」と「飾り」のタブに分けた設定
 /// - 見本はスクロールする設定の外に置き、どの設定を変えているときも見えるようにする。幅の狭い画面では見本を上、トレーを下に置き、
 ///   幅の広い画面では見本を左、トレーを右に並べる（`AppearancePreviewLayout`）
@@ -24,8 +24,12 @@ struct AppearanceSettingsScreen: View {
     @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
 
-    /// 映している見本。
+    /// 映している見本。全画面の試着と同じものを切り替える。
     @State private var previewKind = AppearancePreview.Kind.home
+    /// 全画面の試着を出しているか。
+    @State private var isTryingOn = false
+    /// 全画面の試着の「Plus で使う」を押した。全画面が閉じきってから課金画面を開く（重ねて出せないため）。
+    @State private var opensPaywallAfterTryOn = false
 
     var body: some View {
         let oshis = storedOshis.map(OshiConStore.oshi(from:))
@@ -36,7 +40,9 @@ struct AppearanceSettingsScreen: View {
                 ? AnyLayout(HStackLayout(spacing: 0))
                 : AnyLayout(VStackLayout(spacing: 0))
             stack {
-                AppearancePreviewStage(layout: layout, oshis: oshis, kind: $previewKind)
+                AppearancePreviewStage(layout: layout, oshis: oshis, kind: $previewKind) {
+                    isTryingOn = true
+                }
                 AppearanceEditorTray(oshis: oshis, arrangement: layout.arrangement)
             }
         }
@@ -51,6 +57,18 @@ struct AppearanceSettingsScreen: View {
                 plusItem
             }
             .hidingSharedBarBackground()
+        }
+        .fullScreenCover(isPresented: $isTryingOn) {
+            // 全画面が閉じきってから課金画面を開く
+            if opensPaywallAfterTryOn {
+                opensPaywallAfterTryOn = false
+                openPlusPaywall()
+            }
+        } content: {
+            AppearanceTryOnScreen(oshis: oshis, kind: $previewKind) {
+                opensPaywallAfterTryOn = true
+                isTryingOn = false
+            }
         }
         // 見本とトレーに場所を空けるため、開いている間はタブバーを隠す
         .hidesTabBar()

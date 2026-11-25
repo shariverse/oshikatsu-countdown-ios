@@ -15815,6 +15815,40 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto dan pengaturan pilihanmu langsung tampil di pratinjau." } }
       }
     },
+    "全画面" : {
+      "comment" : "着せ替えの画面。全画面の試着を開くボタン",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Full Screen" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "全画面" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "全屏" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "全螢幕" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "전체 화면" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Plein écran" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vollbild" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pantalla completa" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tela cheia" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Schermo intero" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เต็มจอ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Layar Penuh" } }
+      }
+    },
+    "試着中" : {
+      "comment" : "全画面の試着。着せ替えを試している印",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Trying On" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "試着中" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "试穿中" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "試穿中" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "미리 입혀 보는 중" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Essayage" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Anprobe" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Probando" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Experimentando" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "In prova" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "กำลังลองแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sedang Mencoba" } }
+      }
+    },
     "着せ替える前" : {
       "comment" : "全画面の試着。長押ししている間に出す、着せ替える前（標準）の見た目の印と、見本の読み上げの値",
       "localizations" : {
@@ -15830,6 +15864,40 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Prima" } },
         "th" : { "stringUnit" : { "state" : "translated", "value" : "ก่อนตกแต่ง" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Sebelum" } }
+      }
+    },
+    "長押しで、着せ替える前と比べる" : {
+      "comment" : "全画面の試着。長押しで着せ替える前の見た目と比べられることの案内",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Touch and hold to compare with before" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "長押しで、着せ替える前と比べる" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "长按可与换装前对比" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "長按可與換裝前比較" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "길게 눌러 꾸미기 전과 비교" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Maintenez appuyé pour comparer avec l'avant" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gedrückt halten, um mit vorher zu vergleichen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mantén pulsado para comparar con el antes" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Toque e segure para comparar com o antes" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tieni premuto per confrontare con il prima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แตะค้างเพื่อเทียบกับก่อนตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tekan lama untuk membandingkan dengan sebelumnya" } }
+      }
+    },
+    "着せ替える前と比べる" : {
+      "comment" : "全画面の試着。見本の読み上げの操作（着せ替える前の見た目と試着を切り替える）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Compare with before" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "着せ替える前と比べる" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "与换装前对比" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "與換裝前比較" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "꾸미기 전과 비교" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comparer avec l'avant" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit vorher vergleichen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Comparar con el antes" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Comparar com o antes" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Confronta con il prima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เทียบกับก่อนตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Bandingkan dengan sebelumnya" } }
       }
     }
   },
