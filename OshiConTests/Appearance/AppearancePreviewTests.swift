@@ -210,23 +210,18 @@ struct AppearancePreviewTests {
     @Test("全画面の試着の見本の読み上げは、長押ししている間は「着せ替える前」、それ以外は Plus によらず設定のとおり")
     func tryOnAccessibilityValue() {
         let settings = AppearanceSettings(isDecorationEnabled: true, backgroundPhotoFileName: photo)
+        let content = AppearancePreview.content(events: [], oshis: [], today: today, now: now, locale: DomainFixtures.japanese)
+        let value = { (kind: AppearancePreview.Kind, isComparing: Bool, locale: Locale) in
+            AppearancePreview.tryOnAccessibilityValue(of: settings, kind: kind, content: content, isComparing: isComparing, locale: locale)
+        }
         #expect(
-            AppearancePreview.tryOnAccessibilityValue(of: settings, kind: .home, isComparing: false, locale: DomainFixtures.japanese)
+            value(.home, false, DomainFixtures.japanese)
                 == "背景の写真あり、暗幕の濃さ 50%、ぼかしの強さ 40%、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%"
         )
-        #expect(
-            AppearancePreview.tryOnAccessibilityValue(of: settings, kind: .share, isComparing: false, locale: DomainFixtures.japanese)
-                == "背景の写真あり"
-        )
+        #expect(value(.share, false, DomainFixtures.japanese) == "背景の写真あり")
         for kind in AppearancePreview.Kind.allCases {
-            #expect(
-                AppearancePreview.tryOnAccessibilityValue(of: settings, kind: kind, isComparing: true, locale: DomainFixtures.japanese)
-                    == "着せ替える前"
-            )
-            #expect(
-                AppearancePreview.tryOnAccessibilityValue(of: settings, kind: kind, isComparing: true, locale: DomainFixtures.english)
-                    == "Before"
-            )
+            #expect(value(kind, true, DomainFixtures.japanese) == "着せ替える前")
+            #expect(value(kind, true, DomainFixtures.english) == "Before")
         }
     }
 
