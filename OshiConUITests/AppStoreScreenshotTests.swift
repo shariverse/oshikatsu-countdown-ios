@@ -164,25 +164,48 @@ final class AppStoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: 1.5)
     }
 
-    /// ホーム画面に出る。撮影のアプリが裏に回るまで、ホームボタンを 3 回まで押し、それで戻れなければ下の端から上へスワイプする（ホームボタンが効かない iPhone Duo）
-    /// （ホーム画面の 1 ページ目の並びは Simulator ごとに違うので、アイコンではなくアプリの状態で確かめる）。
+    /// ホーム画面に出る。撮影のアプリが裏に回り、ホーム画面のアイコンが見えるまで、ホームボタンを 3 回まで押し、それで戻れなければ下の端から上へスワイプする（ホームボタンが効かない iPhone Duo）
+    /// （ホーム画面の 1 ページ目の並びは Simulator ごとに違うので、どのアイコンかは見ない）。
+    /// アプリが裏に回っただけでは確かめない。遅い CI では、ロックを解くホームボタンと続けて押したことになり、App スイッチャーに入ることがある（アイコンが見えない）
     @MainActor
     private func goHome(from app: XCUIApplication) {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         // スワイプは iPad では App スイッチャーに入ってしまうので、ホームボタンが 3 回とも効かなかったとき（iPhone Duo）だけにする
         for _ in 0..<3 {
             XCUIDevice.shared.press(.home)
-            if leftForeground(app) {
+            if leftForeground(app), showsHomeScreen(springboard) {
                 return
             }
         }
         for _ in 0..<2 {
             swipeUpFromBottom(on: springboard)
-            if leftForeground(app) {
+            if leftForeground(app), showsHomeScreen(springboard) {
                 return
             }
         }
         XCTFail("ホーム画面に出られませんでした")
+    }
+
+    /// ホーム画面のアイコンが画面の中に見えるかを 3 秒まで待つ（App スイッチャーの中では見えない）。
+    @MainActor
+    private func showsHomeScreen(_ springboard: XCUIApplication) -> Bool {
+        let deadline = Date().addingTimeInterval(3)
+        while Date() < deadline {
+            if !iconsOnScreen(of: springboard).isEmpty {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
+    }
+
+    /// 画面の中にあるホーム画面のアイコン（ほかのページのアイコンは除く）。
+    @MainActor
+    private func iconsOnScreen(of springboard: XCUIApplication) -> [XCUIElement] {
+        let bounds = CGRect(origin: .zero, size: XCUIScreen.main.screenshot().image.size)
+        return springboard.icons.allElementsBoundByIndex.filter { icon in
+            !icon.frame.isEmpty && bounds.contains(icon.frame)
+        }
     }
 
     /// 撮影のアプリが前面から外れたか（裏に回ったか、裏で止まったか）を 3 秒まで待つ。
@@ -250,10 +273,11 @@ final class AppStoreScreenshotTests: XCTestCase {
     @MainActor
     private func attachHomeScreenLayout(of springboard: XCUIApplication) {
         let screen = XCUIScreen.main.screenshot().image.size
-        let bounds = CGRect(origin: .zero, size: screen)
-        // 画面の外（ほかのページ）のアイコンは除く
-        let elements: [XCUIElement] = springboard.icons.allElementsBoundByIndex.filter { icon in
-            !icon.frame.isEmpty && bounds.contains(icon.frame)
+        let elements = iconsOnScreen(of: springboard)
+        // アイコンが無いと重ねる位置を決められない（scripts/render-app-store-screenshots.sh が止まる）ので、ここで失敗にして撮り直させる
+        guard !elements.isEmpty else {
+            XCTFail("ホーム画面のアイコンが見つかりませんでした")
+            return
         }
         let icons: [[String: Any]] = elements.map { icon in
             let frame = icon.frame
