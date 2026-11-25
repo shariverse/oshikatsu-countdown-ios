@@ -5,10 +5,10 @@
 
 import SwiftUI
 
-/// 着せ替えの画面に置くホームの見本（試着）。ホームの部品（先頭のカード・予定の行）を iPhone の縦の画面の大きさで組み、縮めて見せる。
+/// 着せ替えの見本のホーム（試着）。ホームの部品（絞り込み・先頭のカード・予定の行）を組み、地に選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す。
 ///
-/// 地は `AppearanceScreenBackground` で、選んだ写真・ON/OFF・強さをその場で映す。見本は 1 枚の絵として読み上げ、押せない。
-/// 見本の中の文字の大きさは、画面のダイナミックタイプによらず標準の大きさにする（縮めた絵なので、大きくすると崩れる）。
+/// 着せ替えの画面では iPhone の縦の画面の大きさで組んで縮め（`AppearancePhoneFrame`）、全画面の試着では画面の大きさのまま出す。
+/// 押せなくするのと、読み上げを 1 つの要素にまとめるのは、置く側（`AppearancePreviewCarousel`・`AppearanceTryOnScreen`）が受け持つ。
 struct AppearanceHomePreview: View {
     let rendering: AppearanceRendering
     let content: HomeContent
@@ -16,47 +16,21 @@ struct AppearanceHomePreview: View {
     let decorationOshis: [Oshi]
     /// 背景の写真の置き場所（`AppearanceStore.photos`）。
     let photos: OshiPhotoLibrary
-    /// 見本を見せる幅（pt）。高さは縦横の比（`AppearancePreview.canvasSize`）から決まる。
-    let width: CGFloat
-
-    @Environment(\.appTheme) private var theme
-    @Environment(\.displayScale) private var displayScale
-
-    /// 見本の上の、ステータスバーの分の余白（pt）。
-    private let topInset: CGFloat = 54
-    /// 見本の角の丸み（pt。縮める前のホームの大きさで数える）。見本を小さく見せても、端末の角のような形を保つ。
-    private let canvasCornerRadius: CGFloat = 52
+    /// 中身の上に空ける高さ（pt）。ステータスバーとバーの分。地はこの余白の下にも敷く。
+    var topInset: CGFloat = AppearancePreview.canvasTopInset
+    /// 中身の左右に足す幅（pt）。横向きの全画面で、安全領域の外に文字を出さない。
+    var horizontalInset: CGFloat = 0
 
     var body: some View {
-        let canvas = AppearancePreview.canvasSize
-        let factor = AppearancePreview.displayScaleFactor(width: width)
-        let size = CGSize(width: canvas.width * factor, height: canvas.height * factor)
-        let cornerRadius = canvasCornerRadius * factor
         home
             // 実際のホームと同じく、背景の写真・飾りの上では見出しの後ろに板を敷く
             .environment(\.isOverAppearancePhoto, rendering.drawsPhotosOnGround)
-            .frame(width: canvas.width, height: canvas.height, alignment: .top)
+            // 実際のホームと同じく、広い画面でも読みやすい幅に収める
+            .frame(maxWidth: 720)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background {
                 AppearanceScreenBackground(rendering: rendering, oshis: decorationOshis, photos: photos)
-                    // 縮めて見せるので、写真は見せる大きさに合わせて読む
-                    .environment(\.displayScale, displayScale * factor)
             }
-            .clipped()
-            .dynamicTypeSize(.large)
-            .environment(\.horizontalSizeClass, .compact)
-            .environment(\.verticalSizeClass, .regular)
-            .scaleEffect(factor, anchor: .topLeading)
-            .frame(width: size.width, height: size.height, alignment: .topLeading)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(theme.palette.outlineVariant.color)
-            }
-            .allowsHitTesting(false)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("ホームの見本"))
-            .accessibilityValue(Text(AppearancePreview.accessibilityValue(of: rendering)))
-            .accessibilityIdentifier("appearance.preview")
     }
 
     private var home: some View {
@@ -78,6 +52,7 @@ struct AppearanceHomePreview: View {
             }
         }
         .padding(.horizontal)
+        .padding(.horizontal, horizontalInset)
         .padding(.top, topInset)
     }
 }
@@ -91,24 +66,26 @@ private enum AppearanceHomePreviewSample {
 }
 
 #Preview("標準") {
-    AppearanceHomePreview(
-        rendering: .standard,
-        content: AppearanceHomePreviewSample.content,
-        decorationOshis: [],
-        photos: .shared,
-        width: 180
-    )
+    AppearancePhoneFrame(width: 180) {
+        AppearanceHomePreview(
+            rendering: .standard,
+            content: AppearanceHomePreviewSample.content,
+            decorationOshis: [],
+            photos: .shared
+        )
+    }
     .padding()
 }
 
 #Preview("飾り（ダーク）") {
-    AppearanceHomePreview(
-        rendering: AppearanceRendering(backgroundPhoto: nil, decoration: .default),
-        content: AppearanceHomePreviewSample.content,
-        decorationOshis: [Oshi(name: "ミナト", color: .navy)],
-        photos: .shared,
-        width: 180
-    )
+    AppearancePhoneFrame(width: 180) {
+        AppearanceHomePreview(
+            rendering: AppearanceRendering(backgroundPhoto: nil, decoration: .default),
+            content: AppearanceHomePreviewSample.content,
+            decorationOshis: [Oshi(name: "ミナト", color: .navy)],
+            photos: .shared
+        )
+    }
     .padding()
     .preferredColorScheme(.dark)
 }
