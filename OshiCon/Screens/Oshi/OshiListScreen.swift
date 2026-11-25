@@ -6,9 +6,12 @@
 import SwiftData
 import SwiftUI
 
-/// 推しの一覧。並び順に、アバター・名前・予定の件数を並べる。押すと編集、「推しを登録」で登録のシートを開く。
+/// 推しの一覧。並び順に、1 位の推しを大きいカード（チェキの写真・「1 位」のリボン・次の予定と残り日数・予定の件数）で、
+/// 2 位からの推しを行（缶バッジのアバター・名前・次の予定と日付・残り日数）で並べる。押すと編集、「推しを登録」で登録のシートを開く。
+/// 1 分ごと（分の変わり目）に今日を確かめ、日付が変わったら次の予定と残り日数を数え直す。
+///
 /// 「並べ替え」で並べ替えの状態にし、行をドラッグして順番を入れ替える（いちばん上が 1 位の推し）。並べ替えの間は、読み上げの行の操作「上に移動」「下に移動」でも入れ替えられる。
-/// 並べ替えの間は、ふつうの一覧と見分けられるよう、一覧の上に案内・各行に順位を出し、「この順番で確定」を塗りのボタンにする。
+/// 並べ替えの間は、ふつうの一覧と見分けられるよう、カードをやめて同じ形の行のリストにし、一覧の上に案内・各行に順位を出し、「この順番で確定」を塗りのボタンにする。
 struct OshiListScreen: View {
     @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
@@ -48,8 +51,14 @@ struct OshiListScreen: View {
         Group {
             if storedOshis.isEmpty {
                 emptyView
+            } else if editMode.isEditing {
+                reorderList
+                    .transition(.opacity)
             } else {
-                list
+                TimelineView(.everyMinute) { context in
+                    cards(makeContent(now: context.date))
+                }
+                .transition(.opacity)
             }
         }
         .background(theme.palette.background.color.ignoresSafeArea())
@@ -92,47 +101,94 @@ struct OshiListScreen: View {
         }
     }
 
-    private var list: some View {
+    private func makeContent(now: Date) -> OshiListContent {
+        // 件数と次の予定は、関係の配列ではなく予定の一覧から数える（予定の付け替えの直後でも保存した中身どおりにする）。
+        // 端末のタイムゾーンを変えたときも、次の分の変わり目からその日付で数える
+        OshiListContent(
+            oshis: storedOshis.map(OshiConStore.oshi(from:)),
+            events: storedEvents.compactMap(OshiConStore.event(from:)),
+            now: now,
+            calendar: .autoupdatingCurrent
+        )
+    }
+
+    /// ふつうの一覧。1 位の推しのカードと、2 位からの推しの行のまとまり。
+    private func cards(_ content: OshiListContent) -> some View {
+        ScrollView {
+            VStack(spacing: 14) {
+                if let top = content.top {
+                    editButton(for: top.oshi, label: top.topAccessibilityLabel) {
+                        OshiTopCard(row: top)
+                    }
+                }
+                if !content.others.isEmpty {
+                    VStack(spacing: 0) {
+                        ForEach(Array(content.others.enumerated()), id: \.element.id) { index, row in
+                            if index > 0 {
+                                Divider()
+                                    .padding(.leading, 72)
+                            }
+                            editButton(for: row.oshi, label: row.accessibilityLabel) {
+                                OshiNextEventRow(row: row)
+                            }
+                        }
+                    }
+                    .background(theme.palette.surface.color, in: RoundedRectangle(cornerRadius: theme.shape.section))
+                    .themeCardBorder(RoundedRectangle(cornerRadius: theme.shape.section))
+                }
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            // 広い画面でも読みやすい幅に収める
+            .frame(maxWidth: 720)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    /// 押すと編集を開くカード・行。読み上げはボタンそのものに付け、中の文字を別々に読ませない。
+    private func editButton(for oshi: Oshi, label: String, @ViewBuilder content: () -> some View) -> some View {
+        Button {
+            editorTarget = .edit(oshi)
+        } label: {
+            content()
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityHint(Text("編集する"))
+        .accessibilityIdentifier("oshiList.row")
+    }
+
+    /// 並べ替えの状態の一覧。行をドラッグして順番を入れ替える。
+    private var reorderList: some View {
         // 件数は関係の配列ではなく予定の一覧から数える（予定の付け替えの直後でも保存した中身どおりにする）
         let eventCounts = Dictionary(grouping: storedEvents.compactMap { $0.oshi?.id }, by: \.self).mapValues(\.count)
         return List {
-            if editMode.isEditing {
-                Section {
-                    OshiReorderGuide()
-                        .listRowBackground(theme.palette.brandContainer.color)
-                        .accessibilityIdentifier("oshiList.reorderGuide")
-                }
+            Section {
+                OshiReorderGuide()
+                    .listRowBackground(theme.palette.brandContainer.color)
+                    .accessibilityIdentifier("oshiList.reorderGuide")
             }
             Section {
                 ForEach(Array(storedOshis.enumerated()), id: \.element.id) { index, stored in
-                    let oshi = OshiConStore.oshi(from: stored)
-                    Button {
-                        // 並べ替えの間は、行を押しても編集を開かない
-                        if !editMode.isEditing {
-                            editorTarget = .edit(oshi)
-                        }
-                    } label: {
-                        OshiRow(
-                            oshi: oshi,
-                            eventCount: eventCounts[oshi.id, default: 0],
-                            rank: editMode.isEditing ? index + 1 : nil
+                    // 並べ替えの間は、行を押しても編集を開かない
+                    Button {} label: {
+                        OshiReorderRow(
+                            oshi: OshiConStore.oshi(from: stored),
+                            eventCount: eventCounts[stored.id, default: 0],
+                            rank: index + 1
                         )
                     }
                     .themeRowBackground()
                     .accessibilityIdentifier("oshiList.row")
-                    // 入れ替えるのは並べ替えの間だけ（ドラッグも読み上げの操作も）。ふつうの一覧では行を押すと編集を開く
-                    .moveDisabled(!editMode.isEditing)
                     .accessibilityActions {
-                        if editMode.isEditing {
-                            if index > 0 {
-                                Button("上に移動") {
-                                    move(from: IndexSet(integer: index), to: index - 1)
-                                }
+                        if index > 0 {
+                            Button("上に移動") {
+                                move(from: IndexSet(integer: index), to: index - 1)
                             }
-                            if index < storedOshis.count - 1 {
-                                Button("下に移動") {
-                                    move(from: IndexSet(integer: index), to: index + 2)
-                                }
+                        }
+                        if index < storedOshis.count - 1 {
+                            Button("下に移動") {
+                                move(from: IndexSet(integer: index), to: index + 2)
                             }
                         }
                     }
@@ -179,26 +235,23 @@ struct OshiListScreen: View {
     }
 }
 
-/// 推しの一覧の行。並べ替えの間（`rank` がある）は、左に順位を出し、編集を開く印（＞）と案内を出さない。
-private struct OshiRow: View {
+/// 並べ替えの間の行。左に順位、缶バッジのアバター・名前・予定の件数を出す。編集を開く印（＞）と案内は出さない。
+private struct OshiReorderRow: View {
+    /// アバターの一辺。
+    private static let avatarSize: CGFloat = 48
+
     let oshi: Oshi
     let eventCount: Int
-    /// 並べ替えの間だけ渡す順位（1 から）。
-    let rank: Int?
+    /// 順位（1 から）。
+    let rank: Int
 
     @Environment(\.appTheme) private var theme
 
-    private var isReordering: Bool {
-        rank != nil
-    }
-
     var body: some View {
         HStack(spacing: 12) {
-            if let rank {
-                OshiRankBadge(rank: rank)
-                    .transition(.opacity)
-            }
-            OshiPhotoAvatar(oshi: oshi, size: 48)
+            OshiRankBadge(rank: rank)
+            OshiPhotoAvatar(oshi: oshi, size: Self.avatarSize)
+                .canBadgeStyle(color: oshi.color, size: Self.avatarSize)
             VStack(alignment: .leading, spacing: 2) {
                 Text(oshi.name)
                     .font(theme.typography.text(.body, weight: .bold))
@@ -208,17 +261,10 @@ private struct OshiRow: View {
                     .foregroundStyle(theme.palette.onSurfaceVariant.color)
             }
             Spacer(minLength: 0)
-            if !isReordering {
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
-                    .accessibilityHidden(true)
-            }
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityHint(isReordering ? Text(verbatim: "") : Text("編集する"))
     }
 }
 
