@@ -264,19 +264,19 @@ private struct TicketTag: View {
     }
 }
 
-/// ホームの予定の行。アバター・タイトル・補足と、右に残り日数を推し色で出す。
+/// ホームの予定の行。缶バッジ風のアバター・タイトル・補足と、右に残り日数を推し色で出す（当日は「今日！」の札）。
 struct HomeEventRow: View {
+    /// アバターの一辺。
+    private static let avatarSize: CGFloat = 44
+
     let item: HomeContent.Item
 
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         HStack(spacing: 12) {
-            if let oshi = item.oshi {
-                OshiPhotoAvatar(oshi: oshi, size: 44)
-            } else {
-                OshiAvatar(name: item.event.title, color: item.color, size: 44)
-            }
+            avatar
+                .canBadgeStyle(color: item.color, size: Self.avatarSize)
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.event.title)
                     .font(theme.typography.text(.body, weight: .bold))
@@ -294,17 +294,27 @@ struct HomeEventRow: View {
                 mutedColor: theme.palette.onSurfaceVariant.color,
                 numberFont: theme.typography.countdownSmall,
                 unitFont: theme.typography.text(.caption, weight: .bold),
-                showsPrefix: false
+                showsPrefix: false,
+                todayPillColor: item.color
             )
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
     }
+
+    @ViewBuilder private var avatar: some View {
+        if let oshi = item.oshi {
+            OshiPhotoAvatar(oshi: oshi, size: Self.avatarSize)
+        } else {
+            OshiAvatar(name: item.event.title, color: item.color, size: Self.avatarSize)
+        }
+    }
 }
 
 /// 残り日数。これからは数字と「日」（先頭のカードは「あと N 日」）、当日は「今日！」、終わった予定は「N 日前」。
 /// 数字の前後の文言は言語で変わる（en は `3 days`・`3 days left`）。
+/// `todayPillColor` を渡すと、当日の「今日！」を推し色の札（`TodayPill`）で出す。
 struct DaysCountdownView: View {
     let scheduled: ScheduledEvent
     let color: Color
@@ -312,15 +322,21 @@ struct DaysCountdownView: View {
     let numberFont: Font
     let unitFont: Font
     let showsPrefix: Bool
+    /// 当日の「今日！」を札で出すときの推し色。nil なら `color` の文字で出す（先頭のカード）。
+    var todayPillColor: OshiColor?
 
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         switch scheduled.status {
         case .today:
-            Text("今日！")
-                .font(unitFont)
-                .foregroundStyle(color)
+            if let todayPillColor {
+                TodayPill(color: todayPillColor)
+            } else {
+                Text("今日！")
+                    .font(unitFont)
+                    .foregroundStyle(color)
+            }
         case .ended:
             Text(EventText.countdown(daysUntil: scheduled.daysUntil, status: .ended))
                 .font(theme.typography.text(.subheadline))
