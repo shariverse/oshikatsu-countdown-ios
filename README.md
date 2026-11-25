@@ -52,50 +52,6 @@ SwiftUI のプロジェクト一式と、ビルド・テスト・Archive・TestF
 
 ## テンプレートの使い方
 
-### 11. テーマ
-
-出荷するアプリとウィジェットは、Discussion #80 のテーマ案から採用した「地雷系・ゴシック」（`AppTheme.shipping` = `AppTheme.jiraiGothic`）だけを使います。
-採用しなかった案は片付け、アイデアは shilokuma-inc/design-knowledge に残しました。配色・書体・コントラストと、採用でしたこと・残っていることは [docs/design/themes.md](docs/design/themes.md) にまとめています。
-
-- **Preview**: `OshiCon/Screens/ThemePreviews/JiraiGothicPreviews.swift` にあります（ホーム・予定の詳細・予定の追加・ウィジェット 2 種を、ライトとダーク・大きな文字・横向きで）。
-  どれも `ThemePreviewCanvas(<テーマ>, <画面>, <外観>)` で描き、日本語の見本の推しと予定をメモリ上のストアに入れます。
-  テーマの日本語の書体はアプリの言語が日本語のときだけ使われるので、Scheme の Run の Options の App Language を日本語にして見ます。
-  ウィジェット 3 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)`・`photo(_:family:photo:renderingMode:theme:)` で、ウィジェットの大きさの枠に入れて描けます（推しの写真は tinted の描き方も渡せます）
-- **書体**: Kaisei Decol（SIL OFL 1.1）は google/fonts から取得したものを改変せずに `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts`・オープンソースライセンスの画面に載せています
-- **ナビゲーションバーのタイトル**: 日本語のときだけ Kaisei Decol の太字にし、ほかの言語はシステムの書体のままです（バーの外観で書体だけを替える。`OshiCon/App/NavigationBarAppearance.swift`）。ホームのバーにはタイトルの文字を出しません（Discussion #148。決まりは [docs/design/themes.md](docs/design/themes.md)）
-
-### 12. 推しの写真の調整
-
-推しの登録・編集で写真を選ぶと、調整画面（拡大・縮小・移動・回転）で丸の枠に写す範囲を決めてから取り込みます（Discussion #128）。仕様とコードの場所は [docs/photo-crop.md](docs/photo-crop.md) にまとめています。
-
-- 正方形に切り抜いた画像（一辺 1440px まで）だけを保存します。予定の詳細の横長の写真は、その正方形の中央の帯を出します
-- 拡大は、切り抜く範囲の一辺が元の写真の 360px を下回らないところまで。回転しても枠の隅が空かないよう補正します
-- この機能より前に登録した写真はそのまま残します。保存してある写真は「位置を調整」で、さらに狭める調整だけができます
-- 仕様の正は [docs/spec/features/07-photo-crop.md](docs/spec/features/07-photo-crop.md)（仕様リポジトリ app-specs から生成したもの）です
-- UI テストでは、起動引数 `-useTestPhoto`（`-useInMemoryStore` のときだけ効く）で「写真を選ぶ」を生成した画像を選ぶボタンに替えます（`PhotosPicker` は UI テストから操作できないため）
-
-### 13. 画像でシェア
-
-予定の詳細のツールバーの「画像でシェア」から、予定の「あと○日」を正方形のカードの画像（1080 × 1080 px の PNG）にして共有シートで渡します（1.3.0 から。無料）。仕様とコードの場所は [docs/share-card.md](docs/share-card.md) にまとめています。
-
-- コードは `OshiCon/Share/` にあります（中身の規則 `ShareCardContent`・見た目の差し替え口 `ShareCardStyle`・カード `ShareCardView`・書き出し `ShareCardRenderer`・プレビュー画面 `ShareCardPreviewScreen`）
-- プレビュー画面で会場（既定で載せない）と推しの写真（既定で載せる）を切り替えてからシェアします。推しの名前は載せず、透かしに言語ごとのブランド名（App Store の名前のコロンより前）を入れます
-- 画像は端末の中で作り、通信しません。共有シートの「画像を保存」のため、Info.plist に `NSPhotoLibraryAddUsageDescription`（写真への追加の説明）を置いています
-- Plus の人で着せ替えの背景の写真を ON にしていると、`ShareCardStyle` の `background` を `.photo(fileName:)` にしてカードの地をその写真に替えます（`ShareCardStyle.appearance(_:)`）
-- テスト: Unit は `OshiConTests/Share/`（`ShareCardContentTests`・`ShareCardRendererTests`・`ShareCardSharingTests`）、UI は `OshiConUITests/ShareCardUITests`（`-useInMemoryStore -useTestPhoto`。識別子は `eventDetail.share`・`shareCard.preview`・`shareCard.includesVenue`・`shareCard.includesPhoto`・`shareCard.share`）。共有シートそのものは UI テストから開けません
-
-### 14. 着せ替え（Plus）
-
-推し活カウントダウン Plus で、ホームと予定の詳細の地を着せ替えます（1.3.0 から）。仕様・コードの場所・テストの口・実機で確かめることは [docs/appearance.md](docs/appearance.md) にまとめています。
-
-- **背景**: アプリ全体で 1 枚の写真を約 9:19.5 の縦長の枠で調整して保存し、暗幕とぼかし（それぞれスライダーで調整）を掛けて地に敷きます。幕の色はライトでは地の色、ダークでは黒です。iPad と横向きでは写真を中央に置き、左右を同じ写真の強いぼかしで埋めます
-- **飾り**: 地のハートと十字を、写真を登録した推しの丸い写真に順に替えます（写真の無い推しのところは今の模様のまま）
-- コードは `OshiCon/Appearance/`（規則・ストア・地の View）と `OshiCon/Screens/Appearance/`（着せ替えの画面・ホームの見本）にあります。
-  設定は UserDefaults（`AppStorageKey.appearance*`）、背景の写真は推しの写真と同じ App Group の置き場所に置き、SwiftData のスキーマは変えていません
-- 設定画面の「着せ替え」の行は、Plus の行と同じく 1.3.0 から App Store 版でも出します（`PlusEntryPolicy`）。Plus でない人も写真を選んで試着・保存でき、Plus でなければホームと詳細は標準の見た目のままです（写真と設定は残します）
-- テスト: Unit は `OshiConTests/Appearance/`、UI は `OshiConUITests/AppearanceUITests`（`-useInMemoryStore -useTestPhoto` と `-plusLocked`・`-plusUnlocked`・`-simulateAppStoreDistribution`）。
-  ホームと詳細に効いたかは、メモリ上のストアのときだけ置く `home.appearance`・`eventDetail.appearance` のラベルで確かめます
-
 ### 15. ウィジェット
 
 ホーム画面のウィジェットは 3 種です。Widget と TimelineProvider は `OshiConWidget/`、中身の規則と View は `Shared/Widget/` にあります（View はアプリの Preview でも描きます）。

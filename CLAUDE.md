@@ -58,7 +58,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - ナビゲーションバーのタイトルも日本語だけテーマの書体の太字。書体を決めるのは `Shared/Design/BarTitleFace.swift`、バーの外観に入れるのは `OshiCon/App/NavigationBarAppearance.swift`（起動時に 1 回。`.font` だけを替え、地には触れない）。ホームのバーはタイトルの文字を出さない（`.navigationTitle` は読み上げ用に残す。Discussion #148）
   - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
     画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
-  - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。書体を足したらオープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。見方は README の「テーマ」
+  - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。書体を足したらオープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。見方は `docs/design/themes.md` の「見方」
   - Form・List の行の地は `themeRowBackground()` でテーマのカードの地（`surface`）にする（システムの既定の地のままにしない）
   - 出荷するテーマの狙い・配色・書体・コントラストと、採用でしたこと・残っていること（デザインキャンバスなど）は `docs/design/themes.md`（テーマの仕様の正は `docs/spec/design/jirai-gothic.md`）
 - 推しの写真は、選んだら調整画面（拡大・縮小・移動・回転）で丸の範囲を決め、正方形に切り抜いた画像だけを保存する（スキーマは変えない）。仕様の正は `docs/spec/features/07-photo-crop.md`。コードの場所・テストの口（`-useTestPhoto`）・iOS だけの実装の参考は `docs/photo-crop.md`

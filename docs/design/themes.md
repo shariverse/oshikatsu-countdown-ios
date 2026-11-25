@@ -28,6 +28,8 @@
 ## 見方
 
 - **Preview**: `OshiCon/Screens/ThemePreviews/JiraiGothicPreviews.swift`（ホーム・予定の詳細・予定の追加・ウィジェット 2 種を、ライト / ダーク・大きな文字・横向きで）。日本語の書体を見るときは、Scheme の Run の Options の App Language を日本語にします
+  - どれも `ThemePreviewCanvas(<テーマ>, <画面>, <外観>)` で描き、日本語の見本の推しと予定をメモリ上のストアに入れます
+  - ウィジェット 3 種は `OshiCon/Screens/WidgetPreviews/WidgetPreviewFrame.swift` の `WidgetPreview.countdown(_:theme:)`・`upcoming(_:theme:)`・`photo(_:family:photo:renderingMode:theme:)` で、ウィジェットの大きさの枠に入れて描けます（推しの写真は tinted の描き方も渡せます）
 
 ## 地雷系・ゴシック（`jiraiGothic`）
 
