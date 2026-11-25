@@ -167,9 +167,11 @@ final class OshiConUITests: XCTestCase {
         let cells = app.cells.containing(.button, identifier: "oshiList.row")
         let handle = cells.element(boundBy: 2).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5))
         let top = cells.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.2))
-        handle.press(forDuration: 0.5, thenDragTo: top)
+        // ゆっくり引き、いちばん上で止めてから離す。遅い CI の Simulator では、着いてすぐ指を離すと、
+        // ほかの行がよける前に落ちて 2 位に入った（#317）。落とした後に一覧が並べ替えた順になるまでも、4 秒ほどかかった
+        handle.press(forDuration: 0.5, thenDragTo: top, withVelocity: .slow, thenHoldForDuration: 1)
         let first = rows.element(boundBy: 0)
-        let deadline = Date().addingTimeInterval(5)
+        let deadline = Date().addingTimeInterval(10)
         while !first.label.contains("レオ"), Date() < deadline {
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
         }
