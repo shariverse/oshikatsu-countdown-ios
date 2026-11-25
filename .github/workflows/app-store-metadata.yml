@@ -8,7 +8,8 @@ name: App Store Metadata
 # （リポジトリに大きな画像を置かない。見出しを付けるのに Google Chrome を使う）。撮るのが遅い表示サイズ（screenshots.json の jobPerLanguage）は、言語ごとにも分ける。
 # iPhone Duo は GitHub の標準イメージ xcode-27 で撮る（Xcode 27 と iOS 27.1 のランタイムが要る。ランタイムは scripts/app-store-screenshots.sh が入れる）。
 # クリエイティブアセット（プロダクトページのヘッダー / 検索結果）は、6.9 インチのスクリーンショットから scripts/render-creative-assets.sh で書き出し、
-# App Asset Library に上げて言語ごとのローカリゼーションに配置する。
+# App Asset Library に上げて言語ごとのローカリゼーションに配置する。creative_from_run に前の実行の ID（カンマ区切りで複数）を入れると、撮り直さずに
+# その実行の 6.9 インチのスクリーンショットから書き出す（デザインだけを変えたとき）。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリなどは入れないので、App Store Connect の画面で入れる。
 # 審査への提出は行わないので、提出は App Store Connect の画面から行う。
 on:
@@ -31,19 +32,29 @@ on:
         type: boolean
         default: true
       creative_assets:
-        description: ヘッダー / 検索結果のクリエイティブアセットを書き出して配置する（6.9 インチのスクリーンショットを撮るときだけ）
+        description: ヘッダー / 検索結果のクリエイティブアセットを書き出して配置する（6.9 インチのスクリーンショットを撮るとき、または creative_from_run を入れたとき）
         type: boolean
         default: true
+      creative_from_run:
+        description: クリエイティブアセットの元にする 6.9 インチのスクリーンショットを撮った、前の実行の ID（カンマ区切りで複数。空ならこの実行で撮ったもの）
+        type: string
+        default: ''
       upload:
         description: App Store Connect に登録する（外すと撮るだけ）
         type: boolean
         default: true
+      parallel:
+        description: 実行中の回を待たずに動かす（表示サイズと言語が、実行中の回と重ならないときだけ）
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+# 同じスクリーンショットを同時に消して上げ直さないよう、1 回ずつ流す。parallel を入れた回だけ、実行ごとの別のグループにして待たない
+# （表示サイズと言語が重ならなければ、登録する画像の組が別なので取り合わない。掲載文は同じ文面を書くだけ）
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}${{ inputs.parallel && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: false
 
 jobs:
@@ -139,10 +150,14 @@ jobs:
 
   creative:
     needs: [plan, screenshots]
-    # 6.9 インチのスクリーンショットを撮ったときだけ（撮影が一部失敗しても、撮れていれば書き出す）
-    if: ${{ always() && inputs.creative_assets && contains(needs.plan.outputs.matrix, 'APP_IPHONE_67') }}
+    # 6.9 インチのスクリーンショットを撮ったとき（撮影が一部失敗しても、撮れていれば書き出す）か、前の実行のものを使うとき
+    if: ${{ always() && inputs.creative_assets && needs.plan.result == 'success' && (inputs.creative_from_run != '' || contains(needs.plan.outputs.matrix, 'APP_IPHONE_67')) }}
     runs-on: macos-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      # 前の実行の Artifact を読む
+      actions: read
 
     steps:
       - name: Select Xcode
@@ -155,12 +170,30 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Download 6.9 inch screenshots
+        if: ${{ inputs.creative_from_run == '' }}
         uses: actions/download-artifact@v8
         with:
           name: screenshots-APP_IPHONE_67
           path: ${{ runner.temp }}/app-store-screenshots
 
+      - name: Download 6.9 inch screenshots from earlier runs
+        # 言語を分けて撮った回が複数あるときは、それぞれの Artifact を 1 つのフォルダにまとめる（言語のフォルダは重ならない）
+        if: ${{ inputs.creative_from_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_IDS: ${{ inputs.creative_from_run }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/app-store-screenshots"
+          for run_id in ${RUN_IDS//,/ }; do
+            [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "::error::creative_from_run は実行の ID（数字）をカンマ区切りで入れてください: ${run_id}"; exit 1; }
+            gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name screenshots-APP_IPHONE_67 --dir "$RUNNER_TEMP/earlier-runs/$run_id"
+            cp -R "$RUNNER_TEMP/earlier-runs/$run_id/." "$RUNNER_TEMP/app-store-screenshots/"
+          done
+          find "$RUNNER_TEMP/app-store-screenshots" -mindepth 2 -maxdepth 2 -type d | sort
+
       - name: Render creative assets
+        # 撮ってある言語すべて（前の実行のものなら、その実行で撮った言語）を書き出す
         run: scripts/render-creative-assets.sh "$RUNNER_TEMP/app-store-screenshots/APP_IPHONE_67" "$RUNNER_TEMP/creative-assets"
 
       - name: Upload creative assets to GitHub
