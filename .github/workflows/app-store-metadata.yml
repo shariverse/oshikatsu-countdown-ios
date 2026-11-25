@@ -194,8 +194,11 @@ jobs:
           find "$RUNNER_TEMP/app-store-screenshots" -mindepth 2 -maxdepth 2 -type d | sort
 
       - name: Render creative assets
-        # 撮ってある言語すべて（前の実行のものなら、その実行で撮った言語）を書き出す
-        run: scripts/render-creative-assets.sh "$RUNNER_TEMP/app-store-screenshots/APP_IPHONE_67" "$RUNNER_TEMP/creative-assets"
+        # この実行で撮ったものは、撮れた言語をすべて書き出す（撮れなかった言語があっても止めない）。
+        # 前の実行のものは、languages を入れればその言語だけ（1 つの言語だけやり直すとき）、空ならその実行で撮った言語をすべて書き出す
+        env:
+          LANGUAGES: ${{ inputs.creative_from_run != '' && inputs.languages || '' }}
+        run: scripts/render-creative-assets.sh "$RUNNER_TEMP/app-store-screenshots/APP_IPHONE_67" "$RUNNER_TEMP/creative-assets" "$LANGUAGES"
 
       - name: Upload creative assets to GitHub
         uses: actions/upload-artifact@v7
