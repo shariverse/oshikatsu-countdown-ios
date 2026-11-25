@@ -174,7 +174,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - コミット: `[type] 日本語の説明`（type は `feat` / `fix` / `refactor` / `chore` / `update`、補助的に `docs` / `test` / `ci`）。1 コミット = 1 つの論理的変更
 - PR タイトル: `【TYPE】日本語の説明`。本文は `.github/pull_request_template.md` に従い、Assignee に自分を設定する
 - コミットメッセージ・PR 本文・コメントに `Co-Authored-By` や「Generated with Claude Code」などの AI の帰属行を入れない
-- UI の見た目が変わる PR は、Simulator のスクリーンショットを `gh pr create --attach` で添付する（README の「PR 本文のスクリーンショット」）
+- UI の見た目が変わる PR は、Simulator のスクリーンショットを `gh pr create --attach` で添付する（`docs/pr-screenshots.md`）
 
 ## コードレビュー観点
 
