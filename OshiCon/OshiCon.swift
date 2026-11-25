@@ -29,8 +29,9 @@ struct OshiCon: App {
         appearance = AppearanceStore.forLaunch()
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
+        var sampleOshiIDs: [SampleData.Role: Oshi.ID] = [:]
         if LaunchOptions.seedsSampleData, case let .success(container) = container {
-            Self.seedSampleData(into: container)
+            sampleOshiIDs = Self.seedSampleData(into: container)
         }
         reminders = (try? container.get()).map { ReminderScheduler(container: $0) }
         liveActivities = (try? container.get()).map { LiveActivityScheduler(container: $0) }
@@ -40,12 +41,19 @@ struct OshiCon: App {
         if LaunchOptions.appliesSampleAppearance, let directory = LaunchOptions.sampleOshiPhotosDirectory {
             Self.applySampleAppearance(to: appearance, photosIn: directory)
         }
+        if let role = LaunchOptions.sampleOshiBackground,
+           let oshiID = sampleOshiIDs[role],
+           let directory = LaunchOptions.sampleOshiPhotosDirectory {
+            Self.applySampleOshiBackground(to: appearance, role: role, oshiID: oshiID, photosIn: directory)
+        }
     }
 
     /// 見本の推しと予定を入れる（メモリ上のストアのときだけ呼ぶ）。名前と予定名は画面の言語（`-AppleLanguages` で変えられる）で選ぶ。
     /// 端末の言語ではなくアプリが選んだ言語（`Locale.app`）にし、文言と見本の言語をそろえる。
     /// App Store 用スクリーンショットでは、UI テストから渡された写真を見本の推しに付ける（`LaunchOptions.sampleOshiPhotosDirectory`）。
-    private static func seedSampleData(into container: ModelContainer) {
+    /// 入れた見本の推しの id を、役どころごとに返す（推しごとの背景の写真を入れるのに使う）。
+    @discardableResult
+    private static func seedSampleData(into container: ModelContainer) -> [SampleData.Role: Oshi.ID] {
         let now = Date.now
         let calendar = Calendar.autoupdatingCurrent
         var sample = SampleData.make(today: CalendarDay(now, calendar: calendar), now: now, locale: .app)
@@ -55,27 +63,52 @@ struct OshiCon: App {
         if let directory = LaunchOptions.sampleOshiPhotosDirectory {
             sample = SampleData.attachingPhotos(to: sample, from: directory, library: .shared)
         }
+        // 推しは役どころの並びで作るので、並べ替えの前に役どころと結び付ける
+        let oshiIDs = Dictionary(uniqueKeysWithValues: zip(SampleData.Role.allCases, sample.oshis.map(\.id)))
         // 写真は役どころの並びで付けるので、並べ替えは写真を付けた後にする
         if let role = LaunchOptions.sampleTopOshi {
             sample = sample.movingToTop(role)
         }
         SampleData.insert(sample, into: container.mainContext, now: now)
+        return oshiIDs
     }
 
     /// 着せ替えに、見本のいちばん上の推し（アイドルグループ）の写真を背景に敷き、飾りを入れる（App Store 用スクリーンショット。`LaunchOptions.appliesSampleAppearance`）。
     private static func applySampleAppearance(to appearance: AppearanceStore, photosIn directory: URL) {
-        let source = directory.appending(path: SampleData.Role.group.photoFileName, directoryHint: .notDirectory)
+        guard let background = sampleBackground(of: .group, photosIn: directory) else {
+            return
+        }
+        appearance.isDecorationEnabled = true
+        Task {
+            _ = try? await appearance.replaceBackgroundPhoto(background.data, crop: background.crop)
+        }
+    }
+
+    /// 着せ替えの推し `oshiID`（役どころ `role`）の背景に、その推しの写真を敷く（スクリーンショット。`LaunchOptions.sampleOshiBackground`）。
+    private static func applySampleOshiBackground(
+        to appearance: AppearanceStore,
+        role: SampleData.Role,
+        oshiID: Oshi.ID,
+        photosIn directory: URL
+    ) {
+        guard let background = sampleBackground(of: role, photosIn: directory) else {
+            return
+        }
+        Task {
+            _ = try? await appearance.replaceBackgroundPhoto(background.data, crop: background.crop, for: oshiID)
+        }
+    }
+
+    /// 役どころ `role` の見本の推しの写真と、それを縦長の枠いっぱいに切り抜く範囲。読めなければ nil。
+    private static func sampleBackground(of role: SampleData.Role, photosIn directory: URL) -> (data: Data, crop: PhotoCrop)? {
+        let source = directory.appending(path: role.photoFileName, directoryHint: .notDirectory)
         guard let data = try? Data(contentsOf: source),
               let image = UIImage(data: data),
               let cgImage = image.cgImage else {
-            return
+            return nil
         }
         let size = CGSize(width: cgImage.width, height: cgImage.height)
-        appearance.isDecorationEnabled = true
-        let crop = PhotoCrop(imageSize: size, aspectRatio: PhotoCrop.backgroundAspectRatio)
-        Task {
-            _ = try? await appearance.replaceBackgroundPhoto(data, crop: crop)
-        }
+        return (data: data, crop: PhotoCrop(imageSize: size, aspectRatio: PhotoCrop.backgroundAspectRatio))
     }
 
     var body: some Scene {
