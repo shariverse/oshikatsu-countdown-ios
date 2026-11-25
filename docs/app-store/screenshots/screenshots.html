@@ -360,6 +360,7 @@
       return { image, left: x, top, right: x + width, bottom: top + width * aspect };
     });
     concealSearchButton(target, grid, boxes, scale);
+    concealNewsWidget(target, scale);
     for (const box of boxes) {
       add(`<img class="overlay" src="${box.image.src}" style="left:${box.left * scale}px;top:${box.top * scale}px;` +
         `width:${(box.right - box.left) * scale}px;height:${(box.bottom - box.top) * scale}px">`, target.screen);
@@ -393,6 +394,20 @@
           `background:url('${target.image.src}') ${-left * scale}px ${-sourceTop * scale}px / ${target.screenWidth}px ${target.screenHeight}px no-repeat;` +
           `transform:scaleY(-1)"></i>`, target.screen);
       }
+    }
+  }
+
+  // ホーム画面に最初からあるニュースのウィジェット（iOS 26 の iPad の Simulator。左上の大）は、実在の記事の見出し・媒体名・写真を出すので、
+  // 中身が読めないようにぼかし、何も出ていないウィジェット（隣のリマインダーなど）と同じ暗い地で覆う。
+  // アイコンの位置の記録では、どの言語でも「News」という名前の、幅 130pt 超の枠として入る。枠はラベルのぶん縦に長いので、上から幅と同じ高さだけ覆う
+  const NEWS_WIDGET_CORNER_RADIUS = 24;
+  function concealNewsWidget(target, scale) {
+    for (const widget of window.HOME_LAYOUT.icons.filter((icon) => icon.label === "News" && icon.width > 130)) {
+      const height = Math.min(widget.width, widget.height);
+      add(`<i class="overlay" style="left:${widget.x * scale}px;top:${widget.y * scale}px;` +
+        `width:${widget.width * scale}px;height:${height * scale}px;border-radius:${NEWS_WIDGET_CORNER_RADIUS * scale}px;` +
+        `background:rgba(36, 36, 38, 0.82);backdrop-filter:blur(${30 * scale}px);-webkit-backdrop-filter:blur(${30 * scale}px)"></i>`,
+        target.screen);
     }
   }
 

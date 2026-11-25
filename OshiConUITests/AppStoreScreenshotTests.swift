@@ -19,6 +19,7 @@ import XCTest
 /// ふだんのテストでは流さない。`scripts/app-store-screenshots.sh` が環境変数 `APP_STORE_SCREENSHOTS=1`
 /// （xcodebuild には `TEST_RUNNER_APP_STORE_SCREENSHOTS=1` で渡す）を付けて、表示サイズ・言語ごとに流す。
 /// 言語は `APP_STORE_LANGUAGE`（`-AppleLanguages` の値）と `APP_STORE_LOCALE`（`-AppleLocale` の値）で受け取る。
+/// 表示サイズ（`APP_IPHONE_67` など）は `APP_STORE_DISPLAY_TYPE` で受け取る（iPhone Duo ではロック画面を確かめない）。
 /// 文言は言語で変わるので、要素はアクセシビリティ ID と並びの位置で探す。
 /// 戻るボタンやサイドバーの並びは iPhone と iPad で違うので、画面ごとに起動し直してから開く。
 final class AppStoreScreenshotTests: XCTestCase {
@@ -133,6 +134,9 @@ final class AppStoreScreenshotTests: XCTestCase {
         // 1 回目のロックで許可の表示が間に合わなかったとき（遅い CI）のため、ここでももう一度許可を探す
         lockAndWake(waitingFor: 3)
         allowLiveActivitiesIfAsked(on: springboard)
+        guard ensureLiveActivityOnLockScreen(of: springboard) else {
+            return
+        }
         capture("lock-screen")
         unlock()
 
@@ -420,5 +424,52 @@ private extension AppStoreScreenshotTests {
             let frame = icon.frame
             return frame.width >= 40 && frame.width <= 130 && frame.minY < screen.height * 0.8 && frame.maxX < screen.width * 0.8
         }
+    }
+}
+
+// MARK: - ロック画面のライブアクティビティ
+
+private extension AppStoreScreenshotTests {
+    /// ロック画面にライブアクティビティが出ているかを確かめ、出ていなければ 2 回まで出し直す。出せなければ失敗にする
+    /// （スクリプトがこのテストを撮り直す）。ライブアクティビティの帯が無いロック画面を、そのまま 2 枚目に使わないため。
+    /// ホーム画面を撮ってからロックし直すと、まれに帯が消えている（iOS 26 の iPad で、1 回目のロックでは出ていた）。
+    /// 出し直すときは、`-sampleLiveActivity` を渡さずに起動して終えてから、渡して起動し直し、裏に回してからロックする。
+    /// iPhone Duo はロックできず、ロック画面を使わないので確かめない。
+    @MainActor
+    func ensureLiveActivityOnLockScreen(of springboard: XCUIApplication) -> Bool {
+        guard ProcessInfo.processInfo.environment["APP_STORE_DISPLAY_TYPE"] != "APP_IPHONE_DUO" else {
+            return true
+        }
+        for attempt in 1...3 {
+            if showsLiveActivity(on: springboard) {
+                return true
+            }
+            guard attempt < 3 else {
+                break
+            }
+            unlock()
+            let ending = launch()
+            XCTAssertTrue(featuredCard(in: ending).waitForExistence(timeout: Self.timeout))
+            Thread.sleep(forTimeInterval: 2)
+            let app = launch(["-sampleLiveActivity"])
+            XCTAssertTrue(featuredCard(in: app).waitForExistence(timeout: Self.timeout))
+            Thread.sleep(forTimeInterval: 2)
+            goHome(from: app)
+            lockAndWake(waitingFor: 3)
+            allowLiveActivitiesIfAsked(on: springboard)
+        }
+        let hierarchy = XCTAttachment(string: springboard.debugDescription)
+        hierarchy.name = "lock-screen-hierarchy"
+        hierarchy.lifetime = .keepAlways
+        add(hierarchy)
+        XCTFail("ロック画面にライブアクティビティが出ませんでした")
+        return false
+    }
+
+    /// ロック画面にライブアクティビティの帯が出ているか（5 秒まで待つ）。帯の中身は springboard の `activity-content-view` の要素として見える
+    /// （iOS 26.5 の iPad と iPhone で確かめた）。帯を包む `ListCell` は、何も出ていないロック画面にもあるので目印にしない。
+    @MainActor
+    func showsLiveActivity(on springboard: XCUIApplication) -> Bool {
+        springboard.descendants(matching: .any)["activity-content-view"].firstMatch.waitForExistence(timeout: 5)
     }
 }
