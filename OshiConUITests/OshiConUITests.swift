@@ -75,17 +75,16 @@ final class OshiConUITests: XCTestCase {
     @MainActor
     func testTabsSwitchBetweenHomeOshiAndSettings() throws {
         let app = launch(hasCompletedOnboarding: true)
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
         assertShowsHome(app)
 
-        tabBar.buttons["推し"].tap()
+        app.selectTab("推し")
         XCTAssertTrue(app.navigationBars["推し"].waitForExistence(timeout: 2))
 
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
 
-        tabBar.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         assertShowsHome(app)
     }
 
@@ -101,9 +100,7 @@ final class OshiConUITests: XCTestCase {
     @MainActor
     func testRegisterEditAndDeleteOshi() throws {
         let app = launch(hasCompletedOnboarding: true)
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["推し"].tap()
+        app.selectTab("推し")
         XCTAssertTrue(app.staticTexts["推しを登録しよう"].waitForExistence(timeout: 2))
 
         // 登録する
@@ -144,9 +141,7 @@ final class OshiConUITests: XCTestCase {
     @MainActor
     func testReorderOshis() throws {
         let app = launch(hasCompletedOnboarding: true, arguments: ["-seedSampleData"])
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["推し"].tap()
+        app.selectTab("推し")
         let rows = app.buttons.matching(identifier: "oshiList.row")
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(rows.element(boundBy: 0).label.contains("LUMINA"))
@@ -172,9 +167,11 @@ final class OshiConUITests: XCTestCase {
         let cells = app.cells.containing(.button, identifier: "oshiList.row")
         let handle = cells.element(boundBy: 2).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5))
         let top = cells.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.2))
-        handle.press(forDuration: 0.5, thenDragTo: top)
+        // ゆっくり引き、いちばん上で止めてから離す。遅い CI の Simulator では、着いてすぐ指を離すと、
+        // ほかの行がよける前に落ちて 2 位に入った（#317）。落とした後に一覧が並べ替えた順になるまでも、4 秒ほどかかった
+        handle.press(forDuration: 0.5, thenDragTo: top, withVelocity: .slow, thenHoldForDuration: 1)
         let first = rows.element(boundBy: 0)
-        let deadline = Date().addingTimeInterval(5)
+        let deadline = Date().addingTimeInterval(10)
         while !first.label.contains("レオ"), Date() < deadline {
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
         }
@@ -188,7 +185,7 @@ final class OshiConUITests: XCTestCase {
         XCTAssertTrue(guide.waitForNonExistence(timeout: 2))
 
         // ホームの推しの絞り込みも、並べ替えた順になる
-        tabBar.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         let leo = app.buttons["レオ"]
         XCTAssertTrue(leo.waitForExistence(timeout: 5))
         XCTAssertLessThan(leo.frame.minX, app.buttons["LUMINA"].frame.minX)
@@ -197,9 +194,7 @@ final class OshiConUITests: XCTestCase {
     @MainActor
     func testSettingsShowsPastEventsToggleAndLicenses() throws {
         let app = launch(hasCompletedOnboarding: true)
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
 
         let showsPast = app.switches.matching(NSPredicate(format: "label CONTAINS %@", "終わった予定も表示する")).firstMatch
@@ -222,9 +217,7 @@ final class OshiConUITests: XCTestCase {
     @MainActor
     func testSettingsReminderTimings() throws {
         let app = launch(hasCompletedOnboarding: true)
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
 
         // 既定は通知を ON にし、5 つのタイミングをすべて出す
@@ -246,12 +239,9 @@ final class OshiConUITests: XCTestCase {
         app.swipeDown()
         app.swipeDown()
         scrollIntoView(reminders, in: app, upward: false)
-        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        reminders.waitUntilStill()
         XCTAssertTrue(reminders.isHittable)
-        reminders.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        let turnedOff = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "0"), object: reminders)
-        XCTAssertEqual(XCTWaiter().wait(for: [turnedOff], timeout: 2), .completed)
-        XCTAssertEqual(reminders.value as? String, "0")
+        reminders.setSwitch(to: "0")
         XCTAssertTrue(app.switches["settings.reminderTiming.thirtyDaysBefore"].waitForNonExistence(timeout: 2))
         XCTAssertFalse(app.datePickers.firstMatch.exists)
     }

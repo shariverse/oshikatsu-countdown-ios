@@ -14,7 +14,7 @@
 <!-- Thank you for your contribution! -->
 
 <!-- スクリーンショットテンプレート
-gh の --attach で添付するときは、画像をローカルのパスで書く（README の「PR 本文のスクリーンショット」）。
+gh の --attach で添付するときは、画像をローカルのパスで書く（docs/pr-screenshots.md）。
 --attach は HTML の <img> や <table> の中を書き換えないため、表は Markdown で書く
 
 | Before | After |

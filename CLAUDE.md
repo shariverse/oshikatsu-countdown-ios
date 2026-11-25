@@ -58,7 +58,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - ナビゲーションバーのタイトルも日本語だけテーマの書体の太字。書体を決めるのは `Shared/Design/BarTitleFace.swift`、バーの外観に入れるのは `OshiCon/App/NavigationBarAppearance.swift`（起動時に 1 回。`.font` だけを替え、地には触れない）。ホームのバーはタイトルの文字を出さない（`.navigationTitle` は読み上げ用に残す。Discussion #148）
   - 装飾は値の型（`AppTheme.Decoration`）で持ち、描くのは `Shared/Design/ThemeDecorations.swift` の差し込み口（`ThemeScreenBackground`・`themeCardBorder(_:)`・`themeHeadingOrnament()`・`ThemePhotoPlaceholder`）。`accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない。
     画像の素材は使わず、SwiftUI の図形・`Canvas`・SF Symbols で描く
-  - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。書体を足したらオープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。見方は README の「テーマ」
+  - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。書体を足したらオープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。見方は `docs/design/themes.md` の「見方」
   - Form・List の行の地は `themeRowBackground()` でテーマのカードの地（`surface`）にする（システムの既定の地のままにしない）
   - 出荷するテーマの狙い・配色・書体・コントラストと、採用でしたこと・残っていること（デザインキャンバスなど）は `docs/design/themes.md`（テーマの仕様の正は `docs/spec/design/jirai-gothic.md`）
 - 推しの写真は、選んだら調整画面（拡大・縮小・移動・回転）で丸の範囲を決め、正方形に切り抜いた画像だけを保存する（スキーマは変えない）。仕様の正は `docs/spec/features/07-photo-crop.md`。コードの場所・テストの口（`-useTestPhoto`）・iOS だけの実装の参考は `docs/photo-crop.md`
@@ -129,7 +129,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 今ある無料の機能（数える・ウィジェット・通知・ライブアクティビティ・ロック画面）は有料に移さない。Plus が使えるのは、サブスクリプションが有効か、買い切りを買ったとき
   - 課金は StoreKit だけで行い、自前のサーバー・解析は使わない（通信しない方針はそのまま）。App のプライバシーは「データの収集なし」のまま
   - 解約・期限切れで見た目を標準に戻す。選んだ画像は消さずに残す（また入ったら戻る）
-  - 商品（productId・価格・12 言語の表示名）の正は `docs/app-store/in-app-purchases.json`。App Store Connect への登録はワークフロー「App Store In-App Purchases」（README の「課金の商品の登録」）。productId は一度作ると変えられない
+  - 商品（productId・価格・12 言語の表示名）の正は `docs/app-store/in-app-purchases.json`。App Store Connect への登録はワークフロー「App Store In-App Purchases」（`docs/app-store/in-app-purchases.md`）。productId は一度作ると変えられない
   - 審査ガイドライン 3.1.2(a)（続く価値）に備え、テーマや飾りを定期的に足していく
 - **シェア（1.3.0 から。無料）**: 予定の「あと○日」をカードの画像にして共有シートで渡す（端末の中で作り、通信しない）。透かし（アプリ名）は全員に小さく入れ、会場は既定で載せない
 - 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents / Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
@@ -174,7 +174,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - コミット: `[type] 日本語の説明`（type は `feat` / `fix` / `refactor` / `chore` / `update`、補助的に `docs` / `test` / `ci`）。1 コミット = 1 つの論理的変更
 - PR タイトル: `【TYPE】日本語の説明`。本文は `.github/pull_request_template.md` に従い、Assignee に自分を設定する
 - コミットメッセージ・PR 本文・コメントに `Co-Authored-By` や「Generated with Claude Code」などの AI の帰属行を入れない
-- UI の見た目が変わる PR は、Simulator のスクリーンショットを `gh pr create --attach` で添付する（README の「PR 本文のスクリーンショット」）
+- UI の見た目が変わる PR は、Simulator のスクリーンショットを `gh pr create --attach` で添付する（`docs/pr-screenshots.md`）
 
 ## コードレビュー観点
 

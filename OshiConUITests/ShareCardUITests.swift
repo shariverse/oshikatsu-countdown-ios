@@ -29,9 +29,7 @@ final class ShareCardUITests: XCTestCase {
     /// 写真のある推しを登録する。
     @MainActor
     private func registerOshiWithPhoto(in app: XCUIApplication) {
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["推し"].tap()
+        app.selectTab("推し")
         app.navigationBars["推し"].buttons["推しを登録"].tap()
         XCTAssertTrue(app.navigationBars["推しを登録"].waitForExistence(timeout: 5))
         let name = app.textFields["推しの名前"]
@@ -44,7 +42,7 @@ final class ShareCardUITests: XCTestCase {
         XCTAssertTrue(app.buttons["写真を外す"].waitForExistence(timeout: 5))
         app.navigationBars["推しを登録"].buttons["保存"].tap()
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "ミナト")).firstMatch.waitForExistence(timeout: 5))
-        tabBar.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
     }
 
     /// 今日の予定を足して詳細を開き、シェアのプレビューを開く。追加の画面は先頭の推しを選んでおく。
@@ -113,11 +111,9 @@ final class ShareCardUITests: XCTestCase {
         XCTAssertEqual(includesVenue.value as? String, "0")
         XCTAssertEqual(includesPhoto.value as? String, "1")
 
-        includesVenue.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        XCTAssertEqual(includesVenue.value as? String, "1")
+        includesVenue.setSwitch(to: "1")
         XCTAssertTrue(preview(in: app, containing: "東京ドーム").waitForExistence(timeout: 2))
-        includesPhoto.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        XCTAssertEqual(includesPhoto.value as? String, "0")
+        includesPhoto.setSwitch(to: "0")
         waitForShareButton(in: app)
 
         // 閉じると詳細に戻る
