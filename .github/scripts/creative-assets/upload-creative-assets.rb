@@ -44,6 +44,9 @@ PLACEMENT_TYPES = [HEADER, SEARCH_RESULTS].freeze
 # 配置を追加できる（審査に出す前・却下後の）バージョンの状態
 EDITABLE_VERSION_STATES = %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED INVALID_BINARY].freeze
 PROCESSING_TIMEOUT = 15 * 60
+# 上げた画像の処理が終わっていない state。配置に使えるのは、処理を終えた PREPARE_FOR_SUBMISSION の画像。
+# COMPLETE はその手前で短いあいだ返ることがある（2026-11-25 に 28 枚のうち 1 枚）ので、これも待つ
+PROCESSING_STATES = %w[AWAITING_UPLOAD UPLOAD_COMPLETE COMPLETE].freeze
 
 def env!(name)
   value = ENV.fetch(name, '')
@@ -233,7 +236,7 @@ def upload_image(client, library_id, path)
   loop do
     image = client.get("/v1/appAssetLibraryImages/#{image_id}").fetch('data')
     state = image.dig('attributes', 'state')
-    return image unless %w[AWAITING_UPLOAD UPLOAD_COMPLETE].include?(state)
+    return image unless PROCESSING_STATES.include?(state)
     raise ApiError, "#{file_name} の処理が #{PROCESSING_TIMEOUT / 60} 分で終わりませんでした（state: #{state}）" if Time.now > deadline
 
     sleep 10

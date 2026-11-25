@@ -212,7 +212,7 @@ gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE
 - このバージョンの新機能は、登録するバージョンと同じ名前のファイル（`docs/app-store/whats-new/1.1.0.md` など）の `## <言語>` の下のコードブロックから読みます。アップデートを出すたびに新しいファイルを足します。ファイルが無ければ新機能は触りません（最初のバージョンには入れられないため）。ファイルがあるのに登録する言語の見出しが無いときは、何も登録せずに止まります
 - 6.9 インチを撮ったときは、その撮った画面（見出しを付ける前の `raw/`）からクリエイティブアセット（プロダクトページのヘッダー 3840x1646・検索結果 3840x2560）を [docs/app-store/creative/creative.html](docs/app-store/creative/creative.html) と `scripts/render-creative-assets.sh` で言語ごとに書き出し、App Asset Library に上げて各言語のローカリゼーションに配置します（`creative_assets` を外すと飛ばします）。文言は creative.html の `copy` に言語ごとに書きます。
   地・模様・書体・端末の枠はスクリーンショット（[docs/app-store/screenshots/screenshots.html](docs/app-store/screenshots/screenshots.html)）にそろえます
-- クリエイティブアセットだけを作り直すときは、`creative_from_run` に 6.9 インチを撮った前の実行の ID（言語を分けて撮ったならカンマ区切りで複数）を入れ、`screenshots` を外して流します。その実行の Artifact（`screenshots-APP_IPHONE_67`）に入っている言語をすべて書き出して配置します（`languages` は掲載文を登録する言語です。絞ると掲載文の登録もその言語だけになります）。ほかの表示サイズの撮り直しと一緒に流すこともできます
+- クリエイティブアセットだけを作り直すときは、`creative_from_run` に 6.9 インチを撮った前の実行の ID（言語を分けて撮ったならカンマ区切りで複数）を入れ、`screenshots` を外して流します。その実行の Artifact（`screenshots-APP_IPHONE_67`）に入っている言語のうち、`languages` の言語を書き出して配置します（空なら入っている言語すべて。`languages` は掲載文を登録する言語でもあります）。ほかの表示サイズの撮り直しと一緒に流すこともできます
 - iPhone Duo は GitHub の標準イメージ `xcode-27`（actions/runner-images の xcode-27-arm64。org で用意するものは無い）で撮ります。イメージに iOS 27.1 のランタイムが無いので、撮影の前にダウンロードします（数分かかります）
 - iPhone Duo は 1 言語に 20 分ほどかかるので、言語ごとに別のジョブで撮ります（screenshots.json の `jobPerLanguage`）
 - 実行は 1 回ずつ流れ、次の回は前の回が終わるまで待ちます（待てるのは 1 回だけで、後から入れた回が待っている回を置き換えます）。`parallel` を入れた回だけは待たずに動くので、`languages` が実行中の回の言語と 1 つも重ならないときだけ使います。登録のジョブはどの回も `languages` の掲載文を書くので、表示サイズが違っても同じ言語の回を並べると、App Store Connect が HTTP 500 を返して止まることがあります
