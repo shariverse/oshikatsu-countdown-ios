@@ -15746,6 +15746,91 @@
         "th" : { "stringUnit" : { "state" : "translated", "value" : "ปริมาณของตกแต่ง %@" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Jumlah hiasan %@" } }
       }
+    },
+    "予定の詳細" : {
+      "comment" : "着せ替えの画面。見本の切り替え（予定の詳細の見本）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Event Details" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "予定の詳細" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "日程详情" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "行程詳情" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "일정 상세" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Détail de l'événement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Termindetails" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Detalle del evento" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Detalhes do evento" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Dettagli dell'evento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รายละเอียดกิจกรรม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Detail Acara" } }
+      }
+    },
+    "シェア" : {
+      "comment" : "着せ替えの画面。見本の切り替え（シェアのカードの見本）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "シェア" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "分享" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "分享" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공유" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Partage" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Teilen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Compartir" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Compartilhar" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Condivisione" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แชร์" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Bagikan" } }
+      }
+    },
+    "予定の詳細の見本" : {
+      "comment" : "着せ替えの画面。予定の詳細の見本の読み上げの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Event details preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "予定の詳細の見本" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "日程详情预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "行程詳情預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "일정 상세 미리보기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu du détail de l'événement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau der Termindetails" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa del detalle del evento" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia dos detalhes do evento" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima dei dettagli dell'evento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่างรายละเอียดกิจกรรม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau detail acara" } }
+      }
+    },
+    "シェアのカードの見本" : {
+      "comment" : "着せ替えの画面。シェアのカードの見本の読み上げの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share card preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "シェアのカードの見本" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "分享卡片预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "分享卡片預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공유 카드 미리보기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu de la carte à partager" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau der Karte zum Teilen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa de la tarjeta para compartir" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia do cartão para compartilhar" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima della scheda da condividere" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่างการ์ดสำหรับแชร์" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau kartu untuk dibagikan" } }
+      }
+    },
+    "着せ替える前" : {
+      "comment" : "全画面の試着。長押ししている間に出す、着せ替える前（標準）の見た目の印と、見本の読み上げの値",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Before" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "着せ替える前" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "换装前" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "換裝前" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "꾸미기 전" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Avant" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorher" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Antes" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Prima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ก่อนตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sebelum" } }
+      }
     }
   },
   "version" : "1.0"
