@@ -175,6 +175,7 @@ run_tests() {
   TEST_RUNNER_APP_STORE_SCREENSHOTS=1 \
     TEST_RUNNER_APP_STORE_LANGUAGE="$2" \
     TEST_RUNNER_APP_STORE_LOCALE="$3" \
+    TEST_RUNNER_APP_STORE_DISPLAY_TYPE="$DISPLAY_TYPE" \
     "${XCODEBUILD_COMMAND[@]}" test-without-building \
     -project OshiCon.xcodeproj \
     -scheme OshiCon \
