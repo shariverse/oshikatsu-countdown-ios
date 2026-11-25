@@ -9,6 +9,17 @@
 
 - `Shared/Resources/Localizable.xcstrings` は、1 か所だけ項目を 1 行に詰めて書いている（「推し活カウントダウン Plus」）。スクリプトで文言を足すときに JSON として読み込んで `json.dump` で書き直すと、その項目まで展開されて差分が出る。新しい項目は、既存の書き方（2 スペースの字下げ・`"key" : value`）のテキストとして、並びの位置に差し込む（2026-11-23）
 
+## Swift の分離（既定が MainActor）
+
+- 自作の `Shape` / `InsettableShape` には `nonisolated` を付ける。アプリのターゲットは既定がメインアクターなので、付けないと Xcode 27.1 で `conformance of '…' to protocol 'Shape' crosses into main actor-isolated code` のエラーになる（Xcode 26.6 では警告も出ずに通るので、CI では気づけない）（2026-11-26）
+
+## PR 用のスクリーンショット
+
+- 見本のデータの画面は、UI テストを書かなくても Simulator に入れたアプリを起動引数で開いて撮れる。
+  `SIMCTL_CHILD_OSHICON_SAMPLE_OSHI_PHOTOS=<リポジトリ>/OshiConUITests/SampleOshiPhotos xcrun simctl launch <udid> jp.shilokuma.OshiCon -useInMemoryStore -seedSampleData -hasCompletedOnboarding YES -colorScheme dark -AppleLanguages "(ja)" -AppleLocale ja_JP`
+  （`-sampleStreamStartsSoon` で当日の配信が 40 分ほど先になり、当日の開始の前の詳細を撮れる）。文字の大きさは `xcrun simctl ui <udid> content_size accessibility-extra-large` で変える。
+  Before は、変更の前にビルドした `.app` を別の場所に写しておいて入れ直す（2026-11-26）
+
 ## App Store 用スクリーンショット
 
 - `xcrun simctl status_bar --time 9:41` はロック画面の時計にも効き、日付が「1 月 1 日（土）」になる。ISO 8601 で日時を渡しても（受け付けるのは小数の秒と `Z` の付いた `date -u +%Y-%m-%dT%H:%M:%S.000Z` の形だけ）、iOS 27 のロック画面の日付は 1 月 1 日のままだったので、ロック画面を撮るなら `--time` は上書きしない。ステータスバーの「Carrier」は `--operatorName ""` で消える（2026-11-24）
