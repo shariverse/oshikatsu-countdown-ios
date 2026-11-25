@@ -44,15 +44,16 @@ on:
         type: boolean
         default: true
       parallel:
-        description: 実行中の回を待たずに動かす（表示サイズと言語が、実行中の回と重ならないときだけ）
+        description: 実行中の回を待たずに動かす（languages が、実行中の回の言語と 1 つも重ならないときだけ。表示サイズが違っても、同じ言語は並べない）
         type: boolean
         default: false
 
 permissions:
   contents: read
 
-# 同じスクリーンショットを同時に消して上げ直さないよう、1 回ずつ流す。parallel を入れた回だけ、実行ごとの別のグループにして待たない
-# （表示サイズと言語が重ならなければ、登録する画像の組が別なので取り合わない。掲載文は同じ文面を書くだけ）
+# 同じスクリーンショットを同時に消して上げ直さないよう、1 回ずつ流す。parallel を入れた回だけ、実行ごとの別のグループにして待たない。
+# 登録のジョブはどの回も languages の掲載文を書くので、言語が 1 つでも重なる回は並べない（表示サイズが違っても、同じ言語の掲載文を
+# 同時に書くと、App Store Connect が HTTP 500 を返して止まることがある。2026-11-25 に es-MX・th で起きた）
 concurrency:
   group: ${{ github.workflow }}${{ inputs.parallel && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: false

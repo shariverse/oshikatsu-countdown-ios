@@ -259,6 +259,10 @@
     return target.screenWidth / screenPoints;
   }
 
+  // iPhone Duo の外側の画面の、1 列目のアイコンの中心と列の間隔（pt）。iOS 27.1 の Simulator で、どの言語でも 1 列目は 56.5pt、2 列目は 144.5pt
+  const DUO_FIRST_COLUMN_CENTER = 56.5;
+  const DUO_COLUMN_PITCH = 88;
+
   // ホーム画面のアイコンの並び（1 ページ目）。行の上端と列の中心（pt）。
   // アイコンの枠はラベルを含み、ラベルが長いと幅が広がるので、列は中心で、アイコンの幅はいちばん狭い枠の幅で決める
   function iconGrid() {
@@ -274,6 +278,11 @@
       // iPhone Duo の外側の画面は、そのページのアイコンが記録に入らないことがあるので、実測した 1 つ目のアイコンの位置を使う
       // （iOS 27.1 の Simulator。左上の 1 つ目のアイコンとラベルの枠）
       icons.push({ x: 7, y: 52, width: 98, height: 87, label: "" });
+    } else if (deviceKind === "duo" && !icons.some((icon) => icon.x + icon.width / 2 < DUO_FIRST_COLUMN_CENTER + DUO_COLUMN_PITCH / 2)) {
+      // 1 列目のアイコンだけが記録に入らず、2 列目（テストのランナーなど）だけが入ったときは、いちばん左の列を 1 列目とみなすと
+      // ウィジェットが 2 列目からずれる。記録に入ったアイコンと同じ大きさのアイコンが、同じ行の 1 列目にあるとみなす
+      const reference = icons[0];
+      icons.push({ x: DUO_FIRST_COLUMN_CENTER - reference.width / 2, y: reference.y, width: reference.width, height: reference.height, label: "" });
     }
     if (icons.length === 0) {
       throw new Error("ホーム画面のアイコンの位置（raw/layout.js）に、使えるアイコンがありません");
