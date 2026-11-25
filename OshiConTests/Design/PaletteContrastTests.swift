@@ -99,6 +99,14 @@ struct PaletteContrastTests {
         }
     }
 
+    @Test("「今日！」の札（推し色の地にカードの地の色の文字）は 4.5:1 以上（ライトとダーク）", arguments: PaletteContrastTests.themes, [false, true])
+    func todayPill(theme: AppTheme, isDark: Bool) {
+        let text = TodayPillColors.text(in: theme).resolved(isDark: isDark)
+        for color in OshiColor.allCases {
+            #expect(text.contrastRatio(with: TodayPillColors.ground(color, in: theme).resolved(isDark: isDark)) >= 4.5, "\(color)")
+        }
+    }
+
     @Test("コントラスト比の計算は WCAG の値と合う")
     func contrastRatio() {
         #expect(abs(RGBColor.white.contrastRatio(with: .black) - 21) < 0.001)
