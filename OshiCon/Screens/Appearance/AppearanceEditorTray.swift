@@ -217,10 +217,10 @@ struct AppearanceEditorTray: View {
         arrangement: .pinnedTop,
         tab: $tab
     )
-        .frame(height: 320)
-        .frame(maxHeight: .infinity, alignment: .bottom)
-        .environment(AppearanceStore.volatile(
-            suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
-            directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
-        ))
+    .frame(height: 320)
+    .frame(maxHeight: .infinity, alignment: .bottom)
+    .environment(AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    ))
 }
