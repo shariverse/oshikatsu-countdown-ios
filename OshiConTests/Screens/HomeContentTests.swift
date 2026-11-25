@@ -158,7 +158,36 @@ struct HomeContentTests {
             "ライブ、10月25日 日曜日、ミナト、あと 7 日",
             "推しなし、11月1日 日曜日、推しなし、あと 14 日"
         ])
-        #expect(items[1].featuredAccessibilityLabel == "いちばん近い予定、ミナト、ライブ、あと 7 日、10月25日 日曜日")
+        // 先頭のカードは、札（見出しと予定の種類）・推しの名前・タイトル・残り日数・日付の順に読む
+        #expect(items[1].featuredAccessibilityLabel == "いちばん近い予定、ライブ、ミナト、ライブ、あと 7 日、10月25日 日曜日")
+    }
+
+    @Test("先頭のカードの読み上げは、半券の開始の時刻と会場まで読む。推しなし・会場なしの予定は、その分を読まない")
+    func featuredAccessibilityLabel() {
+        let dome = OshiEvent(
+            oshiID: minato.id,
+            kind: .live,
+            title: "5th LIVE",
+            day: DomainFixtures.day(2026, 10, 25),
+            startTime: TimeOfDay(hour: 17, minute: 0),
+            venue: "東京ドーム",
+            isPinned: true,
+            createdAt: DomainFixtures.date(2026, 9, 1)
+        )
+        let release = OshiEvent(
+            oshiID: nil,
+            kind: .release,
+            title: "アルバム",
+            day: DomainFixtures.day(2026, 10, 18),
+            createdAt: DomainFixtures.date(2026, 9, 1)
+        )
+        let featured = { (events: [OshiEvent]) in
+            HomeContent(
+                events: events, oshis: [minato], selectedOshiID: nil, showsPastEvents: false, today: today, locale: DomainFixtures.japanese
+            ).featured
+        }
+        #expect(featured([dome, release])?.featuredAccessibilityLabel == "ピン留め、ライブ、ミナト、5th LIVE、あと 7 日、10月25日 日曜日、開演 17:00、東京ドーム")
+        #expect(featured([release])?.featuredAccessibilityLabel == "いちばん近い予定、発売日、アルバム、今日！、10月18日 日曜日")
     }
 
     @Test("英語では日付・残り日数・読み上げの区切りも英語の書き方になる")
@@ -167,7 +196,7 @@ struct HomeContentTests {
         #expect(items.map(\.supportingText) == ["Sun, Oct 18 · Every year", "Sun, Oct 25 · ミナト", "Sun, Nov 1 · No oshi"])
         #expect(items.map(\.countdownText) == ["Today!", "7 days left", "14 days left"])
         #expect(items[1].accessibilityLabel == "ライブ, Sunday, October 25, ミナト, 7 days left")
-        #expect(items[1].featuredAccessibilityLabel == "Up Next, ミナト, ライブ, 7 days left, Sunday, October 25")
+        #expect(items[1].featuredAccessibilityLabel == "Up Next, Live, ミナト, ライブ, 7 days left, Sunday, October 25")
     }
 
     @Test("推しが見つからない予定は推しなしとして出す")

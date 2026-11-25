@@ -52,15 +52,19 @@ nonisolated struct HomeContent: Equatable, Sendable {
             )
         }
 
-        /// 先頭のカードの読み上げ（`ピン留め、ミナト、5th LIVE、あと 7 日、10月25日 日曜日、開演 17:00`）。
+        /// 先頭のカードの読み上げ（`ピン留め、ライブ、ミナト、5th LIVE、あと 7 日、10月25日 日曜日、開演 17:00、東京ドーム`）。
+        /// カードに出す順（札・推しの名前・タイトル・残り日数、半券の日付・開始の時刻・会場）に読む。
         var featuredAccessibilityLabel: String {
-            var parts = [featuredBadgeText]
+            var parts = [featuredBadgeText, event.kind.label(locale: locale)]
             if let oshi {
                 parts.append(oshi.name)
             }
             parts += [event.title, countdownText, EventText.spokenMonthDayWeekday(scheduled.occurrenceDay, locale: locale)]
             if let startTime = event.startTime {
                 parts.append(EventText.startTime(startTime, kind: event.kind, locale: locale))
+            }
+            if !event.venue.isEmpty {
+                parts.append(event.venue)
             }
             return EventText.joinedForSpeech(parts, locale: locale)
         }
