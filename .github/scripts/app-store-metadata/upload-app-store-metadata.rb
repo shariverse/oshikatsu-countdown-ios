@@ -44,8 +44,9 @@ require 'tmpdir'
 require 'uri'
 
 API_BASE = 'https://api.appstoreconnect.apple.com'
-# 番号を変えたり文面を入れたりできる（審査に出す前・却下後の）バージョンの状態
-EDITABLE_STATES = %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED INVALID_BINARY].freeze
+# 番号を変えたり文面を入れたりできる（審査に出す前・却下後の）バージョンの状態。
+# READY_FOR_REVIEW は、審査の提出物の下書きに入れたが、まだ提出していない状態（画面では「審査準備完了」。編集できる）
+EDITABLE_STATES = %w[PREPARE_FOR_SUBMISSION READY_FOR_REVIEW DEVELOPER_REJECTED REJECTED METADATA_REJECTED INVALID_BINARY].freeze
 PROCESSING_TIMEOUT = 15 * 60
 
 # App Store Connect の文字数の上限
