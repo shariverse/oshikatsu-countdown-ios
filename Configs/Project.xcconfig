@@ -34,3 +34,10 @@ IPHONEOS_DEPLOYMENT_TARGET = 17.0
 // 強いリンクのままだと、iOS 26 でだけ呼ぶ予約（LiveActivityScheduler）の `.standard` が見つからず、iOS 17 では起動した直後に dyld が止める。
 // `#available` で囲っても強いリンクのままなので、リンクのほうで弱くする
 OTHER_LDFLAGS = $(inherited) -weak_framework ActivityKit
+
+// 着せ替え（Plus）で選べる代替のアプリアイコン（推し色の 11 色。ピンクは主アイコンの AppIcon）。
+// Icon Composer のファイルは OshiCon/AlternateAppIcons/<名前>.icon（scripts/make-alternate-app-icons.py で作る）。
+// Xcode がこの名前から Info.plist の CFBundleAlternateIcons を書く（Info.plist には手で書かない）。
+// 名前はアプリの AppIconRule.alternateIconName(for:) と同じにする（AppIconTests が食い違いを見つける）。
+// アセットカタログを持つのはアプリだけなので、Widget Extension とテストのターゲットには効かない
+ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = AppIcon-Red AppIcon-Orange AppIcon-Yellow AppIcon-Green AppIcon-Mint AppIcon-Blue AppIcon-Navy AppIcon-Purple AppIcon-Lavender AppIcon-Brown AppIcon-Black
