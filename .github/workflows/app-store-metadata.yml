@@ -5,7 +5,7 @@ name: App Store Metadata
 #
 # 表示サイズと機種は docs/app-store/screenshots.json、言語は docs/app-store/languages.json で決める。
 # スクリーンショットは表示サイズごとに別のジョブで並行して、scripts/app-store-screenshots.sh で撮り、見出しと端末の枠を付けた 10 枚にする
-# （リポジトリに大きな画像を置かない。見出しを付けるのに Google Chrome を使う）。
+# （リポジトリに大きな画像を置かない。見出しを付けるのに Google Chrome を使う）。撮るのが遅い表示サイズ（screenshots.json の jobPerLanguage）は、言語ごとにも分ける。
 # iPhone Duo は GitHub の標準イメージ xcode-27 で撮る（Xcode 27 と iOS 27.1 のランタイムが要る。ランタイムは scripts/app-store-screenshots.sh が入れる）。
 # クリエイティブアセット（プロダクトページのヘッダー / 検索結果）は、6.9 インチのスクリーンショットから scripts/render-creative-assets.sh で書き出し、
 # App Asset Library に上げて言語ごとのローカリゼーションに配置する。
@@ -74,13 +74,25 @@ jobs:
             echo 'matrix=[]' >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          matrix=$(jq -c --arg wanted "$DISPLAY_TYPES" '
+          all_languages=$(jq -c --arg wanted "$LANGUAGES" '
+            ($wanted | split(",") | map(select(. != ""))) as $w
+            | if ($w | length) == 0 then .languages | map(.language) else $w end' docs/app-store/languages.json)
+          # jobPerLanguage の表示サイズ（撮るのが遅い iPhone Duo）は、1 つのジョブの上限の時間に収まるよう言語ごとに別のジョブにする。
+          # Artifact も言語ごとに分け、登録のジョブが screenshots-* をまとめて読む
+          matrix=$(jq -c --arg wanted "$DISPLAY_TYPES" --arg languages "$LANGUAGES" --argjson all_languages "$all_languages" '
             ($wanted | split(",") | map(select(. != ""))) as $w
             | .displayTypes
             | (if ($w | length) == 0 then keys_unsorted else $w end) as $types
             | ($types - keys) as $unknown
             | if ($unknown | length) > 0 then error("screenshots.json に無い表示サイズ: \($unknown | join(","))") else . end
-            | [$types[] as $t | .[$t] | {display_type: $t, label, runs_on: .runsOn, xcode_version: .xcodeVersion}]' docs/app-store/screenshots.json)
+            | [$types[] as $t | .[$t] as $d
+              | {display_type: $t, runs_on: $d.runsOn, xcode_version: $d.xcodeVersion} as $job
+              | if $d.jobPerLanguage then
+                  $all_languages[] as $l
+                  | $job + {label: "\($d.label) (\($l))", languages: $l, artifact: "screenshots-\($t)-\($l)"}
+                else
+                  $job + {label: $d.label, languages: $languages, artifact: "screenshots-\($t)"}
+                end]' docs/app-store/screenshots.json)
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "$matrix"
 
@@ -113,14 +125,14 @@ jobs:
       - name: Take screenshots
         env:
           DISPLAY_TYPE: ${{ matrix.display_type }}
-          LANGUAGES: ${{ inputs.languages }}
+          LANGUAGES: ${{ matrix.languages }}
         run: scripts/app-store-screenshots.sh "$DISPLAY_TYPE" "$LANGUAGES"
 
       - name: Upload screenshots to GitHub
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: screenshots-${{ matrix.display_type }}
+          name: ${{ matrix.artifact }}
           path: ${{ env.SCREENSHOTS_DIR }}
           # 途中で失敗しても撮れたぶんは残す
           if-no-files-found: warn
