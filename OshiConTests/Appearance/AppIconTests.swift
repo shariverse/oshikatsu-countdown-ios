@@ -103,8 +103,11 @@ struct AppIconTests {
 
     @Test("アプリの Info.plist に、主アイコン AppIcon と 11 色の代替アイコンが入っている（iPhone と iPad）", arguments: ["CFBundleIcons", "CFBundleIcons~ipad"])
     func infoPlist(key: String) throws {
-        // テストはアプリの中で動くので、Bundle.main がアプリになる
-        let icons = try #require(Bundle.main.object(forInfoDictionaryKey: key) as? Object, "\(key)")
+        // テストはアプリの中で動くので、Bundle.main がアプリになる。
+        // Bundle の Info.plist は端末に合わない `~ipad` のキーを畳むので、ファイルをそのまま読む
+        let url = Bundle.main.bundleURL.appending(path: "Info.plist")
+        let plist = try #require(try PropertyListSerialization.propertyList(from: Data(contentsOf: url), format: nil) as? Object)
+        let icons = try #require(plist[key] as? Object, "\(key)")
         let primary = try #require(icons["CFBundlePrimaryIcon"] as? Object)
         #expect(primary["CFBundleIconName"] as? String == "AppIcon")
         let alternates = try #require(icons["CFBundleAlternateIcons"] as? Object)
