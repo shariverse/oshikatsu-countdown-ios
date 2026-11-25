@@ -29,9 +29,7 @@ final class AppearanceUITests: XCTestCase {
             "OSHICON_DEFAULT_showsPastEvents": "NO"
         ]
         app.launch()
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
         return app
     }
@@ -114,18 +112,15 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(remove.waitForExistence(timeout: 2))
     }
 
-    /// スイッチを押す（ラベルの文字ではなく、右端のスイッチを押す）。
+    /// スイッチを押して、値を `expected` にする（ラベルの文字ではなく、右端のスイッチを押す）。
     @MainActor
     private func toggle(_ identifier: String, in app: XCUIApplication, to expected: String) {
         let element = app.switches[identifier]
         reveal(element, in: app)
         XCTAssertTrue(element.exists, identifier)
         // 送った後の惰性が止まってから押す（動いている間に押すと、スクロールが止まるだけで切り替わらない）
-        RunLoop.current.run(until: Date().addingTimeInterval(1))
-        element.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", expected), object: element)
-        XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 2), .completed, identifier)
-        XCTAssertEqual(element.value as? String, expected, identifier)
+        element.waitUntilStill()
+        element.setSwitch(to: expected)
     }
 
     /// ホームのタブで今日の予定を足し、その詳細を開く。
@@ -291,7 +286,7 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["着せ替え"].exists)
 
         // Plus でなければ、ホームと詳細は標準の見た目のまま
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "standard")
         addEventAndOpenDetail(in: app)
         waitForMarker("eventDetail.appearance", in: app, equalTo: "standard")
@@ -311,7 +306,7 @@ final class AppearanceUITests: XCTestCase {
         waitForPreview(in: app, containing: ["推しの写真の飾りあり"])
 
         // ホームと詳細に、写真と飾りが効く
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "photo,decoration")
         addEventAndOpenDetail(in: app)
         waitForMarker("eventDetail.appearance", in: app, equalTo: "photo,decoration")
@@ -319,12 +314,10 @@ final class AppearanceUITests: XCTestCase {
         // 背景を OFF にすると、写真は消えて飾りだけになる。詳細ではタブバーが隠れるので、ホームに戻ってから設定のタブに移る
         app.navigationBars.firstMatch.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.buttons["home.addEvent"].waitForExistence(timeout: 5))
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["着せ替え"].waitForExistence(timeout: 5))
         toggle("appearance.backgroundToggle", in: app, to: "0")
-        tabBar.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "decoration")
         let row = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "5th LIVE、")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 2))
@@ -371,7 +364,7 @@ final class AppearanceUITests: XCTestCase {
         toggle("appearance.decorationOshi.0", in: app, to: "1")
 
         // ホームにも飾りが効く
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "decoration")
     }
 
@@ -382,7 +375,7 @@ final class AppearanceUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["settings.appearance"].waitForExistence(timeout: 5))
         // Plus が使えても、ホームは標準の見た目のまま（設定していないため）
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "standard")
     }
 }

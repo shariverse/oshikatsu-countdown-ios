@@ -24,9 +24,7 @@ final class PlusPaywallUITests: XCTestCase {
             "OSHICON_DEFAULT_showsPastEvents": "NO"
         ]
         app.launch()
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
         return app
     }
