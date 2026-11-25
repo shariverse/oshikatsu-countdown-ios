@@ -324,4 +324,9 @@ private struct OshiReorderGuide: View {
     }
     .environment(AppRouter())
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
+    // 推しの編集の画面が引く着せ替えの設定（端末の設定に触れない）
+    .environment(AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    ))
 }

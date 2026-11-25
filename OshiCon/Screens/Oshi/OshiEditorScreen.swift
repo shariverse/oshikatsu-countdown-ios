@@ -19,6 +19,8 @@ struct OshiEditorScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.appTheme) private var theme
+    /// 推しを削除したら、着せ替えのその推しの背景の写真も消す。
+    @Environment(AppearanceStore.self) private var appearance
     @State private var form: OshiForm
     /// 新しく登録するときの id。保存に失敗してやり直しても同じ推しとして保存する。
     @State private var newOshiID = UUID()
@@ -212,7 +214,8 @@ struct OshiEditorScreen: View {
             isBusy = false
         }
         do {
-            try OshiEditing(store: OshiConStore(context: modelContext)).delete(oshiID: oshi.id)
+            // 着せ替えのその推しの背景の写真と設定も消す
+            try OshiEditing(store: OshiConStore(context: modelContext), appearance: appearance).delete(oshiID: oshi.id)
             dismiss()
         } catch {
             failureMessage = String(localized: "削除できませんでした")
@@ -220,17 +223,30 @@ struct OshiEditorScreen: View {
     }
 }
 
+/// Preview で使う、端末の設定に触れない着せ替えの設定。
+private enum OshiEditorPreview {
+    static func appearance() -> AppearanceStore {
+        AppearanceStore.volatile(
+            suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+            directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+        )
+    }
+}
+
 #Preview("登録") {
     OshiEditorScreen(oshi: nil)
         .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
+        .environment(OshiEditorPreview.appearance())
 }
 
 #Preview("初回の導線") {
     OshiEditorScreen(oshi: nil, onboarding: .oshi {})
         .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
+        .environment(OshiEditorPreview.appearance())
 }
 
 #Preview("編集") {
     OshiEditorScreen(oshi: Oshi(name: "ミナト", color: .navy))
         .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
+        .environment(OshiEditorPreview.appearance())
 }
