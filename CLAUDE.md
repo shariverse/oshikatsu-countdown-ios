@@ -129,7 +129,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 今ある無料の機能（数える・ウィジェット・通知・ライブアクティビティ・ロック画面）は有料に移さない。Plus が使えるのは、サブスクリプションが有効か、買い切りを買ったとき
   - 課金は StoreKit だけで行い、自前のサーバー・解析は使わない（通信しない方針はそのまま）。App のプライバシーは「データの収集なし」のまま
   - 解約・期限切れで見た目を標準に戻す。選んだ画像は消さずに残す（また入ったら戻る）
-  - 商品（productId・価格・12 言語の表示名）の正は `docs/app-store/in-app-purchases.json`。App Store Connect への登録はワークフロー「App Store In-App Purchases」（README の「課金の商品の登録」）。productId は一度作ると変えられない
+  - 商品（productId・価格・12 言語の表示名）の正は `docs/app-store/in-app-purchases.json`。App Store Connect への登録はワークフロー「App Store In-App Purchases」（`docs/app-store/in-app-purchases.md`）。productId は一度作ると変えられない
   - 審査ガイドライン 3.1.2(a)（続く価値）に備え、テーマや飾りを定期的に足していく
 - **シェア（1.3.0 から。無料）**: 予定の「あと○日」をカードの画像にして共有シートで渡す（端末の中で作り、通信しない）。透かし（アプリ名）は全員に小さく入れ、会場は既定で載せない
 - 技術: SwiftUI / SwiftData / `PhotosPicker` / WidgetKit + App Intents / Swift Testing（Unit）/ XCTest（UI テスト）。外部ライブラリは原則足さない
