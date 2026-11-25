@@ -64,6 +64,9 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 推し活のモチーフ（1.4.0 から。無料）: チケット（ホームの先頭のカード。`TicketShape`）・チェキ（`ChekiPhoto`）・缶バッジ（`canBadgeStyle(color:size:)`）・リボンの札（`RibbonLabel`）・「今日！」の札（`TodayPill`）。
     部品は `OshiCon/Screens/Common/` に置き、アプリの画面だけで使う（`Shared/` の `OshiAvatar` とウィジェット・ライブアクティビティ・シェアのカードは変えない）。
     世界観（地雷系・ゴシック）・推し色の役割・規則・文言は変えず、SwiftUI の図形で描く。決まりは `docs/design/themes.md` の「推し活のモチーフ」
+    - 推しの一覧は、1 位の推しを大きいカード（チェキ・「最推し！」のリボン・次の予定と残り日数・予定の件数）、2 位からを行（缶バッジ・次の予定と日付・残り日数）で出す。
+      推しごとの「次の予定」（当日とこれからの予定のうちいちばん近いもの。ピン留めは見ない）の規則は `OshiCon/Screens/Oshi/OshiListContent.swift`。
+      並べ替えの間は、カードをやめて今までのリスト（順位・名前・予定の件数）に切り替える（ドラッグでの入れ替えは `List` が要るため）
 - 推しの写真は、選んだら調整画面（拡大・縮小・移動・回転）で丸の範囲を決め、正方形に切り抜いた画像だけを保存する（スキーマは変えない）。仕様の正は `docs/spec/features/07-photo-crop.md`。コードの場所・テストの口（`-useTestPhoto`）・iOS だけの実装の参考は `docs/photo-crop.md`
 - 予定の通知（ローカル通知）は `OshiCon/Reminder/`。どの予定にいつ出すかの規則は `ReminderPlan`、文面は `ReminderContent`、予約・許可・押された通知は `ReminderScheduler`。
   設定はアプリ全体で 1 つ（UserDefaults。予定ごとには持たないのでスキーマは変えない）で、画面は `OshiCon/Screens/Settings/ReminderSettingsSection.swift`。
