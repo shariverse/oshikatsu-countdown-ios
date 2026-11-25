@@ -137,6 +137,31 @@ nonisolated struct EventDetailContent: Equatable, Sendable {
         return "\(date) \(EventText.startTime(startTime, kind: event.kind, locale: locale))"
     }
 
+    /// 日時・会場・くり返しの行。会場は入れてあるときだけ、くり返しは毎年くり返す予定だけ出す。
+    var infoRows: [InfoRow] {
+        var rows = [infoRow(.dateTime, title: "日時", value: dateText)]
+        if !event.venue.isEmpty {
+            rows.append(infoRow(.venue, title: "会場・場所", value: event.venue))
+        }
+        if event.repeatsYearly {
+            let value = String(localized: LocalizedStringResource("毎年この日を数えます", locale: locale))
+            rows.append(infoRow(.repeating, title: "くり返し", value: value))
+        }
+        return rows
+    }
+
+    private func infoRow(_ kind: InfoKind, title: LocalizedStringResource, value: String) -> InfoRow {
+        var title = title
+        title.locale = locale
+        let titleText = String(localized: title)
+        return InfoRow(
+            kind: kind,
+            title: titleText,
+            value: value,
+            accessibilityLabel: EventText.joinedForSpeech([titleText, value], locale: locale)
+        )
+    }
+
     /// 削除の確認の本文。
     var deleteMessage: String {
         String(localized: LocalizedStringResource("「\(event.title)」を削除します。元に戻せません。", locale: locale))
@@ -184,6 +209,27 @@ extension EventDetailContent {
         /// 1 秒ごとに進むタイル（推し色の枠と数字で目立たせる）。
         var isLive: Bool {
             unit == .seconds
+        }
+    }
+
+    /// 日時・会場・くり返しの行の種類。
+    nonisolated enum InfoKind: Equatable, Sendable {
+        case dateTime
+        case venue
+        case repeating
+    }
+
+    /// 日時・会場・くり返しの行 1 つ。
+    nonisolated struct InfoRow: Equatable, Sendable, Identifiable {
+        let kind: InfoKind
+        /// 項目名（`日時`）。
+        let title: String
+        let value: String
+        /// 行の読み上げ（`日時、10月18日(日) 開演 17:00`）。
+        let accessibilityLabel: String
+
+        var id: InfoKind {
+            kind
         }
     }
 }

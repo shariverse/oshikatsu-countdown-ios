@@ -6,37 +6,25 @@
 import SwiftUI
 
 /// 詳細の中身のカード。種類・推しの名前・タイトル、残り（または当日・終わった予定）、進み具合、日時・会場・くり返し。
-/// 残りは `EventDetailCountdown`、進み具合のバーは `EventDetailProgressBar` が描く。
+/// 残りは `EventDetailCountdown`、進み具合のバーは `EventDetailProgressBar`、日時などの行は `EventDetailInfoRows` が描く。
 struct EventDetailCard: View {
     let detail: EventDetailContent
 
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 16) {
-                heading
-                EventDetailCountdown(detail: detail)
-                if let progress = detail.countdown.progress,
-                   let percentText = detail.progressPercentText,
-                   let accessibilityLabel = detail.progressAccessibilityLabel {
-                    progressBar(progress: progress, percentText: percentText, accessibilityLabel: accessibilityLabel)
-                }
+        VStack(alignment: .leading, spacing: 16) {
+            heading
+            EventDetailCountdown(detail: detail)
+            if let progress = detail.countdown.progress,
+               let percentText = detail.progressPercentText,
+               let accessibilityLabel = detail.progressAccessibilityLabel {
+                progressBar(progress: progress, percentText: percentText, accessibilityLabel: accessibilityLabel)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 24)
-            .padding(.bottom, 16)
-            Divider()
-                .padding(.horizontal, 20)
-            infoRow(systemImage: "clock", title: "日時", value: detail.dateText)
-            if !detail.event.venue.isEmpty {
-                infoRow(systemImage: "mappin.and.ellipse", title: "会場・場所", value: detail.event.venue)
-            }
-            if detail.event.repeatsYearly {
-                infoRow(systemImage: "repeat", title: "くり返し", value: String(localized: "毎年この日を数えます"))
-            }
+            EventDetailInfoRows(rows: detail.infoRows)
         }
-        .padding(.bottom, 24)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             theme.palette.surface.color,
@@ -82,27 +70,6 @@ struct EventDetailCard: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
-    }
-
-    private func infoRow(systemImage: String, title: LocalizedStringKey, value: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Image(systemName: systemImage)
-                .foregroundStyle(theme.palette.onSurfaceVariant.color)
-                .frame(width: 24)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(theme.typography.text(.caption))
-                    .foregroundStyle(theme.palette.onSurfaceVariant.color)
-                Text(value)
-                    .font(theme.typography.text(.body))
-                    .foregroundStyle(theme.palette.onSurface.color)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
     }
 }
 

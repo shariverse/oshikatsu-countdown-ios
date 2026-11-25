@@ -160,6 +160,22 @@ struct EventDetailContentTests {
         #expect(detail.countdown.occurrenceDay == DomainFixtures.day(2026, 10, 18))
     }
 
+    @Test("日時・会場・くり返しの行。会場は入れてあるときだけ、くり返しは毎年くり返す予定だけ")
+    func infoRows() {
+        let rows = content(event(), now: DomainFixtures.date(2026, 10, 1)).infoRows
+        #expect(rows.map(\.kind) == [.dateTime, .venue])
+        #expect(rows.map(\.title) == ["日時", "会場・場所"])
+        #expect(rows.map(\.value) == ["10月18日(日) 開演 17:00", "東京ドーム"])
+        #expect(rows.map(\.accessibilityLabel) == ["日時、10月18日(日) 開演 17:00", "会場・場所、東京ドーム"])
+
+        var birthday = event(kind: .birthday, day: DomainFixtures.day(2000, 10, 18), startTime: nil, repeatsYearly: true)
+        birthday.venue = ""
+        let repeating = content(birthday, now: DomainFixtures.date(2026, 4, 18)).infoRows
+        #expect(repeating.map(\.kind) == [.dateTime, .repeating])
+        #expect(repeating.map(\.title) == ["日時", "くり返し"])
+        #expect(repeating.map(\.value) == ["10月18日(日)", "毎年この日を数えます"])
+    }
+
     @Test("日時は日付と開始の時刻。推しなしの予定は「推しなし」と無彩色。削除の確認の本文")
     func texts() {
         let detail = content(event(), now: DomainFixtures.date(2026, 10, 1))
@@ -176,6 +192,7 @@ struct EventDetailContentTests {
         #expect(detail.remainingDescription == "3 days, 7 hours, 5 minutes left")
         #expect(detail.remainingDaysParts == .init(prefix: "", number: "3", suffix: "days left"))
         #expect(detail.clockTiles.map(\.label) == ["hr", "min", "sec"])
+        #expect(detail.infoRows.map(\.title) == ["Date & Time", "Venue"])
         #expect(detail.dateText == "Sun, Oct 18 Show 17:00")
         #expect(detail.kindLabel == "Live")
         #expect(detail.progressStartText == "Added 9/2")
