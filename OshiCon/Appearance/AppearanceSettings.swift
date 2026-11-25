@@ -22,24 +22,29 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
     var backgroundPhotoFileName: String?
     /// 飾りの濃さ・量・出す推し。飾りが OFF でも残す。
     var decorationStyle: OshiPhotoDecorationStyle
+    /// ホーム画面のアプリアイコンの色（`AppIconRule`）。既定はピンク（今のアイコン）。Plus でなくても残す。
+    var appIconColor: OshiColor
 
     init(
         isBackgroundEnabled: Bool = true,
         isDecorationEnabled: Bool = false,
         backgroundStyle: AppearanceBackgroundStyle = .default,
         backgroundPhotoFileName: String? = nil,
-        decorationStyle: OshiPhotoDecorationStyle = .default
+        decorationStyle: OshiPhotoDecorationStyle = .default,
+        appIconColor: OshiColor = .defaultColor
     ) {
         self.isBackgroundEnabled = isBackgroundEnabled
         self.isDecorationEnabled = isDecorationEnabled
         self.backgroundStyle = backgroundStyle
         self.backgroundPhotoFileName = backgroundPhotoFileName
         self.decorationStyle = decorationStyle
+        self.appIconColor = appIconColor
     }
 
     /// UserDefaults から読む。書いていない項目は既定の値。写真の置き場所の外を指すファイル名は無いものとする。
     /// 暗幕・ぼかし・飾りの濃さ・量は範囲に収め、出さない推しの id は UUID として読めるものだけを使う。
     /// 暗幕とぼかしを書いていなければ、前の版の強さ（弱・中・強。`AppStorageKey.appearanceIntensity`）から読み替える。
+    /// アプリアイコンの色は、知らない値ならピンク。
     init(defaults: UserDefaults) {
         let fileName = defaults.string(forKey: AppStorageKey.appearanceBackgroundPhoto)
         let legacyStyle = defaults.string(forKey: AppStorageKey.appearanceIntensity)
@@ -58,7 +63,8 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
                 opacity: opacity ?? OshiPhotoDecorationStyle.defaultOpacity,
                 amount: amount ?? OshiPhotoDecorationStyle.defaultAmount,
                 excludedOshiIDs: Set(excluded.compactMap(UUID.init(uuidString:)))
-            )
+            ),
+            appIconColor: defaults.string(forKey: AppStorageKey.appearanceAppIcon).flatMap(OshiColor.init(rawValue:)) ?? .defaultColor
         )
     }
 
@@ -73,6 +79,7 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
         defaults.set(decorationStyle.opacity, forKey: AppStorageKey.appearanceDecorationOpacity)
         defaults.set(decorationStyle.amount, forKey: AppStorageKey.appearanceDecorationAmount)
         defaults.set(decorationStyle.excludedOshiIDs.map(\.uuidString).sorted(), forKey: AppStorageKey.appearanceDecorationExcludedOshis)
+        defaults.set(appIconColor.rawValue, forKey: AppStorageKey.appearanceAppIcon)
         if let backgroundPhotoFileName {
             defaults.set(backgroundPhotoFileName, forKey: AppStorageKey.appearanceBackgroundPhoto)
         } else {

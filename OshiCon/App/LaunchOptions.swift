@@ -196,6 +196,8 @@ nonisolated enum AppStorageKey {
     static let appearanceDecorationAmount = "appearanceDecorationAmount"
     /// 着せ替え: 飾りに出さない推しの id（UUID の文字列の配列。既定は空で、すべての推しを出す）。
     static let appearanceDecorationExcludedOshis = "appearanceDecorationExcludedOshis"
+    /// 着せ替え: ホーム画面のアプリアイコンの色（`OshiColor` の生の値。`AppIconRule`。既定はピンク）。
+    static let appearanceAppIcon = "appearanceAppIcon"
 
     /// そのタイミングの通知を出す（既定は ON）。
     static func reminderTiming(_ timing: ReminderTiming) -> String {
