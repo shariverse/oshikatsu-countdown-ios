@@ -5,6 +5,8 @@
 - **背景**: アプリ全体で 1 枚の写真を、iPhone の縦の比率（約 9:19.5）に調整して、ホームと予定の詳細の地に敷く
 - **飾り**: 地に散らしているハートと十字の代わりに、選んだ推しの丸い写真を並べる。濃さと量はスライダーで変え、量をいちばん多くすると地を埋め尽くす（#266）
 
+1.4.0 から、ホーム画面の**アプリアイコン**の色も、推し色の 12 色から選べる（#336。「アプリアイコン」の節）。
+
 AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 
 > **Android 版の SPEC（`shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`）には、まだこの仕様が書かれていない。**
@@ -80,6 +82,25 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   - 出す推しに写真のある推しが 1 人もいなければ、テーマの模様（ハート・十字）のまま。読めなかった写真の推しは飛ばす
 - 写真はいちばん大きい丸（64pt）× 画面の倍率に縮め、丸の外を透明にした画像にしてメインアクターの外で読む（量 100% の iPad では丸が数百になるので、描くたびに丸で切らない）
 
+### アプリアイコン
+
+1.4.0 で足した（#336。画面デザイン案 B5）。
+
+- ホーム画面のアプリアイコンの色を、推し色の 12 色（`OshiColor`）から選ぶ。図柄（白いハート）・影・透け方は今のアイコンのまま、地の色だけを替える。
+  ピンク（#C8326A）が今のアイコン（主アイコン `AppIcon`）で既定。ほかの 11 色は代替アイコン（`AppIcon-Red`・`AppIcon-Orange`・…・`AppIcon-Black`）
+- ダークの外観のアイコンも 12 色ぶん用意する。今のアイコンと同じく、暗い地に淡い推し色のハート。OKLCH で、地は明るさ 0.19・彩度は推し色の 0.18 倍（0.035 まで）、
+  ハートは明るさ 0.84・彩度は推し色の 0.8 倍（0.095 まで）、色相は推し色のまま（ピンクは今のアイコンの値のまま）。ティント・クリアの外観は、システムが図柄から作る（今のアイコンと同じ）
+- **Plus の扱い**: Plus でない人も色を選べ、着せ替えの画面の見本に映り、選んだ色は保存する（試着）。ホーム画面のアイコンを替えるのは Plus の人だけ
+  - Plus で色を選ぶと、その場でホーム画面のアイコンを替える（`UIApplication.setAlternateIconName`）。替えるたびに、システムが利用者に知らせる
+  - 解約・期限切れで Plus が使えなくなったら、主アイコン（ピンク）に戻す。選んだ色は残し、また Plus になったら（買い直し・購入の復元）その色に戻す
+  - システムの知らせが出るので、替えるのは「出したいアイコン」が今のアイコンと違うときだけ（`AppIconRule.request(desired:current:supportsAlternateIcons:)`）。
+    出したいアイコンは、Plus が使えれば選んだ色、使えなければ主アイコン（`AppIconRule.iconName(selected:isPlusUnlocked:)`）
+  - 合わせるきっかけは、色を選んだとき・Plus の状態が変わったとき・アプリが前面に来たとき（裏にいる間に期限が切れたとき）。アイコンを替えられるのは前面にあるときだけなので、前面にある間だけ合わせる
+  - 替えている間に色を続けて選んだら、替え終わってからいちばん新しい色に 1 回だけ替える。替えられなかった色は、選び直すまで替え直さない（前面に来るたびに試し続けない）
+  - 起動の直後の Plus の状態は、前に決めた結果（App Group の `PlusStatusStorage`）なので、起動のたびにアイコンが戻って替わり直すことはない
+- 端末が代替アイコンを使えない（`supportsAlternateIcons` が false）ときは替えない
+- ウィジェット・ホーム画面の表示名（「推し活カウント」）・課金画面・通知のアイコンの見た目は変えない（通知のアイコンはシステムがアプリのアイコンから描く）
+
 ### 設定と保存
 
 - 設定はアプリ全体で 1 つ。アプリだけの UserDefaults（`AppStorageKey`。`PrivacyInfo.xcprivacy` の CA92.1）に置く
@@ -94,6 +115,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   | `appearanceDecorationOpacity` | 飾りの濃さ（0.1〜1） | 0.4 |
   | `appearanceDecorationAmount` | 飾りの量（0〜1） | 0.25 |
   | `appearanceDecorationExcludedOshis` | 飾りに出さない推しの id（UUID の文字列の配列） | 空（すべての推しを出す） |
+  | `appearanceAppIcon` | ホーム画面のアプリアイコンの色（`OshiColor` の生の値。知らない値はピンク） | `pink` |
 
 - 範囲の外の暗幕・ぼかし・濃さ・量は範囲に収め、UUID でない id は読まない。出さない推しの id は、推しを切り替えたときに、もういない推しの分を外す
 - 前の版（TestFlight）の強さ `appearanceIntensity`（`weak`・`medium`・`strong`）が残っていて、暗幕とぼかしのキーが無ければ、同じ見た目になる位置に読み替える
@@ -154,7 +176,14 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - 「飾り」のタブ（`AppearanceDecorationSettings`）: 飾りの ON/OFF、濃さ（薄い〜濃い）と量（少なめ〜埋め尽くす）のスライダー、飾りに出す推し。飾りが OFF のときも値は見せ、押せなくする
   - 飾りに出す推しは、推しごとの切り替え（丸い写真と名前）を横に並べる。出す推しには印を付け、出さない推しは薄くする。写真の無い推しは「写真がありません」を添える。推しがいなければ出さない。
     読み上げと UI テストには、名前の付いたスイッチとして見せる（`accessibilityRepresentation`）
-- どちらのタブも、いちばん下に Plus の案内を添える（Plus でない人には試着できること、Plus の人には効いていること）
+- 「アイコン」のタブ（`AppearanceIconSettings`）: 推し色の 12 色のアイコンを 6 列の格子に並べ（一辺は 64pt まで）、押した色を選ぶ。選んでいる色はアクセントの輪で囲む。下に説明の文を添える。
+  読み上げは色の名前（`OshiColor.label`）のボタンで、選んでいる色に「選択中」が付く
+  - このタブを開いている間は、見本の舞台（ホーム・予定の詳細・シェア）の代わりに、アイコンの見本（`AppearanceIconPreview`）を同じ場所・同じ大きさに置く（タブを替えてもトレーの高さは変わらない）。
+    選んでいる色のアイコンを大きく（ライトの外観。132pt まで）、その下にホーム画面の表示名（言語ごとの `CFBundleDisplayName`）、ライトとダークの外観のアイコンを小さく並べる。
+    大きさは舞台の大きさから決める（`AppIconPreviewMetrics`）。読み上げでは 1 つの要素（名前は「アイコンの見本」、値は色の名前）
+  - アイコンの見本は、アセットカタログのアイコン（`.icon`）をアプリから画像として読めないので、同じ図柄を SwiftUI の図形で描く（`AppIconImage`。ハートは `heart.svg` と同じ形と大きさ）
+  - 選んでいるタブは画面（`AppearanceSettingsScreen`）が持ち、トレーには `Binding` で渡す
+- どのタブも、いちばん下に Plus の案内を添える（Plus でない人には試着できること、Plus の人には効いていること）。「アイコン」のタブでは、ホーム画面のアイコンについての文にする
 - スライダー（暗幕・ぼかし・飾りの濃さ・量）は同じ部品（`AppearanceSlider`）。値は 5% ずつに丸め、百分率で出す。幅に収まれば 1 行（名前・スライダー・値）にして、トレーの行を低くする。
   収まらないとき（長い訳）は 2 行にして、両端の言葉をスライダーの左右に添える。アクセシビリティの大きな文字では、両端の言葉をスライダーの下に置く
 - 文言は 12 言語（`Shared/Resources/Localizable.xcstrings`）
@@ -202,6 +231,11 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 | 見本（ホーム・予定の詳細・シェアのカード）と、iPhone の縦の画面に縮める枠 | `OshiCon/Screens/Appearance/AppearanceHomePreview.swift`・`AppearanceDetailPreview.swift`・`AppearanceSharePreview.swift`・`AppearancePhoneFrame.swift` |
 | 設定のトレー（タブ）と、「背景」「飾り」のタブの中身・スライダーの部品 | `OshiCon/Screens/Appearance/AppearanceEditorTray.swift`（`AppearanceEditorTab`・`AppearanceEditorTray`）・`AppearanceBackgroundSettings.swift`・`AppearanceDecorationSettings.swift`・`AppearanceSlider.swift` |
 | 全画面の試着 | `OshiCon/Screens/Appearance/AppearanceTryOnScreen.swift` |
+| アプリアイコンの名前の規則（色 ↔ 代替アイコンの名前・ホーム画面に出すアイコン・替えるか）と色（ライトとダーク） | `OshiCon/Appearance/AppIcon.swift`（`AppIconRule`・`AppIconRequest`・`AppIconPalette`） |
+| ホーム画面のアイコンを合わせる係（システムの API とメモリ上の代わり・替える回数をまとめる・前面にある間だけ合わせる） | `OshiCon/Appearance/AppIconSynchronizer.swift`（`AppIconSynchronizer`・`AppIconSwitching`・`synchronizesAppIcon(_:plus:appearance:)`。`OshiCon.swift` で入れる） |
+| 「アイコン」のタブの中身とアイコンの見本・UI テストの口 | `OshiCon/Screens/Appearance/AppearanceIconSettings.swift`（`AppearanceIconSettings`・`AppearanceIconPreview`・`AppIconPreviewMetrics`・`appIconUITestMarker(_:)`）・`AppIconImage.swift` |
+| アイコンの Icon Composer のファイル | 主アイコン `OshiCon/AppIcon.icon`、代替アイコン `OshiCon/AlternateAppIcons/AppIcon-<色>.icon`（`scripts/make-alternate-app-icons.py` で作り直す） |
+| 代替アイコンの名前のビルド設定 | `Configs/Project.xcconfig` の `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`（Xcode が Info.plist の `CFBundleAlternateIcons` を書く。Info.plist には手で書かない） |
 | 設定の「着せ替え」の行 | `OshiCon/Screens/Settings/SettingsScreen.swift`（`PlusSettingsSection`） |
 | 縦長の枠の調整と切り抜き | `OshiCon/Photo/`（[photo-crop.md](photo-crop.md)） |
 | シェアのカードの地を選ぶ規則 | `OshiCon/Share/ShareCardStyle.swift`（`ShareCardStyle.appearance(_:)`） |
@@ -225,6 +259,12 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   - `AppearancePreviewLayoutTests`: 縦向きの iPhone（SE〜Pro Max）は見本を上に大きく置いて（画面の高さの 45% 前後）トレーに 200pt を残すこと、大きな文字では見本を小さくしてトレーに半分より多く残すこと、
     iPad と横向きの iPhone は左右に並べて見本と切り替えの行を高さに、左の列を幅の 4 割に収めること、iPad の狭い分割は上に置くこと、シェアのカードの見本の大きさと、となりの見本をよける幅、測れていない大きさ
   - `AppearanceUITestMarkerTests`: UI テストに見せる値
+  - `AppIconTests`: 色と代替アイコンの名前（ピンクは主アイコン・名前から色）、Plus のときだけ選んだ色・使えなければ主アイコン、今と同じなら替えないこと、設定の読み書き（既定はピンク・知らない値はピンク）、
+    ダークの色（ライトの地より暗く、ハートと 7:1 以上・ピンクは今のアイコンのまま）、アプリの Info.plist（iPhone と iPad）に 11 色の代替アイコンが入っていること、
+    リポジトリの Icon Composer のファイルの色が `AppIconPalette` と同じで、図柄・影・透け方が主アイコンのままであること（`.icon` はアプリに入らないので、リポジトリから読む）。
+    アイコンの見本の大きさ（`AppIconPreviewMetricsTests`）
+  - `AppIconSynchronizerTests`: 同じアイコンには替えない、解約で主アイコンに戻して Plus に戻ったら選んだ色に戻す、Plus でなければ替えない、替えている間に続けて選んだら終わってから最後の色に 1 回だけ替える、
+    替えられなかった色は選び直すまで替え直さない、代替アイコンを使えない端末では替えない、メモリ上のストアではシステムの API を呼ばない
   - ほかに `OshiConTests/Photo/OshiEditingTests`（推しの写真の差し替え・削除で背景の写真が消えない）、`PhotoCropRectangleTests`・`PhotoResizerRectangleCropTests`（縦長の枠）、
     `OshiConTests/Share/ShareCardAppearanceStyleTests`（シェアのカードの地を選ぶ規則）
 - UI（XCTest）: `OshiConUITests/AppearanceUITests`・`AppearanceTryOnUITests`（起動と操作は親の `AppearanceUITestCase`）。起動引数 `-useInMemoryStore -useTestPhoto` と日本語で起動する
@@ -237,6 +277,11 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
       見本の推しの切り替え（`appearance.decorationOshi.<並びの番号>`。スイッチとして見える）で外せる → ホームに飾りが効く。
       スライダーと推しの切り替えを動かすときも、見本が画面の中にあって設定と重ならないことを確かめる
     - `-simulateAppStoreDistribution`: App Store 版でも「着せ替え」の行が出る
+  - `AppearanceIconUITests`
+    - `-plusLocked`: 「アイコン」のタブ（`appearance.tab.icon`）で、上の見本がアイコンの見本（`appearance.icon.preview`。値は色の名前）に替わる → 色（`appearance.icon.<OshiColor の生の値>`）を押すと見本に映るが、
+      ホーム画面のアイコンは `pink` のまま → ほかのタブに戻ると、ホーム・予定の詳細・シェアの見本に戻り、選んだ色は残る
+    - `-plusUnlocked`: 色を選ぶとホーム画面のアイコンも替わり、ピンクで戻る
+    - メモリ上のストアではシステムの API を呼ばない（`InMemoryAppIconSwitcher`）ので、ホーム画面に出ているアイコンの色は「アイコン」のタブに置く 1pt の口（`appearance.icon.homeScreen`。`OshiColor` の生の値）で確かめる
   - `AppearanceTryOnUITests`（`-plusLocked -seedSampleData`）
     - 見本の切り替え: 下の切り替え（`appearance.previewKind.home`・`.eventDetail`・`.share`）と横のスワイプで見本が替わり（見本の読み上げの名前）、切り替えの選択も付いてくる。選んだ写真が、シェアのカードの見本にも予定の詳細の見本にも映る
     - 全画面の試着: 「全画面」（`appearance.fullScreen`）で、映していた見本のまま全画面（`appearance.tryOn.preview`）を出す → 全画面でも切り替えられる
@@ -266,3 +311,9 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - 幕を薄くしたので、明るい写真・暗い写真の上で、iOS 17・18 の透けたバー（ナビゲーションバーの ＋・いちばん下までスクロールしたときのタブバー）が読めるか。上の端のグラデーションが不自然でないか（iPad・横向きを含む）。見出しのリボンの札と案内の板が大きな文字で崩れないか
 - 購入・解約・期限切れ（Xcode の StoreKit の Manage Transactions）で、ホームと詳細がその場で切り替わり、写真と設定が残ること
 - VoiceOver で、ホームと詳細の読み上げ・並びが変わらないこと
+- **アプリアイコン**（#336）
+  - Plus で色を選んだとき、システムの知らせ（「"推し活カウント"のアイコンを変更しました」）が 1 回だけ出て、ホーム画面・App スイッチャー・Spotlight・設定のアイコンが替わるか。色を続けて押したときに知らせが重ならないか
+  - ダーク・ティント・クリアの外観（iOS 26 のホーム画面のカスタマイズ）で、12 色のアイコンが今のピンクのアイコンと同じように見えるか。iOS 17・18（平らな画像）でも見る
+  - 購入・解約・期限切れ（Xcode の StoreKit の Manage Transactions）で、ピンクに戻る・選んだ色に戻るのがそれぞれ 1 回だけで、起動のたびや前面に来るたびに知らせが出ないか
+  - 課金画面で買った直後にアイコンが替わり、知らせが課金画面の上に出ても操作に困らないか
+  - iPad（横向き・Split View）でも替わるか
