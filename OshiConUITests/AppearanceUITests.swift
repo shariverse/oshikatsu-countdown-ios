@@ -56,6 +56,7 @@ final class AppearanceUITests: XCTestCase {
     }
 
     /// 見本の読み上げの値が `texts` をすべて含むまで待つ。見本は Form の外に固定しているので、送らずに読める。
+    /// 遅い Simulator では、値がそろっていても待ちが時間切れで返ることがあるので、待った後の値で確かめる。
     @MainActor
     private func waitForPreview(in app: XCUIApplication, containing texts: [String], file: StaticString = #filePath, line: UInt = #line) {
         let element = preview(in: app)
@@ -63,8 +64,9 @@ final class AppearanceUITests: XCTestCase {
         let format = texts.map { _ in "value CONTAINS %@" }.joined(separator: " AND ")
         let predicate = NSPredicate(format: format, argumentArray: texts)
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        let result = XCTWaiter().wait(for: [expectation], timeout: 5)
-        XCTAssertEqual(result, .completed, "見本の値: \(element.value as? String ?? "nil")", file: file, line: line)
+        _ = XCTWaiter().wait(for: [expectation], timeout: 5)
+        let value = element.value as? String ?? "nil"
+        XCTAssertTrue(texts.allSatisfy { value.contains($0) }, "見本の値: \(value)", file: file, line: line)
     }
 
     /// ホームか予定の詳細の地に描いているもの（`AppearanceUITestMarker`）が `expected` になるまで待つ。
@@ -79,8 +81,8 @@ final class AppearanceUITests: XCTestCase {
         let marker = app.descendants(matching: .any)[identifier].firstMatch
         XCTAssertTrue(marker.waitForExistence(timeout: 5), identifier, file: file, line: line)
         let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", expected), object: marker)
-        let result = XCTWaiter().wait(for: [expectation], timeout: 5)
-        XCTAssertEqual(result, .completed, "\(identifier): \(marker.label)", file: file, line: line)
+        _ = XCTWaiter().wait(for: [expectation], timeout: 5)
+        XCTAssertEqual(marker.label, expected, identifier, file: file, line: line)
     }
 
     /// 「写真を選ぶ／写真を変える」で生成した画像を選び、縦長の枠の調整画面で拡大してから「完了」する。
@@ -106,7 +108,8 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["着せ替え"].waitForExistence(timeout: 5))
         // 取り込むと「写真を変える」になり、その下の行に「写真を外す」が出る。見本の分だけ Form が短く、画面の外の行は作られないので、送ってから探す
         let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label CONTAINS %@", "写真を変える"), object: select)
-        XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 5), .completed)
+        _ = XCTWaiter().wait(for: [changed], timeout: 5)
+        XCTAssertTrue(select.label.contains("写真を変える"), select.label)
         let remove = app.buttons["appearance.removePhoto"]
         reveal(remove, in: app)
         XCTAssertTrue(remove.waitForExistence(timeout: 2))
@@ -192,9 +195,6 @@ final class AppearanceUITests: XCTestCase {
         return moved
     }
 
-    /// Form をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
-    /// スライダーの無い Form の左の端（行の外の余白）を縦に送る。見本は Form の外にあり、見本の上では送れない。
-    @MainActor
     /// スライダーのつまみを押さえ、端までゆっくり引いて、止めてから離す。1 回だけ引き、引き直さない。
     ///
     /// iOS 26 のスライダーは、つまみが指に遅れて付いてくる。`adjust(toNormalizedSliderPosition:)` は速く引いてすぐ指を離すので、
@@ -212,6 +212,9 @@ final class AppearanceUITests: XCTestCase {
         thumb.press(forDuration: 0.3, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.5)
     }
 
+    /// Form をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
+    /// スライダーの無い Form の左の端（行の外の余白）を縦に送る。見本は Form の外にあり、見本の上では送れない。
+    @MainActor
     private func scroll(_ form: XCUIElement, upward: Bool) {
         let top = form.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.3))
         let bottom = form.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.7))
