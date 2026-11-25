@@ -74,8 +74,10 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   共有シートには画像だけを渡す（`ShareCardImage` が Transferable）。会場は既定で載せず、写真は既定で載せる。透かしは catalog のキー「推し活カウントダウン」（App Store の名前のコロンより前）。
   共有シートの「画像を保存」のため Info.plist に `NSPhotoLibraryAddUsageDescription` を置く（`NSPhotoLibraryUsageDescription` は置かない）。
   仕様・テストの口（`OshiConTests/Share/`・`ShareCardUITests`・`eventDetail.share`・`shareCard.*`）は `docs/share-card.md`
-- Plus の着せ替え（背景の写真と推しの写真の飾り）は、規則・ストア・地の View が `OshiCon/Appearance/`、着せ替えの画面とホームの見本が `OshiCon/Screens/Appearance/`。
-  着せ替えの画面の見本は設定の Form の外に置き、縦向きの iPhone では上に固定、iPad・横向きでは左に並べる（並べ方と大きさは `AppearancePreviewLayout`。#269）。
+- Plus の着せ替え（背景の写真と推しの写真の飾り）は、規則・ストア・地の View が `OshiCon/Appearance/`、着せ替えの画面・見本（ホーム・予定の詳細・シェアのカード）・全画面の試着が `OshiCon/Screens/Appearance/`。
+  着せ替えの画面は、見本の舞台（横のスワイプと下の切り替えで見本を替える。「全画面」で全画面の試着を開く）と、設定のトレー（タブ「背景」「飾り」）に分ける（#323）。
+  見本はスクロールする設定の外に置き、縦向きの iPhone では上に大きく、iPad・横向きでは左に並べる（並べ方と大きさは `AppearancePreviewLayout`。#269）。開いている間はタブバーを隠す。
+  タブを足すときは `AppearanceEditorTab` に case を足し、`AppearanceEditorTray` に中身を足す。
   効かせるのはホームと予定の詳細の地だけ（詳細は上の写真より下）で、`ThemeScreenBackground`（課金画面・シェアのカード・テーマの見本）は変えない。
   設定（背景・飾りの ON/OFF、暗幕の濃さとぼかしの強さ、背景の写真のファイル名、飾りの濃さ・量・出さない推し）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
   画面は `@Environment(AppearanceStore.self)` と `@Environment(\.isPlusUnlocked)` から `store.rendering(isPlusUnlocked:)`（`AppearanceRendering`。Plus でなければ標準）で描くものを決め、背景の写真は `store.photos` から読む（メモリ上のストアでは置き場所が違う）。
