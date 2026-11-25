@@ -6,7 +6,7 @@
 import SwiftUI
 
 /// 詳細の中身のカード。種類・推しの名前・タイトル、残り（または当日・終わった予定）、進み具合、日時・会場・くり返し。
-/// 残りは `EventDetailCountdown` が描く。
+/// 残りは `EventDetailCountdown`、進み具合のバーは `EventDetailProgressBar` が描く。
 struct EventDetailCard: View {
     let detail: EventDetailContent
 
@@ -64,15 +64,16 @@ struct EventDetailCard: View {
         }
     }
 
+    /// 進み具合のバーと、両端と中央のラベル（登録の日・○% 経過・当日）。まとめて 1 つの要素として読む。
     private func progressBar(progress: Double, percentText: String, accessibilityLabel: String) -> some View {
         VStack(spacing: 6) {
-            ProgressView(value: progress)
-                .tint(detail.color.text(in: theme).color)
+            EventDetailProgressBar(progress: progress, tint: detail.color.text(in: theme).color)
             HStack {
                 Text(detail.progressStartText)
                 Spacer()
                 Text(percentText)
                     .fontWeight(.bold)
+                    .foregroundStyle(theme.palette.onSurface.color)
                 Spacer()
                 Text(detail.progressEndText)
             }
