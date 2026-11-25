@@ -7,7 +7,7 @@ on:
       xcode-version:
         description: maxim-lobanov/setup-xcode に渡す Xcode バージョン
         type: string
-        # README の Environment と揃える。ランナー側の更新でビルドが変わらないよう固定する
+        # docs/development.md の「開発環境」と揃える。ランナー側の更新でビルドが変わらないよう固定する
         default: '26.6'
       ui-tests:
         description: UI テスト（<プロジェクト名>UITests）も実行するか。false なら Unit テストだけ実行する

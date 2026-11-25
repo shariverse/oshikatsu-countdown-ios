@@ -22,4 +22,4 @@
 - リポジトリ変数（Settings → Secrets and variables → Actions → Variables）に `ENABLE_DELIVERY=false` を設定すると Upload をスキップします（Archive は App Store Connect にアプリが無くても通るため止めません）。テンプレートリポジトリ自身はこの設定でアップロードを止めています。テンプレートから作成したリポジトリには引き継がれないため、何もしなければ従来どおり実行されます
 - Build はドキュメントだけの変更でも実行します。ルールセットで `build / build` を必須にしているため、飛ばすとチェックが出ず、PR をマージできなくなります
 - 作業ブランチへの push では、時間のかかる UI テスト（`<プロジェクト名>UITests`）を省いて Unit テストだけ実行します。UI テストは Pull Request の作成時と `main` / `develop` / `release/**` への push で実行します。AskHub の子 PR（`askhub/**` 宛て）は PR のイベントでは実行せず（ワーカーが手元でテストを流してから出すため）、作業ブランチ → `develop` の最終 PR は更新（synchronize）でも UI テストまで実行します。Fork からの Pull Request は push で実行されないため、更新（synchronize）を含むすべてのイベントで UI テストまで実行します
-- Xcode のバージョンは [.github/workflows/_build.yml](../.github/workflows/_build.yml) と [.github/workflows/_archive.yml](../.github/workflows/_archive.yml) の `xcode-version` で固定しています。Environment の更新時はあわせて変更してください
+- Xcode のバージョンは [.github/workflows/_build.yml](../.github/workflows/_build.yml) と [.github/workflows/_archive.yml](../.github/workflows/_archive.yml) の `xcode-version` で固定しています。[開発環境](development.md#開発環境)を更新するときは、あわせて変更してください
