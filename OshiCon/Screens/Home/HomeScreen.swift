@@ -31,7 +31,8 @@ struct HomeScreen: View {
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
-        // 背景の写真・推しの丸い写真の飾りの上では、地の上に直接描く見出し・案内の後ろに板を敷く（`appearanceTextPlate()`）
+        // 背景の写真・推しの丸い写真の飾りの上では、地の上に直接描く案内の後ろに板を敷く（`appearanceTextPlate()`）。
+        // 見出しはリボンの札で、自分の地を持つので板は敷かない
         .environment(\.isOverAppearancePhoto, rendering.drawsPhotosOnGround)
         .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: rendering)
         // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れでその場で切り替わる
@@ -226,7 +227,7 @@ struct HomeScreen: View {
     }
 }
 
-/// ホームの見出しつきのまとまり。中身はカードの地に並べる。
+/// ホームの見出しつきのまとまり。見出しはリボンの札（`RibbonLabel`）で、中身はカードの地に並べる。
 struct HomeSection<Content: View>: View {
     let title: LocalizedStringKey
     @ViewBuilder var content: () -> Content
@@ -235,12 +236,10 @@ struct HomeSection<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(theme.typography.text(.headline, weight: .bold))
-                .foregroundStyle(theme.palette.onSurface.color)
+            // リボンの札は自分の地（アクセント）を持つので、着せ替えの背景の写真・飾りの上でも板（`appearanceTextPlate()`）を敷かない。
+            // 見出しの前の印（テーマのハート）は、札の中に札の文字の色で置く
+            RibbonLabel(title: Text(title), systemImage: theme.decoration.headingOrnament.symbolName)
                 .accessibilityAddTraits(.isHeader)
-                .themeHeadingOrnament()
-                .appearanceTextPlate()
             VStack(spacing: 0) {
                 content()
             }
