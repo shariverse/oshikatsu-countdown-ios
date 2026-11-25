@@ -20,6 +20,15 @@
 - iOS 26 の iPad の Simulator は、ホーム画面の 1 ページ目に既定のウィジェット（ニュース・リマインダー・カレンダー）がある。ニュースのウィジェットは、実在の記事の見出し・媒体名・写真を出すので、そのまま App Store のスクリーンショットに写さない。`springboard.icons` では、どの言語でもラベルが「News」の大きい枠（ラベルのぶん縦に長い）として入る（2026-11-25）
 - iOS 26 の iPad で、ロック画面にライブアクティビティを出してからホーム画面に出てロックし直すと、まれに帯が消えていた（14 言語のうち 1 つ）。ロック画面の帯の中身は springboard の `activity-content-view` の要素として見えるので、撮る前に確かめる（帯を包む `ListCell` は何も出ていないロック画面にもある）。iOS 27.0 の iPad の Simulator では、ライブアクティビティがロック画面に出なかった（2026-11-25）
 
+## UI テスト
+
+- iOS 26 のスライダーは、つまみが指に遅れて付いてくる。`adjust(toNormalizedSliderPosition:)` は速く引いてすぐ指を離すので、遅い CI の Simulator では途中（75〜95%）で止まる。途中から `adjust` で引き直しても、短く速いドラッグにつまみは付いてこず、右へ引き直した指は iOS 26 の「画面のどこからでも戻れるスワイプ」として効いて前の画面に戻る。つまみを押さえてゆっくり引き、端で止めてから離す（`press(forDuration:thenDragTo:withVelocity:thenHoldForDuration:)`）と、負荷をかけても端まで届く。つまみのまん中は、スライダーの両端から 19pt ほど内側を動く（2026-11-26）
+- 一覧の並べ替えのドラッグも、着いた先で止めてから離す。着いてすぐ離すと、遅い CI の Simulator では、ほかの行がよける前に落ちて 1 つ手前の順位に入る（2026-11-26）
+- 遅い CI の Simulator（起動した直後は特に）では、`tap()` が効かないことがある（タブバーは選択の印が動きかけて元のタブに戻り、スイッチは何も起きない）。手元では負荷をかけても再現しなかった。タブとスイッチは `OshiConUITests/UITestSupport.swift` の `selectTab(_:)`・`setSwitch(to:)` で押す（効いたことを確かめ、効いていなければ押し直す）（2026-11-26）
+- 遅い Simulator では、`XCTWaiter` の待ちが、条件を満たしているのに時間切れで返ることがある（要素の読み取り 1 回に数秒かかるため）。待ちの結果ではなく、待った後に読んだ値で確かめる（2026-11-26）
+- CI で落ちた UI テストは、成果物の `TestResults.xcresult` を取ってきて `xcrun xcresulttool get test-results activities --path <xcresult> --test-id '<クラス>/<テスト>()'` で落ちる直前の操作を、`xcrun xcresulttool export attachments` で録画・押した座標（`Synthesized Event` の plist）・画面の階層を読める。`gh api …/jobs/<id>/logs` は空で返るので、ログは `gh run view <id> --log` で取る（2026-11-26）
+- 手元（macOS 27）の Xcode 26.6 では、負荷が低くても、iOS 26.5 の新しい Simulator で UI テストのランナーが `The test runner hung before establishing connection` で起動しなかった。Xcode 27.1（`DEVELOPER_DIR`）でビルドして同じ iOS 26.5 の Simulator に流すと、CI と同じ OS で確かめられる（2026-11-26）
+
 ## App Store Connect への提出
 
 - ワークフロー「App Store Metadata」で新しく足した言語（1.3.0 の en-GB・es-MX）は、サポート URL（バージョンのページ）とプライバシーポリシー URL（「アプリのプライバシー」のページ）が空のままで、「審査用に追加」で止められる。ワークフローはこの 2 つを入れないので、言語を足したら画面でほかの言語と同じ URL を入れる（2026-11-25）

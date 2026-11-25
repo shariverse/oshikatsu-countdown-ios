@@ -29,9 +29,7 @@ final class AppearanceUITests: XCTestCase {
             "OSHICON_DEFAULT_showsPastEvents": "NO"
         ]
         app.launch()
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 2))
         return app
     }
@@ -58,6 +56,7 @@ final class AppearanceUITests: XCTestCase {
     }
 
     /// 見本の読み上げの値が `texts` をすべて含むまで待つ。見本は Form の外に固定しているので、送らずに読める。
+    /// 遅い Simulator では、値がそろっていても待ちが時間切れで返ることがあるので、待った後の値で確かめる。
     @MainActor
     private func waitForPreview(in app: XCUIApplication, containing texts: [String], file: StaticString = #filePath, line: UInt = #line) {
         let element = preview(in: app)
@@ -65,8 +64,9 @@ final class AppearanceUITests: XCTestCase {
         let format = texts.map { _ in "value CONTAINS %@" }.joined(separator: " AND ")
         let predicate = NSPredicate(format: format, argumentArray: texts)
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        let result = XCTWaiter().wait(for: [expectation], timeout: 5)
-        XCTAssertEqual(result, .completed, "見本の値: \(element.value as? String ?? "nil")", file: file, line: line)
+        _ = XCTWaiter().wait(for: [expectation], timeout: 5)
+        let value = element.value as? String ?? "nil"
+        XCTAssertTrue(texts.allSatisfy { value.contains($0) }, "見本の値: \(value)", file: file, line: line)
     }
 
     /// ホームか予定の詳細の地に描いているもの（`AppearanceUITestMarker`）が `expected` になるまで待つ。
@@ -81,8 +81,8 @@ final class AppearanceUITests: XCTestCase {
         let marker = app.descendants(matching: .any)[identifier].firstMatch
         XCTAssertTrue(marker.waitForExistence(timeout: 5), identifier, file: file, line: line)
         let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", expected), object: marker)
-        let result = XCTWaiter().wait(for: [expectation], timeout: 5)
-        XCTAssertEqual(result, .completed, "\(identifier): \(marker.label)", file: file, line: line)
+        _ = XCTWaiter().wait(for: [expectation], timeout: 5)
+        XCTAssertEqual(marker.label, expected, identifier, file: file, line: line)
     }
 
     /// 「写真を選ぶ／写真を変える」で生成した画像を選び、縦長の枠の調整画面で拡大してから「完了」する。
@@ -108,24 +108,22 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["着せ替え"].waitForExistence(timeout: 5))
         // 取り込むと「写真を変える」になり、その下の行に「写真を外す」が出る。見本の分だけ Form が短く、画面の外の行は作られないので、送ってから探す
         let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label CONTAINS %@", "写真を変える"), object: select)
-        XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 5), .completed)
+        _ = XCTWaiter().wait(for: [changed], timeout: 5)
+        XCTAssertTrue(select.label.contains("写真を変える"), select.label)
         let remove = app.buttons["appearance.removePhoto"]
         reveal(remove, in: app)
         XCTAssertTrue(remove.waitForExistence(timeout: 2))
     }
 
-    /// スイッチを押す（ラベルの文字ではなく、右端のスイッチを押す）。
+    /// スイッチを押して、値を `expected` にする（ラベルの文字ではなく、右端のスイッチを押す）。
     @MainActor
     private func toggle(_ identifier: String, in app: XCUIApplication, to expected: String) {
         let element = app.switches[identifier]
         reveal(element, in: app)
         XCTAssertTrue(element.exists, identifier)
         // 送った後の惰性が止まってから押す（動いている間に押すと、スクロールが止まるだけで切り替わらない）
-        RunLoop.current.run(until: Date().addingTimeInterval(1))
-        element.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", expected), object: element)
-        XCTAssertEqual(XCTWaiter().wait(for: [changed], timeout: 2), .completed, identifier)
-        XCTAssertEqual(element.value as? String, expected, identifier)
+        element.waitUntilStill()
+        element.setSwitch(to: expected)
     }
 
     /// ホームのタブで今日の予定を足し、その詳細を開く。
@@ -176,31 +174,42 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertFalse(preview.frame.intersects(control.frame), "見本: \(preview.frame)、設定: \(control.frame)", file: file, line: line)
     }
 
-    /// スライダー `slider` を端（`position` が 1 なら右、0 なら左）へ動かし、値が狙った向きに動いたことを確かめて、動いた後の値（「90%」など）を返す。
-    /// 動きの遅い CI の Simulator では、`adjust(toNormalizedSliderPosition:)` が端まで届かずに途中（75〜95%）で止まったり、
-    /// 引いた指で Form が送られてスライダーが画面の外に出たりする。そのため、ちょうど端の値（`end`）は求めない。
-    /// 端に届くまで 3 回まで動かし直し、動かす前と値を読む前にスライダーを画面の中に戻す。見本に映ったかは、返した値で確かめる。
+    /// スライダー `slider` を端（`position` が 1 なら右、0 なら左）へ動かし、値が狙った向きに動いたことを確かめて、動いた後の値（「100%」など）を返す。
+    /// 見本に映ったかは、返した値で確かめる（ちょうど端の値は求めない）。動かす前と値を読む前に、スライダーを画面の中に戻す。
     @MainActor
     private func move(
         _ slider: XCUIElement,
         to position: CGFloat,
-        end: String,
         in app: XCUIApplication,
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> String {
         let initial = slider.value as? String ?? ""
-        for _ in 0..<3 {
-            reveal(slider, in: app)
-            guard slider.value as? String != end else { break }
-            slider.adjust(toNormalizedSliderPosition: position)
-        }
+        reveal(slider, in: app)
+        drag(slider, to: position)
         reveal(slider, in: app)
         let moved = slider.value as? String ?? ""
         let (before, after) = (initial.percentValue, moved.percentValue)
         let message = "スライダーが狙った向きに動いていない: \(initial) → \(moved)"
         XCTAssertTrue(position > 0.5 ? after > before : after < before, message, file: file, line: line)
         return moved
+    }
+
+    /// スライダーのつまみを押さえ、端までゆっくり引いて、止めてから離す。1 回だけ引き、引き直さない。
+    ///
+    /// iOS 26 のスライダーは、つまみが指に遅れて付いてくる。`adjust(toNormalizedSliderPosition:)` は速く引いてすぐ指を離すので、
+    /// 遅い CI の Simulator ではつまみが端に届く前に指が離れ、途中（75〜95%）で止まる。そこから短く速く引き直しても、つまみは付いてこない。
+    /// 右へ引き直した指は、iOS 26 の「画面のどこからでも戻れるスワイプ」として効いて、着せ替えの画面から設定に戻ることがあった（#317）。
+    @MainActor
+    private func drag(_ slider: XCUIElement, to position: CGFloat) {
+        // 送った後の惰性が止まってから押さえる（動いている間に押すと、スクロールが止まるだけでつまみをつかめない）
+        slider.waitUntilStill()
+        // つまみのまん中が動く範囲は、スライダーの両端からつまみの幅の半分（iOS 26 では 19pt ほど）だけ内側にある
+        let inset = 19 / max(slider.frame.width, 1)
+        let thumbOffset = inset + slider.normalizedSliderPosition * (1 - 2 * inset)
+        let thumb = slider.coordinate(withNormalizedOffset: CGVector(dx: thumbOffset, dy: 0.5))
+        let end = slider.coordinate(withNormalizedOffset: CGVector(dx: position, dy: 0.5))
+        thumb.press(forDuration: 0.3, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.5)
     }
 
     /// Form をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
@@ -225,10 +234,10 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertEqual(scrim.value as? String, "50%")
         XCTAssertEqual(blur.value as? String, "40%")
         assertPreviewVisible(besides: scrim, in: app)
-        let scrimValue = move(scrim, to: 1, end: "100%", in: app)
+        let scrimValue = move(scrim, to: 1, in: app)
         XCTAssertEqual(blur.value as? String, "40%")
         assertPreviewVisible(besides: blur, in: app)
-        let blurValue = move(blur, to: 0, end: "0%", in: app)
+        let blurValue = move(blur, to: 0, in: app)
         XCTAssertEqual(scrim.value as? String, scrimValue)
         waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ \(scrimValue)", "ぼかしの強さ \(blurValue)"])
 
@@ -291,7 +300,7 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["着せ替え"].exists)
 
         // Plus でなければ、ホームと詳細は標準の見た目のまま
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "standard")
         addEventAndOpenDetail(in: app)
         waitForMarker("eventDetail.appearance", in: app, equalTo: "standard")
@@ -311,7 +320,7 @@ final class AppearanceUITests: XCTestCase {
         waitForPreview(in: app, containing: ["推しの写真の飾りあり"])
 
         // ホームと詳細に、写真と飾りが効く
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "photo,decoration")
         addEventAndOpenDetail(in: app)
         waitForMarker("eventDetail.appearance", in: app, equalTo: "photo,decoration")
@@ -319,12 +328,10 @@ final class AppearanceUITests: XCTestCase {
         // 背景を OFF にすると、写真は消えて飾りだけになる。詳細ではタブバーが隠れるので、ホームに戻ってから設定のタブに移る
         app.navigationBars.firstMatch.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.buttons["home.addEvent"].waitForExistence(timeout: 5))
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["設定"].tap()
+        app.selectTab("設定")
         XCTAssertTrue(app.navigationBars["着せ替え"].waitForExistence(timeout: 5))
         toggle("appearance.backgroundToggle", in: app, to: "0")
-        tabBar.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "decoration")
         let row = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "5th LIVE、")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 2))
@@ -352,12 +359,12 @@ final class AppearanceUITests: XCTestCase {
         // 濃く、多くする（埋め尽くす側へ）。スライダーを動かしている間も、見本は画面の中にあり、その場で映る
         reveal(opacity, in: app)
         assertPreviewVisible(besides: opacity, in: app)
-        let opacityValue = move(opacity, to: 1, end: "100%", in: app)
+        let opacityValue = move(opacity, to: 1, in: app)
         waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 25%"])
         let amount = app.sliders["appearance.decorationAmount"]
         reveal(amount, in: app)
         assertPreviewVisible(besides: amount, in: app)
-        let amountValue = move(amount, to: 1, end: "100%", in: app)
+        let amountValue = move(amount, to: 1, in: app)
         waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 \(amountValue)"])
 
         // 見本の推し（写真なし）が並び、推しごとに外せる
@@ -371,7 +378,7 @@ final class AppearanceUITests: XCTestCase {
         toggle("appearance.decorationOshi.0", in: app, to: "1")
 
         // ホームにも飾りが効く
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "decoration")
     }
 
@@ -382,7 +389,7 @@ final class AppearanceUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["settings.appearance"].waitForExistence(timeout: 5))
         // Plus が使えても、ホームは標準の見た目のまま（設定していないため）
-        app.tabBars.firstMatch.buttons["ホーム"].tap()
+        app.selectTab("ホーム")
         waitForMarker("home.appearance", in: app, equalTo: "standard")
     }
 }

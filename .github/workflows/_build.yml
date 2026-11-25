@@ -17,8 +17,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    # PR を作ったときは UI テストまで流し、30 分を超えるようになったので余裕を持たせる
-    timeout-minutes: 45
+    # PR を作ったときは UI テストまで流す。遅いランナーではビルドに 14 分・テストに 32 分かかり、
+    # 全テストが通った後の成果物のアップロードの途中に 45 分で打ち切られた（#317）ので、余裕を持たせる
+    timeout-minutes: 60
 
     steps:
       - name: Select Xcode

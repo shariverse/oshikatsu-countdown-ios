@@ -63,9 +63,7 @@ final class PhotoCropUITests: XCTestCase {
     @MainActor
     func testCropAndSaveShowsPhotoThenCancelKeepsIt() throws {
         let app = launch(hasCompletedOnboarding: true)
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        tabBar.buttons["推し"].tap()
+        app.selectTab("推し")
         app.navigationBars["推し"].buttons["推しを登録"].tap()
         XCTAssertTrue(app.navigationBars["推しを登録"].waitForExistence(timeout: 5))
         let name = app.textFields["推しの名前"]
