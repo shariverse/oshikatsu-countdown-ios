@@ -48,7 +48,7 @@
 ├── OshiConUITests/   # UI テスト（XCTest）
 ├── OshiCon.xcodeproj # 共有スキーム OshiCon を含む
 ├── OshiCon.xctestplan # 共有スキーム OshiCon のテストプラン（Unit テスト・UI テスト・StoreKit Configuration）
-├── docs/                    # 開発の手引き（development.md・setup.md・ci.md・pr-screenshots.md）・ExportOptions.plist のサンプル・App Store の掲載文と運用（app-store/）・テーマ（design/themes.md）・写真の調整の仕様（photo-crop.md）・画像でシェアの仕様（share-card.md）・着せ替えの仕様（appearance.md）・ウィジェット（widgets.md）
+├── docs/                    # 開発の手引き（development.md・setup.md・ci.md・pr-screenshots.md）・ExportOptions.plist のサンプル・App Store の掲載文と運用（app-store/）・テーマ（design/themes.md）・写真の調整の仕様（photo-crop.md）・画像でシェアの仕様（share-card.md）・着せ替えの仕様（appearance.md）・ウィジェット（widgets.md）・README の画像（images/readme/）
 ├── scripts/                 # rename.sh・app-store-screenshots.sh（App Store 用スクリーンショット）・render-creative-assets.sh（クリエイティブアセット）
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/
