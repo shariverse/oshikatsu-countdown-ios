@@ -201,7 +201,7 @@ gh workflow run app-store-metadata.yml --ref develop
 # 一部だけ撮る・撮るだけで登録しない
 gh workflow run app-store-metadata.yml --ref develop -f display_types=APP_IPHONE_67 -f languages=ja,en -f upload=false
 # クリエイティブアセットのデザインだけを変えたとき（前の実行の 6.9 インチの画面から書き出して配置する。撮り直さない）
-gh workflow run app-store-metadata.yml --ref develop -f screenshots=false -f creative_from_run=<前の実行の ID> -f languages=ja,en
+gh workflow run app-store-metadata.yml --ref develop -f screenshots=false -f creative_from_run=<前の実行の ID>,<前の実行の ID> -f languages=ja,en
 ```
 
 - 文面は各見出しの下のコードブロックから読みます。文字数の上限を超えていたら何も登録せずに止まります。`metadata/<言語>.md` が無い言語は飛ばします（ja は無ければ `listing.md` を読みます）
@@ -210,7 +210,7 @@ gh workflow run app-store-metadata.yml --ref develop -f screenshots=false -f cre
 - このバージョンの新機能は、登録するバージョンと同じ名前のファイル（`docs/app-store/whats-new/1.1.0.md` など）の `## <言語>` の下のコードブロックから読みます。アップデートを出すたびに新しいファイルを足します。ファイルが無ければ新機能は触りません（最初のバージョンには入れられないため）。ファイルがあるのに登録する言語の見出しが無いときは、何も登録せずに止まります
 - 6.9 インチを撮ったときは、その撮った画面（見出しを付ける前の `raw/`）からクリエイティブアセット（プロダクトページのヘッダー 3840x1646・検索結果 3840x2560）を [docs/app-store/creative/creative.html](docs/app-store/creative/creative.html) と `scripts/render-creative-assets.sh` で言語ごとに書き出し、App Asset Library に上げて各言語のローカリゼーションに配置します（`creative_assets` を外すと飛ばします）。文言は creative.html の `copy` に言語ごとに書きます。
   地・模様・書体・端末の枠はスクリーンショット（[docs/app-store/screenshots/screenshots.html](docs/app-store/screenshots/screenshots.html)）にそろえます
-- クリエイティブアセットだけを作り直すときは、`creative_from_run` に 6.9 インチを撮った前の実行の ID を入れ、`screenshots` を外して流します。その実行の Artifact（`screenshots-APP_IPHONE_67`）に入っている言語を書き出して配置します（`languages` はその言語にそろえると、掲載文の登録もその言語だけになります）
+- クリエイティブアセットだけを作り直すときは、`creative_from_run` に 6.9 インチを撮った前の実行の ID（言語を分けて撮ったならカンマ区切りで複数）を入れ、`screenshots` を外して流します。その実行の Artifact（`screenshots-APP_IPHONE_67`）に入っている言語をすべて書き出して配置します（`languages` は掲載文を登録する言語です。絞ると掲載文の登録もその言語だけになります）。ほかの表示サイズの撮り直しと一緒に流すこともできます
 - iPhone Duo は GitHub の標準イメージ `xcode-27`（actions/runner-images の xcode-27-arm64。org で用意するものは無い）で撮ります。イメージに iOS 27.1 のランタイムが無いので、撮影の前にダウンロードします（数分かかります）
 - iPhone Duo は 1 言語に 20 分ほどかかるので、言語ごとに別のジョブで撮ります（screenshots.json の `jobPerLanguage`）
 - 1 つの表示サイズ（言語ごとに分けたものは 1 つの言語）の撮影が失敗しても、撮れたぶんと掲載文は登録します。撮った画像は Artifact（`screenshots-<表示サイズ>`。言語ごとに分けたものは `screenshots-<表示サイズ>-<言語>`）にも残ります
