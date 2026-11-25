@@ -8,8 +8,8 @@ name: App Store Metadata
 # （リポジトリに大きな画像を置かない。見出しを付けるのに Google Chrome を使う）。撮るのが遅い表示サイズ（screenshots.json の jobPerLanguage）は、言語ごとにも分ける。
 # iPhone Duo は GitHub の標準イメージ xcode-27 で撮る（Xcode 27 と iOS 27.1 のランタイムが要る。ランタイムは scripts/app-store-screenshots.sh が入れる）。
 # クリエイティブアセット（プロダクトページのヘッダー / 検索結果）は、6.9 インチのスクリーンショットから scripts/render-creative-assets.sh で書き出し、
-# App Asset Library に上げて言語ごとのローカリゼーションに配置する。creative_from_run に前の実行の ID を入れると、撮り直さずに
-# その実行の 6.9 インチのスクリーンショットから書き出す（デザインだけを変えたとき。screenshots を外して流す）。
+# App Asset Library に上げて言語ごとのローカリゼーションに配置する。creative_from_run に前の実行の ID（カンマ区切りで複数）を入れると、撮り直さずに
+# その実行の 6.9 インチのスクリーンショットから書き出す（デザインだけを変えたとき）。
 # サポート URL・プライバシーポリシー URL・著作権・連絡先・カテゴリなどは入れないので、App Store Connect の画面で入れる。
 # 審査への提出は行わないので、提出は App Store Connect の画面から行う。
 on:
@@ -36,7 +36,7 @@ on:
         type: boolean
         default: true
       creative_from_run:
-        description: クリエイティブアセットの元にする 6.9 インチのスクリーンショットを撮った、前の実行の ID（空ならこの実行で撮ったもの）
+        description: クリエイティブアセットの元にする 6.9 インチのスクリーンショットを撮った、前の実行の ID（カンマ区切りで複数。空ならこの実行で撮ったもの）
         type: string
         default: ''
       upload:
@@ -170,14 +170,21 @@ jobs:
           name: screenshots-APP_IPHONE_67
           path: ${{ runner.temp }}/app-store-screenshots
 
-      - name: Download 6.9 inch screenshots from an earlier run
+      - name: Download 6.9 inch screenshots from earlier runs
+        # 言語を分けて撮った回が複数あるときは、それぞれの Artifact を 1 つのフォルダにまとめる（言語のフォルダは重ならない）
         if: ${{ inputs.creative_from_run != '' }}
-        uses: actions/download-artifact@v8
-        with:
-          name: screenshots-APP_IPHONE_67
-          path: ${{ runner.temp }}/app-store-screenshots
-          run-id: ${{ inputs.creative_from_run }}
-          github-token: ${{ github.token }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_IDS: ${{ inputs.creative_from_run }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/app-store-screenshots"
+          for run_id in ${RUN_IDS//,/ }; do
+            [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "::error::creative_from_run は実行の ID（数字）をカンマ区切りで入れてください: ${run_id}"; exit 1; }
+            gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name screenshots-APP_IPHONE_67 --dir "$RUNNER_TEMP/earlier-runs/$run_id"
+            cp -R "$RUNNER_TEMP/earlier-runs/$run_id/." "$RUNNER_TEMP/app-store-screenshots/"
+          done
+          find "$RUNNER_TEMP/app-store-screenshots" -mindepth 2 -maxdepth 2 -type d | sort
 
       - name: Render creative assets
         # 撮ってある言語すべて（前の実行のものなら、その実行で撮った言語）を書き出す
