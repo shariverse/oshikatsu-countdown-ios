@@ -149,6 +149,13 @@ set_device_language() {
   boot
 }
 
+# Simulator を消去して起動する（入れたアプリ・ライブアクティビティの許可・ロックの状態も消える。アプリはテストを流すときに入れ直される）
+erase_device() {
+  xcrun simctl shutdown "$UDID" 2>/dev/null || true
+  xcrun simctl erase "$UDID"
+  boot
+}
+
 # MARK: - ビルド
 
 # Simulator を起動したままビルドすると、非力なランナーが固まることがあるので、ビルドしてから起動する
@@ -178,22 +185,33 @@ run_tests() {
     -resultBundlePath "$1"
 }
 
-# 1 つのテスト（$5）を流し、撮った画面を $6 に書き出す。CI の Simulator は、スクリーンショットの取得がタイムアウトすることがあるので、1 回だけやり直す
+# 1 つのテスト（$5）を流し、撮った画面を $6 に書き出す。CI の Simulator は、スクリーンショットの取得がタイムアウトすることがあるので、
+# 起動し直して 1 回、それでもだめなら Simulator を消去して 1 回やり直す
+# （遅い CI の iPhone Duo で、ホーム画面に出られず、起動し直してもアプリの画面が出ないことがあった）。3 回ともだめなら 1 を返す
 capture() {
-  local result="$1" language="$2" apple_language="$3" apple_locale="$4" test="$5" output="$6"
-  if ! run_tests "$result" "$apple_language" "$apple_locale" "$test"; then
-    echo "::warning::${DISPLAY_TYPE} / ${language} / ${test} の撮影に失敗したので、やり直します"
-    rm -rf "$result"
-    set_device_language "$apple_language" "$apple_locale"
-    if [[ "$test" == testCaptureScreensInApp ]]; then
-      override_status_bar
-    else
-      clear_status_bar
+  local result="$1" language="$2" apple_language="$3" apple_locale="$4" test="$5" output="$6" attempt
+  for attempt in 1 2 3; do
+    if [[ "$attempt" -gt 1 ]]; then
+      echo "::warning::${DISPLAY_TYPE} / ${language} / ${test} の撮影に失敗したので、やり直します（${attempt} 回目）"
+      rm -rf "$result"
+      if [[ "$attempt" -eq 3 ]]; then
+        erase_device
+      fi
+      set_device_language "$apple_language" "$apple_locale"
+      if [[ "$test" == testCaptureScreensInApp ]]; then
+        override_status_bar
+      else
+        clear_status_bar
+      fi
     fi
-    run_tests "$result" "$apple_language" "$apple_locale" "$test"
-  fi
-  mkdir -p "$output"
-  xcrun xcresulttool export attachments --path "$result" --output-path "$output"
+    if run_tests "$result" "$apple_language" "$apple_locale" "$test"; then
+      mkdir -p "$output"
+      # この関数は if の中で呼ぶので set -e が効かない。書き出しの失敗も返す
+      xcrun xcresulttool export attachments --path "$result" --output-path "$output" || return 1
+      return 0
+    fi
+  done
+  return 1
 }
 
 # ウィジェットの View は文言と日付をアプリの言語で出すので、テストのホストのアプリの言語と地域を替えて流す
@@ -210,6 +228,9 @@ render_surfaces() {
     -testRegion "$3" \
     -resultBundlePath "$4"
 }
+
+# 撮れなかった言語（空白区切り）。1 つの言語で撮れなくても、ほかの言語は撮って登録できるよう、次の言語に進む
+failed_languages=""
 
 while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
   echo "==> ${DISPLAY_TYPE} / ${language}"
@@ -235,10 +256,21 @@ while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
   fi
 
   # アプリの中の画面（ステータスバーをそろえる）→ アプリの外の面（上書きを外す）の順に撮り、添付を raw/ に集める
+  # 撮れなかった言語は、途中までの画像を消して（App Store Metadata のワークフローが登録しないように）次の言語に進む
   override_status_bar
-  capture "$WORK_DIR/${language}-app.xcresult" "$language" "$apple_language" "$apple_locale" testCaptureScreensInApp "$WORK_DIR/${language}-app"
+  if ! capture "$WORK_DIR/${language}-app.xcresult" "$language" "$apple_language" "$apple_locale" testCaptureScreensInApp "$WORK_DIR/${language}-app"; then
+    echo "::error::${DISPLAY_TYPE} / ${language} のアプリの中の画面を撮れませんでした。この言語は飛ばします"
+    rm -rf "${destination:?}"
+    failed_languages+="${language} "
+    continue
+  fi
   clear_status_bar
-  capture "$WORK_DIR/${language}-outside.xcresult" "$language" "$apple_language" "$apple_locale" testCaptureSurfacesOutsideApp "$WORK_DIR/${language}-outside"
+  if ! capture "$WORK_DIR/${language}-outside.xcresult" "$language" "$apple_language" "$apple_locale" testCaptureSurfacesOutsideApp "$WORK_DIR/${language}-outside"; then
+    echo "::error::${DISPLAY_TYPE} / ${language} のアプリの外の面を撮れませんでした。この言語は飛ばします"
+    rm -rf "${destination:?}"
+    failed_languages+="${language} "
+    continue
+  fi
   for part in app outside; do
     find "$WORK_DIR/${language}-${part}" -type f ! -name manifest.json -exec cp {} "$destination/raw/" \;
   done
@@ -261,3 +293,8 @@ while IFS=$'\t' read -r -u 3 language apple_language apple_locale; do
 
   scripts/render-app-store-screenshots.sh "$destination" "$DISPLAY_TYPE" "$language"
 done 3< <(printf '%s\n' "$LANGUAGE_LIST")
+
+if [[ -n "$failed_languages" ]]; then
+  echo "::error::${DISPLAY_TYPE} で撮れなかった言語: ${failed_languages% }（この言語だけ撮り直してください）" >&2
+  exit 1
+fi
