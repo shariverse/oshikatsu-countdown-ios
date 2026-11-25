@@ -10,7 +10,7 @@
 #      - App 情報のローカリゼーションに、アプリ名・サブタイトルを入れる
 #      - バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキスト・マーケティング URL と、このバージョンの新機能を入れる
 #      - SCREENSHOT_DIR があれば、画像の寸法から表示サイズを決めて（docs/app-store/screenshots.json）、スクリーンショットを差し替える
-#   3. アプリの主要言語を languages.json の先頭の言語にする
+#   3. アプリの主要言語を languages.json の先頭の言語にする（その言語を登録する回だけ）
 #   4. App Review に関する情報のメモに、審査用メモを入れる
 #
 # 文面は docs/app-store/metadata/<language>.md と review-notes.md の、見出しの下のコードブロックから読む（文面の正はこれら）。
@@ -531,8 +531,9 @@ begin
   done = upsert_review_notes(client, version['id'], notes)
   rows << "| （共通） | App Review に関する情報のメモ（デモ用アカウントは不要） | #{done} |"
 
-  # 主要言語は、そのローカリゼーションができてから変える
-  primary = languages.first
+  # 主要言語は languages.json の先頭の言語にする（LANGUAGES で絞った回の先頭の言語ではない）。そのローカリゼーションができてから変えるので、
+  # その言語を登録した回だけ変える
+  primary = select_languages([]).first
   if primary && listings[primary['language']] && app.dig('attributes', 'primaryLocale') != primary['storeLocale']
     begin
       client.patch("/v1/apps/#{app['id']}", { data: { type: 'apps', id: app['id'], attributes: { primaryLocale: primary['storeLocale'] } } })
