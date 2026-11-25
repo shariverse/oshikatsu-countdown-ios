@@ -171,25 +171,19 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertFalse(preview.frame.intersects(control.frame), "見本: \(preview.frame)、設定: \(control.frame)", file: file, line: line)
     }
 
-    /// スライダー `slider` を端（`position` が 1 なら右、0 なら左）へ動かし、値が狙った向きに動いたことを確かめて、動いた後の値（「90%」など）を返す。
-    /// 動きの遅い CI の Simulator では、`adjust(toNormalizedSliderPosition:)` が端まで届かずに途中（75〜95%）で止まったり、
-    /// 引いた指で Form が送られてスライダーが画面の外に出たりする。そのため、ちょうど端の値（`end`）は求めない。
-    /// 端に届くまで 3 回まで動かし直し、動かす前と値を読む前にスライダーを画面の中に戻す。見本に映ったかは、返した値で確かめる。
+    /// スライダー `slider` を端（`position` が 1 なら右、0 なら左）へ動かし、値が狙った向きに動いたことを確かめて、動いた後の値（「100%」など）を返す。
+    /// 見本に映ったかは、返した値で確かめる（ちょうど端の値は求めない）。動かす前と値を読む前に、スライダーを画面の中に戻す。
     @MainActor
     private func move(
         _ slider: XCUIElement,
         to position: CGFloat,
-        end: String,
         in app: XCUIApplication,
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> String {
         let initial = slider.value as? String ?? ""
-        for _ in 0..<3 {
-            reveal(slider, in: app)
-            guard slider.value as? String != end else { break }
-            slider.adjust(toNormalizedSliderPosition: position)
-        }
+        reveal(slider, in: app)
+        drag(slider, to: position)
         reveal(slider, in: app)
         let moved = slider.value as? String ?? ""
         let (before, after) = (initial.percentValue, moved.percentValue)
@@ -201,6 +195,23 @@ final class AppearanceUITests: XCTestCase {
     /// Form をゆっくり 1 回送る。スライダーの上から縦に送るとスライダーが指を取って送られないので、
     /// スライダーの無い Form の左の端（行の外の余白）を縦に送る。見本は Form の外にあり、見本の上では送れない。
     @MainActor
+    /// スライダーのつまみを押さえ、端までゆっくり引いて、止めてから離す。1 回だけ引き、引き直さない。
+    ///
+    /// iOS 26 のスライダーは、つまみが指に遅れて付いてくる。`adjust(toNormalizedSliderPosition:)` は速く引いてすぐ指を離すので、
+    /// 遅い CI の Simulator ではつまみが端に届く前に指が離れ、途中（75〜95%）で止まる。そこから短く速く引き直しても、つまみは付いてこない。
+    /// 右へ引き直した指は、iOS 26 の「画面のどこからでも戻れるスワイプ」として効いて、着せ替えの画面から設定に戻ることがあった（#317）。
+    @MainActor
+    private func drag(_ slider: XCUIElement, to position: CGFloat) {
+        // 送った後の惰性が止まってから押さえる（動いている間に押すと、スクロールが止まるだけでつまみをつかめない）
+        slider.waitUntilStill()
+        // つまみのまん中が動く範囲は、スライダーの両端からつまみの幅の半分（iOS 26 では 19pt ほど）だけ内側にある
+        let inset = 19 / max(slider.frame.width, 1)
+        let thumbOffset = inset + slider.normalizedSliderPosition * (1 - 2 * inset)
+        let thumb = slider.coordinate(withNormalizedOffset: CGVector(dx: thumbOffset, dy: 0.5))
+        let end = slider.coordinate(withNormalizedOffset: CGVector(dx: position, dy: 0.5))
+        thumb.press(forDuration: 0.3, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.5)
+    }
+
     private func scroll(_ form: XCUIElement, upward: Bool) {
         let top = form.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.3))
         let bottom = form.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.7))
@@ -220,10 +231,10 @@ final class AppearanceUITests: XCTestCase {
         XCTAssertEqual(scrim.value as? String, "50%")
         XCTAssertEqual(blur.value as? String, "40%")
         assertPreviewVisible(besides: scrim, in: app)
-        let scrimValue = move(scrim, to: 1, end: "100%", in: app)
+        let scrimValue = move(scrim, to: 1, in: app)
         XCTAssertEqual(blur.value as? String, "40%")
         assertPreviewVisible(besides: blur, in: app)
-        let blurValue = move(blur, to: 0, end: "0%", in: app)
+        let blurValue = move(blur, to: 0, in: app)
         XCTAssertEqual(scrim.value as? String, scrimValue)
         waitForPreview(in: app, containing: ["背景の写真あり", "暗幕の濃さ \(scrimValue)", "ぼかしの強さ \(blurValue)"])
 
@@ -345,12 +356,12 @@ final class AppearanceUITests: XCTestCase {
         // 濃く、多くする（埋め尽くす側へ）。スライダーを動かしている間も、見本は画面の中にあり、その場で映る
         reveal(opacity, in: app)
         assertPreviewVisible(besides: opacity, in: app)
-        let opacityValue = move(opacity, to: 1, end: "100%", in: app)
+        let opacityValue = move(opacity, to: 1, in: app)
         waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 25%"])
         let amount = app.sliders["appearance.decorationAmount"]
         reveal(amount, in: app)
         assertPreviewVisible(besides: amount, in: app)
-        let amountValue = move(amount, to: 1, end: "100%", in: app)
+        let amountValue = move(amount, to: 1, in: app)
         waitForPreview(in: app, containing: ["飾りの濃さ \(opacityValue)", "飾りの量 \(amountValue)"])
 
         // 見本の推し（写真なし）が並び、推しごとに外せる
