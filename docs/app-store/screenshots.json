@@ -4,6 +4,7 @@
     "キーは App Store Connect の screenshotDisplayType。devices は上から順に、ランナーにある機種を使う。",
     "sizes は書き出した画像に期待する寸法（縦向き）。登録するスクリプトも、画像の寸法からこの表で表示サイズを決める。",
     "runsOn / xcodeVersion は撮るジョブの runs-on と Xcode。iPhone Duo には Xcode 27 と iOS 27.1 のランタイムが要るので、GitHub の標準イメージ xcode-27 で撮る（ランタイムは撮影スクリプトが入れる）。",
+    "jobPerLanguage が true の表示サイズは、言語ごとに別のジョブで撮る。iPhone Duo は 1 言語に 20 分ほどかかり、全言語を 1 つのジョブで撮るとジョブの上限の 120 分を超えるため。",
     "screenshotCount は見出しを付けて書き出す枚数（docs/app-store/screenshots/screenshots.html の SLIDES。App Store Connect の上限は 1 言語・1 表示サイズにつき 10 枚）。",
     "iPhone Duo は外側の画面（1398x2034）だけ撮る。内側の画面（2007x2853）も App Store が受け付けるが、2027 年 4 月まで必須ではなく、API の表示サイズの名前を確かめていないので、まだ撮らない。"
   ],
@@ -35,7 +36,8 @@
       "devices": ["iPhone Duo"],
       "sizes": ["1398x2034"],
       "runsOn": "xcode-27",
-      "xcodeVersion": "27.1"
+      "xcodeVersion": "27.1",
+      "jobPerLanguage": true
     }
   }
 }
