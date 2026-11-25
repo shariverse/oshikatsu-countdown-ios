@@ -3,290 +3,123 @@
 //  OshiCon
 //
 
-import PhotosUI
 import SwiftData
 import SwiftUI
 
-/// 着せ替え（Plus）の設定。設定画面の「着せ替え」の行から開く。
+/// 着せ替え（Plus）の画面。設定画面の「着せ替え」の行から開く。
 ///
-/// - 背景の写真を選ぶ・変える・外す（`PhotosPicker` → 縦長の枠の調整画面 `PhotoCropScreen`）、背景の ON/OFF、暗幕の濃さとぼかしの強さ（スライダー）
-/// - 飾りの ON/OFF・濃さと量（スライダー）・飾りに出す推し（推しごとのスイッチ）は `AppearanceDecorationSettings`
-/// - ホームの見本（`AppearancePreviewPane`）に、選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す（Plus でなくても試着できる）。
-///   見本はスクロールする Form の外に置き、どの設定を変えているときも見えるようにする。幅の狭い画面では上に固定し、幅の広い画面では左に並べる（`AppearancePreviewLayout`）
-/// - Plus でない人も写真と設定を保存でき（`AppearanceStore`）、案内から課金画面（`\.openPlusPaywall`）を開ける。Plus の人には使えていることを示す
+/// - 見本の舞台（`AppearancePreviewStage`）: ホーム・予定の詳細・シェアのカードの見本を大きく置き、選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す
+///   （Plus でなくても試着できる）。見本の下の切り替えと横のスワイプで見本を替え、「全画面」で全画面の試着（`AppearanceTryOnScreen`）を開く
+/// - 設定のトレー（`AppearanceEditorTray`）: 「背景」と「飾り」のタブに分けた設定
+/// - 見本はスクロールする設定の外に置き、どの設定を変えているときも見えるようにする。幅の狭い画面では見本を上、トレーを下に置き、
+///   幅の広い画面では見本を左、トレーを右に並べる（`AppearancePreviewLayout`）
+/// - Plus でない人も写真と設定を保存でき（`AppearanceStore`）、バーの「Plus で使う」から課金画面（`\.openPlusPaywall`）を開ける。Plus の人には使えていることを示す
 ///
-/// UI テストでは、起動引数 `-useTestPhoto`（`LaunchOptions.usesTestPhoto`）で `PhotosPicker` の代わりに生成した画像を選ぶボタンにする。
+/// 見本とトレーに場所を空けるため、開いている間はタブバーを隠す。
 struct AppearanceSettingsScreen: View {
-    @Environment(AppearanceStore.self) private var store
     @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @Environment(\.openPlusPaywall) private var openPlusPaywall
     @Environment(\.appTheme) private var theme
-    @Environment(\.displayScale) private var displayScale
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
 
-    @State private var selectedItem: PhotosPickerItem?
-    /// 写真を読んでいる・取り込んでいる間は true（続けて選ばせない）。
-    @State private var isLoading = false
-    @State private var failure: Failure?
-    /// 調整画面で調整中の写真。nil なら調整画面を出していない。
-    @State private var cropping: PendingBackgroundCrop?
-
-    /// 調整画面で描く写真の長辺の上限（画素）。パノラマなどで大きくなりすぎないようにする。
-    private let cropDisplayMaxLongSide = 4_096
-
-    private enum Failure {
-        /// 選んだ写真を読めなかった。
-        case load
-        /// 取り込んだ写真を保存できなかった。
-        case save
-    }
-
-    private var hasPhoto: Bool {
-        store.settings.backgroundPhotoFileName != nil
-    }
+    /// 映している見本。全画面の試着と同じものを切り替える。
+    @State private var previewKind = AppearancePreview.Kind.home
+    /// 全画面の試着を出しているか。
+    @State private var isTryingOn = false
+    /// 全画面の試着の「Plus で使う」を押した。全画面が閉じきってから課金画面を開く（重ねて出せないため）。
+    @State private var opensPaywallAfterTryOn = false
 
     var body: some View {
         let oshis = storedOshis.map(OshiConStore.oshi(from:))
         GeometryReader { proxy in
             let layout = AppearancePreviewLayout(containerSize: proxy.size, isAccessibilitySize: dynamicTypeSize.isAccessibilitySize)
-            let isSide = layout.arrangement == .sideBySide
-            // 回転などで並べ方が変わっても、見本と Form を作り直さない（スクロールの位置と読んだ写真を保つ）よう、並べ方だけを替える
-            let stack = isSide ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
+            // 回転などで並べ方が変わっても、見本とトレーを作り直さない（スクロールの位置と読んだ写真を保つ）よう、並べ方だけを替える
+            let stack = layout.arrangement == .sideBySide
+                ? AnyLayout(HStackLayout(spacing: 0))
+                : AnyLayout(VStackLayout(spacing: 0))
             stack {
-                AppearancePreviewPane(layout: layout, oshis: oshis)
-                // 見本と設定の境目の細い線。上に固定するときは、送った設定がこの線の下に隠れる
-                theme.palette.outlineVariant.color
-                    .frame(width: isSide ? 1 / displayScale : nil, height: isSide ? nil : 1 / displayScale)
-                    .accessibilityHidden(true)
-                Form {
-                    plusSection
-                    backgroundSection
-                    AppearanceDecorationSettings(oshis: oshis)
+                AppearancePreviewStage(layout: layout, oshis: oshis, kind: $previewKind) {
+                    isTryingOn = true
                 }
-                .scrollContentBackground(.hidden)
-                // UI テストは、見本の外（Form の上）で指を動かして送る
-                .accessibilityIdentifier("appearance.form")
+                AppearanceEditorTray(oshis: oshis, arrangement: layout.arrangement)
             }
         }
-        .background(theme.palette.background.color)
+        .background {
+            ThemeScreenBackground()
+                .ignoresSafeArea()
+        }
         .navigationTitle("着せ替え")
         .navigationBarTitleDisplayMode(.inline)
-        .task(id: selectedItem) {
-            guard let selectedItem else {
-                return
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                plusItem
             }
-            isLoading = true
-            await load(data: try? await selectedItem.loadTransferable(type: Data.self))
-            // 選んだ写真を戻し、読み込めなかった同じ写真をもう一度選んでも読み直せるようにする
-            self.selectedItem = nil
+            .hidingSharedBarBackground()
         }
-        .fullScreenCover(item: $cropping) { pending in
-            PhotoCropScreen(
-                image: pending.source.image,
-                initialCrop: pending.source.initialCrop(aspectRatio: PhotoCrop.backgroundAspectRatio),
-                shape: .roundedRectangle,
-                onCancel: {
-                    cropping = nil
-                },
-                onDone: { crop in
-                    cropping = nil
-                    // Task が動き出す前に立て、閉じるアニメーションの間に選び直させない
-                    isLoading = true
-                    Task {
-                        await apply(pending.data, crop: crop)
-                    }
-                }
-            )
+        .fullScreenCover(isPresented: $isTryingOn) {
+            // 全画面が閉じきってから課金画面を開く
+            if opensPaywallAfterTryOn {
+                opensPaywallAfterTryOn = false
+                openPlusPaywall()
+            }
+        } content: {
+            AppearanceTryOnScreen(oshis: oshis, kind: $previewKind) {
+                opensPaywallAfterTryOn = true
+                isTryingOn = false
+            }
         }
+        // 見本とトレーに場所を空けるため、開いている間はタブバーを隠す
+        .hidesTabBar()
     }
 
     // MARK: - Plus の案内
 
-    @ViewBuilder private var plusSection: some View {
-        Section {
-            if isPlusUnlocked {
-                Label {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Plus をお使いいただけます")
-                        Text("ホームと予定の詳細に、着せ替えが効いています")
-                            .font(theme.typography.text(.footnote))
-                            .foregroundStyle(theme.palette.onSurfaceVariant.color)
-                    }
-                } icon: {
-                    Image(systemName: "checkmark.seal.fill")
-                        .foregroundStyle(theme.palette.brand.color)
-                }
-                .padding(.vertical, 2)
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier("appearance.plusActive")
-            } else {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("着せ替えは Plus で使えます")
-                        .font(theme.typography.text(.body, weight: .bold))
-                    Text("Plus でなくても、写真を選んで試着し、保存しておけます。Plus にすると、ホームと予定の詳細に映ります")
-                        .font(theme.typography.text(.footnote))
-                        .foregroundStyle(theme.palette.onSurfaceVariant.color)
-                }
-                .padding(.vertical, 2)
-                .accessibilityElement(children: .combine)
-                Button {
-                    openPlusPaywall()
-                } label: {
-                    Label("Plus で使う", systemImage: "sparkles")
-                        .font(theme.typography.text(.body, weight: .bold))
-                        .foregroundStyle(theme.palette.brand.color)
-                }
-                .accessibilityIdentifier("appearance.openPaywall")
+    /// バーの右の Plus の案内。Plus でない人には課金画面を開く「Plus で使う」、Plus の人には使えていることの印。
+    @ViewBuilder private var plusItem: some View {
+        if isPlusUnlocked {
+            Label {
+                // 商品名なので訳さない
+                Text(verbatim: "Plus")
+            } icon: {
+                Image(systemName: "checkmark.seal.fill")
             }
-        }
-        .themeRowBackground()
-    }
-
-    // MARK: - 背景の写真
-
-    private var backgroundSection: some View {
-        @Bindable var store = store
-        return Section {
-            photoButtons
-            if let failure {
-                Group {
-                    switch failure {
-                    case .load:
-                        Text("写真を読み込めませんでした")
-                    case .save:
-                        Text("保存できませんでした")
-                    }
-                }
-                .font(theme.typography.text(.footnote))
-                .foregroundStyle(theme.palette.destructive.color)
-            }
-            Toggle("背景に写真を敷く", isOn: $store.isBackgroundEnabled)
-                .accessibilityIdentifier("appearance.backgroundToggle")
-            Group {
-                AppearanceSlider(
-                    title: "暗幕の濃さ",
-                    value: $store.backgroundScrim,
-                    range: AppearanceBackgroundStyle.scrimRange,
-                    minimumLabel: "薄い",
-                    maximumLabel: "濃い",
-                    identifier: "appearance.backgroundScrim"
-                )
-                AppearanceSlider(
-                    title: "ぼかしの強さ",
-                    value: $store.backgroundBlur,
-                    range: AppearanceBackgroundStyle.blurRange,
-                    minimumLabel: "なし",
-                    maximumLabel: "強い",
-                    identifier: "appearance.backgroundBlur"
-                )
-            }
-            // 背景が OFF でも値は残し、見せておく（ON にしたときの見た目が分かるように）
-            .disabled(!store.isBackgroundEnabled)
-        } header: {
-            Text("背景の写真")
-        } footer: {
-            Text("ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。暗幕を薄く、ぼかしを弱くするほど、写真がはっきり見えます")
-        }
-        .themeRowBackground()
-    }
-
-    @ViewBuilder private var photoButtons: some View {
-        Group {
-            if LaunchOptions.usesTestPhoto {
-                // UI テストでは、写真ライブラリの代わりに生成した画像を選ぶ
-                Button {
-                    isLoading = true
-                    Task {
-                        await load(data: PhotoCropPreviewImage.pngData())
-                    }
-                } label: {
-                    photoButtonLabel
-                }
-            } else {
-                PhotosPicker(selection: $selectedItem, matching: .images) {
-                    photoButtonLabel
-                }
-            }
-        }
-        .accessibilityIdentifier("appearance.selectPhoto")
-        .disabled(isLoading)
-        if hasPhoto {
-            Button(role: .destructive) {
-                failure = nil
-                store.removeBackgroundPhoto()
+            .labelStyle(.titleAndIcon)
+            .font(theme.typography.text(.footnote, weight: .bold))
+            .foregroundStyle(theme.palette.brand.color)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Plus をお使いいただけます")
+            .accessibilityIdentifier("appearance.plusActive")
+        } else {
+            Button {
+                openPlusPaywall()
             } label: {
-                Label("写真を外す", systemImage: "trash")
+                Text("Plus で使う")
+                    .font(theme.typography.text(.footnote, weight: .bold))
+                    .lineLimit(1)
+                    .foregroundStyle(theme.palette.onBrand.color)
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 36)
+                    .background(theme.palette.brand.color, in: Capsule())
+                    .contentShape(Capsule())
             }
-            .accessibilityIdentifier("appearance.removePhoto")
-            .disabled(isLoading)
-        }
-    }
-
-    private var photoButtonLabel: some View {
-        HStack(spacing: 8) {
-            Label(hasPhoto ? "写真を変える" : "写真を選ぶ", systemImage: "photo.on.rectangle")
-            Spacer(minLength: 8)
-            if isLoading {
-                ProgressView()
-            }
-        }
-    }
-
-    // MARK: - 写真の取り込み
-
-    /// 写真のデータ（選んだ写真、または UI テストで生成した画像）を調整画面で描ける大きさに読み、縦長の枠の調整画面を出す。
-    private func load(data: Data?) async {
-        isLoading = true
-        failure = nil
-        defer {
-            isLoading = false
-        }
-        guard let data else {
-            failure = .load
-            return
-        }
-        let source = await store.photos.cropSource(
-            data: data,
-            shortSidePixels: AppearancePreview.cropDisplayShortSidePixels(displayScale: displayScale),
-            maxLongSidePixels: cropDisplayMaxLongSide
-        )
-        // 読んでいる間に画面を離れて `.task(id: selectedItem)` が取り消されたら出さない
-        guard !Task.isCancelled else {
-            return
-        }
-        guard let source else {
-            failure = .load
-            return
-        }
-        cropping = PendingBackgroundCrop(data: data, source: source)
-    }
-
-    /// 調整画面の「完了」。縦長に切り抜いて取り込み、背景の写真を差し替える（前の写真は消える）。
-    /// 選び直した写真がすぐ見本に映るよう、背景を OFF にしていたら ON にする。
-    private func apply(_ data: Data, crop: PhotoCrop) async {
-        failure = nil
-        defer {
-            isLoading = false
-        }
-        do {
-            guard try await store.replaceBackgroundPhoto(data, crop: crop) else {
-                failure = .load
-                return
-            }
-            store.isBackgroundEnabled = true
-        } catch {
-            failure = .save
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("appearance.openPaywall")
         }
     }
 }
 
-/// 調整画面で調整中の背景の写真。写真ごとに id を変え、調整画面を作り直す。
-private struct PendingBackgroundCrop: Identifiable {
-    let id = UUID()
-    let data: Data
-    let source: PhotoCropSource
+private extension ToolbarContent {
+    /// iOS 26 のバーが項目の後ろに敷くガラスの地を外す（自分で地を描くボタンと、押せない印のため）。それより前の版には地が無い。
+    @ToolbarContentBuilder
+    func hidingSharedBarBackground() -> some ToolbarContent {
+        if #available(iOS 26.0, *) {
+            sharedBackgroundVisibility(.hidden)
+        } else {
+            self
+        }
+    }
 }
 
 /// Preview で使う、空から始める着せ替えの設定（端末の設定と写真の置き場所に触れない）。

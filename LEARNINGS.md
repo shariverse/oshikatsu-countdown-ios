@@ -40,6 +40,16 @@
 - CI で落ちた UI テストは、成果物の `TestResults.xcresult` を取ってきて `xcrun xcresulttool get test-results activities --path <xcresult> --test-id '<クラス>/<テスト>()'` で落ちる直前の操作を、`xcrun xcresulttool export attachments` で録画・押した座標（`Synthesized Event` の plist）・画面の階層を読める。`gh api …/jobs/<id>/logs` は空で返るので、ログは `gh run view <id> --log` で取る（2026-11-26）
 - 手元（macOS 27）の Xcode 26.6 では、負荷が低くても、iOS 26.5 の新しい Simulator で UI テストのランナーが `The test runner hung before establishing connection` で起動しなかった。Xcode 27.1（`DEVELOPER_DIR`）でビルドして同じ iOS 26.5 の Simulator に流すと、CI と同じ OS で確かめられる（2026-11-26）
 
+- `fullScreenCover` を出している間も、下の画面の要素は UI テストの階層に残る。全画面の中に下の画面と同じ部品を置くと、同じ identifier が 2 つ見つかって `tap()` が `Multiple matching elements found` で落ちる。全画面の中の部品は identifier を分ける（着せ替えの全画面の試着の切り替えは `appearance.tryOn.previewKind.*`）（2026-11-26）
+- 横に送る `ScrollView` に `accessibilityElement(children: .ignore)` を付けると、UI テストから見える要素の `frame` が、画面の外まで続く中身の幅になる（見本が画面の中にあるかを `frame` で確かめられない）。見えている範囲に重ねた透明な面に、読み上げの名前・値・identifier を付ける（2026-11-26）
+- スクロールする領域の下の端から数 pt だけのぞいている要素も、`isHittable` は true になる（見えている部分のまん中で判定される）。その要素のまん中や右端を座標で押すと、画面の外を押して何も起きない（着せ替えのトレーの推しごとの切り替えで、スイッチが切り替わらずに落ちた）。押す前に、要素の `frame.midY` がスクロールする領域の `frame` の中に入るまで送る（`AppearanceUITestCase.reveal`）（2026-11-26）
+
+## SwiftUI
+
+- タブバーを隠す `toolbar(.hidden, for: .tabBar)`（`hidesTabBar()`）は、その画面の `toolbar { }` と `fullScreenCover` より後（いちばん外側）に付ける。着せ替えの画面で `navigationBarTitleDisplayMode` の直後に付けたら、iOS 26.5 の Simulator でタブバーが出たままだった（2026-11-26）
+- `scrollPosition(id:)` で止めた横の `ScrollView` は、回転で中身の大きさが変わると、スクロールの位置が前の大きさのまま残り、選んでいる要素がまん中からずれる（縦向きと横向きで見本の大きさが変わる iPhone で起きた）。大きさが変わった後に `ScrollViewReader` の `scrollTo(_:anchor:)` で送り直す（2026-11-26）
+- `ignoresSafeArea()` で広げた `GeometryReader` の `safeAreaInsets` は 0 になる。安全領域の幅が要るときは、広げる前の `GeometryReader` で測り、中身だけを `ignoresSafeArea()` で広げる（着せ替えの全画面の試着）（2026-11-26）
+
 ## App Store Connect への提出
 
 - ワークフロー「App Store Metadata」で新しく足した言語（1.3.0 の en-GB・es-MX）は、サポート URL（バージョンのページ）とプライバシーポリシー URL（「アプリのプライバシー」のページ）が空のままで、「審査用に追加」で止められる。ワークフローはこの 2 つを入れないので、言語を足したら画面でほかの言語と同じ URL を入れる（2026-11-25）

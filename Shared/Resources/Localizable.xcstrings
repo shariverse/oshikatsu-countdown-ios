@@ -15622,57 +15622,6 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Dapatkan Plus" } }
       }
     },
-    "見本" : {
-      "comment" : "着せ替えの画面。ホームの見本の見出し",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Preview" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "見本" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "预览" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "預覽" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "미리보기" } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu" } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia" } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima" } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่าง" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau" } }
-      }
-    },
-    "選んだ写真と設定を、その場でホームの見本に映します" : {
-      "comment" : "着せ替えの画面。ホームの見本の説明",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your photo and settings are shown right away in this preview of Home." } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "選んだ写真と設定を、その場でホームの見本に映します" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "所选照片和设置会立即显示在主页预览中。" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "所選照片和設定會立即顯示在主頁預覽中。" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "고른 사진과 설정이 홈 미리보기에 바로 나타나요." } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La photo et les réglages choisis s'affichent aussitôt dans l'aperçu de l'accueil." } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Foto und Einstellungen erscheinen sofort in der Vorschau von Start." } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto y los ajustes elegidos se muestran al instante en la vista previa del inicio." } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A foto e os ajustes escolhidos aparecem na hora na prévia do início." } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "La foto e le impostazioni scelte appaiono subito nell'anteprima della Home." } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปและการตั้งค่าที่เลือกจะแสดงในตัวอย่างหน้าหลักทันที" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto dan pengaturan pilihanmu langsung tampil di pratinjau Beranda." } }
-      }
-    },
-    "背景の写真" : {
-      "comment" : "着せ替えの画面。背景の写真のまとまりの見出し",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Background Photo" } },
-        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景の写真" } },
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "背景照片" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "背景照片" } },
-        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경 사진" } },
-        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Photo de fond" } },
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hintergrundfoto" } },
-        "es" : { "stringUnit" : { "state" : "translated", "value" : "Foto de fondo" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Foto de fundo" } },
-        "it" : { "stringUnit" : { "state" : "translated", "value" : "Foto di sfondo" } },
-        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปพื้นหลัง" } },
-        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto Latar" } }
-      }
-    },
     "背景に写真を敷く" : {
       "comment" : "着せ替えの画面。背景の写真を使うかの切り替え",
       "localizations" : {
@@ -16130,6 +16079,210 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Quantità di decorazioni %@" } },
         "th" : { "stringUnit" : { "state" : "translated", "value" : "ปริมาณของตกแต่ง %@" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Jumlah hiasan %@" } }
+      }
+    },
+    "背景" : {
+      "comment" : "着せ替えの画面。設定のタブ（背景の写真の設定）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Background" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "背景" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "背景" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "背景" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "배경" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fond" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hintergrund" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Fondo" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Fundo" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Sfondo" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "พื้นหลัง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Latar" } }
+      }
+    },
+    "予定の詳細" : {
+      "comment" : "着せ替えの画面。見本の切り替え（予定の詳細の見本）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Event Details" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "予定の詳細" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "日程详情" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "行程詳情" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "일정 상세" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Détail de l'événement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Termindetails" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Detalle del evento" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Detalhes do evento" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Dettagli dell'evento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รายละเอียดกิจกรรม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Detail Acara" } }
+      }
+    },
+    "シェア" : {
+      "comment" : "着せ替えの画面。見本の切り替え（シェアのカードの見本）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "シェア" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "分享" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "分享" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공유" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Partage" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Teilen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Compartir" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Compartilhar" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Condivisione" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แชร์" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Bagikan" } }
+      }
+    },
+    "予定の詳細の見本" : {
+      "comment" : "着せ替えの画面。予定の詳細の見本の読み上げの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Event details preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "予定の詳細の見本" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "日程详情预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "行程詳情預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "일정 상세 미리보기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu du détail de l'événement" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau der Termindetails" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa del detalle del evento" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia dos detalhes do evento" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima dei dettagli dell'evento" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่างรายละเอียดกิจกรรม" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau detail acara" } }
+      }
+    },
+    "シェアのカードの見本" : {
+      "comment" : "着せ替えの画面。シェアのカードの見本の読み上げの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share card preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "シェアのカードの見本" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "分享卡片预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "分享卡片預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공유 카드 미리보기" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Aperçu de la carte à partager" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau der Karte zum Teilen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Vista previa de la tarjeta para compartir" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Prévia do cartão para compartilhar" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Anteprima della scheda da condividere" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ตัวอย่างการ์ดสำหรับแชร์" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pratinjau kartu untuk dibagikan" } }
+      }
+    },
+    "見本の切り替え" : {
+      "comment" : "着せ替えの画面。見本の切り替え（ホーム・予定の詳細・シェア）の読み上げの名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Switch preview" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "見本の切り替え" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "切换预览" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "切換預覽" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "미리보기 전환" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Changer d'aperçu" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorschau wechseln" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambiar vista previa" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Trocar prévia" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Cambia anteprima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "สลับตัวอย่าง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ganti pratinjau" } }
+      }
+    },
+    "選んだ写真と設定を、その場で見本に映します" : {
+      "comment" : "着せ替えの画面。見本の読み上げのヒント",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your photo and settings are shown right away in this preview." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "選んだ写真と設定を、その場で見本に映します" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "所选照片和设置会立即显示在预览中。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "所選照片和設定會立即顯示在預覽中。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "고른 사진과 설정이 미리보기에 바로 나타나요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La photo et les réglages choisis s'affichent aussitôt dans l'aperçu." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Foto und Einstellungen erscheinen sofort in der Vorschau." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto y los ajustes elegidos se muestran al instante en la vista previa." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A foto e os ajustes escolhidos aparecem na hora na prévia." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La foto e le impostazioni scelte appaiono subito nell'anteprima." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปและการตั้งค่าที่เลือกจะแสดงในตัวอย่างทันที" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto dan pengaturan pilihanmu langsung tampil di pratinjau." } }
+      }
+    },
+    "全画面" : {
+      "comment" : "着せ替えの画面。全画面の試着を開くボタン",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Full Screen" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "全画面" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "全屏" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "全螢幕" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "전체 화면" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Plein écran" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vollbild" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Pantalla completa" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tela cheia" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Schermo intero" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เต็มจอ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Layar Penuh" } }
+      }
+    },
+    "試着中" : {
+      "comment" : "全画面の試着。着せ替えを試している印",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Trying On" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "試着中" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "试穿中" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "試穿中" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "미리 입혀 보는 중" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Essayage" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Anprobe" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Probando" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Experimentando" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "In prova" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "กำลังลองแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sedang Mencoba" } }
+      }
+    },
+    "着せ替える前" : {
+      "comment" : "全画面の試着。長押ししている間に出す、着せ替える前（標準）の見た目の印と、見本の読み上げの値",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Before" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "着せ替える前" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "换装前" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "換裝前" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "꾸미기 전" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Avant" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vorher" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Antes" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Antes" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Prima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ก่อนตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Sebelum" } }
+      }
+    },
+    "長押しで、着せ替える前と比べる" : {
+      "comment" : "全画面の試着。長押しで着せ替える前の見た目と比べられることの案内",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Touch and hold to compare with before" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "長押しで、着せ替える前と比べる" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "长按可与换装前对比" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "長按可與換裝前比較" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "길게 눌러 꾸미기 전과 비교" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Maintenez appuyé pour comparer avec l'avant" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gedrückt halten, um mit vorher zu vergleichen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Mantén pulsado para comparar con el antes" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Toque e segure para comparar com o antes" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tieni premuto per confrontare con il prima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "แตะค้างเพื่อเทียบกับก่อนตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Tekan lama untuk membandingkan dengan sebelumnya" } }
+      }
+    },
+    "着せ替える前と比べる" : {
+      "comment" : "全画面の試着。見本の読み上げの操作（着せ替える前の見た目と試着を切り替える）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Compare with before" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "着せ替える前と比べる" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "与换装前对比" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "與換裝前比較" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "꾸미기 전과 비교" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comparer avec l'avant" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit vorher vergleichen" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Comparar con el antes" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Comparar com o antes" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Confronta con il prima" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เทียบกับก่อนตกแต่ง" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Bandingkan dengan sebelumnya" } }
       }
     }
   },
