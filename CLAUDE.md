@@ -61,6 +61,9 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   - 出荷するテーマの書体（Kaisei Decol）は `Shared/Resources/Fonts/` に置き、アプリと Widget Extension の `UIAppFonts` で登録する。書体を足したらオープンソースライセンスの画面（`OpenSourceLicense.all`）にも足す。見方は `docs/design/themes.md` の「見方」
   - Form・List の行の地は `themeRowBackground()` でテーマのカードの地（`surface`）にする（システムの既定の地のままにしない）
   - 出荷するテーマの狙い・配色・書体・コントラストと、採用でしたこと・残っていること（デザインキャンバスなど）は `docs/design/themes.md`（テーマの仕様の正は `docs/spec/design/jirai-gothic.md`）
+  - 推し活のモチーフ（1.4.0 から。無料）: チケット（ホームの先頭のカード。`TicketShape`）・チェキ（`ChekiPhoto`）・缶バッジ（`canBadgeStyle(color:size:)`）・リボンの札（`RibbonLabel`）・「今日！」の札（`TodayPill`）。
+    部品は `OshiCon/Screens/Common/` に置き、アプリの画面だけで使う（`Shared/` の `OshiAvatar` とウィジェット・ライブアクティビティ・シェアのカードは変えない）。
+    世界観（地雷系・ゴシック）・推し色の役割・規則・文言は変えず、SwiftUI の図形で描く。決まりは `docs/design/themes.md` の「推し活のモチーフ」
 - 推しの写真は、選んだら調整画面（拡大・縮小・移動・回転）で丸の範囲を決め、正方形に切り抜いた画像だけを保存する（スキーマは変えない）。仕様の正は `docs/spec/features/07-photo-crop.md`。コードの場所・テストの口（`-useTestPhoto`）・iOS だけの実装の参考は `docs/photo-crop.md`
 - 予定の通知（ローカル通知）は `OshiCon/Reminder/`。どの予定にいつ出すかの規則は `ReminderPlan`、文面は `ReminderContent`、予約・許可・押された通知は `ReminderScheduler`。
   設定はアプリ全体で 1 つ（UserDefaults。予定ごとには持たないのでスキーマは変えない）で、画面は `OshiCon/Screens/Settings/ReminderSettingsSection.swift`。
@@ -79,7 +82,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   効かせるのはホームと予定の詳細の地だけ（詳細は上の写真より下）で、`ThemeScreenBackground`（課金画面・シェアのカード・テーマの見本）は変えない。
   設定（背景・飾りの ON/OFF、暗幕の濃さとぼかしの強さ、背景の写真のファイル名、飾りの濃さ・量・出さない推し）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
   画面は `@Environment(AppearanceStore.self)` と `@Environment(\.isPlusUnlocked)` から `store.rendering(isPlusUnlocked:)`（`AppearanceRendering`。Plus でなければ標準）で描くものを決め、背景の写真は `store.photos` から読む（メモリ上のストアでは置き場所が違う）。
-  幕とぼかし（`AppearanceBackgroundStyle`）は着せ替えの画面の 2 つのスライダーで別々に変え、背景の推しが見えるよう、いちばん濃く・強くしても幕 0.6・ぼかし 10pt までにする（#264・#268）。文字の読みやすさは幕で守らない。背景の写真か飾りを描いているときは、地の上に直接描く文字（ホームの見出し・案内）の後ろにカードの地の色の板を敷いて 4.5:1 以上にする（`OshiCon/Appearance/AppearanceTextPlate.swift`。敷くかは `@Environment(\.isOverAppearancePhoto)`）。地の上に文字を足したら `appearanceTextPlate()` を付ける。幕は飾りを重ねるときだけ少し濃くする（`scrimOpacity(isDark:isDecorated:)`）。
+  幕とぼかし（`AppearanceBackgroundStyle`）は着せ替えの画面の 2 つのスライダーで別々に変え、背景の推しが見えるよう、いちばん濃く・強くしても幕 0.6・ぼかし 10pt までにする（#264・#268）。文字の読みやすさは幕で守らない。背景の写真か飾りを描いているときは、地の上に直接描く文字（ホームの案内）の後ろにカードの地の色の板を敷いて 4.5:1 以上にする（`OshiCon/Appearance/AppearanceTextPlate.swift`。敷くかは `@Environment(\.isOverAppearancePhoto)`）。地の上に文字を足したら `appearanceTextPlate()` を付ける（ホームの見出しはリボンの札 `RibbonLabel` で、自分の地を持つので付けない）。幕は飾りを重ねるときだけ少し濃くする（`scrimOpacity(isDark:isDecorated:)`）。
   飾りは、選んだ推し（既定はすべて）のうち写真のある推しの丸い写真を互い違いの並びで並べ、濃さ（10〜100%）と量（少なめ〜埋め尽くす）を着せ替えの画面のスライダーで変える（`OshiPhotoDecorationStyle`・`OshiPhotoDecorationLayout`。#266）。
   飾りも濃くできるので、板とホームの上の端のグラデーションは、背景の写真か飾りを描いているとき（`AppearanceRendering.drawsPhotosOnGround`）に掛ける。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で出す（1.3.0 から App Store 版でも出す）。
   メモリ上のストアでは別の UserDefaults と一時ディレクトリを起動のたびに空にして使い、ホームと詳細に描いているものを UI テストに見せる口（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置く。
