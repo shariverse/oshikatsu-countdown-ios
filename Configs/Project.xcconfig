@@ -23,8 +23,14 @@ APP_GROUP_IDENTIFIER = group.$(APP_BUNDLE_IDENTIFIER)
 DEVELOPMENT_LANGUAGE = en
 
 // バージョン（CFBundleShortVersionString / CFBundleVersion）
-MARKETING_VERSION = 1.3.0
+MARKETING_VERSION = 1.3.1
 CURRENT_PROJECT_VERSION = 1
 
 // 最低サポート OS
 IPHONEOS_DEPLOYMENT_TARGET = 17.0
+
+// ActivityKit は弱いリンクにする（#330）。
+// SDK は ActivityStyle を iOS 16.1 からあると宣言しているが、iOS 17 の ActivityKit には無い（入ったのは iOS 18）。
+// 強いリンクのままだと、iOS 26 でだけ呼ぶ予約（LiveActivityScheduler）の `.standard` が見つからず、iOS 17 では起動した直後に dyld が止める。
+// `#available` で囲っても強いリンクのままなので、リンクのほうで弱くする
+OTHER_LDFLAGS = $(inherited) -weak_framework ActivityKit
