@@ -27,10 +27,13 @@ extension OshiConStore: OshiStoring {}
 final class OshiEditing {
     let store: any OshiStoring
     let photos: OshiPhotoLibrary
+    /// Plus の着せ替えの設定。推しを削除したら、その推しの背景の写真も消す。nil なら触れない。
+    let appearance: AppearanceStore?
 
-    init(store: any OshiStoring, photos: OshiPhotoLibrary = .shared) {
+    init(store: any OshiStoring, photos: OshiPhotoLibrary = .shared, appearance: AppearanceStore? = nil) {
         self.store = store
         self.photos = photos
+        self.appearance = appearance
     }
 
     /// 推しを保存する。写真を差し替えるときは新しい写真を取り込んでから保存し、使わなくなった写真を消す。
@@ -85,11 +88,13 @@ final class OshiEditing {
         return oshi
     }
 
-    /// 推しを削除する。結び付いた予定と写真も消す。
+    /// 推しを削除する。結び付いた予定と写真も消す。着せ替えのその推しの背景の写真と設定も消す（共通の背景の写真とほかの推しの分は残す）。
+    /// 削除に失敗したときは何も消さない。
     func delete(oshiID: Oshi.ID) throws {
         let deleted = try store.deleteOshi(id: oshiID)
         if let photoFileName = deleted?.photoFileName {
             photos.delete(fileName: photoFileName)
         }
+        appearance?.removeBackgroundPhoto(for: oshiID)
     }
 }

@@ -18,12 +18,8 @@ struct AppearanceBackgroundPhotoView: View {
     var excludedTopHeight: CGFloat = 0
 
     @Environment(\.displayScale) private var displayScale
-    @State private var loaded: LoadedPhoto?
-
-    private struct LoadedPhoto {
-        let fileName: String
-        let image: CGImage
-    }
+    /// 読んだ写真。写真が替わっても、新しい写真を読むまでは前の写真のまま。
+    @State private var loaded: CGImage?
 
     nonisolated private struct LoadRequest: Equatable, Sendable {
         let fileName: String
@@ -34,8 +30,9 @@ struct AppearanceBackgroundPhotoView: View {
         GeometryReader { proxy in
             let pixelLength = AppearanceBackgroundLayout(containerSize: proxy.size).decodePixelLength(displayScale: displayScale)
             AppearanceBackgroundPhotoLayers(
-                // 写真を差し替えたら、新しい写真を読むまで前の写真を出さない
-                image: loaded?.fileName == photo.fileName ? loaded?.image : nil,
+                // 写真が替わったら（差し替え・ホームの絞り込みで推しの背景と共通の背景を切り替えたとき）、新しい写真を読むまで前の写真を出したままにする
+                // （読む間に地の色へ戻ってちらつかないように）。読めなければ写真を出さない
+                image: loaded,
                 style: photo.style,
                 isDecorated: isDecorated,
                 excludedTopHeight: excludedTopHeight
@@ -43,12 +40,12 @@ struct AppearanceBackgroundPhotoView: View {
             // 画面の大きさ（回転・iPad の分割）が変わったら読み直す。読み直す間は今の写真を出したままにする。
             // 強さ（幕・ぼかし）と飾りの有無は読み込みに関わらないので、変えても読み直さない
             .task(id: LoadRequest(fileName: photo.fileName, pixelLength: pixelLength)) {
-                let fileName = photo.fileName
-                let image = await photos.loadImage(fileName: fileName, maxPixelLength: pixelLength)
+                let image = await photos.loadImage(fileName: photo.fileName, maxPixelLength: pixelLength)
+                // 続けて切り替えたときは、後から頼んだ写真だけを出す
                 guard !Task.isCancelled else {
                     return
                 }
-                loaded = image.map { LoadedPhoto(fileName: fileName, image: $0) }
+                loaded = image
             }
         }
         .accessibilityHidden(true)

@@ -16,15 +16,16 @@ nonisolated enum AppearanceUITestMarker {
     /// 予定の詳細の地の口の identifier。
     static let eventDetailIdentifier = "eventDetail.appearance"
 
-    /// 描いているものを表す値（訳さない）。標準なら `standard`、着せ替えなら `photo`・`decoration` を `,` でつなぐ。
+    /// 描いているものを表す値（訳さない）。標準なら `standard`、着せ替えなら背景の写真（共通は `photo`、推しごとは `oshiPhoto`）と
+    /// `decoration` を `,` でつなぐ。
     /// 暗幕とぼかしの濃さは見本の読み上げの値（`AppearancePreview.accessibilityValue(of:locale:)`）で確かめる。
     static func value(of rendering: AppearanceRendering) -> String {
         guard !rendering.isStandard else {
             return "standard"
         }
         var parts: [String] = []
-        if rendering.backgroundPhoto != nil {
-            parts.append("photo")
+        if let photo = rendering.backgroundPhoto {
+            parts.append(photo.isOshiBackground ? "oshiPhoto" : "photo")
         }
         if rendering.showsOshiPhotoDecoration {
             parts.append("decoration")

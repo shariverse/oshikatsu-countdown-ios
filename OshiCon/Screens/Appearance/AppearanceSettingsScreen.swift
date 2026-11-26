@@ -27,6 +27,8 @@ struct AppearanceSettingsScreen: View {
 
     /// 映している見本。全画面の試着と同じものを切り替える。
     @State private var previewKind = AppearancePreview.Kind.home
+    /// 「背景」で写真を選ぶ推し（共通なら nil）。見本のホームをその推しで絞り込み、予定の詳細とシェアのカードにその推しの予定を出す。
+    @State private var backgroundOshiID: Oshi.ID?
     /// 設定のトレーで選んでいるタブ。
     @State private var editorTab = AppearanceEditorTab.background
     /// 全画面の試着を出しているか。
@@ -36,6 +38,8 @@ struct AppearanceSettingsScreen: View {
 
     var body: some View {
         let oshis = storedOshis.map(OshiConStore.oshi(from:))
+        // 選んでいた推しが消えたら共通に戻す
+        let backgroundOshiID = HomeContent.validSelection(backgroundOshiID, among: oshis.map(\.id))
         GeometryReader { proxy in
             let layout = AppearancePreviewLayout(containerSize: proxy.size, isAccessibilitySize: dynamicTypeSize.isAccessibilitySize)
             // 回転などで並べ方が変わっても、見本とトレーを作り直さない（スクロールの位置と読んだ写真を保つ）よう、並べ方だけを替える
@@ -47,11 +51,11 @@ struct AppearanceSettingsScreen: View {
                     // アプリアイコンはホーム・予定の詳細・シェアの見本に映らないので、アイコンの見本にする
                     AppearanceIconPreview(layout: layout)
                 } else {
-                    AppearancePreviewStage(layout: layout, oshis: oshis, kind: $previewKind) {
+                    AppearancePreviewStage(layout: layout, oshis: oshis, backgroundOshiID: backgroundOshiID, kind: $previewKind) {
                         isTryingOn = true
                     }
                 }
-                AppearanceEditorTray(oshis: oshis, arrangement: layout.arrangement, tab: $editorTab)
+                AppearanceEditorTray(oshis: oshis, arrangement: layout.arrangement, backgroundOshiID: $backgroundOshiID, tab: $editorTab)
             }
         }
         .background {
@@ -73,7 +77,7 @@ struct AppearanceSettingsScreen: View {
                 openPlusPaywall()
             }
         } content: {
-            AppearanceTryOnScreen(oshis: oshis, kind: $previewKind) {
+            AppearanceTryOnScreen(oshis: oshis, backgroundOshiID: backgroundOshiID, kind: $previewKind) {
                 opensPaywallAfterTryOn = true
                 isTryingOn = false
             }

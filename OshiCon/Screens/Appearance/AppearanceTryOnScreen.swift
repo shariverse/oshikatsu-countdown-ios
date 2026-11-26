@@ -16,6 +16,8 @@ import SwiftUI
 struct AppearanceTryOnScreen: View {
     /// 登録した推し（推しの並び）。見本の推しと飾りに使う。
     let oshis: [Oshi]
+    /// 着せ替えの画面の「背景」で選んでいる推し（共通なら nil）。着せ替えの画面の見本と同じく、ホームの見本をその推しで絞り込む。
+    var backgroundOshiID: Oshi.ID?
     /// 映している見本。着せ替えの画面と同じものを切り替える。
     @Binding var kind: AppearancePreview.Kind
     /// 「Plus で使う」を押したとき。全画面を閉じてから課金画面を開くのは、開く側が受け持つ。
@@ -75,8 +77,16 @@ struct AppearanceTryOnScreen: View {
     // MARK: - 見本
 
     private func preview(size: CGSize, insets: EdgeInsets, now: Date) -> some View {
-        ZStack {
-            screen(size: size, insets: insets, now: now)
+        let content = AppearancePreview.content(
+            events: storedEvents.compactMap(OshiConStore.event(from:)),
+            oshis: oshis,
+            selectedOshiID: backgroundOshiID,
+            // 端末のタイムゾーンを変えたときも、その日付で数える
+            today: CalendarDay(now, calendar: .autoupdatingCurrent),
+            now: now
+        )
+        return ZStack {
+            screen(content: content, size: size, insets: insets, now: now)
                 .frame(width: size.width, height: size.height)
                 .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: isComparing)
                 .allowsHitTesting(false)
@@ -88,7 +98,12 @@ struct AppearanceTryOnScreen: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text(verbatim: kind.accessibilityLabel()))
                 .accessibilityValue(
-                    Text(verbatim: AppearancePreview.tryOnAccessibilityValue(of: store.settings, kind: kind, isComparing: isComparing))
+                    Text(verbatim: AppearancePreview.tryOnAccessibilityValue(
+                        of: store.settings,
+                        kind: kind,
+                        content: content,
+                        isComparing: isComparing
+                    ))
                 )
                 .accessibilityAction(named: Text("着せ替える前と比べる")) {
                     isComparingByAction.toggle()
@@ -98,16 +113,10 @@ struct AppearanceTryOnScreen: View {
     }
 
     /// 映している見本（`kind`）の画面。長押ししている間は、着せ替える前（標準）の見た目で描く。
+    /// どの背景の写真（共通・推しごと）を映すかは、実際の画面と同じ規則で見本ごとに決める。
     @ViewBuilder
-    private func screen(size: CGSize, insets: EdgeInsets, now: Date) -> some View {
-        let rendering = AppearancePreview.rendering(settings: store.settings, isComparing: isComparing)
-        let content = AppearancePreview.content(
-            events: storedEvents.compactMap(OshiConStore.event(from:)),
-            oshis: oshis,
-            // 端末のタイムゾーンを変えたときも、その日付で数える
-            today: CalendarDay(now, calendar: .autoupdatingCurrent),
-            now: now
-        )
+    private func screen(content: HomeContent, size: CGSize, insets: EdgeInsets, now: Date) -> some View {
+        let rendering = AppearancePreview.rendering(settings: store.settings, kind: kind, content: content, isComparing: isComparing)
         let horizontalInset = max(insets.leading, insets.trailing)
         switch kind {
         case .home:

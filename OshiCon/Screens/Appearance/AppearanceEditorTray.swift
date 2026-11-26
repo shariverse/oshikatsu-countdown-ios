@@ -52,6 +52,8 @@ struct AppearanceEditorTray: View {
     /// 登録した推し（推しの並び）。
     let oshis: [Oshi]
     let arrangement: AppearancePreviewLayout.Arrangement
+    /// 「背景」で写真を選ぶ推し（共通なら nil）。見本もこの推しに合わせる。
+    @Binding var backgroundOshiID: Oshi.ID?
     /// 選んでいるタブ。
     @Binding var tab: AppearanceEditorTab
 
@@ -100,7 +102,7 @@ struct AppearanceEditorTray: View {
     private func content(of tab: AppearanceEditorTab) -> some View {
         switch tab {
         case .background:
-            AppearanceBackgroundSettings()
+            AppearanceBackgroundSettings(oshis: oshis, target: $backgroundOshiID)
         case .decoration:
             AppearanceDecorationSettings(oshis: oshis)
         case .icon:
@@ -215,6 +217,7 @@ struct AppearanceEditorTray: View {
     AppearanceEditorTray(
         oshis: [Oshi(name: "ミナト", color: .navy), Oshi(name: "LUMINA", color: .pink)],
         arrangement: .pinnedTop,
+        backgroundOshiID: .constant(nil),
         tab: $tab
     )
     .frame(height: 320)

@@ -85,12 +85,14 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   見本はスクロールする設定の外に置き、縦向きの iPhone では上に大きく、iPad・横向きでは左に並べる（並べ方と大きさは `AppearancePreviewLayout`。#269）。開いている間はタブバーを隠す。
   タブを足すときは `AppearanceEditorTab` に case を足し、`AppearanceEditorTray` に中身を足す。選んでいるタブは画面（`AppearanceSettingsScreen`）が持つ（「アイコン」のタブの間は、見本の舞台をアイコンの見本に替える）。
   効かせるのはホームと予定の詳細の地だけ（詳細は上の写真より下）で、`ThemeScreenBackground`（課金画面・シェアのカード・テーマの見本）は変えない。
-  設定（背景・飾りの ON/OFF、暗幕の濃さとぼかしの強さ、背景の写真のファイル名、飾りの濃さ・量・出さない推し）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
+  設定（背景・飾りの ON/OFF、暗幕の濃さとぼかしの強さ、背景の写真のファイル名（共通と推しごと）、飾りの濃さ・量・出さない推し）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
+  背景の写真は共通の 1 枚と推しごとの写真を持ち（#335）、画面の推し（ホームは絞り込んでいる推し、予定の詳細とシェアのカードはその予定の推し）の写真があればそれ、無ければ共通の写真を敷く（`AppearanceRendering.init(settings:isPlusUnlocked:oshiID:)`）。
+  「背景」のタブの「共通」と推しの枠で選び、推しを削除したらその推しの写真も消す（`OshiEditing.delete(oshiID:)`）。
   画面は `@Environment(AppearanceStore.self)` と `@Environment(\.isPlusUnlocked)` から `store.rendering(isPlusUnlocked:)`（`AppearanceRendering`。Plus でなければ標準）で描くものを決め、背景の写真は `store.photos` から読む（メモリ上のストアでは置き場所が違う）。
   幕とぼかし（`AppearanceBackgroundStyle`）は着せ替えの画面の 2 つのスライダーで別々に変え、背景の推しが見えるよう、いちばん濃く・強くしても幕 0.6・ぼかし 10pt までにする（#264・#268）。文字の読みやすさは幕で守らない。背景の写真か飾りを描いているときは、地の上に直接描く文字（ホームの案内）の後ろにカードの地の色の板を敷いて 4.5:1 以上にする（`OshiCon/Appearance/AppearanceTextPlate.swift`。敷くかは `@Environment(\.isOverAppearancePhoto)`）。地の上に文字を足したら `appearanceTextPlate()` を付ける（ホームの見出しはリボンの札 `RibbonLabel` で、自分の地を持つので付けない）。幕は飾りを重ねるときだけ少し濃くする（`scrimOpacity(isDark:isDecorated:)`）。
   飾りは、選んだ推し（既定はすべて）のうち写真のある推しの丸い写真を互い違いの並びで並べ、濃さ（10〜100%）と量（少なめ〜埋め尽くす）を着せ替えの画面のスライダーで変える（`OshiPhotoDecorationStyle`・`OshiPhotoDecorationLayout`。#266）。
   飾りも濃くできるので、板とホームの上の端のグラデーションは、背景の写真か飾りを描いているとき（`AppearanceRendering.drawsPhotosOnGround`）に掛ける。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で出す（1.3.0 から App Store 版でも出す）。
-  メモリ上のストアでは別の UserDefaults と一時ディレクトリを起動のたびに空にして使い、ホームと詳細に描いているものを UI テストに見せる口（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置く。
+  メモリ上のストアでは別の UserDefaults と一時ディレクトリを起動のたびに空にして使い、ホームと詳細に描いているもの（共通の写真は `photo`、推しの写真は `oshiPhoto`）を UI テストに見せる口（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置く。
   アプリアイコンの色替え（推し色の 12 色。#336）は、規則と色が `OshiCon/Appearance/AppIcon.swift`（`AppIconRule`・`AppIconPalette`）、ホーム画面のアイコンを合わせる係が `AppIconSynchronizer.swift`、タブの中身と見本が `OshiCon/Screens/Appearance/AppearanceIconSettings.swift`。
   ピンクは主アイコン `OshiCon/AppIcon.icon`、ほかの 11 色は代替アイコン `OshiCon/AlternateAppIcons/AppIcon-<色>.icon`（`scripts/make-alternate-app-icons.py` で作る）で、名前は `Configs/Project.xcconfig` の `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`（Info.plist の `CFBundleAlternateIcons` は Xcode が書くので、手で書かない）。
   ホーム画面のアイコンを替えるのは Plus のときだけで、出したいアイコンが今と違うときだけ、前面で `setAlternateIconName` を呼ぶ（替えるたびにシステムが利用者に知らせる）。解約・期限切れで主アイコンに戻し、選んだ色（`AppStorageKey.appearanceAppIcon`）は残す。

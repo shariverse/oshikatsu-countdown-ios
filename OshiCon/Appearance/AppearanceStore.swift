@@ -9,7 +9,8 @@ import Observation
 /// 推し活カウントダウン Plus の着せ替えの設定（`AppearanceSettings`）と、背景の写真のファイルを持つ。
 ///
 /// - 設定はアプリだけの UserDefaults に、背景の写真は `photos`（推しの写真と同じ置き場所）に置く
-/// - 背景の写真を差し替える・外すときは、前のファイルを消す
+/// - 背景の写真は、共通の 1 枚と推しごとの写真を持つ（`oshiID` が nil なら共通）。差し替える・外すときは、前のファイルを消す
+/// - 推しを削除したら、その推しの背景の写真も外して消す（`OshiEditing.delete(oshiID:)` が呼ぶ）
 /// - Plus が使えるかにかかわらず保存する（Plus でない人も試着で選んだ写真を残し、買ったらそのまま使う）。描くものは `rendering(isPlusUnlocked:)`
 ///
 /// UI テスト・スクリーンショット（メモリ上のストア）では端末の設定を書き換えないよう、別の UserDefaults と一時ディレクトリを使い、
@@ -52,9 +53,9 @@ final class AppearanceStore {
         return AppearanceStore(defaults: defaults, photos: OshiPhotoLibrary(directory: directory))
     }
 
-    /// Plus が使えるかと設定から、実際に描くもの。
-    func rendering(isPlusUnlocked: Bool) -> AppearanceRendering {
-        AppearanceRendering(settings: settings, isPlusUnlocked: isPlusUnlocked)
+    /// Plus が使えるかと設定から、実際に描くもの。`oshiID` はどの推しの画面か（その推しの背景の写真があれば敷く。`AppearanceRendering`）。
+    func rendering(isPlusUnlocked: Bool, oshiID: Oshi.ID? = nil) -> AppearanceRendering {
+        AppearanceRendering(settings: settings, isPlusUnlocked: isPlusUnlocked, oshiID: oshiID)
     }
 
     /// 背景の写真を地に敷くか。
@@ -113,27 +114,29 @@ final class AppearanceStore {
     }
 
     /// 背景の写真を、調整した範囲 `crop`（縦長の枠。`PhotoCrop.backgroundAspectRatio`）で切り抜いて取り込み、差し替える。
-    /// 差し替えたら前の写真を消す。読めない写真なら何も変えずに false。
+    /// `oshiID` が nil なら共通の写真、推しの id ならその推しの写真を差し替える。
+    /// 差し替えたら前の写真を消す（ほかの推しの写真と共通の写真は残す）。読めない写真なら何も変えずに false。
     @discardableResult
-    func replaceBackgroundPhoto(_ data: Data, crop: PhotoCrop) async throws -> Bool {
+    func replaceBackgroundPhoto(_ data: Data, crop: PhotoCrop, for oshiID: Oshi.ID? = nil) async throws -> Bool {
         guard let fileName = try await photos.importPhoto(data, crop: crop, maxPixelLength: PhotoResizer.maxBackgroundPixelLength) else {
             return false
         }
         // 取り込みの間に別の写真に差し替わっていても、そのとき持っている写真を消す（使わないファイルを残さない）
-        let previous = settings.backgroundPhotoFileName
-        update { $0.backgroundPhotoFileName = fileName }
+        let previous = settings.backgroundPhotoFileName(for: oshiID)
+        update { $0.setBackgroundPhotoFileName(fileName, for: oshiID) }
         if let previous, previous != fileName {
             photos.delete(fileName: previous)
         }
         return true
     }
 
-    /// 背景の写真を外し、ファイルを消す。ほかの設定はそのまま。
-    func removeBackgroundPhoto() {
-        guard let previous = settings.backgroundPhotoFileName else {
+    /// 背景の写真を外し、ファイルを消す。`oshiID` が nil なら共通の写真、推しの id ならその推しの写真。ほかの設定と写真はそのまま。
+    /// 推しを削除したときも呼ぶ（その推しの写真と設定を残さない）。
+    func removeBackgroundPhoto(for oshiID: Oshi.ID? = nil) {
+        guard let previous = settings.backgroundPhotoFileName(for: oshiID) else {
             return
         }
-        update { $0.backgroundPhotoFileName = nil }
+        update { $0.setBackgroundPhotoFileName(nil, for: oshiID) }
         photos.delete(fileName: previous)
     }
 
