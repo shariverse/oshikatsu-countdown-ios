@@ -20,6 +20,11 @@
   （`-sampleStreamStartsSoon` で当日の配信が 40 分ほど先になり、当日の開始の前の詳細を撮れる）。文字の大きさは `xcrun simctl ui <udid> content_size accessibility-extra-large` で変える。
   Before は、変更の前にビルドした `.app` を別の場所に写しておいて入れ直す（2026-11-26）
 
+- 着せ替えのアプリアイコン（`setAlternateIconName`）は、メモリ上のストアではシステムの API を呼ばない（`InMemoryAppIconSwitcher`）。ホーム画面のアイコンが替わるところとシステムの知らせを撮るときは、
+  `AppIconSynchronizer.forLaunch` を一時的にシステムの係（`SystemAppIconSwitcher`）にして `-useInMemoryStore -plusUnlocked` で起動し、UI テストから springboard の知らせ（`springboard.alerts.buttons`）を押してからホームボタンで出て撮る（一時的な変更はコミットしない）。
+  iOS 26.5 の Simulator では、`simctl ui <udid> appearance dark` にしても、ホーム画面のアイコンはライトの見え方のままだった（ダークのアイコンは `ictool` の書き出しで見る）（2026-11-26）
+- iPad の Simulator では、メインの画面がタブバーではなくサイドバー（`NavigationSplitView`）なので、UI テストの `selectTab(_:)` は使えない。サイドバーの行（`staticTexts["設定"]`）を押す（2026-11-26）
+
 ## App Store 用スクリーンショット
 
 - `xcrun simctl status_bar --time 9:41` はロック画面の時計にも効き、日付が「1 月 1 日（土）」になる。ISO 8601 で日時を渡しても（受け付けるのは小数の秒と `Z` の付いた `date -u +%Y-%m-%dT%H:%M:%S.000Z` の形だけ）、iOS 27 のロック画面の日付は 1 月 1 日のままだったので、ロック画面を撮るなら `--time` は上書きしない。ステータスバーの「Carrier」は `--operatorName ""` で消える（2026-11-24）

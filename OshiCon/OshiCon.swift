@@ -21,12 +21,15 @@ struct OshiCon: App {
     private let plus: PlusStore
     /// Plus の着せ替えの設定と背景の写真。画面は `@Environment(AppearanceStore.self)` で引く。
     private let appearance: AppearanceStore
+    /// ホーム画面のアプリアイコンを、着せ替えで選んだ色と Plus の状態に合わせる。メモリ上のストアではシステムの API を呼ばない。
+    private let appIcon: AppIconSynchronizer
 
     init() {
         LaunchOptions.applyDefaultEnvironment()
         NavigationBarAppearance.applyTitleFonts()
         plus = PlusStore()
         appearance = AppearanceStore.forLaunch()
+        appIcon = AppIconSynchronizer.forLaunch()
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
         var sampleOshiIDs: [SampleData.Role: Oshi.ID] = [:]
@@ -123,6 +126,7 @@ struct OshiCon: App {
                     .refreshesLiveActivities(liveActivities)
                     .providesPlusStatus(plus)
                     .environment(appearance)
+                    .synchronizesAppIcon(appIcon, plus: plus, appearance: appearance)
                     .preferredColorScheme(LaunchOptions.forcedColorScheme)
             case .failure:
                 StoreUnavailableView()

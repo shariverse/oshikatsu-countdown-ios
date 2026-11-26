@@ -95,6 +95,12 @@ final class AppearanceStore {
         }
     }
 
+    /// ホーム画面のアプリアイコンの色。Plus でなくても選んで残せる（ホーム画面に出すかは `AppIconRule`）。
+    var appIconColor: OshiColor {
+        get { settings.appIconColor }
+        set { update { $0.appIconColor = newValue } }
+    }
+
     /// 背景の写真に掛ける暗幕の濃さ（スライダーの位置）。範囲の外の値は範囲に収める。
     var backgroundScrim: Double {
         get { settings.backgroundStyle.scrim }

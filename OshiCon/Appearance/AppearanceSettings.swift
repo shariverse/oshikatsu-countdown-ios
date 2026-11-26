@@ -27,6 +27,8 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
     /// その推しで絞り込んだホームと、その推しの予定の詳細・シェアのカードでは、共通の写真（`backgroundPhotoFileName`）の代わりに敷く。
     /// 推しを削除したら外す（`AppearanceStore.removeBackgroundPhoto(for:)`）。
     var oshiBackgroundPhotoFileNames: [Oshi.ID: String]
+    /// ホーム画面のアプリアイコンの色（`AppIconRule`）。既定はピンク（今のアイコン）。Plus でなくても残す。
+    var appIconColor: OshiColor
 
     init(
         isBackgroundEnabled: Bool = true,
@@ -34,7 +36,8 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
         backgroundStyle: AppearanceBackgroundStyle = .default,
         backgroundPhotoFileName: String? = nil,
         decorationStyle: OshiPhotoDecorationStyle = .default,
-        oshiBackgroundPhotoFileNames: [Oshi.ID: String] = [:]
+        oshiBackgroundPhotoFileNames: [Oshi.ID: String] = [:],
+        appIconColor: OshiColor = .defaultColor
     ) {
         self.isBackgroundEnabled = isBackgroundEnabled
         self.isDecorationEnabled = isDecorationEnabled
@@ -42,12 +45,14 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
         self.backgroundPhotoFileName = backgroundPhotoFileName
         self.decorationStyle = decorationStyle
         self.oshiBackgroundPhotoFileNames = oshiBackgroundPhotoFileNames
+        self.appIconColor = appIconColor
     }
 
     /// UserDefaults から読む。書いていない項目は既定の値。写真の置き場所の外を指すファイル名は無いものとする。
     /// 暗幕・ぼかし・飾りの濃さ・量は範囲に収め、出さない推しの id は UUID として読めるものだけを使う。
     /// 暗幕とぼかしを書いていなければ、前の版の強さ（弱・中・強。`AppStorageKey.appearanceIntensity`）から読み替える。
     /// 推しごとの背景の写真は、推しの id が UUID として読め、ファイル名が写真の置き場所の中を指すものだけを使う。
+    /// アプリアイコンの色は、知らない値ならピンク。
     init(defaults: UserDefaults) {
         let fileName = defaults.string(forKey: AppStorageKey.appearanceBackgroundPhoto)
         let legacyStyle = defaults.string(forKey: AppStorageKey.appearanceIntensity)
@@ -69,7 +74,8 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
             ),
             oshiBackgroundPhotoFileNames: Self.oshiBackgroundPhotoFileNames(
                 from: defaults.dictionary(forKey: AppStorageKey.appearanceOshiBackgroundPhotos) ?? [:]
-            )
+            ),
+            appIconColor: defaults.string(forKey: AppStorageKey.appearanceAppIcon).flatMap(OshiColor.init(rawValue:)) ?? .defaultColor
         )
     }
 
@@ -114,6 +120,7 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
         defaults.set(decorationStyle.opacity, forKey: AppStorageKey.appearanceDecorationOpacity)
         defaults.set(decorationStyle.amount, forKey: AppStorageKey.appearanceDecorationAmount)
         defaults.set(decorationStyle.excludedOshiIDs.map(\.uuidString).sorted(), forKey: AppStorageKey.appearanceDecorationExcludedOshis)
+        defaults.set(appIconColor.rawValue, forKey: AppStorageKey.appearanceAppIcon)
         if let backgroundPhotoFileName {
             defaults.set(backgroundPhotoFileName, forKey: AppStorageKey.appearanceBackgroundPhoto)
         } else {

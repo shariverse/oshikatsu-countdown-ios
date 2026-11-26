@@ -219,6 +219,8 @@ nonisolated enum AppStorageKey {
     static let appearanceDecorationExcludedOshis = "appearanceDecorationExcludedOshis"
     /// 着せ替え: 推しごとの背景の写真のファイル名（推しの id の UUID の文字列 → `OshiPhotoLibrary` の中のファイル名の辞書。写真を選んだ推しだけ。既定は空）。
     static let appearanceOshiBackgroundPhotos = "appearanceOshiBackgroundPhotos"
+    /// 着せ替え: ホーム画面のアプリアイコンの色（`OshiColor` の生の値。`AppIconRule`。既定はピンク）。
+    static let appearanceAppIcon = "appearanceAppIcon"
 
     /// そのタイミングの通知を出す（既定は ON）。
     static func reminderTiming(_ timing: ReminderTiming) -> String {

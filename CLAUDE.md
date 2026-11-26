@@ -83,7 +83,7 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
 - Plus の着せ替え（背景の写真と推しの写真の飾り）は、規則・ストア・地の View が `OshiCon/Appearance/`、着せ替えの画面・見本（ホーム・予定の詳細・シェアのカード）・全画面の試着が `OshiCon/Screens/Appearance/`。
   着せ替えの画面は、見本の舞台（横のスワイプと下の切り替えで見本を替える。「全画面」で全画面の試着を開く）と、設定のトレー（タブ「背景」「飾り」）に分ける（#323）。
   見本はスクロールする設定の外に置き、縦向きの iPhone では上に大きく、iPad・横向きでは左に並べる（並べ方と大きさは `AppearancePreviewLayout`。#269）。開いている間はタブバーを隠す。
-  タブを足すときは `AppearanceEditorTab` に case を足し、`AppearanceEditorTray` に中身を足す。
+  タブを足すときは `AppearanceEditorTab` に case を足し、`AppearanceEditorTray` に中身を足す。選んでいるタブは画面（`AppearanceSettingsScreen`）が持つ（「アイコン」のタブの間は、見本の舞台をアイコンの見本に替える）。
   効かせるのはホームと予定の詳細の地だけ（詳細は上の写真より下）で、`ThemeScreenBackground`（課金画面・シェアのカード・テーマの見本）は変えない。
   設定（背景・飾りの ON/OFF、暗幕の濃さとぼかしの強さ、背景の写真のファイル名（共通と推しごと）、飾りの濃さ・量・出さない推し）はアプリだけの UserDefaults（`AppStorageKey.appearance*`）に `AppearanceSettings` で、背景の写真は推しの写真と同じ置き場所（App Group）に置く（スキーマは変えない）。
   背景の写真は共通の 1 枚と推しごとの写真を持ち（#335）、画面の推し（ホームは絞り込んでいる推し、予定の詳細とシェアのカードはその予定の推し）の写真があればそれ、無ければ共通の写真を敷く（`AppearanceRendering.init(settings:isPlusUnlocked:oshiID:)`）。
@@ -93,7 +93,11 @@ xcodebuild build -project OshiCon.xcodeproj -scheme OshiCon -destination 'platfo
   飾りは、選んだ推し（既定はすべて）のうち写真のある推しの丸い写真を互い違いの並びで並べ、濃さ（10〜100%）と量（少なめ〜埋め尽くす）を着せ替えの画面のスライダーで変える（`OshiPhotoDecorationStyle`・`OshiPhotoDecorationLayout`。#266）。
   飾りも濃くできるので、板とホームの上の端のグラデーションは、背景の写真か飾りを描いているとき（`AppearanceRendering.drawsPhotosOnGround`）に掛ける。設定の「着せ替え」の行は Plus の行と同じく `PlusEntryPolicy.showsEntry(in:)` で出す（1.3.0 から App Store 版でも出す）。
   メモリ上のストアでは別の UserDefaults と一時ディレクトリを起動のたびに空にして使い、ホームと詳細に描いているもの（共通の写真は `photo`、推しの写真は `oshiPhoto`）を UI テストに見せる口（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置く。
-  仕様・コードの場所・テストの口（`AppearanceUITests`・`appearance.*`）・実機で確かめることは `docs/appearance.md`。Android 版の SPEC には未記載（epic の後で合わせる）
+  アプリアイコンの色替え（推し色の 12 色。#336）は、規則と色が `OshiCon/Appearance/AppIcon.swift`（`AppIconRule`・`AppIconPalette`）、ホーム画面のアイコンを合わせる係が `AppIconSynchronizer.swift`、タブの中身と見本が `OshiCon/Screens/Appearance/AppearanceIconSettings.swift`。
+  ピンクは主アイコン `OshiCon/AppIcon.icon`、ほかの 11 色は代替アイコン `OshiCon/AlternateAppIcons/AppIcon-<色>.icon`（`scripts/make-alternate-app-icons.py` で作る）で、名前は `Configs/Project.xcconfig` の `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`（Info.plist の `CFBundleAlternateIcons` は Xcode が書くので、手で書かない）。
+  ホーム画面のアイコンを替えるのは Plus のときだけで、出したいアイコンが今と違うときだけ、前面で `setAlternateIconName` を呼ぶ（替えるたびにシステムが利用者に知らせる）。解約・期限切れで主アイコンに戻し、選んだ色（`AppStorageKey.appearanceAppIcon`）は残す。
+  メモリ上のストアではシステムの API を呼ばず（`InMemoryAppIconSwitcher`）、UI テストはホーム画面のアイコンの色を `appearance.icon.homeScreen` で確かめる。
+  仕様・コードの場所・テストの口（`AppearanceUITests`・`AppearanceIconUITests`・`appearance.*`）・実機で確かめることは `docs/appearance.md`。Android 版の SPEC には未記載（epic の後で合わせる）
 - 署名・Bundle ID・バージョンは pbxproj に書かず `Configs/Project.xcconfig` に書く
 - `OshiCon/PrivacyInfo.xcprivacy`・`OshiConWidget/PrivacyInfo.xcprivacy` はプライバシーマニフェスト。今はアプリが UserDefaults の `CA92.1`（アプリ自身だけが読み書き）と `1C8F.1`（App Group で Widget Extension と共有）を、
   Widget Extension が UserDefaults の `1C8F.1` だけを申告している（`PrivacyManifestTests` で確かめる）。App Group の UserDefaults に置くのは Plus が使えるかの判定の結果と期限だけ（`PlusStatusStorage`）。
