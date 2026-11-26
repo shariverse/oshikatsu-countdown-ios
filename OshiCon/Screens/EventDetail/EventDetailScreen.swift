@@ -7,7 +7,7 @@ import SwiftData
 import SwiftUI
 
 /// 予定の詳細。推しの写真（無ければテーマの模様。出荷するテーマは推し色を黒に寄せた地に十字とハート）の上に中身のカードを重ね、秒単位のカウントダウンと進み具合を出す。
-/// 上のボタンでピン留めの切り替え・編集・削除（確認を出す）をする。予定が消えたら（削除・推しの削除など）前の画面に戻る。
+/// 上のボタンでピン留めの切り替え・画像でシェア（プレビューのシート）・編集・削除（確認を出す）をする。予定が消えたら（削除・推しの削除など）前の画面に戻る。
 struct EventDetailScreen: View {
     let eventID: OshiEvent.ID
 
@@ -16,8 +16,16 @@ struct EventDetailScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.appTheme) private var theme
+    @Environment(AppearanceStore.self) private var appearance
+    @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @Query private var storedEvents: [StoredEvent]
+    /// 着せ替えの飾りに使う推し（ホームと同じ並び）。
+    @Query(sort: OshiConStore.oshiOrder)
+    private var storedOshis: [StoredOshi]
+    /// 上の写真の下端。着せ替えの地を、上の写真より下にだけ敷くのに使う。
+    @State private var headerPosition = AppearanceDetailHeaderPosition()
     @State private var isEditing = false
+    @State private var isSharing = false
     @State private var isConfirmingDelete = false
     @State private var failureMessage: String?
     /// ピン留めを切り替えたときの触覚。
@@ -27,6 +35,8 @@ struct EventDetailScreen: View {
     /// 横向きの iPhone（縦が狭い）では、写真で画面が埋まらないよう低くする。
     private static let compactPhotoHeight: CGFloat = 140
     private static let cardOverlap: CGFloat = 28
+    /// 上の写真の下端を測る座標（スクロールの枠。地と同じく画面の上端から）。
+    nonisolated private static let scrollSpace = "eventDetail.scroll"
 
     init(eventID: OshiEvent.ID) {
         self.eventID = eventID
@@ -55,6 +65,7 @@ struct EventDetailScreen: View {
         // 予定が消えた・読めないときは前の画面に戻る。作り直しや遷移の途中でも戻れるよう、ホームの積み重ねから外す
         .onChange(of: current == nil, initial: true) { _, isMissing in
             if isMissing {
+                isSharing = false
                 leave()
             }
         }
@@ -75,6 +86,12 @@ struct EventDetailScreen: View {
                     .clipped()
                     // 横向きでは左右の安全領域の外まで敷く
                     .ignoresSafeArea(edges: .horizontal)
+                    // スクロールで動いた上の写真の下端を、着せ替えの地に伝える（この画面の本体は描き直さない）
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.frame(in: .named(Self.scrollSpace)).maxY
+                    } action: { maxY in
+                        headerPosition.update(headerMaxY: maxY)
+                    }
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     EventDetailCard(detail: EventDetailContent(event: event, oshi: oshi, now: context.date, calendar: zonedCalendar))
                 }
@@ -83,16 +100,32 @@ struct EventDetailScreen: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .background(theme.palette.surface.color.ignoresSafeArea())
+        .coordinateSpace(.named(Self.scrollSpace))
+        .appearanceUITestMarker(AppearanceUITestMarker.eventDetailIdentifier, rendering: rendering)
+        // Plus の着せ替え（上の写真より下の地だけ）。Plus でなければカードの地の色のまま。購入・解約・期限切れでその場で切り替わる
+        .background(
+            AppearanceDetailBackground(
+                rendering: rendering,
+                oshis: storedOshis.map(OshiConStore.oshi(from:)),
+                photos: appearance.photos,
+                header: headerPosition
+            )
+            .ignoresSafeArea()
+        )
         .toolbar { toolbar(event: event) }
-        // ウィジェットのリンクで画面を切り替えるときは、編集のシートと削除の確認を閉じる
+        // ウィジェットのリンクで画面を切り替えるときは、編集とシェアのシートと削除の確認を閉じる
         .onChange(of: router.sheetDismissal) {
             isEditing = false
+            isSharing = false
             isConfirmingDelete = false
         }
         .sheet(isPresented: $isEditing) {
             // 開いた時点の最新の予定を渡す（古い値だと、外したピン留めを書き戻してしまう）
             EventEditorScreen(event: event)
+        }
+        .sheet(isPresented: $isSharing) {
+            // Plus で背景の写真を敷いているときは、カードの地もその写真にする（それ以外は出荷するテーマのカード）
+            ShareCardPreviewScreen(event: event, oshi: oshi, style: .appearance(rendering), backgroundPhotos: appearance.photos)
         }
         .alert("この予定を削除しますか？", isPresented: $isConfirmingDelete) {
             Button("削除", role: .destructive) {
@@ -102,6 +135,11 @@ struct EventDetailScreen: View {
         } message: {
             Text(EventDetailContent(event: event, oshi: oshi, now: .now, calendar: zonedCalendar).deleteMessage)
         }
+    }
+
+    /// Plus が使えるかと着せ替えの設定から、実際に描くもの。
+    private var rendering: AppearanceRendering {
+        appearance.rendering(isPlusUnlocked: isPlusUnlocked)
     }
 
     private var photoHeight: CGFloat {
@@ -122,6 +160,11 @@ struct EventDetailScreen: View {
                 setPinned(!event.isPinned, event: event)
             }
             .accessibilityIdentifier("eventDetail.pin")
+            // シェアの入口はここだけ（ホームの行・ウィジェットには置かない）
+            Button("画像でシェア", systemImage: "square.and.arrow.up") {
+                isSharing = true
+            }
+            .accessibilityIdentifier("eventDetail.share")
             Button("編集", systemImage: "pencil") {
                 isEditing = true
             }
@@ -215,5 +258,10 @@ private struct EventDetailHeader: View {
         EventDetailScreen(eventID: UUID())
     }
     .environment(AppRouter())
+    // 端末の設定に触れない着せ替えの設定
+    .environment(AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    ))
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }

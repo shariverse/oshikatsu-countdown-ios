@@ -33,16 +33,63 @@ struct OshiConStoreTests {
         )
     }
 
-    @Test("推しは登録した順に読む")
+    @Test("推しは追加した順に読む。追加した推しは末尾に並ぶ（登録した時刻が前でも）")
     func oshisInRegistrationOrder() throws {
-        try store.save(Oshi(name: "二人目", color: .blue), now: DomainFixtures.date(2026, 10, 2))
-        try store.save(Oshi(name: "一人目", color: .pink), now: DomainFixtures.date(2026, 10, 1))
+        try store.save(Oshi(name: "一人目", color: .pink), now: DomainFixtures.date(2026, 10, 2))
+        try store.save(Oshi(name: "二人目", color: .blue), now: DomainFixtures.date(2026, 10, 1))
         try store.save(Oshi(name: "三人目", color: .mint, photoFileName: "photo.jpg"), now: DomainFixtures.date(2026, 10, 3))
 
         let oshis = try store.oshis()
         #expect(oshis.map(\.name) == ["一人目", "二人目", "三人目"])
         #expect(oshis.map(\.color) == [.pink, .blue, .mint])
         #expect(oshis.last?.photoFileName == "photo.jpg")
+    }
+
+    @Test("推しを並べ替えると、その順に読む。並べ替えた後に追加した推しは末尾に並ぶ")
+    func reorderOshis() throws {
+        let first = Oshi(name: "一人目")
+        let second = Oshi(name: "二人目")
+        let third = Oshi(name: "三人目")
+        for oshi in [first, second, third] {
+            try store.save(oshi, now: DomainFixtures.date(2026, 10, 1))
+        }
+
+        try store.reorderOshis([third.id, first.id, second.id])
+        #expect(try store.oshis().map(\.name) == ["三人目", "一人目", "二人目"])
+
+        try store.save(Oshi(name: "四人目"), now: DomainFixtures.date(2026, 10, 2))
+        #expect(try store.oshis().map(\.name) == ["三人目", "一人目", "二人目", "四人目"])
+    }
+
+    @Test("並べ替えに無い推しは今の並びのまま後ろに置き、知らない id は無視する")
+    func reorderOshisWithMissingAndUnknownIDs() throws {
+        let first = Oshi(name: "一人目")
+        let second = Oshi(name: "二人目")
+        let third = Oshi(name: "三人目")
+        for oshi in [first, second, third] {
+            try store.save(oshi, now: DomainFixtures.date(2026, 10, 1))
+        }
+
+        // 並べ替えている間に二人目・三人目が増えた（並べ替えの画面は一人目しか知らない）とき
+        try store.reorderOshis([UUID(), first.id])
+        #expect(try store.oshis().map(\.name) == ["一人目", "二人目", "三人目"])
+
+        try store.reorderOshis([third.id])
+        #expect(try store.oshis().map(\.name) == ["三人目", "一人目", "二人目"])
+    }
+
+    @Test("並べ替えた後に推しを削除しても、残りの推しの並びは変わらない")
+    func reorderThenDelete() throws {
+        let first = Oshi(name: "一人目")
+        let second = Oshi(name: "二人目")
+        let third = Oshi(name: "三人目")
+        for oshi in [first, second, third] {
+            try store.save(oshi, now: DomainFixtures.date(2026, 10, 1))
+        }
+        try store.reorderOshis([second.id, third.id, first.id])
+
+        try store.deleteOshi(id: second.id)
+        #expect(try store.oshis().map(\.name) == ["三人目", "一人目"])
     }
 
     @Test("同じ id の推しを保存すると更新し、登録した順は変えない")
@@ -238,7 +285,7 @@ struct OshiConStoreTests {
     @Test("知らない種類・推し色は、その他・既定の推し色として読む")
     func unknownRawValues() throws {
         let context = store.context
-        let oshi = StoredOshi(id: UUID(), name: "推し", colorRawValue: "gold", photoFileName: nil, createdAt: .now)
+        let oshi = StoredOshi(id: UUID(), name: "推し", colorRawValue: "gold", photoFileName: nil, createdAt: .now, sortOrder: 0)
         context.insert(oshi)
         let event = StoredEvent(
             id: UUID(),

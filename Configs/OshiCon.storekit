@@ -1,0 +1,393 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "6F1C2B7A",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4800",
+      "familyShareable" : false,
+      "internalID" : "6740000003",
+      "localizations" : [
+        {
+          "description" : "Buy once and keep Plus forever",
+          "displayName" : "Plus (Lifetime)",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Buy once and keep Plus forever",
+          "displayName" : "Plus (Lifetime)",
+          "locale" : "en_GB"
+        },
+        {
+          "description" : "一度の購入で Plus の機能をずっと使えます",
+          "displayName" : "Plus（買い切り）",
+          "locale" : "ja"
+        },
+        {
+          "description" : "一次购买，永久使用 Plus 的所有功能",
+          "displayName" : "Plus（永久）",
+          "locale" : "zh_Hans"
+        },
+        {
+          "description" : "一次購買，永久使用 Plus 的所有功能",
+          "displayName" : "Plus（永久）",
+          "locale" : "zh_Hant"
+        },
+        {
+          "description" : "한 번 구매로 Plus 기능을 계속 이용",
+          "displayName" : "Plus (평생)",
+          "locale" : "ko"
+        },
+        {
+          "description" : "Un seul achat, Plus pour toujours",
+          "displayName" : "Plus (à vie)",
+          "locale" : "fr_FR"
+        },
+        {
+          "description" : "Einmal kaufen, Plus für immer nutzen",
+          "displayName" : "Plus (dauerhaft)",
+          "locale" : "de_DE"
+        },
+        {
+          "description" : "Un solo pago y Plus para siempre",
+          "displayName" : "Plus (de por vida)",
+          "locale" : "es_ES"
+        },
+        {
+          "description" : "Un solo pago y Plus para siempre",
+          "displayName" : "Plus (de por vida)",
+          "locale" : "es_MX"
+        },
+        {
+          "description" : "Pague uma vez e use o Plus para sempre",
+          "displayName" : "Plus (vitalício)",
+          "locale" : "pt_BR"
+        },
+        {
+          "description" : "Un solo acquisto, Plus per sempre",
+          "displayName" : "Plus (a vita)",
+          "locale" : "it"
+        },
+        {
+          "description" : "ซื้อครั้งเดียว ใช้ Plus ได้ตลอดไป",
+          "displayName" : "Plus (ตลอดชีพ)",
+          "locale" : "th"
+        },
+        {
+          "description" : "Beli sekali, pakai Plus selamanya",
+          "displayName" : "Plus (Seumur Hidup)",
+          "locale" : "id"
+        }
+      ],
+      "productID" : "jp.shilokuma.OshiCon.plus.lifetime",
+      "referenceName" : "Plus Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "ja_JP",
+    "_storefront" : "JPN",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21600001",
+      "localizations" : [
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "en_US"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "en_GB"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "推し活カウントダウン Plus",
+          "locale" : "ja"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "追星倒计时 Plus",
+          "locale" : "zh_Hans"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "推活倒數 Plus",
+          "locale" : "zh_Hant"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "최애 디데이 Plus",
+          "locale" : "ko"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "fr_FR"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "de_DE"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "es_ES"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "es_MX"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "pt_BR"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "it"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "th"
+        },
+        {
+          "customAppName" : "",
+          "description" : "",
+          "displayName" : "Oshi Countdown Plus",
+          "locale" : "id"
+        }
+      ],
+      "name" : "OshiCon Plus",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "1980",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6740000001",
+          "introductoryOffer" : {
+            "internalID" : "6740000011",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
+          "localizations" : [
+            {
+              "description" : "Your oshi's photo on backgrounds and widgets",
+              "displayName" : "Plus (Yearly)",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Your oshi's photo on backgrounds and widgets",
+              "displayName" : "Plus (Yearly)",
+              "locale" : "en_GB"
+            },
+            {
+              "description" : "推しの写真で背景・飾り・ウィジェットを着せ替え",
+              "displayName" : "Plus（年額）",
+              "locale" : "ja"
+            },
+            {
+              "description" : "用本命的照片装扮背景、装饰和小组件",
+              "displayName" : "Plus（年付）",
+              "locale" : "zh_Hans"
+            },
+            {
+              "description" : "用我推的照片裝扮背景、裝飾和小工具",
+              "displayName" : "Plus（年付）",
+              "locale" : "zh_Hant"
+            },
+            {
+              "description" : "최애 사진으로 배경·장식·위젯 꾸미기",
+              "displayName" : "Plus (연간)",
+              "locale" : "ko"
+            },
+            {
+              "description" : "La photo de votre oshi en fond et en widget",
+              "displayName" : "Plus (annuel)",
+              "locale" : "fr_FR"
+            },
+            {
+              "description" : "Oshi-Fotos für Hintergrund und Widgets",
+              "displayName" : "Plus (jährlich)",
+              "locale" : "de_DE"
+            },
+            {
+              "description" : "Fotos de tu oshi en fondos y widgets",
+              "displayName" : "Plus (anual)",
+              "locale" : "es_ES"
+            },
+            {
+              "description" : "Fotos de tu oshi en fondos y widgets",
+              "displayName" : "Plus (anual)",
+              "locale" : "es_MX"
+            },
+            {
+              "description" : "Fotos do seu oshi no fundo e nos widgets",
+              "displayName" : "Plus (anual)",
+              "locale" : "pt_BR"
+            },
+            {
+              "description" : "Foto del tuo oshi su sfondi e widget",
+              "displayName" : "Plus (annuale)",
+              "locale" : "it"
+            },
+            {
+              "description" : "แต่งพื้นหลังและวิดเจ็ตด้วยรูปโอชิ",
+              "displayName" : "Plus (รายปี)",
+              "locale" : "th"
+            },
+            {
+              "description" : "Foto oshi-mu untuk latar dan widget",
+              "displayName" : "Plus (Tahunan)",
+              "locale" : "id"
+            }
+          ],
+          "productID" : "jp.shilokuma.OshiCon.plus.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Plus Yearly",
+          "subscriptionGroupID" : "21600001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "280",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6740000002",
+          "localizations" : [
+            {
+              "description" : "Your oshi's photo on backgrounds and widgets",
+              "displayName" : "Plus (Monthly)",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Your oshi's photo on backgrounds and widgets",
+              "displayName" : "Plus (Monthly)",
+              "locale" : "en_GB"
+            },
+            {
+              "description" : "推しの写真で背景・飾り・ウィジェットを着せ替え",
+              "displayName" : "Plus（月額）",
+              "locale" : "ja"
+            },
+            {
+              "description" : "用本命的照片装扮背景、装饰和小组件",
+              "displayName" : "Plus（月付）",
+              "locale" : "zh_Hans"
+            },
+            {
+              "description" : "用我推的照片裝扮背景、裝飾和小工具",
+              "displayName" : "Plus（月付）",
+              "locale" : "zh_Hant"
+            },
+            {
+              "description" : "최애 사진으로 배경·장식·위젯 꾸미기",
+              "displayName" : "Plus (월간)",
+              "locale" : "ko"
+            },
+            {
+              "description" : "La photo de votre oshi en fond et en widget",
+              "displayName" : "Plus (mensuel)",
+              "locale" : "fr_FR"
+            },
+            {
+              "description" : "Oshi-Fotos für Hintergrund und Widgets",
+              "displayName" : "Plus (monatlich)",
+              "locale" : "de_DE"
+            },
+            {
+              "description" : "Fotos de tu oshi en fondos y widgets",
+              "displayName" : "Plus (mensual)",
+              "locale" : "es_ES"
+            },
+            {
+              "description" : "Fotos de tu oshi en fondos y widgets",
+              "displayName" : "Plus (mensual)",
+              "locale" : "es_MX"
+            },
+            {
+              "description" : "Fotos do seu oshi no fundo e nos widgets",
+              "displayName" : "Plus (mensal)",
+              "locale" : "pt_BR"
+            },
+            {
+              "description" : "Foto del tuo oshi su sfondi e widget",
+              "displayName" : "Plus (mensile)",
+              "locale" : "it"
+            },
+            {
+              "description" : "แต่งพื้นหลังและวิดเจ็ตด้วยรูปโอชิ",
+              "displayName" : "Plus (รายเดือน)",
+              "locale" : "th"
+            },
+            {
+              "description" : "Foto oshi-mu untuk latar dan widget",
+              "displayName" : "Plus (Bulanan)",
+              "locale" : "id"
+            }
+          ],
+          "productID" : "jp.shilokuma.OshiCon.plus.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Plus Monthly",
+          "subscriptionGroupID" : "21600001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

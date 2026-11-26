@@ -14,18 +14,19 @@ nonisolated struct OshiPhotoLibrary: Sendable {
     /// 写真のファイルを置くディレクトリ。
     let directory: URL
 
-    init(directory: URL = AppGroupContainer.dataDirectory.appending(path: "Photos", directoryHint: .isDirectory)) {
+    init(directory: URL = AppGroupContainer.photosDirectory) {
         self.directory = directory
     }
 
-    /// 写真のデータを長辺 1440px 以下の JPEG に縮めて取り込み、ファイル名を返す。読めなければ nil。
-    /// `crop` があれば、その範囲で一辺 1440px 以下の正方形に切り抜く。縮めるのは重いので、メインアクターの外で行う。
+    /// 写真のデータを長辺 `maxPixelLength`（既定は 1440px）以下の JPEG に縮めて取り込み、ファイル名を返す。読めなければ nil。
+    /// `crop` があれば、その範囲（推しの丸は正方形、背景の写真は縦長）で長い辺 `maxPixelLength` 以下に切り抜く。
+    /// 背景の写真は `PhotoResizer.maxBackgroundPixelLength` を渡す。縮めるのは重いので、メインアクターの外で行う。
     @concurrent
-    func importPhoto(_ data: Data, crop: PhotoCrop? = nil) async throws -> String? {
+    func importPhoto(_ data: Data, crop: PhotoCrop? = nil, maxPixelLength: Int = PhotoResizer.maxPixelLength) async throws -> String? {
         let jpeg = if let crop {
-            PhotoResizer.croppedJPEGData(from: data, crop: crop)
+            PhotoResizer.croppedJPEGData(from: data, crop: crop, maxPixelLength: maxPixelLength)
         } else {
-            PhotoResizer.jpegData(from: data)
+            PhotoResizer.jpegData(from: data, maxPixelLength: maxPixelLength)
         }
         guard let jpeg else {
             return nil
@@ -97,10 +98,7 @@ nonisolated struct OshiPhotoLibrary: Sendable {
 
     /// 取り込みで付けるファイル名（`<UUID>.jpg`）か。ディレクトリの外を指す名前を弾く。
     static func isValidFileName(_ fileName: String) -> Bool {
-        guard fileName.hasSuffix(".jpg") else {
-            return false
-        }
-        return UUID(uuidString: String(fileName.dropLast(4))) != nil
+        AppGroupContainer.isPhotoFileName(fileName)
     }
 }
 
@@ -109,9 +107,14 @@ nonisolated struct PhotoCropSource: Sendable {
     let image: CGImage
     let pixelSize: CGSize
 
-    /// 写真全体が枠を覆う最小の大きさで、中央・回転なしの範囲（元の写真の画素の座標）。
+    /// 写真全体が丸の枠（正方形）を覆う最小の大きさで、中央・回転なしの範囲（元の写真の画素の座標）。
     var initialCrop: PhotoCrop {
-        PhotoCrop(imageSize: pixelSize)
+        initialCrop(aspectRatio: 1)
+    }
+
+    /// 写真全体が縦横比 `aspectRatio`（幅 ÷ 高さ）の枠を覆う最小の大きさで、中央・回転なしの範囲（元の写真の画素の座標）。
+    func initialCrop(aspectRatio: CGFloat) -> PhotoCrop {
+        PhotoCrop(imageSize: pixelSize, aspectRatio: aspectRatio)
     }
 
     /// 調整画面で描くために読む長辺（画素）。短い辺が `shortSidePixels` 以上になる長辺を、`maxLongSidePixels` と元の長辺で抑える。

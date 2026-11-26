@@ -15,6 +15,7 @@ struct CountdownWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: Self.kind, intent: SelectEventIntent.self, provider: CountdownProvider()) { entry in
             CountdownWidgetEntryView(content: entry.content)
+                .environment(\.appTheme, .shipping(themeColor: entry.themeColor))
         }
         .configurationDisplayName("カウントダウン")
         .description("選んだ予定まであと何日かを推し色で表示します")
@@ -45,6 +46,8 @@ private struct CountdownWidgetEntryView: View {
 nonisolated struct CountdownEntry: TimelineEntry {
     let date: Date
     let content: CountdownWidgetContent
+    /// テーマを染める色（1 位の推しの推し色）。見本・読めないときは nil（ピンクのまま）。
+    var themeColor: OshiColor?
 
     /// ウィジェットの一覧に出す見本。
     static var sample: Self {
@@ -97,7 +100,8 @@ nonisolated struct CountdownProvider: AppIntentTimelineProvider {
                 oshis: data.oshis,
                 now: date,
                 calendar: calendar
-            )
+            ),
+            themeColor: data.themeColor
         )
     }
 }

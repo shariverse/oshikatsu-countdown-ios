@@ -3,7 +3,7 @@
 //  OshiCon
 //
 
-import Foundation
+import SwiftUI
 
 /// 起動引数で切り替える動き（UI テスト用）。
 ///
@@ -24,6 +24,84 @@ nonisolated enum LaunchOptions {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(sampleDataArgument)
     }
 
+    /// 見本の推しに付ける写真を置いたディレクトリを渡す環境変数（App Store 用スクリーンショット。写真は UI テストのバンドルの中）。
+    static let sampleOshiPhotosEnvironmentKey = "OSHICON_SAMPLE_OSHI_PHOTOS"
+
+    /// 見本の推しに付ける写真のディレクトリ（`SampleData.attachingPhotos(to:from:library:)`）。見本を入れるときだけ効く。
+    static var sampleOshiPhotosDirectory: URL? {
+        guard seedsSampleData,
+              let path = ProcessInfo.processInfo.environment[sampleOshiPhotosEnvironmentKey],
+              !path.isEmpty else {
+            return nil
+        }
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
+    /// 見本の当日の配信の開始を、今から 40 分ほど先にする（App Store 用スクリーンショット。秒まで数える詳細とライブアクティビティを撮る）。
+    /// 見本を入れるときだけ効く（`SampleData.Content.startingStreamSoon(now:calendar:)`）。
+    static let sampleStreamSoonArgument = "-sampleStreamStartsSoon"
+
+    static var startsSampleStreamSoon: Bool {
+        seedsSampleData && ProcessInfo.processInfo.arguments.contains(sampleStreamSoonArgument)
+    }
+
+    /// 推しの一覧のいちばん上（1 位。テーマの色になる）にする見本の推しの役どころ（`-sampleTopOshi singer` のように `SampleData.Role` の生の値を続ける）。
+    /// App Store 用スクリーンショットで、推し色のテーマを撮り分ける。見本を入れるときだけ効く。
+    static let sampleTopOshiArgument = "-sampleTopOshi"
+
+    static var sampleTopOshi: SampleData.Role? {
+        sampleTopOshi(arguments: ProcessInfo.processInfo.arguments, seedsSampleData: seedsSampleData)
+    }
+
+    static func sampleTopOshi(arguments: [String], seedsSampleData: Bool) -> SampleData.Role? {
+        guard seedsSampleData,
+              let index = arguments.firstIndex(of: sampleTopOshiArgument),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        return SampleData.Role(rawValue: arguments[index + 1])
+    }
+
+    /// 着せ替え（背景の写真と飾り）を、見本の推しの写真で入れておく（App Store 用スクリーンショット）。
+    /// 見本の推しに写真を付けるとき（`sampleOshiPhotosDirectory`）だけ効く。
+    static let sampleAppearanceArgument = "-sampleAppearance"
+
+    static var appliesSampleAppearance: Bool {
+        sampleOshiPhotosDirectory != nil && ProcessInfo.processInfo.arguments.contains(sampleAppearanceArgument)
+    }
+
+    /// メモリ上のストアでも、見本の予定の当日のライブアクティビティを実際に出す（App Store 用スクリーンショット。ロック画面と Dynamic Island を撮る）。
+    /// 見本を入れるときだけ効く。見本を入れて、この引数を渡さないときは、前に出したものを終える（ほかの画面に Dynamic Island が写らないように）。
+    static let sampleLiveActivityArgument = "-sampleLiveActivity"
+
+    static var showsSampleLiveActivity: Bool {
+        seedsSampleData && ProcessInfo.processInfo.arguments.contains(sampleLiveActivityArgument)
+    }
+
+    /// 画面の外観を、端末の設定によらずライトかダークに固定する（`-colorScheme light` / `-colorScheme dark`。App Store 用スクリーンショット）。
+    /// メモリ上のストアのときだけ効く。
+    static let colorSchemeArgument = "-colorScheme"
+
+    static var forcedColorScheme: ColorScheme? {
+        forcedColorScheme(arguments: ProcessInfo.processInfo.arguments)
+    }
+
+    static func forcedColorScheme(arguments: [String]) -> ColorScheme? {
+        guard arguments.contains(inMemoryStoreArgument),
+              let index = arguments.firstIndex(of: colorSchemeArgument),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        switch arguments[index + 1] {
+        case "light":
+            return .light
+        case "dark":
+            return .dark
+        default:
+            return nil
+        }
+    }
+
     /// 推しの写真を選ぶボタンで、写真ライブラリ（`PhotosPicker`）の代わりにテスト用に生成した画像を選ぶ（UI テスト）。
     /// `PhotosPicker` は別プロセスの画面で UI テストから操作できないため。メモリ上のストアのときだけ効く。
     static let testPhotoArgument = "-useTestPhoto"
@@ -38,6 +116,34 @@ nonisolated enum LaunchOptions {
 
     static var schedulesTestReminder: Bool {
         usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(testReminderArgument)
+    }
+
+    /// 推し活カウントダウン Plus を使える状態で起動する（UI テスト・スクリーンショット）。
+    /// メモリ上のストアでは StoreKit に問い合わせず、Plus は使えない状態に固定する（`PlusStore`）。この引数でそれを使える状態に替える。
+    /// メモリ上のストアのときだけ効く。
+    static let plusUnlockedArgument = "-plusUnlocked"
+
+    /// 推し活カウントダウン Plus を使えない状態で起動する（UI テスト・スクリーンショット）。メモリ上のストアの既定と同じだが、
+    /// テストの意図を書くために渡す。`-plusUnlocked` と一緒に渡したときは、こちらを優先する。
+    static let plusLockedArgument = "-plusLocked"
+
+    static var unlocksPlus: Bool {
+        unlocksPlus(arguments: ProcessInfo.processInfo.arguments)
+    }
+
+    /// 起動引数から、メモリ上のストアで Plus を使える状態にするかを決める。
+    static func unlocksPlus(arguments: [String]) -> Bool {
+        arguments.contains(inMemoryStoreArgument)
+            && arguments.contains(plusUnlockedArgument)
+            && !arguments.contains(plusLockedArgument)
+    }
+
+    /// App Store 版として動かす（App Store 用スクリーンショットと UI テスト）。
+    /// DEBUG のビルドは開発版になるので、配るアプリと同じ配り方で確かめるときに渡す（`AppDistributionDetector.live`）。メモリ上のストアのときだけ効く。
+    static let appStoreDistributionArgument = "-simulateAppStoreDistribution"
+
+    static var simulatesAppStoreDistribution: Bool {
+        usesInMemoryStore && ProcessInfo.processInfo.arguments.contains(appStoreDistributionArgument)
     }
 
     /// UI テストが環境変数で渡した設定の初期値の、名前の頭（`OSHICON_DEFAULT_hasCompletedOnboarding=NO` など）
@@ -72,6 +178,24 @@ nonisolated enum AppStorageKey {
     static let remindersEnabled = "remindersEnabled"
     /// 日付で決まる通知（N 日前・前日・当日）を出す時刻。0:00 からの分（既定は 9:00）。
     static let reminderMinutes = "reminderMinutes"
+    /// 着せ替え: 背景の写真を地に敷く（既定は ON。`AppearanceSettings`）。
+    static let appearanceBackgroundEnabled = "appearanceBackgroundEnabled"
+    /// 着せ替え: 地の飾りを推しの丸い写真に替える（既定は OFF）。
+    static let appearanceDecorationEnabled = "appearanceDecorationEnabled"
+    /// 着せ替え: 背景の写真に掛ける暗幕の濃さ（スライダーの位置 0〜1。`AppearanceBackgroundStyle`。既定は 0.5）。
+    static let appearanceBackgroundScrim = "appearanceBackgroundScrim"
+    /// 着せ替え: 背景の写真に掛けるぼかしの強さ（スライダーの位置 0〜1。`AppearanceBackgroundStyle`。既定は 0.4）。
+    static let appearanceBackgroundBlur = "appearanceBackgroundBlur"
+    /// 着せ替え: 前の版（TestFlight）の暗幕とぼかしの強さ（`weak`・`medium`・`strong`）。暗幕とぼかしを書いていないときに読み替えるだけで、書かない。
+    static let appearanceIntensity = "appearanceIntensity"
+    /// 着せ替え: 背景の写真のファイル名（`OshiPhotoLibrary` の中。選んでいなければ無い）。
+    static let appearanceBackgroundPhoto = "appearanceBackgroundPhoto"
+    /// 着せ替え: 飾りの濃さ（丸い写真の不透明度。`OshiPhotoDecorationStyle.opacityRange`。既定は 0.4）。
+    static let appearanceDecorationOpacity = "appearanceDecorationOpacity"
+    /// 着せ替え: 飾りの量（0〜1。`OshiPhotoDecorationLayout`。既定は 0.25）。
+    static let appearanceDecorationAmount = "appearanceDecorationAmount"
+    /// 着せ替え: 飾りに出さない推しの id（UUID の文字列の配列。既定は空で、すべての推しを出す）。
+    static let appearanceDecorationExcludedOshis = "appearanceDecorationExcludedOshis"
 
     /// そのタイミングの通知を出す（既定は ON）。
     static func reminderTiming(_ timing: ReminderTiming) -> String {

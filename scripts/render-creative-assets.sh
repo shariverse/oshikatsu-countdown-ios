@@ -6,9 +6,10 @@
 #   scripts/render-creative-assets.sh <6.9 インチのスクリーンショットのフォルダ> [出力先] [言語（カンマ区切り）]
 #   scripts/render-creative-assets.sh build/app-store-screenshots/APP_IPHONE_67
 #
-# 元は docs/app-store/creative/creative.html。画面の画像には scripts/app-store-screenshots.sh APP_IPHONE_67 の出力
-# （<言語>/ に画像と manifest.json）を使う。Google Chrome をヘッドレスで開いて実寸で撮り、透過を落として
-# <出力先>/<言語>/header.png・search_results.png に書き出す（出力先の既定は build/creative-assets）。
+# 元は docs/app-store/creative/creative.html。画面の画像には scripts/app-store-screenshots.sh APP_IPHONE_67 の出力のうち、
+# 見出しを付ける前の撮った画面（<言語>/raw/ に画像と manifest.json）を使う。地・模様・書体・端末の枠はスクリーンショット
+# （docs/app-store/screenshots/screenshots.html）にそろえ、書体（Kaisei Decol・Outfit）は Shared/Resources/Fonts/ から渡す。
+# Google Chrome をヘッドレスで開いて実寸で撮り、透過を落として <出力先>/<言語>/header.png・search_results.png に書き出す（出力先の既定は build/creative-assets）。
 # アプリ名は docs/app-store/metadata/<言語>.md の「## アプリ名」から読む。アイコンは Icon Composer の ictool で書き出す（無ければ載せない）。
 #
 # 寸法: ヘッダーは 21:9（3840x1646）、検索結果は 3:2（3840x2560）。どちらも透過なし
@@ -32,6 +33,8 @@ fi
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 cp "$HTML" "$WORK/"
+mkdir -p "$WORK/fonts"
+cp Shared/Resources/Fonts/KaiseiDecol-Bold.ttf Shared/Resources/Fonts/KaiseiDecol-Regular.ttf Shared/Resources/Fonts/Outfit-Variable.ttf "$WORK/fonts/"
 
 # xcode-select -p は Xcode.app/Contents/Developer を返す。Icon Composer は 1 つ上の Contents/Applications にある
 ictool="$(xcode-select -p)/../Applications/Icon Composer.app/Contents/Executables/ictool"
@@ -57,19 +60,23 @@ while IFS= read -r -u 3 language; do
     echo "${HTML} の copy に ${language} の文言がありません" >&2
     exit 1
   fi
-  manifest="$SCREENSHOTS/$language/manifest.json"
+  manifest="$SCREENSHOTS/$language/raw/manifest.json"
   if [[ ! -f "$manifest" ]]; then
     echo "${manifest} がありません。先に scripts/app-store-screenshots.sh APP_IPHONE_67 で撮ってください" >&2
     exit 1
   fi
 
-  # 書き出したファイル名は UUID なので、添付の名前（「01-ホーム_0_…」）の順に 01.png〜 として並べる
+  # 書き出したファイル名は UUID なので、添付の名前（「detail_0_…」）で探し、creative.html が読む screens/<言語>/<名前>.png として置く。
+  # ホームはライトの外観のもの（暗い地の上で、中央の端末を目立たせる）
   mkdir -p "$WORK/screens/$language"
-  index=0
-  while IFS= read -r file; do
-    index=$((index + 1))
-    cp "$SCREENSHOTS/$language/$file" "$WORK/screens/$language/$(printf '%02d' "$index").png"
-  done < <(jq -r '[.[].attachments[]] | sort_by(.suggestedHumanReadableName) | .[].exportedFileName' "$manifest")
+  for name in home-light detail oshi-list share-card appearance-home; do
+    file=$(jq -r --arg name "$name" '[.[].attachments[] | select(.suggestedHumanReadableName | startswith($name + "_"))][0].exportedFileName // empty' "$manifest")
+    if [[ -z "$file" ]]; then
+      echo "${manifest} に ${name} の画面がありません" >&2
+      exit 1
+    fi
+    cp "$SCREENSHOTS/$language/raw/$file" "$WORK/screens/$language/$name.png"
+  done
 
   metadata="docs/app-store/metadata/$language.md"
   [[ -f "$metadata" ]] || metadata=docs/app-store/listing.md
@@ -81,10 +88,22 @@ while IFS= read -r -u 3 language; do
   output_dir=$(cd "$OUTPUT_DIR/$language" && pwd)
   while read -r type file width height; do
     output="$output_dir/$file"
-    "$CHROME" --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
-      --allow-file-access-from-files --virtual-time-budget=3000 \
-      --window-size="$width,$height" --screenshot="$output.raw.png" \
-      "file://$WORK/creative.html?type=$type&lang=$language&name=$query_name" >/dev/null 2>&1
+    url="file://$WORK/creative.html?type=$type&lang=$language&name=$query_name"
+    chrome_flags=(--headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1
+      --allow-file-access-from-files --virtual-time-budget=8000 --window-size="$width,$height")
+    # 画面が読めないと、HTML は赤い文字のエラーを描くだけなので、描き終えた印（data-ready）を先に確かめる（3 回まで試す）
+    ready=false
+    for _ in 1 2 3; do
+      if "$CHROME" "${chrome_flags[@]}" --dump-dom "$url" 2>/dev/null | grep -q 'data-ready="true"'; then
+        ready=true
+        break
+      fi
+    done
+    if [[ "$ready" != true ]]; then
+      echo "${file}（${language}）を描けませんでした。Chrome で ${url} を開いてエラーを確かめてください" >&2
+      exit 1
+    fi
+    "$CHROME" "${chrome_flags[@]}" --screenshot="$output.raw.png" "$url" >/dev/null 2>&1
     # 透過を落とす（JPEG を経由して PNG に戻す）
     sips -s format jpeg -s formatOptions 100 "$output.raw.png" --out "$WORK/flat.jpg" >/dev/null
     sips -s format png "$WORK/flat.jpg" --out "$output" >/dev/null
@@ -101,6 +120,6 @@ done 3< <(
     tr ',' '\n' <<<"$LANGUAGES"
   else
     # 撮ってある言語だけ書き出す
-    find "$SCREENSHOTS" -mindepth 2 -maxdepth 2 -name manifest.json | awk -F/ '{ print $(NF-1) }' | sort
+    find "$SCREENSHOTS" -mindepth 3 -maxdepth 3 -path '*/raw/manifest.json' | awk -F/ '{ print $(NF-2) }' | sort
   fi
 )

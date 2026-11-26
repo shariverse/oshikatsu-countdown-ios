@@ -15,14 +15,18 @@ import SwiftUI
 /// - 計画に無くなったもの（削除した・時刻を変えた・時間帯を過ぎた予定）と、中身が変わったもの（タイトル・推しなど）は終える
 ///
 /// 推し・予定の保存・削除、日付・時刻・タイムゾーンの変更、アプリが前面に来たときに置き直す。
-/// UI テスト・スクリーンショット（メモリ上のストア）では何もしない。
+/// UI テスト・スクリーンショット（メモリ上のストア）では何もしない。ただし App Store 用スクリーンショットでロック画面と Dynamic Island を撮るときは、
+/// 見本の予定で実際に出す（`LaunchOptions.showsSampleLiveActivity`）。
 final class LiveActivityScheduler {
     private static let logger = Logger(subsystem: "jp.shilokuma.OshiCon", category: "LiveActivityScheduler")
 
     private let container: ModelContainer
     private let isActive: Bool
 
-    init(container: ModelContainer, isActive: Bool = !LaunchOptions.usesInMemoryStore) {
+    init(
+        container: ModelContainer,
+        isActive: Bool = !LaunchOptions.usesInMemoryStore || LaunchOptions.showsSampleLiveActivity
+    ) {
         self.container = container
         self.isActive = isActive
     }
@@ -80,6 +84,17 @@ final class LiveActivityScheduler {
             for attributes in scheduled where !existing.contains(attributes) {
                 schedule(attributes)
             }
+        }
+    }
+
+    /// 出している・予約しているものをすべて終える（App Store 用スクリーンショットで、前に撮ったものをほかの画面に写さないため）。
+    static func endAll() {
+        let ids = Set(Activity<EventActivityAttributes>.activities.map(\.id))
+        guard !ids.isEmpty else {
+            return
+        }
+        Task {
+            await end(activityIDs: ids)
         }
     }
 

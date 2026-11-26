@@ -17,10 +17,16 @@ struct OshiCon: App {
     private let reminders: ReminderScheduler?
     /// 当日の開演までのライブアクティビティ。ストアを開けなかったときは nil。
     private let liveActivities: LiveActivityScheduler?
+    /// Plus の購入の状態。取引の変化（`Transaction.updates`）を取りこぼさないよう、起動の途中で作って監視を始める。
+    private let plus: PlusStore
+    /// Plus の着せ替えの設定と背景の写真。画面は `@Environment(AppearanceStore.self)` で引く。
+    private let appearance: AppearanceStore
 
     init() {
         LaunchOptions.applyDefaultEnvironment()
         NavigationBarAppearance.applyTitleFonts()
+        plus = PlusStore()
+        appearance = AppearanceStore.forLaunch()
         let location: OshiConStore.Location = LaunchOptions.usesInMemoryStore ? .inMemory : .appGroup
         container = Result { try OshiConStore.makeContainer(location) }
         if LaunchOptions.seedsSampleData, case let .success(container) = container {
@@ -28,14 +34,48 @@ struct OshiCon: App {
         }
         reminders = (try? container.get()).map { ReminderScheduler(container: $0) }
         liveActivities = (try? container.get()).map { LiveActivityScheduler(container: $0) }
+        if LaunchOptions.seedsSampleData, !LaunchOptions.showsSampleLiveActivity {
+            LiveActivityScheduler.endAll()
+        }
+        if LaunchOptions.appliesSampleAppearance, let directory = LaunchOptions.sampleOshiPhotosDirectory {
+            Self.applySampleAppearance(to: appearance, photosIn: directory)
+        }
     }
 
     /// 見本の推しと予定を入れる（メモリ上のストアのときだけ呼ぶ）。名前と予定名は画面の言語（`-AppleLanguages` で変えられる）で選ぶ。
     /// 端末の言語ではなくアプリが選んだ言語（`Locale.app`）にし、文言と見本の言語をそろえる。
+    /// App Store 用スクリーンショットでは、UI テストから渡された写真を見本の推しに付ける（`LaunchOptions.sampleOshiPhotosDirectory`）。
     private static func seedSampleData(into container: ModelContainer) {
         let now = Date.now
-        let sample = SampleData.make(today: CalendarDay(now, calendar: .autoupdatingCurrent), now: now, locale: .app)
+        let calendar = Calendar.autoupdatingCurrent
+        var sample = SampleData.make(today: CalendarDay(now, calendar: calendar), now: now, locale: .app)
+        if LaunchOptions.startsSampleStreamSoon {
+            sample = sample.startingStreamSoon(now: now, calendar: calendar)
+        }
+        if let directory = LaunchOptions.sampleOshiPhotosDirectory {
+            sample = SampleData.attachingPhotos(to: sample, from: directory, library: .shared)
+        }
+        // 写真は役どころの並びで付けるので、並べ替えは写真を付けた後にする
+        if let role = LaunchOptions.sampleTopOshi {
+            sample = sample.movingToTop(role)
+        }
         SampleData.insert(sample, into: container.mainContext, now: now)
+    }
+
+    /// 着せ替えに、見本のいちばん上の推し（アイドルグループ）の写真を背景に敷き、飾りを入れる（App Store 用スクリーンショット。`LaunchOptions.appliesSampleAppearance`）。
+    private static func applySampleAppearance(to appearance: AppearanceStore, photosIn directory: URL) {
+        let source = directory.appending(path: SampleData.Role.group.photoFileName, directoryHint: .notDirectory)
+        guard let data = try? Data(contentsOf: source),
+              let image = UIImage(data: data),
+              let cgImage = image.cgImage else {
+            return
+        }
+        let size = CGSize(width: cgImage.width, height: cgImage.height)
+        appearance.isDecorationEnabled = true
+        let crop = PhotoCrop(imageSize: size, aspectRatio: PhotoCrop.backgroundAspectRatio)
+        Task {
+            _ = try? await appearance.replaceBackgroundPhoto(data, crop: crop)
+        }
     }
 
     var body: some Scene {
@@ -48,6 +88,9 @@ struct OshiCon: App {
                     .refreshesWidgets()
                     .refreshesReminders(reminders)
                     .refreshesLiveActivities(liveActivities)
+                    .providesPlusStatus(plus)
+                    .environment(appearance)
+                    .preferredColorScheme(LaunchOptions.forcedColorScheme)
             case .failure:
                 StoreUnavailableView()
             }

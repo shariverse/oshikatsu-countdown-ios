@@ -13,22 +13,36 @@ struct HomeScreen: View {
     private static let sheetPresentationDelay = Duration.milliseconds(450)
 
     @Query private var storedEvents: [StoredEvent]
-    @Query(sort: [SortDescriptor(\StoredOshi.createdAt), SortDescriptor(\StoredOshi.name)])
+    @Query(sort: OshiConStore.oshiOrder)
     private var storedOshis: [StoredOshi]
     @AppStorage(AppStorageKey.showsPastEvents) private var showsPastEvents = false
     @State private var selectedOshiID: Oshi.ID?
     @Environment(AppRouter.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.appTheme) private var theme
+    @Environment(AppearanceStore.self) private var appearance
+    @Environment(\.isPlusUnlocked) private var isPlusUnlocked
     @State private var isAddingEvent = false
     /// 予定の追加のシートが実際に出ている（開こうとしても出せなかったときと分ける）。
     @State private var isAddEventSheetVisible = false
 
     var body: some View {
+        let rendering = appearance.rendering(isPlusUnlocked: isPlusUnlocked)
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
-        .background(ThemeScreenBackground().ignoresSafeArea())
+        // 背景の写真・推しの丸い写真の飾りの上では、地の上に直接描く見出し・案内の後ろに板を敷く（`appearanceTextPlate()`）
+        .environment(\.isOverAppearancePhoto, rendering.drawsPhotosOnGround)
+        .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: rendering)
+        // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れでその場で切り替わる
+        .background(
+            AppearanceScreenBackground(
+                rendering: rendering,
+                oshis: storedOshis.map(OshiConStore.oshi(from:)),
+                photos: appearance.photos
+            )
+            .ignoresSafeArea()
+        )
         // 画面の名前（VoiceOver・iPad の戻り先）として残し、バーには出さない（Discussion #148 の Q1・Q3）。
         // 大きいタイトルの帯も無くし、先頭のカードを上に詰める
         .navigationTitle("推し活カウントダウン")
@@ -47,6 +61,10 @@ struct HomeScreen: View {
                 Button("予定を追加", systemImage: "plus", action: presentAddEvent)
                     .accessibilityIdentifier("home.addEvent")
             }
+        }
+        // 選んでいた推しが削除されたら「すべて」に戻す。中身（`HomeContent`）だけでなく、絞り込みの選択肢と予定の追加で選んでおく推しも合わせる
+        .onChange(of: storedOshis.map(\.id), initial: true) { _, oshiIDs in
+            selectedOshiID = HomeContent.validSelection(selectedOshiID, among: oshiIDs)
         }
         // ウィジェットのリンクで画面を切り替えるときは、予定の追加のシートを閉じる（予定の追加のリンクのときは開いたまま）
         .onChange(of: router.sheetDismissal) { _, dismissal in
@@ -128,6 +146,7 @@ struct HomeScreen: View {
                 .buttonStyle(.borderedProminent)
                 .font(theme.typography.text(.headline, weight: .bold))
             }
+            .appearanceBlockPlate()
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -137,6 +156,7 @@ struct HomeScreen: View {
                     if content.emptyState == .noEventsForOshi {
                         Text("この推しの予定はまだありません")
                             .foregroundStyle(theme.palette.onSurfaceVariant.color)
+                            .appearanceTextPlate()
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 40)
                     } else {
@@ -196,6 +216,7 @@ struct HomeScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(item.accessibilityLabel)
+            .accessibilityIdentifier("home.eventRow")
             .transition(AppMotion.transition(for: cardMotion))
         }
     }
@@ -219,6 +240,7 @@ struct HomeSection<Content: View>: View {
                 .foregroundStyle(theme.palette.onSurface.color)
                 .accessibilityAddTraits(.isHeader)
                 .themeHeadingOrnament()
+                .appearanceTextPlate()
             VStack(spacing: 0) {
                 content()
             }
@@ -233,5 +255,10 @@ struct HomeSection<Content: View>: View {
         HomeScreen()
     }
     .environment(AppRouter())
+    // 端末の設定に触れない着せ替えの設定
+    .environment(AppearanceStore.volatile(
+        suiteName: "jp.shilokuma.OshiCon.PreviewAppearance",
+        directory: FileManager.default.temporaryDirectory.appending(path: "PreviewAppearancePhotos", directoryHint: .isDirectory)
+    ))
     .modelContainer(for: [StoredOshi.self, StoredEvent.self], inMemory: true)
 }

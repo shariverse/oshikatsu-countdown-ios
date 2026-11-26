@@ -9,7 +9,7 @@ import SwiftUI
 // 置き方は `ThemeDecorations.swift` の差し込み口が決める（読み上げから外し、押せる範囲にしない）。
 
 /// 十字の形。縦の棒を長く、横の棒を上から 3 分の 1 の高さに置く。`rect` に収め、棒の太さは幅の 4 分の 1。
-enum GothicCross {
+nonisolated enum GothicCross {
     static func path(in rect: CGRect) -> Path {
         let bar = rect.width / 4
         var path = Path()
@@ -25,28 +25,72 @@ enum GothicCross {
     }
 }
 
-/// 地の色に、十字とハートを小さく散らした画面の地。
-/// 模様は一定の大きさのタイルをくり返すので、iPad の広い画面でも密度は変わらない。
-struct CrossesAndHeartsBackground: View {
-    let ground: AdaptiveColor
-    let ornament: AdaptiveColor
-
-    /// 模様 1 つ。`position` はタイルの中の中心、`size` は高さ。
-    private struct Mark {
+/// 画面の地に散らす十字とハートの並び。一定の大きさのタイルをくり返すので、iPad の広い画面でも密度は変わらない。
+/// 着せ替えの推しの写真の飾り（`OshiPhotoDecoration`）も、同じ位置に置く。
+nonisolated enum CrossesAndHeartsPattern {
+    /// タイルの中の模様 1 つ。`position` はタイルの中の中心、`size` は高さ。
+    nonisolated struct Mark: Equatable, Sendable {
         let isCross: Bool
         let position: CGPoint
         let size: CGFloat
     }
 
-    private static let tileSize = CGSize(width: 180, height: 220)
+    /// 地に置いた模様 1 つ。`slot` は左上のタイルから行ごとに数えた通し番号、`center` は地の座標の中心、`size` は高さ。
+    nonisolated struct PlacedMark: Equatable, Sendable {
+        let slot: Int
+        let isCross: Bool
+        let center: CGPoint
+        let size: CGFloat
+    }
 
-    private static let marks: [Mark] = [
+    static let tileSize = CGSize(width: 180, height: 220)
+
+    static let marks: [Mark] = [
         Mark(isCross: true, position: CGPoint(x: 28, y: 34), size: 16),
         Mark(isCross: false, position: CGPoint(x: 132, y: 60), size: 10),
         Mark(isCross: true, position: CGPoint(x: 86, y: 128), size: 10),
         Mark(isCross: false, position: CGPoint(x: 160, y: 172), size: 12),
         Mark(isCross: true, position: CGPoint(x: 40, y: 196), size: 12)
     ]
+
+    /// 大きさ `size` の地に置く模様。タイルを左上から行ごとに並べ、地にかかるタイルの模様をすべて返す。
+    static func placedMarks(in size: CGSize) -> [PlacedMark] {
+        var placed: [PlacedMark] = []
+        var origin = CGPoint.zero
+        while origin.y < size.height {
+            origin.x = 0
+            while origin.x < size.width {
+                for mark in marks {
+                    placed.append(PlacedMark(
+                        slot: placed.count,
+                        isCross: mark.isCross,
+                        center: CGPoint(x: origin.x + mark.position.x, y: origin.y + mark.position.y),
+                        size: mark.size
+                    ))
+                }
+                origin.x += tileSize.width
+            }
+            origin.y += tileSize.height
+        }
+        return placed
+    }
+
+    /// 模様 1 つを色 `color` で描く。ハートは `heart`（色を付けて解決した SF Symbols）で描く。
+    static func draw(_ mark: PlacedMark, in context: GraphicsContext, color: Color, heart: GraphicsContext.ResolvedImage) {
+        if mark.isCross {
+            let width = mark.size * 0.7
+            let rect = CGRect(x: mark.center.x - width / 2, y: mark.center.y - mark.size / 2, width: width, height: mark.size)
+            context.fill(GothicCross.path(in: rect), with: .color(color))
+        } else {
+            context.draw(heart, in: GothicCross.rect(fitting: heart.size, height: mark.size, center: mark.center))
+        }
+    }
+}
+
+/// 地の色に、十字とハートを小さく散らした画面の地（`CrossesAndHeartsPattern`）。
+struct CrossesAndHeartsBackground: View {
+    let ground: AdaptiveColor
+    let ornament: AdaptiveColor
 
     var body: some View {
         ground.color
@@ -55,29 +99,8 @@ struct CrossesAndHeartsBackground: View {
                     let color = ornament.color.opacity(AppTheme.ScreenBackground.markOpacity)
                     var heart = context.resolve(Image(systemName: "heart.fill"))
                     heart.shading = .color(color)
-                    let tile = Self.tileSize
-                    var origin = CGPoint.zero
-                    while origin.y < size.height {
-                        origin.x = 0
-                        while origin.x < size.width {
-                            for mark in Self.marks {
-                                let center = CGPoint(x: origin.x + mark.position.x, y: origin.y + mark.position.y)
-                                if mark.isCross {
-                                    let width = mark.size * 0.7
-                                    let rect = CGRect(
-                                        x: center.x - width / 2,
-                                        y: center.y - mark.size / 2,
-                                        width: width,
-                                        height: mark.size
-                                    )
-                                    context.fill(GothicCross.path(in: rect), with: .color(color))
-                                } else {
-                                    context.draw(heart, in: GothicCross.rect(fitting: heart.size, height: mark.size, center: center))
-                                }
-                            }
-                            origin.x += tile.width
-                        }
-                        origin.y += tile.height
+                    for mark in CrossesAndHeartsPattern.placedMarks(in: size) {
+                        CrossesAndHeartsPattern.draw(mark, in: context, color: color, heart: heart)
                     }
                 }
             }

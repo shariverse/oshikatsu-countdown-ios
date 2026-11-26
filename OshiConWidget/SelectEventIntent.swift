@@ -6,7 +6,7 @@
 import AppIntents
 import Foundation
 
-/// カウントダウンウィジェットに出す予定を選ぶ設定（ウィジェットを長押しして「ウィジェットを編集」から選ぶ）。
+/// カウントダウンウィジェットと推しの写真ウィジェットに出す予定を選ぶ設定（ウィジェットを長押しして「ウィジェットを編集」から選ぶ）。
 struct SelectEventIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "表示する予定を選ぶ"
     static let description = IntentDescription("カウントダウンする予定を選びます。")

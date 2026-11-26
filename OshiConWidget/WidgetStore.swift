@@ -10,14 +10,20 @@ import SwiftData
 /// ウィジェットで使う、App Group のストアから読んだ予定と推し。
 nonisolated struct WidgetData: Sendable {
     let events: [OshiEvent]
+    /// 推しの並び順（先頭が 1 位の推し）。
     let oshis: [Oshi]
+
+    /// テーマを染める色（1 位の推しの推し色）。推しがいなければ nil（ピンクのまま）。
+    var themeColor: OshiColor? {
+        oshis.first?.color
+    }
 }
 
 /// ウィジェットから App Group のストア（アプリと共有）を読む。SwiftData のモデルはメインアクターで扱い、
 /// 値の型（`OshiEvent`・`Oshi`）に写してから返す。
 ///
-/// ストアのスキーマを変えて移行の段を足すときは、アプリとウィジェットが同時に移行を走らせないよう、
-/// ウィジェットでは移行せずに読めないものとして扱う（アプリを開いて移行してから読む）方針にする。
+/// アプリとウィジェットが同時に移行を走らせないよう、ストアが古い版（移行が要る）ならウィジェットでは開かず、
+/// 読めないものとして扱う（アプリを開いて移行してから読む。`OshiConStore.needsMigration(storeAt:)`）。
 enum WidgetStore {
     private static let logger = Logger(subsystem: "jp.shilokuma.OshiCon", category: "WidgetStore")
     private static var container: ModelContainer?
@@ -28,6 +34,10 @@ enum WidgetStore {
         guard let identifier = AppGroupContainer.identifier,
               FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier) != nil else {
             logger.error("ウィジェットで App Group のコンテナを開けない")
+            return nil
+        }
+        if container == nil, OshiConStore.needsMigration(storeAt: AppGroupContainer.storeURL) {
+            logger.notice("ストアが古い版なので、アプリが移行するまで読まない")
             return nil
         }
         do {

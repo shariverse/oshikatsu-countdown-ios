@@ -40,15 +40,15 @@ struct PrivacyManifestTests {
         }
     }
 
-    @Test("アプリは @AppStorage の UserDefaults（CA92.1）だけを申告する")
+    @Test("アプリは UserDefaults の @AppStorage（CA92.1）と App Group での共有（1C8F.1）だけを申告する")
     func appAccessedAPIs() throws {
         let manifest = try Self.manifest(in: Bundle.main.bundleURL)
-        #expect(try Self.accessedAPIs(in: manifest) == ["NSPrivacyAccessedAPICategoryUserDefaults": ["CA92.1"]])
+        #expect(try Self.accessedAPIs(in: manifest) == ["NSPrivacyAccessedAPICategoryUserDefaults": ["CA92.1", "1C8F.1"]])
     }
 
-    @Test("Widget Extension は理由の申告が要る API を使わない")
+    @Test("Widget Extension は App Group で共有する UserDefaults（1C8F.1）だけを申告する")
     func widgetAccessedAPIs() throws {
         let widget = try #require(try Self.bundleURLs().last)
-        #expect(try Self.accessedAPIs(in: Self.manifest(in: widget)).isEmpty)
+        #expect(try Self.accessedAPIs(in: Self.manifest(in: widget)) == ["NSPrivacyAccessedAPICategoryUserDefaults": ["1C8F.1"]])
     }
 }

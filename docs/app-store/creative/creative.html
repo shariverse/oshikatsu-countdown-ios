@@ -2,80 +2,81 @@
 <!--
   App Store のクリエイティブアセット（プロダクトページのヘッダー / 検索結果）の元。
   scripts/render-creative-assets.sh が Chrome のヘッドレスで開いて実寸で書き出す。直接開くときは
-  creative.html?type=header&lang=ja&name=推し活カウントダウン のように指定する
-  （同じフォルダの screens/<言語>/01.png〜04.png に 6.9 インチのスクリーンショット、icon.png にアプリアイコンが要る）。
+  creative.html?type=header&lang=ja&name=推し活カウントダウン のように指定する。同じフォルダに次のファイルが要る:
+    screens/<言語>/<名前>.png  6.9 インチで撮った画面（home-light・detail・oshi-list・share-card・appearance-home）
+    fonts/                    Kaisei Decol（日本語の見出し）と Outfit（数字・ラテン文字の見出し）
+    icon.png                  アプリアイコン（無ければ載せない）
 
   方針（https://developer.apple.com/app-store/asset-best-practices/）
   - ヘッダー: 初めて来た人に「推しに会える日まであと何日かを数える」ことだけを伝える。
-    端末によって左右が切れるので、文言と端末は中央に寄せる。
+    端末によって左右が切れるので、文言と前の 3 台は中央に寄せ、外側の 2 台は切れてもよい飾りにする。
   - 検索結果: 何をするアプリかが一目でわかるよう、実際の画面と主な機能を見せる。
   - 実在の人物・作品・他社のロゴ・価格・受賞歴は入れない。文言は短く、言語ごとに書く。
+  - 地・模様・書体・端末の枠は、スクリーンショット（docs/app-store/screenshots/screenshots.html）にそろえる。
+    テーマ（地雷系・ゴシック。docs/design/themes.md）のダークの地に十字とハートの模様、見出しは日本語だけ Kaisei Decol の太字。
+    端末の縁は 1 台ずつ推し色（スクリーンショットの枚ごとの色）にして、ピンクに偏らせない
 -->
 <html>
 <head>
 <meta charset="utf-8">
 <style>
-  /* 配色は出荷するテーマ（地雷系・ゴシック。Shared/Design/Themes/JiraiGothic.swift）のライト */
+  @font-face { font-family: "Kaisei Decol"; font-weight: 700; src: url("fonts/KaiseiDecol-Bold.ttf"); }
+  @font-face { font-family: "Kaisei Decol"; font-weight: 400; src: url("fonts/KaiseiDecol-Regular.ttf"); }
+  @font-face { font-family: "Outfit"; font-weight: 100 900; src: url("fonts/Outfit-Variable.ttf"); }
+  /* 配色はスクリーンショットのピンクの枚（screenshots.html の PALETTES.pink） */
   :root {
-    --background: #fff0f5;
-    --brand: #c2185b;
-    --brand-container: #f8c8dc;
-    --on-surface: #1a0f16;
-    --on-surface-variant: #5a3a4c;
+    --bg: #120D12;
+    --cross: #3A2231;
+    --brand: #FF7EB3;
+    --on-brand: #3A0A20;
+    --title: #FFFFFF;
+    --muted: #D6B9C8;
+    --glow: rgba(255, 126, 179, 0.24);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 100%; height: 100%; overflow: hidden; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
   body {
-    background: var(--background);
-    color: var(--on-surface);
-    font-family: "SF Pro Display", "Hiragino Sans", system-ui, sans-serif;
+    color: var(--title);
+    font-family: "Outfit", "SF Pro Display", "Hiragino Sans", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  body[data-lang="ja"] { font-family: "Hiragino Sans", "SF Pro Display", sans-serif; }
-  body[data-lang="zh-Hans"] { font-family: "SF Pro Display", "PingFang SC", sans-serif; }
-  body[data-lang="zh-Hant"] { font-family: "SF Pro Display", "PingFang TC", sans-serif; }
-  body[data-lang="ko"] { font-family: "SF Pro Display", "Apple SD Gothic Neo", sans-serif; }
-  body[data-lang="th"] { font-family: "SF Pro Display", "Sukhumvit Set", "Thonburi", sans-serif; }
+  body[data-lang="ja"] { font-family: "Kaisei Decol", "Hiragino Mincho ProN", serif; }
+  body[data-lang="zh-Hans"] { font-family: "Outfit", "PingFang SC", sans-serif; }
+  body[data-lang="zh-Hant"] { font-family: "Outfit", "PingFang TC", sans-serif; }
+  body[data-lang="ko"] { font-family: "Outfit", "Apple SD Gothic Neo", sans-serif; }
+  body[data-lang="th"] { font-family: "Outfit", "Sukhumvit Set", "Thonburi", sans-serif; }
+  /* 韓国語は単語の間に空白を入れるので、単語の途中（音節の間）では折り返さない */
+  body[data-lang="ko"] { word-break: keep-all; }
 
-  .canvas { position: relative; width: 100vw; height: 100vh; overflow: hidden;
-    background:
-      radial-gradient(ellipse 70% 80% at 50% 110%, rgba(194, 24, 91, 0.28), transparent 70%),
-      radial-gradient(ellipse 90% 90% at 50% -10%, #ffffff, var(--background) 60%, var(--brand-container)); }
+  .canvas { position: relative; width: 100vw; height: 100vh; overflow: hidden; background: var(--bg); }
+  .pattern { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* 推し色をほのかに灯す（ヘッダーは下から、検索結果は右の端末のうしろから） */
+  .glow { position: absolute; inset: 0; }
 
-  /* 推し色の紙吹雪（アプリの推し色のパレットから） */
-  .confetti { position: absolute; border-radius: 50%; }
-  .heart { position: absolute; line-height: 1; }
-
-  /* 端末は 6.9 inch の iPhone に似せる。寸法は端末の幅から JavaScript（phone）で決める。
-     padding の % は親（画面全体）の幅に対する割合になり、枠が太くなるので使わない */
-  .phone { position: absolute;
-    /* チタンのフレーム。斜めの光と、縁の細いハイライト */
-    background: linear-gradient(135deg, #6b6e78 0%, #33353c 18%, #1b1c21 46%, #2c2e35 70%, #5c5f69 100%);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.55); }
-  .phone .bezel { background: #000; }
-  .phone .screen { position: relative; overflow: hidden; }
-  .phone img { display: block; width: 100%; }
-  /* Dynamic Island。CI の Simulator のスクリーンショットには写らないので、画面の上に描く */
+  /* 端末。枠の太さ・角の丸みは JavaScript（phone）で端末の幅から決める。縁の色は --edge */
+  .phone { position: absolute; background: #050305; }
+  .phone .screen { position: relative; overflow: hidden; width: 100%; height: 100%; }
+  .phone .screen img { display: block; width: 100%; height: 100%; }
+  /* Dynamic Island。Simulator のスクリーンショットには写らないので、画面の上に描く */
   .phone .island { position: absolute; left: 50%; transform: translateX(-50%); background: #000; }
-  /* 側面のボタン（左: アクションボタン・音量、右: サイドボタン）。フレームの外に少しだけ出す */
-  .phone .button { position: absolute;
-    background: linear-gradient(90deg, #2a2c32, #6a6d77 45%, #3a3c43); }
 
-  .headline { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; letter-spacing: -0.01em; line-height: 1.15; }
+  .headline { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; letter-spacing: 0.01em; line-height: 1.28; white-space: nowrap; }
   .headline em, .copy .title em { font-style: normal; color: var(--brand); }
-  .sub { position: absolute; left: 0; right: 0; text-align: center; color: var(--on-surface-variant); font-weight: 600; }
+  .sub { position: absolute; left: 0; right: 0; text-align: center; color: var(--muted); font-weight: 500; line-height: 1.55; white-space: nowrap; }
+  body[data-lang="ja"] .sub { font-weight: 400; }
 
   .copy { position: absolute; }
   /* 見出しとチップは折り返さず、収まらなければ文字を縮める（fitCopy） */
-  .copy .title { font-weight: 800; line-height: 1.18; letter-spacing: -0.01em; white-space: nowrap; }
-  .chips { display: flex; flex-direction: column; gap: 0.55em; }
+  .copy .title { font-weight: 700; line-height: 1.28; letter-spacing: 0.01em; white-space: nowrap; }
+  .chips { display: flex; flex-direction: column; gap: 0.6em; }
   .chip { display: inline-flex; align-items: center; gap: 0.6em; align-self: flex-start;
-    padding: 0.45em 0.95em 0.5em 0.7em; border-radius: 999px; font-weight: 700; color: var(--on-surface); white-space: nowrap;
-    background: #ffffff; box-shadow: inset 0 0 0 4px var(--brand-container), 0 16px 40px rgba(194, 24, 91, 0.12); }
+    padding: 0.5em 1.05em 0.55em 0.75em; border-radius: 999px; font-weight: 600; color: var(--title); white-space: nowrap;
+    background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 3px rgba(255, 126, 179, 0.55), 0 16px 40px rgba(0, 0, 0, 0.35); }
+  body[data-lang="ja"] .chip { font-weight: 700; }
   .chip i { font-style: normal; display: grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%;
-    background: var(--brand); color: #fff; font-size: 0.8em; }
-  .brand { position: absolute; display: flex; align-items: center; gap: 0.6em; font-weight: 800; color: var(--brand); }
-  .brand img { height: 1.9em; border-radius: 22%; box-shadow: 0 10px 30px rgba(194, 24, 91, 0.25); }
+    background: var(--brand); color: var(--on-brand); font-family: "Outfit", sans-serif; font-weight: 800; font-size: 0.8em; }
+  .brand { position: absolute; display: flex; align-items: center; gap: 0.6em; font-weight: 700; color: var(--title); white-space: nowrap; }
+  .brand img { height: 1.9em; border-radius: 22%; box-shadow: 0 0 0 3px rgba(255, 126, 179, 0.35), 0 12px 36px rgba(0, 0, 0, 0.5); }
 </style>
 </head>
 <body>
@@ -92,6 +93,11 @@
     en: {
       header: { title: "Count down to every <em>oshi</em> moment.", sub: "Lives, birthdays, release days — see how many days are left at a glance." },
       search: { title: "Your <em>fan days</em>,<br>counted down.", chips: ["Countdowns in your oshi's color", "Home Screen widgets", "iPhone and iPad"] },
+    },
+    // en-GB は en を英国のつづりと言い方（colour・gig）に、es-MX は es と同じ文言（中南米でもそのまま通じる）
+    "en-GB": {
+      header: { title: "Count down to every <em>oshi</em> moment.", sub: "Gigs, birthdays, release days — see how many days are left at a glance." },
+      search: { title: "Your <em>fan days</em>,<br>counted down.", chips: ["Countdowns in your oshi's colour", "Home Screen widgets", "iPhone and iPad"] },
     },
     ja: {
       header: { title: "推しに会える日まで、<em>あと何日</em>？", sub: "ライブ・誕生日・発売日。楽しみな日を推し色で数えよう。" },
@@ -118,6 +124,10 @@
       search: { title: "Deine Fan-Termine,<br><em>im Countdown</em>.", chips: ["Countdown in Fanfarbe", "Widgets für den Home-Bildschirm", "iPhone und iPad"] },
     },
     es: {
+      header: { title: "¿Cuántos días faltan para ver a <em>tu bias</em>?", sub: "Conciertos, cumpleaños, lanzamientos: cuenta los días con el color de tu favorito." },
+      search: { title: "Tus días de fan,<br><em>en cuenta regresiva</em>.", chips: ["Cuenta regresiva con su color", "Widgets de inicio", "iPhone y iPad"] },
+    },
+    "es-MX": {
       header: { title: "¿Cuántos días faltan para ver a <em>tu bias</em>?", sub: "Conciertos, cumpleaños, lanzamientos: cuenta los días con el color de tu favorito." },
       search: { title: "Tus días de fan,<br><em>en cuenta regresiva</em>.", chips: ["Cuenta regresiva con su color", "Widgets de inicio", "iPhone y iPad"] },
     },
@@ -148,83 +158,113 @@
   const W = innerWidth, H = innerHeight;
   const add = (html) => { canvas.insertAdjacentHTML("beforeend", html); return canvas.lastElementChild; };
 
-  // 紙吹雪とハート。毎回同じ位置になるよう乱数の種を固定し、文言の上には置かない
-  const clear = type === "header"
-    ? [[W * 0.08, 90, W * 0.92, 520]]
-    : [[150, 120, 2050, 2200]];
-  const blocked = (x, y) => clear.some(([l, t, r, b]) => x > l - 60 && x < r + 60 && y > t - 60 && y < b + 60);
-  const colors = ["#c8326a", "#3f51b5", "#00897b", "#ef6c00", "#8e24aa", "#fbc02d", "#e91e63"];
-  let seed = 11;
-  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 70; i++) {
-    const size = 10 + rand() * 22, x = rand() * W, y = rand() * H, color = colors[i % colors.length], opacity = 0.35 + rand() * 0.45;
-    if (blocked(x, y)) continue;
-    add(`<div class="confetti" style="left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};opacity:${opacity}"></div>`);
-  }
-  for (let i = 0; i < 14; i++) {
-    const x = rand() * W, y = rand() * H * 0.9, size = 60 + rand() * 70, color = colors[i % colors.length], opacity = 0.5 + rand() * 0.4;
-    if (blocked(x + size / 2, y + size / 2)) continue;
-    add(`<div class="heart" style="left:${x}px;top:${y}px;font-size:${size}px;color:${color};opacity:${opacity}">♥</div>`);
+  // 端末の縁の色（スクリーンショットの枚ごとの色。screenshots.html の PALETTES の brand）
+  const EDGE = { pink: "#FF7EB3", orange: "#F5A66B", navy: "#8693F6", green: "#6ABC9D", red: "#FF817D" };
+
+  // 十字とハートの模様（ThemePhotoPlaceholder と同じ形。64 の格子を scale 倍に）
+  function drawPattern(scale) {
+    const size = 64 * scale;
+    add(`<svg class="pattern" aria-hidden="true"><defs><pattern id="pt" width="${size}" height="${size}" patternUnits="userSpaceOnUse">` +
+      `<g transform="scale(${scale})"><path d="M16 7v16M8 15h16" stroke="var(--cross)" stroke-width="2.6" stroke-linecap="round" fill="none"></path>` +
+      `<path d="M48 55c-6.5-4.3-9.5-7.6-9.5-11.2a4.6 4.6 0 0 1 9.5-1.6 4.6 4.6 0 0 1 9.5 1.6c0 3.6-3 6.9-9.5 11.2z" fill="var(--cross)"></path></g>` +
+      `</pattern></defs><rect width="100%" height="100%" fill="url(#pt)"></rect></svg>`);
   }
 
-  // 端末の寸法（端末の幅に対する割合）。6.9 inch の iPhone の実物に合わせる:
-  // 幅 77.6mm に対して、画面のまわりは片側 2.1mm ほど（黒い縁 1.3mm・フレーム 0.9mm）
-  const FRAME = 0.0115;
-  const BEZEL = 0.0165;
-  // 画面の角の丸み（画面の幅に対する割合）。6.9 inch の画面（440pt）の角は 62pt
-  const SCREEN_RADIUS = 62 / 440;
-  // Dynamic Island（画面の幅に対する割合）。6.9 inch の画面（440pt）で幅 125pt・高さ 37pt、上から 11pt
-  const ISLAND = { width: 125 / 440, height: 37 / 440, top: 11 / 440 };
-  // 側面のボタン: [左か右, 上端（端末の高さに対する割合）, 長さ]
-  const BUTTONS = [["left", 0.185, 0.04], ["left", 0.255, 0.065], ["left", 0.34, 0.065], ["right", 0.27, 0.105]];
-  const phone = (screen, x, y, width, rotate = 0, z = 1) => {
-    const frame = width * FRAME;
-    const bezel = width * BEZEL;
-    const screenWidth = width - 2 * (frame + bezel);
-    const screenRadius = screenWidth * SCREEN_RADIUS;
-    const islandHeight = screenWidth * ISLAND.height;
-    // 角は画面と同心にする
-    const bezelRadius = screenRadius + bezel;
-    const outerRadius = bezelRadius + frame;
-    const thickness = Math.max(2, width * 0.0065);
-    const buttons = BUTTONS.map(([side, top, length]) =>
-      `<i class="button" style="${side}:${-thickness}px;top:${top * 100}%;height:${length * 100}%;width:${thickness + frame / 2}px;` +
-      `border-radius:${side === "left" ? `${thickness}px 0 0 ${thickness}px` : `0 ${thickness}px ${thickness}px 0`}"></i>`).join("");
-    // 影は地の推し色に寄せる（明るい地なので黒い影は重い）
-    return add(
-      `<div class="phone" style="left:${x - width / 2}px;top:${y}px;width:${width}px;padding:${frame}px;border-radius:${outerRadius}px;` +
-      `transform:rotate(${rotate}deg);z-index:${z};filter:drop-shadow(0 ${width * 0.09}px ${width * 0.11}px rgba(60, 10, 30, 0.35))">` +
-      buttons +
-      `<div class="bezel" style="padding:${bezel}px;border-radius:${bezelRadius}px">` +
-      `<div class="screen" style="border-radius:${screenRadius}px"><img src="screens/${lang}/${screen}.png">` +
-      `<i class="island" style="top:${screenWidth * ISLAND.top}px;width:${screenWidth * ISLAND.width}px;height:${islandHeight}px;` +
-      `border-radius:${islandHeight / 2}px"></i></div></div></div>`);
-  };
+  // 端末の枠（端末の画面の幅に対する割合）。6.9 inch の iPhone の実物（画面の角 62pt / 440pt）。screenshots.html の FRAMES.iphone と同じ
+  const FRAME = { bezel: 0.034, radius: 62 / 440, island: { width: 125 / 440, height: 37 / 440, top: 11 / 440 } };
+  // 1 台の端末。centerX・top は外枠の位置、width は外枠の幅、edge は縁の色
+  function phone(screen, centerX, top, width, { rotate = 0, z = 1, edge = EDGE.pink, image }) {
+    const bezel = width * FRAME.bezel;
+    const screenWidth = width - 2 * bezel;
+    const screenHeight = screenWidth * image.naturalHeight / image.naturalWidth;
+    const screenRadius = screenWidth * FRAME.radius;
+    const islandHeight = screenWidth * FRAME.island.height;
+    const line = Math.max(3, width * 0.0045);
+    return add(`<div class="phone" style="left:${centerX - width / 2}px;top:${top}px;width:${width}px;` +
+      `height:${screenHeight + 2 * bezel}px;padding:${bezel}px;border-radius:${screenRadius + bezel}px;z-index:${z};` +
+      `transform:rotate(${rotate}deg);box-shadow:0 0 0 ${line}px ${edge}, 0 ${width * 0.06}px ${width * 0.15}px rgba(0, 0, 0, 0.6)">` +
+      `<div class="screen" style="border-radius:${screenRadius}px"><img src="${image.src}">` +
+      `<i class="island" style="top:${screenWidth * FRAME.island.top}px;width:${screenWidth * FRAME.island.width}px;height:${islandHeight}px;` +
+      `border-radius:${islandHeight / 2}px"></i></div></div>`);
+  }
+
+  const load = (name) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`screens/${lang}/${name}.png を読めません`));
+    image.src = `screens/${lang}/${name}.png`;
+  });
 
   // 文字の多い言語は見出しを小さくする
-  const long = ["fr", "de", "es", "pt-BR", "it", "id"].includes(lang);
+  const long = ["fr", "de", "es", "es-MX", "pt-BR", "it", "id"].includes(lang);
 
-  if (type === "header") {
-    // 21:9。中央に寄せる（左右は端末によって切れる）
-    const title = add(`<div class="headline" style="top:130px;font-size:${long ? 112 : 128}px">${copy.header.title}</div>`);
-    add(`<div class="sub" style="top:${130 + title.offsetHeight + 30}px;font-size:56px">${copy.header.sub}</div>`);
-    phone("02", W / 2 - 720, 700, 560, -7, 1);
-    phone("04", W / 2 + 720, 700, 560, 7, 1);
-    phone("01", W / 2, 560, 640, 0, 2);
-  } else {
-    // 3:2。左に何のアプリかと主な機能、右に実際の画面。
-    // 端末を先に置き、左の端末の左端の手前までを文言の欄にする（長い言語でも、端末の下に文字が入らないように）
-    const back = phone("02", W - 1540, 520, 860, -6, 1);
-    phone("01", W - 760, 360, 980, 4, 2);
+  main().catch((error) => {
+    document.body.innerHTML = `<h1 style="color:red;font-size:120px">${error.message}</h1>`;
+    throw error;
+  });
+
+  async function main() {
+    await document.fonts.ready;
+    if (type === "header") {
+      await drawHeader();
+    } else {
+      await drawSearch();
+    }
+    document.body.dataset.ready = "true";
+  }
+
+  // ヘッダー（21:9）。上の中央に見出しと補足、その下に 5 台を扇に並べ、下の端で切る
+  async function drawHeader() {
+    drawPattern(2.4);
+    add(`<div class="glow" style="background:radial-gradient(ellipse 55% 70% at 50% 108%, var(--glow), transparent 70%)"></div>`);
+    const title = add(`<div class="headline" style="top:120px;font-size:${long ? 116 : 132}px">${copy.header.title}</div>`);
+    const sub = add(`<div class="sub" style="top:${120 + title.offsetHeight + 18}px;font-size:54px">${copy.header.sub}</div>`);
+    fitWidth([title, sub], W * 0.86);
+    const [home, detail, oshiList, share, appearance] = await Promise.all(
+      ["home-light", "detail", "oshi-list", "share-card", "appearance-home"].map(load));
+    const top = sub.getBoundingClientRect().bottom + 90;
+    // 外側の 2 台（端末によって切れる）、内側の 2 台、中央の 1 台の順に、奥から置く
+    phone("share-card", W / 2 - 1400, top + 250, 520, { rotate: -12, z: 1, edge: EDGE.green, image: share });
+    phone("appearance-home", W / 2 + 1400, top + 250, 520, { rotate: 12, z: 1, edge: EDGE.red, image: appearance });
+    phone("detail", W / 2 - 740, top + 90, 600, { rotate: -6, z: 2, edge: EDGE.orange, image: detail });
+    phone("oshi-list", W / 2 + 740, top + 90, 600, { rotate: 6, z: 2, edge: EDGE.navy, image: oshiList });
+    phone("home-light", W / 2, top, 680, { z: 3, edge: EDGE.pink, image: home });
+  }
+
+  // 検索結果（3:2）。左に何のアプリかと主な機能、右に実際の画面。
+  // 端末を先に置き、うしろの端末の左端の手前までを文言の欄にする（長い言語でも、端末の下に文字が入らないように）
+  async function drawSearch() {
+    drawPattern(3);
+    add(`<div class="glow" style="background:radial-gradient(ellipse 45% 60% at 74% 62%, var(--glow), transparent 72%),` +
+      `radial-gradient(ellipse 70% 40% at 50% 112%, rgba(255, 126, 179, 0.14), transparent 70%)"></div>`);
+    const [home, detail] = await Promise.all(["home-light", "detail"].map(load));
+    const back = phone("detail", W - 1540, 520, 860, { rotate: -6, z: 1, edge: EDGE.orange, image: detail });
+    phone("home-light", W - 760, 360, 980, { rotate: 4, z: 2, edge: EDGE.pink, image: home });
     const copyLeft = 250;
     const copyRight = back.getBoundingClientRect().left - 120;
-    add(`<div class="brand" style="left:${copyLeft}px;top:220px;font-size:86px"><img src="icon.png" onerror="this.remove()">${appName}</div>`);
+    const brand = add(`<div class="brand" style="left:${copyLeft}px;top:220px;font-size:86px"><img src="icon.png" onerror="this.remove()">${appName}</div>`);
+    fitWidth([brand], copyRight - copyLeft);
     const box = add(`<div class="copy" style="left:${copyLeft}px;top:520px;width:${copyRight - copyLeft}px;font-size:${long ? 128 : 150}px">` +
         `<div class="title">${copy.search.title}</div>` +
-        `<div class="chips" style="font-size:76px;margin-top:110px">` +
+        `<div class="chips" style="font-size:74px;margin-top:110px">` +
         copy.search.chips.map((c, i) => `<div class="chip"><i>${i + 1}</i>${c}</div>`).join("") +
         `</div></div>`);
     fitCopy(box);
+  }
+
+  // 1 行の文字（見出し・補足・アプリ名）が幅に収まるまで、文字を縮める（折り返さない）
+  function fitWidth(elements, width) {
+    for (const element of elements) {
+      const size = parseFloat(element.style.fontSize);
+      const overflows = () => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect().width > width + 0.5;
+      };
+      for (let scale = 1; overflows() && scale > 0.5; scale -= 0.02) {
+        element.style.fontSize = `${size * scale}px`;
+      }
+    }
   }
 
   // 見出しとチップのいちばん長い行が欄に収まるまで、見出しとチップの文字を同じ割合で縮める（折り返さない）

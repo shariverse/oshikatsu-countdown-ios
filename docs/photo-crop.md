@@ -4,9 +4,9 @@
 決定の出典は Discussion #128（依頼 Issue #127）。実装は epic `epic/photo-crop`（PR #130・#134・#136・#138・#142・#143）。
 ループが仮に決めたこと（拡大の上限・文言・枠の大きさなど）は判断ログ Issue #131 にある。
 
-> **Android 版の SPEC（`shariverse/oshikatsu-countdown-android` の `docs/SPEC.md`）には、まだこの仕様が書かれていない。**
-> Discussion #128 の Q4 で「iOS だけ先に作り、Android の SPEC は後で合わせる」と決めたため、しばらく iOS と Android で挙動が違う。
-> Android 版に移すときは、このファイルの「仕様」を SPEC に書き写す。
+> **仕様の正は [`docs/spec/features/07-photo-crop.md`](spec/features/07-photo-crop.md)**（仕様リポジトリ `shariverse/app-specs` から生成したもの。Android 版にも同じ仕様が届く）。
+> このファイルの「仕様」は実装したときの記録で、食い違ったら `docs/spec/` が正。仕様を変えるときは app-specs に PR を出す。
+> コードの場所・テストの口・iOS だけの実装の参考（色空間の扱いなど）は、このファイルに残す。
 
 ## 仕様
 
@@ -32,7 +32,7 @@
 
 ### 取り込み
 
-- **正方形に切り抜いた画像だけを保存する**（Q2）。SwiftData のスキーマ（`OshiConSchemaV2`）は変えず、範囲（拡大率・位置・回転）も保存しない
+- **正方形に切り抜いた画像だけを保存する**（Q2）。SwiftData のスキーマは変えず、範囲（拡大率・位置・回転）も保存しない
 - 一辺は min(切り抜く範囲の画素の一辺, **1440px**)。小さい写真は拡大しない
 - 写真の向き（EXIF の Orientation）を画素に反映した上で切り抜く。JPEG の画質 0.85、位置情報などのメタデータは残さない（範囲なしの取り込みと同じ）
 - 写真の色空間（Display P3 など）のまま切り抜く。HDR（ITU-R 2100）・extended range の色空間は Display P3 に落とす（トーンマッピングはしない）
@@ -41,7 +41,8 @@
 
 ### 表示
 
-- 丸のアバター（ホームの行・推しの一覧など）は、正方形の画像をそのまま丸く出す
+- 丸のアバター（ホームの行・推しの一覧・推しの登録・編集）は、正方形の画像をそのまま丸く出し、推し色で縁取る（写真だけでは推し色が分からないため。#207）。
+  線の色は推し色を地の上の文字に使うときの色（`OshiColor.text(in:)`。ダークでは白に寄せる）、太さはアバターの一辺の 1/16（2pt 以上）。写真が無いときは推し色の丸に頭文字のまま
 - 予定の詳細の横長の写真（画面の幅 × 300pt、横向きの iPhone は 140pt）は、**1 つの正方形の範囲を丸と詳細の両方に使う**（Q1）。今までどおり `scaledToFill` の中央基準なので、正方形の中央の帯が写る。
   詳細の写る範囲が今より狭くなり、拡大すると粗くなりやすいことは承知の上
 - ウィジェットは写真を出さない（今までどおり）
@@ -55,6 +56,27 @@
   - 保存する前に選んだばかりの写真: 元の選んだ写真と前の範囲から開き直す（前より広げ直すこともできる。「元に戻す」は前の範囲に戻る）
 - 写真の差し替え・「写真を外す」・推しの削除で、使わなくなった写真のファイルを消す規則は今までどおり（`OshiEditing`）
 
+### 長方形の枠（Plus の着せ替えの背景の写真）
+
+調整画面と切り抜きは、正方形だけでなく任意の縦横比の長方形の枠を扱える。Plus の着せ替えの背景の写真は、この調整画面を使い回し、
+iPhone の画面の比率（約 **9:19.5**。`PhotoCrop.backgroundAspectRatio`）の縦長の枠で範囲を決める。推しの丸い写真の挙動は変えていない（縦横比の既定は 1）。
+
+- 範囲（`PhotoCrop(imageSize:aspectRatio:)`）: 拡大率 1 は「回転なしで、枠の縦横比のまま写真に収まる最大の長方形」。横長・正方形の写真では写真の高さいっぱい、枠より細長い写真では幅いっぱい
+- 枠を覆う最小の拡大率: 枠（幅 w・高さ h）を θ 回した外接矩形 幅 w|cos θ| + h|sin θ|・高さ w|sin θ| + h|cos θ| が写真に収まる倍率。
+  正方形では |cos θ| + |sin θ| と同じ。縦長の枠を 90° 回すと、横長の写真では 1 より小さくなる（枠が広く写真を覆える）
+- 移動できる範囲: 回した枠の外接矩形が写真からはみ出さない範囲（幅と高さで別に求める）
+- 拡大の上限: 切り抜く範囲の**短い辺**が元の写真の 360px を下回らない倍率まで
+- 調整画面の枠: 写真を置く範囲から四方 16pt を引いた中に収まる最大の長方形。短い辺が 560pt を超えたら縦横比のまま 560pt に縮める（`PhotoCropLayout.frameSize(in:aspectRatio:)`）。
+  iPhone の縦では高さに合わせ、iPad では幅 560pt × 高さ約 1213pt
+- 枠の外を暗くする形（`PhotoCropShape`）: 推しは丸（`.circle`。既定）、背景は角の丸い長方形（`.roundedRectangle`。角の半径は短い辺の 12%）。`PhotoCropScreen(…, shape:)` で渡す
+- 切り抜き: 枠と同じ縦横比の長方形。長い辺は min(切り抜く範囲の画素の長い辺, 上限)、短い辺は縦横比に合わせて丸める（`PhotoResizer.outputPixelSize`）。
+  上限は推しの写真が 1440px（`PhotoResizer.maxPixelLength`。既定）、背景の写真が **2560px**（`PhotoResizer.maxBackgroundPixelLength`。9:19.5 で約 1182×2560px）。
+  背景は iPhone の画面の高さ（Pro Max で 2868px）に近く、ぼかしと暗幕を掛けて敷くので足りる大きさにした。取り込むときは `OshiPhotoLibrary.importPhoto(_:crop:maxPixelLength:)` に渡す
+- EXIF の向き・色空間・メタデータの扱い、大きな写真を縮めて読む決まり、メインアクターの外（`@concurrent`）で行うことは正方形と同じ
+- 調整画面で描く写真の大きさ（`cropSource(data:shortSidePixels:maxLongSidePixels:)` の `shortSidePixels`）は、縦長の枠では写真の短い辺が枠の高さに当たることがあるので、
+  正方形の枠（枠の一辺 × 画面の倍率）より大きく読む必要がある。着せ替えの画面では、縦長の枠の上限（短い辺 560pt）の長い辺 × 画面の倍率にする
+  （`AppearancePreview.cropDisplayShortSidePixels(displayScale:)`。着せ替えの仕様は [appearance.md](appearance.md)）
+
 ### 作らないもの
 
 - 元の写真と範囲を保存して何度でもやり直せる方式・スキーマの変更（Q2 で採らなかった）
@@ -66,20 +88,22 @@
 
 | 役割 | 場所 |
 | --- | --- |
-| 範囲の計算（拡大率・回転・位置 → 切り抜く正方形、補正、拡大の上限・下限、画面の枠への配置） | `OshiCon/Photo/PhotoCrop.swift`（`nonisolated struct PhotoCrop`） |
-| 切り抜いて JPEG にする | `OshiCon/Photo/PhotoResizer.swift`（`croppedImage`・`croppedJPEGData`） |
-| 写真の置き場所・取り込み・調整画面に渡す写真の読み込み | `OshiCon/Photo/OshiPhotoLibrary.swift`（`importPhoto(_:crop:)`・`cropSource`・`photoData`） |
+| 範囲の計算（拡大率・回転・位置・枠の縦横比 → 切り抜く長方形、補正、拡大の上限・下限、画面の枠への配置） | `OshiCon/Photo/PhotoCrop.swift`（`nonisolated struct PhotoCrop`） |
+| 切り抜いて JPEG にする（切り抜いた画像の大きさ、背景の写真の上限） | `OshiCon/Photo/PhotoResizer.swift`（`croppedImage`・`croppedJPEGData`・`outputPixelSize`・`maxBackgroundPixelLength`） |
+| 写真の置き場所・取り込み・調整画面に渡す写真の読み込み | `OshiCon/Photo/OshiPhotoLibrary.swift`（`importPhoto(_:crop:maxPixelLength:)`・`cropSource`・`PhotoCropSource.initialCrop(aspectRatio:)`・`photoData`） |
 | 調整画面と、画面から切り離した決まり（枠の大きさ・ジェスチャーの量・読み上げの操作） | `OshiCon/Photo/PhotoCropScreen.swift`（`PhotoCropScreen`・`PhotoCropLayout`・`PhotoCropGesture`・`PhotoCropAccessibility`） |
+| 枠の形（丸・角の丸い長方形） | `OshiCon/Photo/PhotoCropShape.swift`（`PhotoCropShape`） |
 | 写真を選ぶ部品と導線（調整画面を出す・位置を調整） | `OshiCon/Photo/OshiPhotoPicker.swift` |
 | 保存のときの取り込みと前の写真の削除 | `OshiCon/Photo/OshiEditing.swift`（`PhotoChange.replace(Data, crop:)`） |
 
-座標は「向きを反映した後の元の写真の画素」で持ち、画面の pt との変換は `PhotoCrop.layout(frameSide:)`・`dragged(by:frameSide:)` の中だけで行う。
+座標は「向きを反映した後の元の写真の画素」で持ち、画面の pt との変換は `PhotoCrop.layout(frameSize:)`・`dragged(by:frameSize:)`（正方形の枠は `frameSide:` でも呼べる）の中だけで行う。
 画面では写真の中心を枠の中心に置き、`scaleEffect` → `rotationEffect`（写真の中心を軸。y が下向きで正の角度は時計回り）→ `offset` の順で描く。
 切り抜きの `CGContext` は y が上向きなので、同じ見た目にするには回転の符号を反転して描く。
 
 ## テスト
 
-- Unit（Swift Testing）: `OshiConTests/Photo/` の `PhotoCropTests`（補正・上限・下限・角度・配置）、`PhotoResizerCropTests`（4 つの象限を色分けした画像で、拡大・移動・回転・EXIF の向き・1440px の上限・色空間など）、`PhotoCropScreenTests`（枠の大きさ・ジェスチャーの量・読み上げの操作・配色）、`OshiEditingTests`（範囲つきの保存）
+- Unit（Swift Testing）: `OshiConTests/Photo/` の `PhotoCropTests`（補正・上限・下限・角度・配置）、`PhotoResizerCropTests`（4 つの象限を色分けした画像で、拡大・移動・回転・EXIF の向き・1440px の上限・色空間など）、`PhotoCropScreenTests`（枠の大きさ・ジェスチャーの量・読み上げの操作・配色）、`OshiEditingTests`（範囲つきの保存）、
+  `PhotoCropRectangleTests`（長方形の枠の補正・上限・下限・配置・枠の大きさと形）、`PhotoResizerRectangleCropTests`（縦長の切り抜き・大きさ・2560px の上限・EXIF の向き・色空間・取り込み）
 - UI（XCTest）: `OshiConUITests/PhotoCropUITests`。`PhotosPicker` は別プロセスの画面で操作できないので、起動引数 `-useTestPhoto`（`LaunchOptions.usesTestPhoto`。`-useInMemoryStore` のときだけ効く）で、
   「写真を選ぶ」を生成した画像（`PhotoCropPreviewImage`。色と図形）を選ぶボタンに替えて、選ぶ → 調整 → 保存・やめる・位置を調整の導線を通す
 - 実機での確認が要ること: #135（4800 万画素の取り込みの速さとメモリ）、#139（ピンチ・ひねり・中断・VoiceOver の操作、`PhotosPicker` を閉じても写真が外れないこと）

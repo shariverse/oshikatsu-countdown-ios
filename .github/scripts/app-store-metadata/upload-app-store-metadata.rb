@@ -10,7 +10,7 @@
 #      - App 情報のローカリゼーションに、アプリ名・サブタイトルを入れる
 #      - バージョンのローカリゼーションに、説明文・キーワード・プロモーションテキスト・マーケティング URL と、このバージョンの新機能を入れる
 #      - SCREENSHOT_DIR があれば、画像の寸法から表示サイズを決めて（docs/app-store/screenshots.json）、スクリーンショットを差し替える
-#   3. アプリの主要言語を languages.json の先頭の言語にする
+#   3. アプリの主要言語を languages.json の先頭の言語にする（その言語を登録する回だけ）
 #   4. App Review に関する情報のメモに、審査用メモを入れる
 #
 # 文面は docs/app-store/metadata/<language>.md と review-notes.md の、見出しの下のコードブロックから読む（文面の正はこれら）。
@@ -29,7 +29,7 @@
 #   ruby .github/scripts/app-store-metadata/upload-app-store-metadata.rb
 #
 # LANGUAGES は登録する言語（カンマ区切り）。空なら languages.json の全言語。
-# SCREENSHOT_DIR は scripts/app-store-screenshots.sh の出力先（<表示サイズ>/<言語>/ に画像と manifest.json がある）。
+# SCREENSHOT_DIR は scripts/app-store-screenshots.sh の出力先（<表示サイズ>/<言語>/ に、見出しを付けた 01.png〜10.png がある）。
 # 空ならスクリーンショットは触らない。撮っていない表示サイズ・言語のスクリーンショットも触らない。透過のある PNG は App Store Connect が受け付けないため、sips で JPEG にしてから上げる（macOS が要る）。
 # GITHUB_STEP_SUMMARY が設定されていれば（GitHub Actions 上）、結果を Job Summary にも書き出す。
 #
@@ -339,28 +339,23 @@ def png_info(path)
   { width: width, height: height, alpha: [4, 6].include?(color_type) }
 end
 
-# scripts/app-store-screenshots.sh の出力から、ある言語の画像を、表示サイズごとに撮った順に集める
+# scripts/app-store-screenshots.sh の出力から、ある言語の画像（見出しを付けた 01.png〜）を、表示サイズごとに番号の順に集める。
+# 撮った元の画面（raw/）と描き出したウィジェット（surfaces/）は上げない
 def collect_screenshots(screenshot_dir, language, work_dir)
   types = display_types_by_size
   groups = Hash.new { |h, k| h[k] = [] }
-  Dir.glob(File.join(screenshot_dir, '*', language, 'manifest.json')).sort.each do |manifest_path|
-    device_dir = File.dirname(manifest_path)
-    # 書き出したファイル名は UUID なので、添付の名前（「01-ホーム_0_…」）の順に並べる
-    attachments = JSON.parse(File.read(manifest_path, encoding: Encoding::UTF_8)).flat_map { |test| test.fetch('attachments') }
-    files = attachments.sort_by { |a| a.fetch('suggestedHumanReadableName') }.map { |a| a.fetch('exportedFileName') }
-    files.each do |file|
-      path = File.join(device_dir, file)
-      info = png_info(path)
-      type = types[[info[:width], info[:height]]]
-      abort "#{path} のサイズ（#{info[:width]}x#{info[:height]}）に合う表示サイズが #{SCREENSHOTS_PATH} にありません" unless type
+  Dir.glob(File.join(screenshot_dir, '*', language, '[0-9][0-9].png')).sort.each do |path|
+    info = png_info(path)
+    type = types[[info[:width], info[:height]]]
+    abort "#{path} のサイズ（#{info[:width]}x#{info[:height]}）に合う表示サイズが #{SCREENSHOTS_PATH} にありません" unless type
 
-      if info[:alpha]
-        jpeg = File.join(work_dir, "#{language}-#{File.basename(file, '.*')}.jpg")
-        system('sips', '-s', 'format', 'jpeg', '-s', 'formatOptions', '95', path, '--out', jpeg, out: File::NULL, exception: true)
-        path = jpeg
-      end
-      groups[type] << path
+    if info[:alpha]
+      device = File.basename(File.dirname(File.dirname(path)))
+      jpeg = File.join(work_dir, "#{device}-#{language}-#{File.basename(path, '.*')}.jpg")
+      system('sips', '-s', 'format', 'jpeg', '-s', 'formatOptions', '95', path, '--out', jpeg, out: File::NULL, exception: true)
+      path = jpeg
     end
+    groups[type] << path
   end
   groups
 end
@@ -536,8 +531,9 @@ begin
   done = upsert_review_notes(client, version['id'], notes)
   rows << "| （共通） | App Review に関する情報のメモ（デモ用アカウントは不要） | #{done} |"
 
-  # 主要言語は、そのローカリゼーションができてから変える
-  primary = languages.first
+  # 主要言語は languages.json の先頭の言語にする（LANGUAGES で絞った回の先頭の言語ではない）。そのローカリゼーションができてから変えるので、
+  # その言語を登録した回だけ変える
+  primary = select_languages([]).first
   if primary && listings[primary['language']] && app.dig('attributes', 'primaryLocale') != primary['storeLocale']
     begin
       client.patch("/v1/apps/#{app['id']}", { data: { type: 'apps', id: app['id'], attributes: { primaryLocale: primary['storeLocale'] } } })

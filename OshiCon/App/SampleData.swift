@@ -7,12 +7,58 @@ import Foundation
 import SwiftData
 
 /// App Store 用スクリーンショットの見本の推しと予定。起動引数 `-seedSampleData` を付け、メモリ上のストアで起動したときだけ入れる。
-/// 実在の人物・作品名・ロゴは使わない。日付は今日から数えて決めるので、いつ撮っても同じ残り日数になる。
+/// 実在の有名人・作品名・ロゴは使わない。日付は今日から数えて決めるので、いつ撮っても同じ残り日数になる。
 /// スクリーンショットは言語ごとに撮るので、名前と予定名は言語ごとに用意する。
+/// 推しの写真は、スクリーンショットを撮るときだけ、商用利用できるフリー素材を加工した画像を付ける（`attachingPhotos(to:from:library:)`。
+/// 出典とライセンスは docs/app-store/sample-oshi-photos.md）。
 nonisolated enum SampleData {
     struct Content: Sendable {
         let oshis: [Oshi]
         let events: [OshiEvent]
+    }
+
+    /// 見本の推しの役どころ。並びは推しの一覧の並び（`Cast.all`）と同じ。生の値は写真のファイル名に使う。
+    enum Role: String, CaseIterable, Sendable {
+        /// アイドルグループ（ドームのライブの推し）
+        case group
+        /// 声優（誕生日を祝う推し）
+        case voiceActor = "voice-actor"
+        /// アニメのキャラクター（劇場版とグッズの推し）
+        case character
+        /// 舞台俳優（2.5 次元舞台の推し）
+        case stageActor = "stage-actor"
+        /// 配信者
+        case streamer
+        /// 歌手（ファンミーティングの推し）
+        case singer
+
+        /// 写真を置いたディレクトリの中の、この役どころの推しの写真のファイル名（`sample-oshi-voice-actor.jpg` など）。
+        var photoFileName: String {
+            "sample-oshi-\(rawValue).jpg"
+        }
+    }
+
+    /// 見本の推しに、`directory` に置いた役どころごとの写真（`Role.photoFileName`）を付ける。
+    /// 写真は `library`（推しの写真の置き場所）に `<UUID>.jpg` の名前で写す。写真が無い・写せない役どころの推しは、写真なし（頭文字）のまま。
+    /// App Store 用スクリーンショットのときだけ使う（`LaunchOptions.sampleOshiPhotosDirectory`）。
+    static func attachingPhotos(to content: Content, from directory: URL, library: OshiPhotoLibrary) -> Content {
+        let fileManager = FileManager.default
+        var oshis = content.oshis
+        for (index, role) in zip(oshis.indices, Role.allCases) {
+            let source = directory.appending(path: role.photoFileName, directoryHint: .notDirectory)
+            guard fileManager.fileExists(atPath: source.path(percentEncoded: false)) else {
+                continue
+            }
+            let fileName = "\(UUID().uuidString).jpg"
+            do {
+                try fileManager.createDirectory(at: library.directory, withIntermediateDirectories: true)
+                try fileManager.copyItem(at: source, to: library.url(for: fileName))
+            } catch {
+                continue
+            }
+            oshis[index].photoFileName = fileName
+        }
+        return Content(oshis: oshis, events: content.events)
     }
 
     /// 見本を用意している言語。`en` を既定にする。
@@ -138,6 +184,7 @@ nonisolated enum SampleData {
 
 private extension SampleData {
     /// 言語ごとの推しの名前と予定名。作品名・会場以外の固有名は、その言語の人に自然な架空の名前にする。
+    /// 見本の推しの写真（`SampleOshiPhotos/`）はどれも男性なので、推しの名前は男性か、男女どちらにも使う名前にする。
     /// 画面で切れないよう、タイトルは短めにする（上限は `InputField`）。
     nonisolated struct Strings: Sendable {
         /// 声優（誕生日を祝う推し）
@@ -180,7 +227,25 @@ private extension SampleData {
         }
 
         var all: [Oshi] {
-            [group, voiceActor, character, stageActor, streamer, singer]
+            Role.allCases.map(oshi(for:))
+        }
+
+        /// 役どころ `role` の推し。
+        func oshi(for role: Role) -> Oshi {
+            switch role {
+            case .group:
+                group
+            case .voiceActor:
+                voiceActor
+            case .character:
+                character
+            case .stageActor:
+                stageActor
+            case .streamer:
+                streamer
+            case .singer:
+                singer
+            }
         }
     }
 }
@@ -190,8 +255,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "Minato",
         character: "Leo",
         stageActor: "Ethan",
-        streamer: "Ivy",
-        singer: "Jade",
+        streamer: "Riley",
+        singer: "Quinn",
         domeLive: "Dome Tour: Tokyo Night",
         domeVenue: "Tokyo Dome",
         birthday: "Minato's Birthday",
@@ -224,8 +289,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "沈墨",
         character: "雷欧",
         stageActor: "陆川",
-        streamer: "小葵",
-        singer: "苏晴",
+        streamer: "一诺",
+        singer: "苏言",
         domeLive: "巨蛋巡演 东京站",
         domeVenue: "东京巨蛋",
         birthday: "沈墨的生日",
@@ -241,8 +306,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "沈墨",
         character: "雷歐",
         stageActor: "陸川",
-        streamer: "小葵",
-        singer: "蘇晴",
+        streamer: "一諾",
+        singer: "蘇言",
         domeLive: "巨蛋巡演 東京場",
         domeVenue: "東京巨蛋",
         birthday: "沈墨的生日",
@@ -259,7 +324,7 @@ nonisolated private extension SampleData.Strings {
         character: "레오",
         stageActor: "서진",
         streamer: "하늘",
-        singer: "유나",
+        singer: "지안",
         domeLive: "돔 투어 도쿄 공연",
         domeVenue: "도쿄돔",
         birthday: "도윤 생일",
@@ -275,8 +340,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "Minato",
         character: "Léo",
         stageActor: "Lucas",
-        streamer: "Chloé",
-        singer: "Inès",
+        streamer: "Sacha",
+        singer: "Alix",
         domeLive: "Tournée des dômes : Tokyo",
         domeVenue: "Tokyo Dome",
         birthday: "Anniversaire de Minato",
@@ -292,8 +357,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "Minato",
         character: "Leo",
         stageActor: "Jonas",
-        streamer: "Mia",
-        singer: "Lena",
+        streamer: "Alex",
+        singer: "Robin",
         domeLive: "Dome-Tour: Tokio",
         domeVenue: "Tokyo Dome",
         birthday: "Minatos Geburtstag",
@@ -309,8 +374,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "Minato",
         character: "Leo",
         stageActor: "Mateo",
-        streamer: "Lucía",
-        singer: "Sofía",
+        streamer: "Dani",
+        singer: "Ariel",
         domeLive: "Gira de domos: Tokio",
         domeVenue: "Tokyo Dome",
         birthday: "Cumpleaños de Minato",
@@ -326,8 +391,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "Minato",
         character: "Leo",
         stageActor: "Gabriel",
-        streamer: "Luana",
-        singer: "Bia",
+        streamer: "Cris",
+        singer: "Dani",
         domeLive: "Turnê de domos: Tóquio",
         domeVenue: "Tokyo Dome",
         birthday: "Aniversário do Minato",
@@ -343,8 +408,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "Minato",
         character: "Leo",
         stageActor: "Matteo",
-        streamer: "Giulia",
-        singer: "Sofia",
+        streamer: "Andrea",
+        singer: "Celeste",
         domeLive: "Tour nei dome: Tokyo",
         domeVenue: "Tokyo Dome",
         birthday: "Compleanno di Minato",
@@ -360,8 +425,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "มินาโตะ",
         character: "ลีโอ",
         stageActor: "ภูมิ",
-        streamer: "ไข่มุก",
-        singer: "แพรว",
+        streamer: "มิว",
+        singer: "พีช",
         domeLive: "โดมทัวร์ รอบโตเกียว",
         domeVenue: "โตเกียวโดม",
         birthday: "วันเกิดมินาโตะ",
@@ -377,8 +442,8 @@ nonisolated private extension SampleData.Strings {
         voiceActor: "Minato",
         character: "Leo",
         stageActor: "Dimas",
-        streamer: "Nayla",
-        singer: "Kirana",
+        streamer: "Bintang",
+        singer: "Lintang",
         domeLive: "Tur Dome: Tokyo",
         domeVenue: "Tokyo Dome",
         birthday: "Ulang tahun Minato",

@@ -8,6 +8,7 @@ import SwiftUI
 /// アプリのテーマ。地の配色・角の丸み・書体・装飾をまとめて持つ。アプリとウィジェットの両方で使う。
 /// 推し色（`OshiColor`）の役割は置き換えない。テーマが変えるのは、推し色の文字を地に合わせて調整する割合だけ。
 /// 出荷するアプリは Discussion #80 の 5 案から採用したテーマ（`shipping`。「地雷系・ゴシック」）だけを使う。
+/// そのピンク（地・装飾・アクセント）は、推しの一覧のいちばん上の推し（1 位の推し）の推し色で染める（`shipping(themeColor:)`。#209）。
 /// 採用しなかった案（採用前のデザインを含む）は片付け、アイデアは shilokuma-inc/design-knowledge に残した（`docs/design/themes.md`）。
 nonisolated struct AppTheme: Hashable, Sendable, Identifiable {
     /// 英字の安定した値（テストの表示で使う）。
@@ -232,6 +233,7 @@ extension AppTheme {
 // MARK: - 配り方
 
 extension EnvironmentValues {
-    /// 画面とウィジェットが使うテーマ。出荷するアプリは `AppTheme.shipping` のまま（Preview だけがテーマを入れる）。
+    /// 画面とウィジェットが使うテーマ。既定は染めない出荷するテーマ（推しがいないときと同じ）。
+    /// アプリは `RootView`、ウィジェットはエントリで、1 位の推しの推し色で染めたテーマ（`AppTheme.shipping(themeColor:)`）を入れる。
     @Entry var appTheme: AppTheme = .shipping
 }

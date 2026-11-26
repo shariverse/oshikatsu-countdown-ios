@@ -77,6 +77,83 @@
           }
         }
       }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "comment" : "共有シートの「画像を保存」で、シェアのカードの画像を写真に追加するときの説明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used to save the countdown card image you share to your photo library."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェアするカウントダウンのカードの画像を、写真に保存するために使います。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用于将分享的倒计时卡片图片保存到照片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用於將分享的倒數卡片圖片儲存到照片。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공유하는 디데이 카드 이미지를 사진에 저장하는 데 사용합니다."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permet d'enregistrer dans Photos l'image de la carte de compte à rebours que vous partagez."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird verwendet, um das geteilte Countdown-Kartenbild in deiner Fotomediathek zu sichern."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se usa para guardar en Fotos la imagen de la tarjeta de cuenta atrás que compartes."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usado para salvar no app Fotos a imagem do cartão de contagem regressiva que você compartilha."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serve per salvare in Foto l'immagine della scheda del conto alla rovescia che condividi."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ใช้เพื่อบันทึกรูปภาพการ์ดนับถอยหลังที่คุณแชร์ลงในรูปภาพ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digunakan untuk menyimpan gambar kartu hitung mundur yang kamu bagikan ke Foto."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

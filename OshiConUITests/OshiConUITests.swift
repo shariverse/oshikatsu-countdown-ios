@@ -15,6 +15,7 @@ final class OshiConUITests: XCTestCase {
 
     /// 端末に残ったデータに左右されないよう、メモリ上のストアで起動し、設定（UserDefaults）の初期値も決める。
     /// 起動引数で渡すとアプリの中で書き換えられなくなる（導線を終えてもタブに切り替わらない）ので、環境変数で渡す。
+    /// メモリ上のストアでは StoreKit に問い合わせず、Plus は使えない状態になる。使える状態にするときは `arguments` に `-plusUnlocked` を渡す。
     @MainActor
     private func launch(hasCompletedOnboarding: Bool, arguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
@@ -141,6 +142,59 @@ final class OshiConUITests: XCTestCase {
     }
 
     @MainActor
+    func testReorderOshis() throws {
+        let app = launch(hasCompletedOnboarding: true, arguments: ["-seedSampleData"])
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
+        tabBar.buttons["推し"].tap()
+        let rows = app.buttons.matching(identifier: "oshiList.row")
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(rows.element(boundBy: 0).label.contains("LUMINA"))
+        XCTAssertTrue(rows.element(boundBy: 2).label.contains("レオ"))
+
+        // ふつうの一覧では、並べ替えの案内も順位も出さない
+        let guide = app.descendants(matching: .any).matching(identifier: "oshiList.reorderGuide").firstMatch
+        XCTAssertFalse(guide.exists)
+        XCTAssertFalse(rows.element(boundBy: 0).label.contains("1 位"))
+
+        // 並べ替えの間は、一覧の上に案内・行に順位を出し、登録のボタンを押せない
+        app.navigationBars["推し"].buttons["並べ替え"].tap()
+        let confirm = app.navigationBars["推し"].buttons["この順番で確定"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 2))
+        XCTAssertTrue(guide.waitForExistence(timeout: 2))
+        XCTAssertTrue(guide.label.contains("並べ替え中"))
+        XCTAssertTrue(rows.element(boundBy: 0).label.contains("1 位"))
+        XCTAssertTrue(rows.element(boundBy: 2).label.contains("3 位"))
+        XCTAssertFalse(app.navigationBars["推し"].buttons["推しを登録"].isEnabled)
+
+        // 3 番目（レオ）の行の右端の並べ替えの印を、いちばん上の行までドラッグする。
+        // 一覧の上に案内の行があるので、推しの行の入ったセルだけを数える
+        let cells = app.cells.containing(.button, identifier: "oshiList.row")
+        let handle = cells.element(boundBy: 2).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5))
+        let top = cells.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.2))
+        handle.press(forDuration: 0.5, thenDragTo: top)
+        let first = rows.element(boundBy: 0)
+        let deadline = Date().addingTimeInterval(5)
+        while !first.label.contains("レオ"), Date() < deadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        XCTAssertTrue(first.label.contains("レオ"))
+        // 順位は並べ替えた順で数え直す
+        XCTAssertTrue(first.label.contains("1 位"))
+        XCTAssertTrue(rows.element(boundBy: 1).label.contains("LUMINA"))
+        XCTAssertTrue(rows.element(boundBy: 1).label.contains("2 位"))
+        confirm.tap()
+        XCTAssertTrue(app.navigationBars["推し"].buttons["並べ替え"].waitForExistence(timeout: 2))
+        XCTAssertTrue(guide.waitForNonExistence(timeout: 2))
+
+        // ホームの推しの絞り込みも、並べ替えた順になる
+        tabBar.buttons["ホーム"].tap()
+        let leo = app.buttons["レオ"]
+        XCTAssertTrue(leo.waitForExistence(timeout: 5))
+        XCTAssertLessThan(leo.frame.minX, app.buttons["LUMINA"].frame.minX)
+    }
+
+    @MainActor
     func testSettingsShowsPastEventsToggleAndLicenses() throws {
         let app = launch(hasCompletedOnboarding: true)
         let tabBar = app.tabBars.firstMatch
@@ -177,18 +231,43 @@ final class OshiConUITests: XCTestCase {
         let reminders = app.switches["settings.reminders"]
         XCTAssertTrue(reminders.waitForExistence(timeout: 2))
         XCTAssertEqual(reminders.value as? String, "1")
+        // 上に Plus と着せ替えの行があり、通知の欄の下のほうは画面の外になる（Form は画面の外の行を作らない）ので、見えるところまで送る
         for timing in ["thirtyDaysBefore", "sevenDaysBefore", "dayBefore", "onTheDay", "hourBeforeStart"] {
             let toggle = app.switches["settings.reminderTiming.\(timing)"]
+            scrollIntoView(toggle, in: app, upward: true)
             XCTAssertTrue(toggle.exists, timing)
             XCTAssertEqual(toggle.value as? String, "1", timing)
         }
+        scrollIntoView(app.datePickers.firstMatch, in: app, upward: true)
         XCTAssertTrue(app.datePickers.firstMatch.exists)
 
         // OFF にすると、タイミングと時刻の項目を隠す
+        // いちばん上まで戻し、送った後の惰性が止まってから押す（動いている間に押すと、スクロールが止まるだけでスイッチが切り替わらない）
+        app.swipeDown()
+        app.swipeDown()
+        scrollIntoView(reminders, in: app, upward: false)
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        XCTAssertTrue(reminders.isHittable)
         reminders.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        let turnedOff = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "0"), object: reminders)
+        XCTAssertEqual(XCTWaiter().wait(for: [turnedOff], timeout: 2), .completed)
         XCTAssertEqual(reminders.value as? String, "0")
         XCTAssertTrue(app.switches["settings.reminderTiming.thirtyDaysBefore"].waitForNonExistence(timeout: 2))
         XCTAssertFalse(app.datePickers.firstMatch.exists)
+    }
+
+    /// `element` が画面の中で押せるところに来るまで、ゆっくり送る（`upward` が true なら下の行へ、false なら上の行へ）。何度か送っても来なければそのまま返す。
+    @MainActor
+    private func scrollIntoView(_ element: XCUIElement, in app: XCUIApplication, upward: Bool, maxSwipes: Int = 5) {
+        var swipes = 0
+        while !(element.exists && element.isHittable), swipes < maxSwipes {
+            if upward {
+                app.swipeUp(velocity: .slow)
+            } else {
+                app.swipeDown(velocity: .slow)
+            }
+            swipes += 1
+        }
     }
 
     /// 通知を押すと、その予定の詳細が開く（落ちない。#186）。
