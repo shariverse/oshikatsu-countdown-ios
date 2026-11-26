@@ -54,7 +54,7 @@ struct EventDetailScreen: View {
     var body: some View {
         Group {
             if let current {
-                content(event: current.event, oshi: current.oshi)
+                content(event: current.event, oshi: current.oshi, rendering: appearanceRendering(for: current.oshi))
             } else {
                 ThemeScreenBackground()
                     .ignoresSafeArea()
@@ -77,7 +77,8 @@ struct EventDetailScreen: View {
         }
     }
 
-    private func content(event: OshiEvent, oshi: Oshi?) -> some View {
+    /// `rendering` は着せ替えで描くもの（予定の推しの背景の写真があればそれ。`appearanceRendering(for:)`）。
+    private func content(event: OshiEvent, oshi: Oshi?, rendering: AppearanceRendering) -> some View {
         ScrollView {
             ZStack(alignment: .top) {
                 // 写真は画面の幅いっぱいに敷き、カードだけ読みやすい幅に収める
@@ -124,7 +125,7 @@ struct EventDetailScreen: View {
             EventEditorScreen(event: event)
         }
         .sheet(isPresented: $isSharing) {
-            // Plus で背景の写真を敷いているときは、カードの地もその写真にする（それ以外は出荷するテーマのカード）
+            // Plus で背景の写真を敷いているときは、カードの地もその写真にする（その予定の推しの写真があればそれ。それ以外は出荷するテーマのカード）
             ShareCardPreviewScreen(event: event, oshi: oshi, style: .appearance(rendering), backgroundPhotos: appearance.photos)
         }
         .alert("この予定を削除しますか？", isPresented: $isConfirmingDelete) {
@@ -137,9 +138,9 @@ struct EventDetailScreen: View {
         }
     }
 
-    /// Plus が使えるかと着せ替えの設定から、実際に描くもの。
-    private var rendering: AppearanceRendering {
-        appearance.rendering(isPlusUnlocked: isPlusUnlocked)
+    /// Plus が使えるかと着せ替えの設定から、実際に描くもの。予定の推し `oshi` の背景の写真があればそれを、無ければ共通の写真を敷く。
+    private func appearanceRendering(for oshi: Oshi?) -> AppearanceRendering {
+        appearance.rendering(isPlusUnlocked: isPlusUnlocked, oshiID: oshi?.id)
     }
 
     private var photoHeight: CGFloat {

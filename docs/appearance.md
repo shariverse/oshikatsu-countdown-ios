@@ -2,7 +2,7 @@
 
 推し活カウントダウン Plus（有料）で解放する着せ替え。次の 2 つを、それぞれ ON/OFF できる。
 
-- **背景**: アプリ全体で 1 枚の写真を、iPhone の縦の比率（約 9:19.5）に調整して、ホームと予定の詳細の地に敷く
+- **背景**: 写真を、iPhone の縦の比率（約 9:19.5）に調整して、ホームと予定の詳細の地に敷く。写真は共通の 1 枚と、推しごとに選べる（1.4.0。#335）
 - **飾り**: 地に散らしているハートと十字の代わりに、選んだ推しの丸い写真を並べる。濃さと量はスライダーで変え、量をいちばん多くすると地を埋め尽くす（#266）
 
 AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
@@ -19,6 +19,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - カード・推し色の役割・書体・テーマ（`AppTheme.jiraiGothic`）は変えない
 - 背景と飾りの両方を ON にしたときは、暗幕とぼかしを掛けた写真の上に飾りを重ねる
 - 背景と飾りは `accessibilityHidden(true)`・`allowsHitTesting(false)` で、読み上げ・押せる範囲・並びを変えず、文字の上に重ねない
+- どの背景の写真を敷くかは、画面の推しで決める（「推しごとの背景」）。共通の写真と推しの写真で、暗幕とぼかし・板・上の端の覆いの扱いは変えない
 - 背景の写真か飾りを描いているとき（`AppearanceRendering.drawsPhotosOnGround`）は、ホームの地の上に直接描く文字（「この推しの予定はまだありません」・予定が無いときの案内）の後ろに、
   カードの地の色（`surface`）の板を敷く（`AppearanceTextPlate`）。予定の詳細は地の上に文字を置いていない（中身はカードの上）
   - 飾りだけで、出す推しに写真のある推しがいない（テーマの模様のまま）ときも敷く（出す推しを切り替えるたびに案内の見た目が変わらないように）
@@ -56,6 +57,16 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - 縦向きの iPhone では写真で地を覆って中央に置く。地のほうが横に広いとき（iPad・横向きの iPhone）は、写真を画面の高さに合わせて中央に置き、
   左右の余りは同じ写真の強いぼかし（60pt）で埋める。左右の余りが 1pt 未満なら覆う側にする
 - 写真は画面の大きさ × 画面の倍率（上限 2560px）に縮めて、メインアクターの外で読む。回転・iPad の分割で読む大きさが変わったら読み直し、その間は今の写真を出したままにする
+  - 写真が替わったとき（差し替え・ホームの絞り込みで推しの写真と共通の写真が替わったとき）も、新しい写真を読むまで前の写真を出したままにする（地の色へ戻ってちらつかないように）
+
+### 推しごとの背景（1.4.0。#335）
+
+- 背景の写真は、**共通**の 1 枚（今までの背景の写真）と、**推しごと**の写真を持つ。推しごとの写真も、共通の写真と同じ縦長の枠で調整して取り込む。暗幕とぼかし・背景の ON/OFF は全体で 1 つ
+- どの写真を敷くかは、画面の推しで決める（`AppearanceRendering.init(settings:isPlusUnlocked:oshiID:)`）。その推しの写真があればそれ、無ければ共通の写真。どちらも無ければ標準の地
+  - **ホーム**: 推しで絞り込んでいるときは、その推し。絞り込んでいない（すべて）ときは推しを決めない（共通の写真）
+  - **予定の詳細**と、そこから開く**シェアのカード**: その予定の推し。推しなしの予定は推しを決めない（共通の写真）
+- Plus でなければ、今までどおり標準（推しの写真があっても敷かない）。背景を OFF にしていれば、推しの写真があっても敷かない
+- ホームで絞り込みを切り替えると、その場で写真が替わる。読む間は前の写真を出したままにする
 
 ### 飾り（推しの丸い写真）
 
@@ -94,15 +105,19 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   | `appearanceDecorationOpacity` | 飾りの濃さ（0.1〜1） | 0.4 |
   | `appearanceDecorationAmount` | 飾りの量（0〜1） | 0.25 |
   | `appearanceDecorationExcludedOshis` | 飾りに出さない推しの id（UUID の文字列の配列） | 空（すべての推しを出す） |
+  | `appearanceOshiBackgroundPhotos` | 推しごとの背景の写真（推しの id の UUID の文字列 → ファイル名の辞書。写真を選んだ推しだけ） | 無し |
 
 - 範囲の外の暗幕・ぼかし・濃さ・量は範囲に収め、UUID でない id は読まない。出さない推しの id は、推しを切り替えたときに、もういない推しの分を外す
+- 推しごとの背景の写真は、推しの id が UUID として読め、ファイル名が写真の置き場所の中を指す項目だけを読む。1 つも無ければキーを消す
 - 前の版（TestFlight）の強さ `appearanceIntensity`（`weak`・`medium`・`strong`）が残っていて、暗幕とぼかしのキーが無ければ、同じ見た目になる位置に読み替える
   （弱: 暗幕 0.25・ぼかし 0、中: 0.5・0.4、強: 0.75・1）。設定を書くときに `appearanceIntensity` を消す
 
 - 背景の写真のファイルは推しの写真と同じ置き場所（`OshiPhotoLibrary`。App Group のコンテナ）に置く。**SwiftData のスキーマは変えていない**
-- 背景の写真を差し替える・外すときは、前のファイルを消す。推しの写真の差し替え・推しの削除では背景の写真を消さない
+- 背景の写真（共通・推しごと）を差し替える・外すときは、その写真の前のファイルだけを消す（ほかの推しの写真と共通の写真は残す）
+- **推しを削除したら、その推しの背景の写真と設定を消す**（`OshiEditing.delete(oshiID:)` が `AppearanceStore.removeBackgroundPhoto(for:)` を呼ぶ。削除に失敗したら消さない）。
+  共通の背景の写真とほかの推しの写真は消さない。推しの写真（アイコン）の差し替え・外すでは、背景の写真を消さない
 - Plus でない人も、写真を選んで設定を保存できる（試着）。Plus を買ったらそのまま使う
-- 解約・期限切れで Plus が使えなくなったら、標準の見た目に戻す。選んだ写真と設定は消さない（また使えるようになったら戻る）
+- 解約・期限切れで Plus が使えなくなったら、標準の見た目に戻す。選んだ写真と設定は消さない（推しごとの写真も。また使えるようになったら戻る）
 
 ### 設定画面の「着せ替え」の行と、着せ替えの画面
 
@@ -122,6 +137,10 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   - シェア: シェアのカード（`ShareCardView`）。背景の写真だけを地に使う（`ShareCardStyle.appearance(_:)`）。暗幕とぼかし・飾りは関わらない
   - ホームと予定の詳細は 390 × 845pt で組み、画面の大きさに合わせて縮める（`AppearancePhoneFrame`）。中の文字は標準の大きさのまま。シェアのカードは 360pt 四方を、収まる大きさに縮める
   - 予定があれば先頭の予定を、無ければ見本の推しと予定を出す。予定の詳細とシェアのカードの見本も、ホームの見本の先頭のカードと同じ予定を出す（`AppearancePreview.featuredItem(of:)`）
+  - 「背景」のタブで推しの枠を選んでいるときは、ホームの見本をその推しで絞り込み（絞り込みの選択にも映す）、予定の詳細とシェアのカードの見本にその推しの予定を出す。
+    その推しに予定が無ければ、見本の先頭の予定（ピン留めのライブ）をその推しの予定として出す（`AppearancePreview.content(events:oshis:selectedOshiID:today:now:locale:)`）。共通の枠なら絞り込まない
+  - どの背景の写真を映すかは、実際の画面と同じ規則で見本ごとに決める（ホームは絞り込んでいる推し、予定の詳細とシェアのカードは出す予定の推し。`AppearancePreview.backgroundOshiID(of:content:)`）。
+    全画面の試着も同じ
 - 見本を横に並べ、まん中の見本を大きく見せて、となりの見本を薄く小さくのぞかせる（`AppearancePreviewCarousel`）。見本を替えるのは、**横のスワイプ**と、見本の下の**切り替え**（「ホーム」「予定の詳細」「シェア」。`AppearancePreviewSwitcher`）
   - どの見本も、並びの上ではホームの見本と同じ幅にそろえる（どの見本もまん中で止まる）。幅の広いシェアのカードは、その幅からはみ出して描き、となりの見本に重ならないよう、はみ出す幅だけよける
     （`AppearancePreviewLayout.carouselOffset(of:selected:)`。シェアのカードがとなりにのぞくときはカードを右へ、シェアのカードを映しているときはほかの見本を左へ）
@@ -129,7 +148,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - 切り替えのとなりに「全画面」を置き、全画面の試着を開く。切り替えと「全画面」が幅に収まらないとき（長い訳・大きな文字・左の細い列）は、「全画面」を記号だけにし、それでも収まらなければ切り替えも記号にする。
   この行の文字は `accessibility1` までしか大きくせず、長押しで大きく表示する
 - 見本は押せず（`allowsHitTesting(false)`）、中の予定や絞り込みは反応しない。読み上げでは 1 つの要素にし、名前で映している見本（「ホームの見本」「予定の詳細の見本」「シェアのカードの見本」）を、
-  値で映しているものを伝える。シェアのカードの見本は、背景の写真があるかだけを伝える。
+  値で映しているものを伝える（推しの背景の写真を映しているときは「推しの背景の写真あり」）。シェアのカードの見本は、背景の写真があるかだけを伝える。
   この要素は、見本の並びそのものではなく、見えている範囲に重ねた透明な面に付ける（並びに付けると、画面の外まで続く並びの幅が要素の大きさになる）
 - スライダーは動かしている間も、値が変わるたび（5% ごと）に見本に映す。暗幕・ぼかし・飾りの濃さ・量だけが変わったときは写真を読み直さず、
   背景の写真の ON/OFF でも飾りの推しの写真を読み直さない（模様に戻ってちらつかない）
@@ -151,6 +170,12 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   タブを足すとき（「カード」「アイコン」など）は、`AppearanceEditorTab` に case を足し、`AppearanceEditorTray` の `content(of:)` に中身を足す
 - 「背景」のタブ（`AppearanceBackgroundSettings`）: 背景の ON/OFF、写真を選ぶ／変える・写真を外す、暗幕の濃さ（薄い〜濃い）とぼかしの強さ（なし〜強い）のスライダー。
   写真を選び直したら背景を ON にする。背景が OFF のときもスライダーの値は見せ、押せなくする
+  - 推しがいれば、ON/OFF に「推しごとに選べます」を添え、その下に「共通」と推しの枠（推しの並び）を横に並べる。枠は選んだ写真の小さな見本（無ければ ＋）と名前で、選んでいる枠はアクセントの色の線と太字。
+    写真を選ぶ／変える・外すは、選んでいる枠の写真に効く。写真を読んでいる・取り込んでいる間は枠を替えられない（選んだときの枠に取り込む）
+  - 枠の下に、共通の枠なら「共通の写真は、推しで絞り込んでいないホームと、写真を選んでいない推しの画面に敷きます」、推しの枠なら「この推しで絞り込んだホームと、この推しの予定の詳細・シェアのカードに敷きます。選んでいなければ、共通の写真を敷きます」を添える
+  - 枠の読み上げは、名前と、写真があるか（「背景の写真あり」「背景の写真なし」）。選んでいる枠は選択中として読む
+  - 推しがいなければ枠を出さず、今までどおり共通の写真だけを選ぶ
+  - 選んでいる枠は着せ替えの画面が持ち（タブを替えても残る）、見本と全画面の試着にも渡す。選んでいた推しが消えたら共通に戻す
 - 「飾り」のタブ（`AppearanceDecorationSettings`）: 飾りの ON/OFF、濃さ（薄い〜濃い）と量（少なめ〜埋め尽くす）のスライダー、飾りに出す推し。飾りが OFF のときも値は見せ、押せなくする
   - 飾りに出す推しは、推しごとの切り替え（丸い写真と名前）を横に並べる。出す推しには印を付け、出さない推しは薄くする。写真の無い推しは「写真がありません」を添える。推しがいなければ出さない。
     読み上げと UI テストには、名前の付いたスイッチとして見せる（`accessibilityRepresentation`）
@@ -172,11 +197,11 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 ### シェアのカード
 
 - Plus の人で背景の写真を ON にしていて写真があれば、予定の詳細から開くシェアのプレビューに `ShareCardStyle(theme: .shipping, background: .photo(fileName:))` を渡す（`ShareCardStyle.appearance(_:)`）。
+  その予定の推しの背景の写真があればそれ、無ければ共通の写真（予定の詳細の地と同じ）。
   それ以外は `.shipping`。暗幕・ぼかしと飾りはカードに関わらない（[share-card.md](share-card.md) の「Plus の着せ替えで差し替える口」）
 
 ### 作らないもの
 
-- 推しごとの背景の写真（SwiftData のスキーマの変更）
 - 課金画面・シェアのカード・テーマの見本・ウィジェット・ライブアクティビティの地を写真や推しの写真の飾りにすること
 - 新しいテーマや飾り、通信・解析・自前のサーバー、権限・プライバシーマニフェストの追加、外部ライブラリ
 
@@ -184,9 +209,10 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 
 | 役割 | 場所 |
 | --- | --- |
-| 設定（読み書き・前の版の強さの読み替え）・暗幕とぼかし（幕の不透明度・ぼかしの半径・幕の色）・何を描くかの規則（Plus と設定から） | `OshiCon/Appearance/AppearanceSettings.swift`（`AppearanceSettings`・`AppearanceBackgroundStyle`・`AppearanceRendering`） |
+| 設定（読み書き・前の版の強さの読み替え・推しごとの背景の写真）・暗幕とぼかし（幕の不透明度・ぼかしの半径・幕の色）・何を描くかの規則（Plus と設定と画面の推しから） | `OshiCon/Appearance/AppearanceSettings.swift`（`AppearanceSettings`・`AppearanceBackgroundStyle`・`AppearanceRendering`） |
 | 背景の写真の上で、地の上の文字の後ろに敷く板（色と、敷くかの Environment `isOverAppearancePhoto`） | `OshiCon/Appearance/AppearanceTextPlate.swift`（`AppearanceTextPlate`・`appearanceTextPlate()`・`appearanceBlockPlate()`） |
-| 設定と背景の写真のファイルを持つストア（差し替え・外す・メモリ上のストアの置き場所） | `OshiCon/Appearance/AppearanceStore.swift`（`AppearanceStore`。`OshiCon.swift` で environment に入れる） |
+| 設定と背景の写真のファイルを持つストア（共通・推しごとの差し替え・外す・メモリ上のストアの置き場所） | `OshiCon/Appearance/AppearanceStore.swift`（`AppearanceStore`。`OshiCon.swift` で environment に入れる） |
+| 推しを削除したときに、その推しの背景の写真を消す | `OshiCon/Photo/OshiEditing.swift`（`OshiEditing.delete(oshiID:)`。`OshiEditorScreen` が `AppearanceStore` を渡す） |
 | 背景の写真の置き方（覆う・中央に置いて左右を埋める・読む画素数・詳細で上を除く範囲） | `OshiCon/Appearance/AppearanceBackgroundLayout.swift` |
 | 背景の写真を敷く View（読み込み・ぼかし・幕・左右の埋め）・上の端のグラデーション | `OshiCon/Appearance/AppearanceBackgroundPhoto.swift`（`AppearanceBackgroundPhotoView`・`AppearanceBackgroundPhotoLayers`・`AppearanceStatusBarFade`） |
 | 飾りの濃さ・量・出す推し、並べる推しの写真、丸の並べ方（量ごとの大きさと間隔・どの丸にどの推し）、丸い写真の作り方・読む画素数 | `OshiCon/Appearance/OshiPhotoDecoration.swift`（`OshiPhotoDecorationStyle`・`OshiPhotoDecoration`・`OshiPhotoDecorationLayout`） |
@@ -194,13 +220,13 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 | 十字とハートの並び（写真のある推しがいないときの飾り） | `Shared/Design/ThemeOrnaments+Gothic.swift`（`CrossesAndHeartsPattern`） |
 | ホームの地 | `OshiCon/Appearance/AppearanceScreenBackground.swift`（`HomeScreen` と見本で使う） |
 | 予定の詳細の地と、上の写真の下端 | `OshiCon/Appearance/AppearanceDetailBackground.swift`（`AppearanceDetailBackground`・`AppearanceDetailHeaderPosition`） |
-| 試着の規則（見本の種類・大きさ・中身・読み上げの名前と値・長押しの間の見た目・調整画面で読む画素数・百分率の文字） | `OshiCon/Appearance/AppearancePreview.swift` |
+| 試着の規則（見本の種類・大きさ・中身（選んでいる推しでの絞り込み）・見本ごとの推し・読み上げの名前と値・長押しの間の見た目・調整画面で読む画素数・百分率の文字） | `OshiCon/Appearance/AppearancePreview.swift` |
 | 着せ替えの画面の並べ方（見本を上に置く・左に並べる）と、見本を見せる大きさ・シェアのカードをよける幅 | `OshiCon/Appearance/AppearancePreviewLayout.swift`（`AppearancePreviewLayout`） |
 | UI テストから描いているものを読む口 | `OshiCon/Appearance/AppearanceUITestMarker.swift` |
 | 着せ替えの画面（見本の舞台とトレーの並べ方・バーの Plus の案内・全画面の試着を開く） | `OshiCon/Screens/Appearance/AppearanceSettingsScreen.swift` |
 | 見本の舞台（見本を横に送る並び・見本の下の切り替えと「全画面」） | `OshiCon/Screens/Appearance/AppearancePreviewStage.swift`（`AppearancePreviewStage`・`AppearancePreviewCarousel`・`AppearancePreviewControls`）・`AppearancePreviewSwitcher.swift` |
 | 見本（ホーム・予定の詳細・シェアのカード）と、iPhone の縦の画面に縮める枠 | `OshiCon/Screens/Appearance/AppearanceHomePreview.swift`・`AppearanceDetailPreview.swift`・`AppearanceSharePreview.swift`・`AppearancePhoneFrame.swift` |
-| 設定のトレー（タブ）と、「背景」「飾り」のタブの中身・スライダーの部品 | `OshiCon/Screens/Appearance/AppearanceEditorTray.swift`（`AppearanceEditorTab`・`AppearanceEditorTray`）・`AppearanceBackgroundSettings.swift`・`AppearanceDecorationSettings.swift`・`AppearanceSlider.swift` |
+| 設定のトレー（タブ）と、「背景」（共通と推しの枠を含む）「飾り」のタブの中身・スライダーの部品 | `OshiCon/Screens/Appearance/AppearanceEditorTray.swift`（`AppearanceEditorTab`・`AppearanceEditorTray`）・`AppearanceBackgroundSettings.swift`・`AppearanceDecorationSettings.swift`・`AppearanceSlider.swift` |
 | 全画面の試着 | `OshiCon/Screens/Appearance/AppearanceTryOnScreen.swift` |
 | 設定の「着せ替え」の行 | `OshiCon/Screens/Settings/SettingsScreen.swift`（`PlusSettingsSection`） |
 | 縦長の枠の調整と切り抜き | `OshiCon/Photo/`（[photo-crop.md](photo-crop.md)） |
@@ -225,6 +251,8 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
   - `AppearancePreviewLayoutTests`: 縦向きの iPhone（SE〜Pro Max）は見本を上に大きく置いて（画面の高さの 45% 前後）トレーに 200pt を残すこと、大きな文字では見本を小さくしてトレーに半分より多く残すこと、
     iPad と横向きの iPhone は左右に並べて見本と切り替えの行を高さに、左の列を幅の 4 割に収めること、iPad の狭い分割は上に置くこと、シェアのカードの見本の大きさと、となりの見本をよける幅、測れていない大きさ
   - `AppearanceUITestMarkerTests`: UI テストに見せる値
+  - `AppearanceOshiBackgroundTests`: 推しごとの背景の写真の読み書き（不正な項目を読まない・無くなったらキーを消す）、描き分けの規則（推しの写真・共通に戻る・どちらも無い・背景 OFF・Plus でない・置き場所の外を指すファイル名・板と覆い・シェアのカードの地・UI テストの口）、
+    ストア（取り込み・差し替えと外すときに前の写真だけを消す・読めない写真・Plus でないときも残す・推しの削除で消し、失敗したら消さない・メモリ上のストア）、試着（選んだ推しでの絞り込みと予定が無いときの見本の予定・見本ごとの推し・読み上げの値）、起動引数 `-sampleOshiBackground`
   - ほかに `OshiConTests/Photo/OshiEditingTests`（推しの写真の差し替え・削除で背景の写真が消えない）、`PhotoCropRectangleTests`・`PhotoResizerRectangleCropTests`（縦長の枠）、
     `OshiConTests/Share/ShareCardAppearanceStyleTests`（シェアのカードの地を選ぶ規則）
 - UI（XCTest）: `OshiConUITests/AppearanceUITests`・`AppearanceTryOnUITests`（起動と操作は親の `AppearanceUITestCase`）。起動引数 `-useInMemoryStore -useTestPhoto` と日本語で起動する
@@ -245,8 +273,11 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
       長押ししている間の見た目（着せ替える前）は、UI テストでは読めないので Unit テストで確かめる
   - 見本は設定のトレーの外にあるので、設定を探して送るときはトレーの設定（`appearance.form`）の上で指を動かす（見本の上では送れない）
   - 着せ替えの画面ではタブバーを隠すので、ほかのタブへは設定に戻ってから移る
+  - `AppearanceOshiBackgroundUITests`（`-plusUnlocked -seedSampleData`）: 「背景」のタブの共通の枠（`appearance.backgroundTarget.common`）で写真を選ぶ → 推しの枠（`appearance.backgroundTarget.<並びの番号>`）を選ぶと見本が共通の写真のまま →
+    その推しの写真を選ぶと見本（ホーム・予定の詳細）が「推しの背景の写真あり」→ 共通の枠に戻すと共通の写真 → ホームで、すべては `photo`、その推しで絞り込むと `oshiPhoto`、ほかの推しは `photo` →
+    その推しの予定の詳細は `oshiPhoto`、ほかの推しの予定の詳細は `photo`
   - ホームと詳細の地は読み上げから外しているので、メモリ上のストアのときだけ 1pt の透明な要素（`home.appearance`・`eventDetail.appearance`。`AppearanceUITestMarker`）を置き、
-    そのラベル（`standard`・`photo`・`decoration` を `,` でつないだもの）で描いているものを確かめる（暗幕とぼかしの値は見本の読み上げの値で確かめる）。端末のストアで動くアプリには置かない
+    そのラベル（`standard`・背景の写真（共通は `photo`、推しごとは `oshiPhoto`）・`decoration` を `,` でつないだもの）で描いているものを確かめる（暗幕とぼかしの値は見本の読み上げの値で確かめる）。端末のストアで動くアプリには置かない
   - メモリ上のストアでは、着せ替えの設定は別の UserDefaults（`jp.shilokuma.OshiCon.InMemoryAppearance`）、写真は一時ディレクトリに置き、起動のたびに空にする。
     そのため 1 回の起動の中で写真を選んでから確かめる
 - iPad Pro 13-inch (M5) でビルドし、横向き・大きな文字・ダークは #Preview（着せ替えの画面・見本の舞台・見本・切り替え・トレー・全画面の試着・背景の写真・飾り・詳細の地）で見る
@@ -264,5 +295,7 @@ AskHub の epic（01M816HSS5D0CG3HJHHEF4XTB3）で作った。
 - **全画面の試着**: 長押しで着せ替える前に替わり、指を離すと戻るか。VoiceOver で、見本の操作「着せ替える前と比べる」で切り替えられるか。横向き・iPad で崩れないか
 - 飾りの見え方（既定の濃さ 40%・量 25% が好みに合うか、埋め尽くしたときに推しの顔が分かるか、推しが 2 人のときに上下の行で同じ推しが並ぶのが気にならないか）
 - 幕を薄くしたので、明るい写真・暗い写真の上で、iOS 17・18 の透けたバー（ナビゲーションバーの ＋・いちばん下までスクロールしたときのタブバー）が読めるか。上の端のグラデーションが不自然でないか（iPad・横向きを含む）。見出しのリボンの札と案内の板が大きな文字で崩れないか
-- 購入・解約・期限切れ（Xcode の StoreKit の Manage Transactions）で、ホームと詳細がその場で切り替わり、写真と設定が残ること
+- 購入・解約・期限切れ（Xcode の StoreKit の Manage Transactions）で、ホームと詳細がその場で切り替わり、写真と設定が残ること（推しごとの写真も）
+- **推しごとの背景**: ホームで絞り込みを続けて切り替えたときに、写真の切り替わりが引っかからないか・前の写真が残って見えるのが不自然でないか（大きな写真・古い端末）。
+  推しを削除した後に、その推しの写真が端末に残っていないか（App Group のコンテナ）
 - VoiceOver で、ホームと詳細の読み上げ・並びが変わらないこと

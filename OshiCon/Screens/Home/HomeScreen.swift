@@ -27,7 +27,8 @@ struct HomeScreen: View {
     @State private var isAddEventSheetVisible = false
 
     var body: some View {
-        let rendering = appearance.rendering(isPlusUnlocked: isPlusUnlocked)
+        // 推しで絞り込んでいるときは、その推しの背景の写真があればそれを敷く（無ければ共通の写真）
+        let rendering = appearance.rendering(isPlusUnlocked: isPlusUnlocked, oshiID: selectedOshiID)
         TimelineView(.everyMinute) { context in
             content(makeContent(now: context.date))
         }
@@ -35,7 +36,7 @@ struct HomeScreen: View {
         // 見出しはリボンの札で、自分の地を持つので板は敷かない
         .environment(\.isOverAppearancePhoto, rendering.drawsPhotosOnGround)
         .appearanceUITestMarker(AppearanceUITestMarker.homeIdentifier, rendering: rendering)
-        // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れでその場で切り替わる
+        // Plus の着せ替え（背景の写真・推しの丸い写真の飾り）。Plus でなければテーマの地のまま。購入・解約・期限切れ・絞り込みでその場で切り替わる
         .background(
             AppearanceScreenBackground(
                 rendering: rendering,

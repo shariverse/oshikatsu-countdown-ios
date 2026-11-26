@@ -9,6 +9,7 @@ import Foundation
 /// 着せ替えの画面の試着（ホーム・予定の詳細・シェアのカードの見本）と、背景の写真を選ぶときの規則。画面から切り離してテストする。
 ///
 /// 試着は Plus が使えるかにかかわらず、選んだ写真・ON/OFF・暗幕とぼかし・飾りをそのまま映す（実際のホームと詳細に効くかは `AppearanceRendering`）。
+/// どの背景の写真（共通・推しごと）を敷くかは実際の画面と同じ規則で、ホームの見本は絞り込んでいる推し、予定の詳細とシェアのカードの見本はその予定の推しで決める。
 nonisolated enum AppearancePreview {
     /// 見本に映す画面。着せ替えの画面と全画面の試着で、見本の下の切り替えから選ぶ。
     nonisolated enum Kind: String, CaseIterable, Identifiable, Sendable {
@@ -93,18 +94,50 @@ nonisolated enum AppearancePreview {
         return CGSize(width: canvasSize.width * factor, height: canvasSize.height * factor)
     }
 
-    /// 試着で描くもの。Plus が使えなくても、設定のとおりに描く。
+    /// 試着で描くもの。Plus が使えなくても、設定のとおりに描く。`oshiID` はどの推しの画面か（`backgroundOshiID(of:content:)`）。
     /// 全画面の試着で長押ししている間（`isComparing`）は、着せ替える前（標準）の見た目にする。
-    static func rendering(settings: AppearanceSettings, isComparing: Bool = false) -> AppearanceRendering {
-        isComparing ? .standard : AppearanceRendering(settings: settings, isPlusUnlocked: true)
+    static func rendering(settings: AppearanceSettings, oshiID: Oshi.ID? = nil, isComparing: Bool = false) -> AppearanceRendering {
+        isComparing ? .standard : AppearanceRendering(settings: settings, isPlusUnlocked: true, oshiID: oshiID)
+    }
+
+    /// 見本 `kind` の推し（その推しの背景の写真があれば敷く）。実際の画面と同じく、ホームは絞り込んでいる推し（すべてのときは nil）、
+    /// 予定の詳細とシェアのカードは、出す予定（`featuredItem(of:)`）の推し（推しなしの予定は nil）。
+    static func backgroundOshiID(of kind: Kind, content: HomeContent) -> Oshi.ID? {
+        switch kind {
+        case .home:
+            content.selectedOshiID
+        case .eventDetail, .share:
+            featuredItem(of: content)?.oshi?.id
+        }
+    }
+
+    /// 見本 `kind` で描くもの。どの推しの画面かは `backgroundOshiID(of:content:)`。
+    static func rendering(
+        settings: AppearanceSettings,
+        kind: Kind,
+        content: HomeContent,
+        isComparing: Bool = false
+    ) -> AppearanceRendering {
+        rendering(settings: settings, oshiID: backgroundOshiID(of: kind, content: content), isComparing: isComparing)
     }
 
     /// 見本に出すホームの中身。登録した予定から先頭の予定が決まればそれを、決まらない（予定が無い・終わった予定だけ）なら見本の推しと予定を出す。
-    static func content(events: [OshiEvent], oshis: [Oshi], today: CalendarDay, now: Date, locale: Locale = .app) -> HomeContent {
+    ///
+    /// `selectedOshiID` は、着せ替えの画面の「背景」で選んでいる推し（共通なら nil）。登録した推しなら、ホームの見本をその推しで絞り込む。
+    /// その推しに先頭の予定が無ければ、見本の先頭の予定（ピン留めのライブ）をその推しの予定として出す（その推しの背景の写真を、予定の詳細とシェアのカードの見本でも見せる）。
+    static func content(
+        events: [OshiEvent],
+        oshis: [Oshi],
+        selectedOshiID: Oshi.ID? = nil,
+        today: CalendarDay,
+        now: Date,
+        locale: Locale = .app
+    ) -> HomeContent {
+        let selection = HomeContent.validSelection(selectedOshiID, among: oshis.map(\.id))
         let registered = HomeContent(
             events: events,
             oshis: oshis,
-            selectedOshiID: nil,
+            selectedOshiID: selection,
             showsPastEvents: false,
             today: today,
             locale: locale
@@ -113,6 +146,17 @@ nonisolated enum AppearancePreview {
             return registered
         }
         let sample = SampleData.make(today: today, now: now, locale: locale)
+        if let selection, var event = sample.events.first {
+            event.oshiID = selection
+            return HomeContent(
+                events: [event],
+                oshis: oshis,
+                selectedOshiID: selection,
+                showsPastEvents: false,
+                today: today,
+                locale: locale
+            )
+        }
         return HomeContent(
             events: sample.events,
             oshis: sample.oshis,
@@ -142,11 +186,16 @@ nonisolated enum AppearancePreview {
 
     /// 見本の読み上げの値。ホームと予定の詳細は、地に描いているものをすべて伝える
     /// （`背景の写真あり、暗幕の濃さ 50%、ぼかしの強さ 40%、推しの写真の飾りあり、飾りの濃さ 40%、飾りの量 25%`）。
+    /// 推しごとの背景の写真を敷いているときは `推しの背景の写真あり` にする。
     /// シェアのカードは背景の写真だけを地に使うので、写真があるかだけを伝える（`背景の写真あり`）。
     static func accessibilityValue(of rendering: AppearanceRendering, kind: Kind = .home, locale: Locale = .app) -> String {
         var parts: [String] = []
         if let photo = rendering.backgroundPhoto {
-            parts.append(String(localized: LocalizedStringResource("背景の写真あり", locale: locale)))
+            parts.append(
+                photo.isOshiBackground
+                    ? String(localized: LocalizedStringResource("推しの背景の写真あり", locale: locale))
+                    : String(localized: LocalizedStringResource("背景の写真あり", locale: locale))
+            )
             if kind.showsGroundStyle {
                 let scrim = percentText(photo.style.scrim, locale: locale)
                 parts.append(String(localized: LocalizedStringResource("暗幕の濃さ \(scrim)", locale: locale)))
@@ -172,16 +221,18 @@ nonisolated enum AppearancePreview {
     }
 
     /// 全画面の試着の見本の読み上げの値。長押ししている間（`isComparing`）は `着せ替える前`、それ以外は見本に映しているもの。
+    /// どの背景の写真を映しているかは、見本の中身 `content` の推しで決める（`rendering(settings:kind:content:isComparing:)`）。
     static func tryOnAccessibilityValue(
         of settings: AppearanceSettings,
         kind: Kind,
+        content: HomeContent,
         isComparing: Bool,
         locale: Locale = .app
     ) -> String {
         guard !isComparing else {
             return String(localized: LocalizedStringResource("着せ替える前", locale: locale))
         }
-        return accessibilityValue(of: rendering(settings: settings), kind: kind, locale: locale)
+        return accessibilityValue(of: rendering(settings: settings, kind: kind, content: content), kind: kind, locale: locale)
     }
 
     /// 暗幕の濃さ・ぼかしの強さ・飾りの濃さ・量（0〜1）を百分率の文字にする（`40%`）。スライダーの読み上げの値と、見本の読み上げの値に使う。

@@ -15639,6 +15639,74 @@
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Pakai Foto sebagai Latar" } }
       }
     },
+    "推しごとに選べます" : {
+      "comment" : "着せ替えの画面の「背景」のタブ。背景の写真の切り替えの下に添える（写真は共通と推しごとに選べる）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You can pick one for each oshi" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しごとに選べます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "可以为每位本命分别选择" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "可以為每位我推分別選擇" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애마다 고를 수 있어요" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Vous pouvez en choisir une par oshi" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Für jedes Oshi einzeln wählbar" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Puedes elegir una para cada oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Você pode escolher uma para cada oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Puoi sceglierne una per ogni oshi" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "เลือกแยกให้แต่ละโอชิได้" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Bisa dipilih untuk tiap oshi" } }
+      }
+    },
+    "共通" : {
+      "comment" : "着せ替えの画面の「背景」のタブ。推しによらない共通の背景の写真の枠の名前",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Default" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "共通" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "通用" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "通用" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공통" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Par défaut" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Standard" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "General" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Geral" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Generale" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "ทั่วไป" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Umum" } }
+      }
+    },
+    "共通の写真は、推しで絞り込んでいないホームと、写真を選んでいない推しの画面に敷きます" : {
+      "comment" : "着せ替えの画面の「背景」のタブ。共通の枠を選んでいるときの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The default photo appears on Home when not filtered by oshi, and on screens for oshis without their own photo." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "共通の写真は、推しで絞り込んでいないホームと、写真を選んでいない推しの画面に敷きます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "通用照片会铺在未按本命筛选的主页，以及未选择照片的本命的画面中。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "通用照片會鋪在未依我推篩選的主頁，以及未選擇照片的我推的畫面中。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공통 사진은 최애별로 보지 않을 때의 홈과, 사진을 고르지 않은 최애의 화면에 깔아요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "La photo par défaut s'affiche sur l'accueil non filtré par oshi et sur les écrans des oshis sans photo à eux." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das Standardfoto erscheint auf Start ohne Oshi-Filter und in den Ansichten von Oshis ohne eigenes Foto." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "La foto general se muestra en el inicio sin filtrar por oshi y en las pantallas de los oshis sin foto propia." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "A foto geral aparece no início sem filtro por oshi e nas telas dos oshis sem foto própria." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La foto generale appare nella Home non filtrata per oshi e nelle schermate degli oshi senza una foto propria." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "รูปทั่วไปจะแสดงในหน้าหลักที่ไม่ได้กรองตามโอชิ และในหน้าของโอชิที่ยังไม่ได้เลือกรูป" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Foto umum dipasang di Beranda yang tidak disaring menurut oshi dan di layar oshi yang belum punya foto sendiri." } }
+      }
+    },
+    "この推しで絞り込んだホームと、この推しの予定の詳細・シェアのカードに敷きます。選んでいなければ、共通の写真を敷きます" : {
+      "comment" : "着せ替えの画面の「背景」のタブ。推しの枠を選んでいるときの説明",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Appears on Home filtered by this oshi, and on this oshi's event details and share cards. Without one, the default photo is used." } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "この推しで絞り込んだホームと、この推しの予定の詳細・シェアのカードに敷きます。選んでいなければ、共通の写真を敷きます" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "会铺在按此本命筛选的主页，以及此本命的日程详情和分享卡片中。未选择时使用通用照片。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "會鋪在依此我推篩選的主頁，以及此我推的行程詳情和分享卡片中。未選擇時使用通用照片。" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "이 최애로 본 홈과, 이 최애의 일정 상세·공유 카드에 깔아요. 고르지 않으면 공통 사진을 깔아요." } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "S'affiche sur l'accueil filtré par cet oshi, ainsi que sur le détail de ses événements et ses cartes à partager. Sinon, la photo par défaut est utilisée." } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Erscheint auf Start mit Filter auf dieses Oshi sowie in dessen Termindetails und Karten zum Teilen. Ohne eigenes Foto wird das Standardfoto verwendet." } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Se muestra en el inicio filtrado por este oshi y en el detalle de sus eventos y sus tarjetas para compartir. Si no eliges una, se usa la foto general." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Aparece no início filtrado por este oshi e nos detalhes dos eventos e cartões para compartilhar dele. Sem uma, usa a foto geral." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Appare nella Home filtrata per questo oshi, nei dettagli dei suoi eventi e nelle schede da condividere. Se non ne scegli una, si usa la foto generale." } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "จะแสดงในหน้าหลักที่กรองตามโอชินี้ และในรายละเอียดกิจกรรมและการ์ดสำหรับแชร์ของโอชินี้ ถ้าไม่ได้เลือกจะใช้รูปทั่วไป" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Dipasang di Beranda yang disaring menurut oshi ini, serta di detail acara dan kartu untuk dibagikan milik oshi ini. Jika belum dipilih, foto umum yang dipakai." } }
+      }
+    },
     "ホームと予定の詳細の地に、暗幕とぼかしを掛けて敷きます。暗幕を薄く、ぼかしを弱くするほど、写真がはっきり見えます" : {
       "comment" : "着せ替えの画面。背景の写真のまとまりの説明",
       "localizations" : {
@@ -15824,6 +15892,23 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Nessuna foto di sfondo" } },
         "th" : { "stringUnit" : { "state" : "translated", "value" : "ไม่มีรูปพื้นหลัง" } },
         "id" : { "stringUnit" : { "state" : "translated", "value" : "Tanpa foto latar" } }
+      }
+    },
+    "推しの背景の写真あり" : {
+      "comment" : "着せ替えの画面。見本の読み上げの値（推しごとの背景の写真を敷いている）",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Oshi background photo on" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "推しの背景の写真あり" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "有本命背景照片" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "有我推背景照片" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "최애 배경 사진 있음" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Photo de fond de l'oshi activée" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Oshi-Hintergrundfoto an" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Con foto de fondo del oshi" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Com foto de fundo do oshi" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Foto di sfondo dell'oshi attiva" } },
+        "th" : { "stringUnit" : { "state" : "translated", "value" : "มีรูปพื้นหลังของโอชิ" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ada foto latar oshi" } }
       }
     },
     "暗幕の濃さ %@" : {

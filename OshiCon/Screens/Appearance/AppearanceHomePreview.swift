@@ -6,6 +6,7 @@
 import SwiftUI
 
 /// 着せ替えの見本のホーム（試着）。ホームの部品（絞り込み・先頭のカード・予定の行）を組み、地に選んだ写真・ON/OFF・暗幕とぼかし・飾りをその場で映す。
+/// 「背景」で推しを選んでいるときは、その推しで絞り込んだホームを出す（`HomeContent.selectedOshiID`。絞り込みの選択にも映す）。
 ///
 /// 着せ替えの画面では iPhone の縦の画面の大きさで組んで縮め（`AppearancePhoneFrame`）、全画面の試着では画面の大きさのまま出す。
 /// 押せなくするのと、読み上げを 1 つの要素にまとめるのは、置く側（`AppearancePreviewCarousel`・`AppearanceTryOnScreen`）が受け持つ。
@@ -36,7 +37,7 @@ struct AppearanceHomePreview: View {
     private var home: some View {
         VStack(alignment: .leading, spacing: 24) {
             if !content.oshis.isEmpty {
-                OshiFilterBar(oshis: content.oshis, selection: .constant(nil))
+                OshiFilterBar(oshis: content.oshis, selection: .constant(content.selectedOshiID))
             }
             if let featured = content.featured {
                 FeaturedEventCard(item: featured)

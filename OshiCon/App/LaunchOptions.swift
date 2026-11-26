@@ -70,6 +70,27 @@ nonisolated enum LaunchOptions {
         sampleOshiPhotosDirectory != nil && ProcessInfo.processInfo.arguments.contains(sampleAppearanceArgument)
     }
 
+    /// 着せ替えの推しごとの背景に、見本の推しの写真を入れておく（`-sampleOshiBackground voice-actor` のように `SampleData.Role` の生の値を続ける。
+    /// その役どころの推しの背景を、その推しの写真にする）。スクリーンショットで、推しで絞り込んだホームと予定の詳細を撮る。
+    /// 見本を入れ、見本の推しに写真を付けるとき（`sampleOshiPhotosDirectory`）だけ効く。
+    static let sampleOshiBackgroundArgument = "-sampleOshiBackground"
+
+    static var sampleOshiBackground: SampleData.Role? {
+        sampleOshiBackground(
+            arguments: ProcessInfo.processInfo.arguments,
+            seedsSampleData: seedsSampleData && sampleOshiPhotosDirectory != nil
+        )
+    }
+
+    static func sampleOshiBackground(arguments: [String], seedsSampleData: Bool) -> SampleData.Role? {
+        guard seedsSampleData,
+              let index = arguments.firstIndex(of: sampleOshiBackgroundArgument),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        return SampleData.Role(rawValue: arguments[index + 1])
+    }
+
     /// メモリ上のストアでも、見本の予定の当日のライブアクティビティを実際に出す（App Store 用スクリーンショット。ロック画面と Dynamic Island を撮る）。
     /// 見本を入れるときだけ効く。見本を入れて、この引数を渡さないときは、前に出したものを終える（ほかの画面に Dynamic Island が写らないように）。
     static let sampleLiveActivityArgument = "-sampleLiveActivity"
@@ -196,6 +217,8 @@ nonisolated enum AppStorageKey {
     static let appearanceDecorationAmount = "appearanceDecorationAmount"
     /// 着せ替え: 飾りに出さない推しの id（UUID の文字列の配列。既定は空で、すべての推しを出す）。
     static let appearanceDecorationExcludedOshis = "appearanceDecorationExcludedOshis"
+    /// 着せ替え: 推しごとの背景の写真のファイル名（推しの id の UUID の文字列 → `OshiPhotoLibrary` の中のファイル名の辞書。写真を選んだ推しだけ。既定は空）。
+    static let appearanceOshiBackgroundPhotos = "appearanceOshiBackgroundPhotos"
 
     /// そのタイミングの通知を出す（既定は ON）。
     static func reminderTiming(_ timing: ReminderTiming) -> String {

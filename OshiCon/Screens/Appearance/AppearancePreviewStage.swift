@@ -14,6 +14,8 @@ struct AppearancePreviewStage: View {
     let layout: AppearancePreviewLayout
     /// 登録した推し（推しの並び）。見本の推しと飾りに使う。
     let oshis: [Oshi]
+    /// 「背景」で選んでいる推し（共通なら nil）。ホームの見本をその推しで絞り込み、予定の詳細とシェアのカードの見本にその推しの予定を出す。
+    var backgroundOshiID: Oshi.ID?
     /// 映している見本。
     @Binding var kind: AppearancePreview.Kind
     /// 「全画面」を押したとき。nil なら「全画面」を出さない。
@@ -30,7 +32,7 @@ struct AppearancePreviewStage: View {
                 AppearancePreviewCarousel(
                     layout: layout,
                     kind: $kind,
-                    rendering: AppearancePreview.rendering(settings: store.settings),
+                    settings: store.settings,
                     content: content(now: context.date),
                     now: context.date,
                     decorationOshis: oshis,
@@ -52,6 +54,7 @@ struct AppearancePreviewStage: View {
         AppearancePreview.content(
             events: storedEvents.compactMap(OshiConStore.event(from:)),
             oshis: oshis,
+            selectedOshiID: backgroundOshiID,
             // 端末のタイムゾーンを変えたときも、その日付で数える
             today: CalendarDay(now, calendar: .autoupdatingCurrent),
             now: now
@@ -63,10 +66,12 @@ struct AppearancePreviewStage: View {
 ///
 /// 見本は押せず（中の予定や絞り込みは反応しない）、読み上げでは 1 つの要素にする（名前は映している見本、値は映しているもの）。
 /// 見本を替えるのは、横のスワイプと、下の切り替え（`AppearancePreviewSwitcher`）。
+/// どの背景の写真（共通・推しごと）を映すかは、見本ごとに実際の画面と同じ規則で決める（`AppearancePreview.rendering(settings:kind:content:)`）。
 struct AppearancePreviewCarousel: View {
     let layout: AppearancePreviewLayout
     @Binding var kind: AppearancePreview.Kind
-    let rendering: AppearanceRendering
+    /// 着せ替えの設定。Plus によらず、そのまま映す。
+    let settings: AppearanceSettings
     let content: HomeContent
     let now: Date
     /// 飾りに使う推し（登録した推し）。
@@ -131,7 +136,7 @@ struct AppearancePreviewCarousel: View {
                 .allowsHitTesting(false)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text(verbatim: kind.accessibilityLabel()))
-                .accessibilityValue(Text(verbatim: AppearancePreview.accessibilityValue(of: rendering, kind: kind)))
+                .accessibilityValue(Text(verbatim: AppearancePreview.accessibilityValue(of: rendering(of: kind), kind: kind)))
                 .accessibilityHint(Text("選んだ写真と設定を、その場で見本に映します"))
                 .accessibilityIdentifier("appearance.preview")
         }
@@ -148,19 +153,25 @@ struct AppearancePreviewCarousel: View {
         }
     }
 
+    /// 見本 `pageKind` で描くもの。
+    private func rendering(of pageKind: AppearancePreview.Kind) -> AppearanceRendering {
+        AppearancePreview.rendering(settings: settings, kind: pageKind, content: content)
+    }
+
     @ViewBuilder
     private func page(_ pageKind: AppearancePreview.Kind, item: HomeContent.Item?) -> some View {
+        let pageRendering = rendering(of: pageKind)
         switch pageKind {
         case .home:
             AppearancePhoneFrame(width: layout.previewSize.width) {
-                AppearanceHomePreview(rendering: rendering, content: content, decorationOshis: decorationOshis, photos: photos)
+                AppearanceHomePreview(rendering: pageRendering, content: content, decorationOshis: decorationOshis, photos: photos)
             }
         case .eventDetail:
             AppearancePhoneFrame(width: layout.previewSize.width) {
-                AppearanceDetailPreview(rendering: rendering, item: item, decorationOshis: decorationOshis, photos: photos)
+                AppearanceDetailPreview(rendering: pageRendering, item: item, decorationOshis: decorationOshis, photos: photos)
             }
         case .share:
-            AppearanceSharePreview(rendering: rendering, item: item, now: now, photos: photos, side: layout.shareCardSide)
+            AppearanceSharePreview(rendering: pageRendering, item: item, now: now, photos: photos, side: layout.shareCardSide)
         }
     }
 }

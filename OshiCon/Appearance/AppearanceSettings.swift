@@ -10,6 +10,7 @@ import Foundation
 ///
 /// アプリだけの UserDefaults（`AppStorageKey`。`PrivacyInfo.xcprivacy` の CA92.1）に置き、SwiftData のスキーマは変えない。
 /// 背景の写真のファイルは推しの写真と同じ置き場所（`OshiPhotoLibrary`。App Group のコンテナ）に置く。
+/// 背景の写真は、共通の 1 枚（`backgroundPhotoFileName`）と推しごとの写真（`oshiBackgroundPhotoFileNames`）を持つ。どれを敷くかは `AppearanceRendering`。
 /// Plus が使えなくなっても設定とファイルは残す（描くものは `AppearanceRendering` が決める）。
 nonisolated struct AppearanceSettings: Equatable, Sendable {
     /// 背景の写真をホームと予定の詳細の地に敷く（写真を選んだときだけ効く）。既定は ON。
@@ -22,24 +23,31 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
     var backgroundPhotoFileName: String?
     /// 飾りの濃さ・量・出す推し。飾りが OFF でも残す。
     var decorationStyle: OshiPhotoDecorationStyle
+    /// 推しごとの背景の写真のファイル名（推しの id → `OshiPhotoLibrary` の中の `<UUID>.jpg`）。写真を選んだ推しだけを入れる。
+    /// その推しで絞り込んだホームと、その推しの予定の詳細・シェアのカードでは、共通の写真（`backgroundPhotoFileName`）の代わりに敷く。
+    /// 推しを削除したら外す（`AppearanceStore.removeBackgroundPhoto(for:)`）。
+    var oshiBackgroundPhotoFileNames: [Oshi.ID: String]
 
     init(
         isBackgroundEnabled: Bool = true,
         isDecorationEnabled: Bool = false,
         backgroundStyle: AppearanceBackgroundStyle = .default,
         backgroundPhotoFileName: String? = nil,
-        decorationStyle: OshiPhotoDecorationStyle = .default
+        decorationStyle: OshiPhotoDecorationStyle = .default,
+        oshiBackgroundPhotoFileNames: [Oshi.ID: String] = [:]
     ) {
         self.isBackgroundEnabled = isBackgroundEnabled
         self.isDecorationEnabled = isDecorationEnabled
         self.backgroundStyle = backgroundStyle
         self.backgroundPhotoFileName = backgroundPhotoFileName
         self.decorationStyle = decorationStyle
+        self.oshiBackgroundPhotoFileNames = oshiBackgroundPhotoFileNames
     }
 
     /// UserDefaults から読む。書いていない項目は既定の値。写真の置き場所の外を指すファイル名は無いものとする。
     /// 暗幕・ぼかし・飾りの濃さ・量は範囲に収め、出さない推しの id は UUID として読めるものだけを使う。
     /// 暗幕とぼかしを書いていなければ、前の版の強さ（弱・中・強。`AppStorageKey.appearanceIntensity`）から読み替える。
+    /// 推しごとの背景の写真は、推しの id が UUID として読め、ファイル名が写真の置き場所の中を指すものだけを使う。
     init(defaults: UserDefaults) {
         let fileName = defaults.string(forKey: AppStorageKey.appearanceBackgroundPhoto)
         let legacyStyle = defaults.string(forKey: AppStorageKey.appearanceIntensity)
@@ -58,11 +66,44 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
                 opacity: opacity ?? OshiPhotoDecorationStyle.defaultOpacity,
                 amount: amount ?? OshiPhotoDecorationStyle.defaultAmount,
                 excludedOshiIDs: Set(excluded.compactMap(UUID.init(uuidString:)))
+            ),
+            oshiBackgroundPhotoFileNames: Self.oshiBackgroundPhotoFileNames(
+                from: defaults.dictionary(forKey: AppStorageKey.appearanceOshiBackgroundPhotos) ?? [:]
             )
         )
     }
 
-    /// UserDefaults に書く。写真が無ければファイル名のキーを消す。出さない推しの id は並べて書く（同じ設定なら同じ値になる）。
+    /// UserDefaults の辞書（推しの id の文字列 → ファイル名）から、推しごとの背景の写真を読む。読めない項目は飛ばす。
+    private static func oshiBackgroundPhotoFileNames(from stored: [String: Any]) -> [Oshi.ID: String] {
+        stored.reduce(into: [:]) { result, entry in
+            guard let oshiID = UUID(uuidString: entry.key),
+                  let fileName = entry.value as? String,
+                  OshiPhotoLibrary.isValidFileName(fileName) else {
+                return
+            }
+            result[oshiID] = fileName
+        }
+    }
+
+    /// 背景の写真のファイル名。`oshiID` が nil なら共通の写真、推しの id ならその推しの写真（共通の写真には戻らない）。選んでいなければ nil。
+    func backgroundPhotoFileName(for oshiID: Oshi.ID?) -> String? {
+        guard let oshiID else {
+            return backgroundPhotoFileName
+        }
+        return oshiBackgroundPhotoFileNames[oshiID]
+    }
+
+    /// 背景の写真のファイル名を書き換える。`oshiID` が nil なら共通の写真、推しの id ならその推しの写真。nil を渡すと外す。
+    mutating func setBackgroundPhotoFileName(_ fileName: String?, for oshiID: Oshi.ID?) {
+        guard let oshiID else {
+            backgroundPhotoFileName = fileName
+            return
+        }
+        oshiBackgroundPhotoFileNames[oshiID] = fileName
+    }
+
+    /// UserDefaults に書く。写真が無ければファイル名のキーを消す（推しごとの写真が 1 つも無ければ、その辞書のキーも消す）。
+    /// 出さない推しの id は並べて書く（同じ設定なら同じ値になる）。
     /// 暗幕とぼかしを書いたら、前の版の強さのキーは使わないので消す。
     func write(to defaults: UserDefaults) {
         defaults.set(isBackgroundEnabled, forKey: AppStorageKey.appearanceBackgroundEnabled)
@@ -77,6 +118,12 @@ nonisolated struct AppearanceSettings: Equatable, Sendable {
             defaults.set(backgroundPhotoFileName, forKey: AppStorageKey.appearanceBackgroundPhoto)
         } else {
             defaults.removeObject(forKey: AppStorageKey.appearanceBackgroundPhoto)
+        }
+        if oshiBackgroundPhotoFileNames.isEmpty {
+            defaults.removeObject(forKey: AppStorageKey.appearanceOshiBackgroundPhotos)
+        } else {
+            let stored = Dictionary(uniqueKeysWithValues: oshiBackgroundPhotoFileNames.map { ($0.key.uuidString, $0.value) })
+            defaults.set(stored, forKey: AppStorageKey.appearanceOshiBackgroundPhotos)
         }
     }
 }
@@ -183,14 +230,29 @@ nonisolated struct AppearanceBackgroundStyle: Equatable, Sendable {
     }
 }
 
-/// 着せ替えで実際に描くもの。Plus が使えるかと設定（`AppearanceSettings`）から決める。
+/// 着せ替えで実際に描くもの。Plus が使えるかと設定（`AppearanceSettings`）と、どの推しの画面か（`oshiID`）から決める。
 ///
 /// Plus が使えないときは標準（背景の写真も推しの写真の飾りも無し）にする。設定とファイルはそのまま残す（また使えるようになったら戻る）。
+/// 背景の写真は、その推しの写真があればそれ、無ければ（推しを決めていない画面も）共通の写真。どちらも無ければ敷かない。
+/// 推しは、ホームでは絞り込んでいる推し（すべてのときは nil）、予定の詳細とシェアのカードではその予定の推し（推しなしの予定は nil）。
 nonisolated struct AppearanceRendering: Equatable, Sendable {
     /// 地に敷く背景の写真。
     nonisolated struct BackgroundPhoto: Equatable, Sendable {
         let fileName: String
         let style: AppearanceBackgroundStyle
+        /// 推しごとの写真のときは、その推しの id。共通の写真は nil。
+        let oshiID: Oshi.ID?
+
+        init(fileName: String, style: AppearanceBackgroundStyle, oshiID: Oshi.ID? = nil) {
+            self.fileName = fileName
+            self.style = style
+            self.oshiID = oshiID
+        }
+
+        /// 推しごとの写真か（共通の写真でないか）。
+        var isOshiBackground: Bool {
+            oshiID != nil
+        }
     }
 
     /// 地に敷く背景の写真。敷かないときは nil。
@@ -212,20 +274,30 @@ nonisolated struct AppearanceRendering: Equatable, Sendable {
     }
 
     /// Plus が使えるかと設定から決める。背景の写真は、Plus が使え、背景を ON にしていて、写真を選んでいるときだけ敷く。
-    init(settings: AppearanceSettings, isPlusUnlocked: Bool) {
+    /// `oshiID` はどの推しの画面か（ホームは絞り込んでいる推し、予定の詳細とシェアのカードはその予定の推し）。
+    /// その推しの写真があればそれを、無ければ（`oshiID` が nil のときも）共通の写真を敷く。
+    init(settings: AppearanceSettings, isPlusUnlocked: Bool, oshiID: Oshi.ID? = nil) {
         guard isPlusUnlocked else {
             self = .standard
             return
         }
-        if settings.isBackgroundEnabled,
-           let fileName = settings.backgroundPhotoFileName,
-           OshiPhotoLibrary.isValidFileName(fileName) {
-            backgroundPhoto = BackgroundPhoto(fileName: fileName, style: settings.backgroundStyle)
-        } else {
-            backgroundPhoto = nil
-        }
+        backgroundPhoto = settings.isBackgroundEnabled ? Self.backgroundPhoto(settings: settings, oshiID: oshiID) : nil
         // 飾りが OFF のときは濃さ・量を持たない（設定に残っていても標準の見た目と同じにする）
         decoration = settings.isDecorationEnabled ? settings.decorationStyle : nil
+    }
+
+    /// 推し `oshiID` の画面に敷く背景の写真。その推しの写真があればそれ、無ければ共通の写真。どちらも無ければ nil。
+    /// 写真の置き場所の外を指すファイル名は無いものとする。
+    private static func backgroundPhoto(settings: AppearanceSettings, oshiID: Oshi.ID?) -> BackgroundPhoto? {
+        if let oshiID,
+           let fileName = settings.oshiBackgroundPhotoFileNames[oshiID],
+           OshiPhotoLibrary.isValidFileName(fileName) {
+            return BackgroundPhoto(fileName: fileName, style: settings.backgroundStyle, oshiID: oshiID)
+        }
+        guard let fileName = settings.backgroundPhotoFileName, OshiPhotoLibrary.isValidFileName(fileName) else {
+            return nil
+        }
+        return BackgroundPhoto(fileName: fileName, style: settings.backgroundStyle)
     }
 
     /// 標準の見た目か。
