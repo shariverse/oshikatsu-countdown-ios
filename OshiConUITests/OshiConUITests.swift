@@ -349,4 +349,42 @@ final class OshiConUITests: XCTestCase {
         // 詳細から戻っても、バーにタイトルの文字は出ない
         assertShowsHome(app)
     }
+
+    /// iPad のサイドバーで、予定の詳細を開いたまま推し・設定に切り替えても落ちない（#331）。ホームに戻ると最初の画面になる。
+    /// サイドバーは iPad の広い画面だけなので、iPhone（CI の Simulator）では飛ばす
+    @MainActor
+    func testSidebarSwitchWhileEventDetailIsOpen() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "サイドバーは iPad の広い画面だけ")
+        let app = launch(hasCompletedOnboarding: true, arguments: ["-seedSampleData"])
+        let featured = app.buttons["home.featuredEvent"].firstMatch
+        XCTAssertTrue(featured.waitForExistence(timeout: 5))
+        featured.tap()
+        XCTAssertTrue(app.buttons["eventDetail.pin"].waitForExistence(timeout: 5))
+
+        selectSidebarItem(at: 1, in: app)
+        XCTAssertTrue(app.buttons["oshiList.row"].firstMatch.waitForExistence(timeout: 5))
+        selectSidebarItem(at: 2, in: app)
+        XCTAssertTrue(app.switches["settings.reminders"].waitForExistence(timeout: 5))
+
+        selectSidebarItem(at: 0, in: app)
+        XCTAssertTrue(featured.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["eventDetail.pin"].exists)
+        XCTAssertEqual(app.state, .runningForeground)
+    }
+
+    /// サイドバーの `index` 番目（ホーム・推し・設定の順）を押す。行の ID（`sidebar.<タブ>`）で探す。
+    /// 並びの位置では探さない（右の列の一覧もセルを持つので、取り違える）。縦向きでサイドバーが隠れていたら出してから押す
+    @MainActor
+    private func selectSidebarItem(at index: Int, in app: XCUIApplication) {
+        // 行の ID は、行の文字にもアイコンの画像にも付く（画像は押せない）ので、文字を探す
+        let item = app.staticTexts["sidebar.\(["home", "oshi", "settings"][index])"].firstMatch
+        if !(item.exists && item.isHittable) {
+            let toggle = app.buttons["ToggleSidebar"].firstMatch
+            if toggle.exists {
+                toggle.tap()
+            }
+        }
+        XCTAssertTrue(item.waitForExistence(timeout: 5))
+        item.tap()
+    }
 }
